@@ -24,6 +24,10 @@
         "@laravel/multiplex": "^0.4.1"
     },
     "dependencies": {
+        "@tiptap/extensions": "^3.31.3",
+        "@tiptap/pm": "^3.31.3",
+        "@tiptap/starter-kit": "^3.31.3",
+        "@tiptap/vue-3": "^3.31.3",
         "axios": "^1.20.0",
         "pinia": "^4.0.3",
         "vue": "^3.5.43",

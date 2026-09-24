@@ -226,6 +226,16 @@ Zahtevi:
 - originalni naziv samo kao metapodatak;
 - audit podatak o uploaderu.
 
+Implementirano u Fazi 4:
+
+- disk `attachments` (`storage/app/private/attachments`, bez javne rute); u produkciji `ATTACHMENTS_DISK` pokazuje na privatni S3-kompatibilan bucket;
+- download ide isključivo kroz `GET /api/v1/attachments/{id}/download`, posle iste autorizacije kao i sve ostalo. Sa bucket-a odgovor je preusmerenje na potpisani URL koji važi 5 minuta; sa lokalnog diska fajl se strimuje, bez učitavanja u PHP memoriju;
+- odgovor nosi `X-Content-Type-Options: nosniff`, `Content-Security-Policy` sa `sandbox` i `Cache-Control: private, no-store`; u browseru se otvaraju samo slike (`?inline=1`), sve ostalo se preuzima;
+- tip se proverava iz sadržaja (fileinfo; DOCX kroz sadržaj ZIP arhive), a čuva se naš MIME tip za potvrđenu ekstenziju;
+- ako upis u bazu ne uspe, već sačuvan fajl se briše.
+
+Formatiran tekst (beleške, interne beleške, sažetak) se na serveru propušta kroz listu dozvoljenih HTML elemenata (Symfony HtmlSanitizer, MIT) pre čuvanja; editor na frontendu je TipTap (MIT), učitan samo na stranicama koje ga koriste.
+
 Datoteke efemerida nisu korisnički sadržaj i ne idu u ovaj storage. One se isporučuju uz aplikaciju i verzionišu zajedno sa deployom.
 
 ## Višejezičnost i vreme

@@ -38,6 +38,17 @@ return [
             'report' => false,
         ],
 
+        // Client files (docs/spec/03, "Storage fajlova"): private, never served
+        // directly; downloads go through an authorized API route. Production points
+        // ATTACHMENTS_DISK at a private S3-compatible bucket instead.
+        'attachments' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/attachments'),
+            'serve' => false,
+            'throw' => true,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

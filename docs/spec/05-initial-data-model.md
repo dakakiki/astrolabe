@@ -5,6 +5,8 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 > Verzija 2. Izmene: `sessions` → `consultations`; nova tabela `chart_calculations`; koordinate i vremenska zona rođenja više nisu opcione kada se očekuje karta; dodata podrazumevana podešavanja karte na workspace-u.
 >
 > Faza 1 (implementirano): `users.current_workspace_id`; `astrology_methods.workspace_id` umesto para `is_system` + `created_by_workspace_id`; `logo_path` i `aspect_orbs` odloženi do faza u kojima se koriste.
+>
+> Faza 4 (implementirano): `consultations` dobija `title`, `timezone` i `created_by`, a `service_id` i `appointment_id` čekaju usluge i termine; `attachments` dobija `client_id`, `kind` i `url`; `activity_events` je uvedena i dobila `visibility`.
 
 ## Nalozi i workspace
 
@@ -223,19 +225,26 @@ INDEX  (workspace_id, subject_type, subject_id)
 
 - `id`
 - `workspace_id`
-- `client_id`
-- `service_id`, nullable
-- `appointment_id`, nullable
+- `client_id` — postavlja se pri kreiranju i ne menja
+- `created_by`, nullable
+- `service_id`, nullable — Faza 6 (usluge)
+- `appointment_id`, nullable — Faza 6 (termini)
 - `chart_calculation_id`, nullable — snimak karte u trenutku konsultacije
-- `starts_at`, nullable
+- `title`, nullable — vrsta konsultacije slobodnim tekstom dok usluge ne postoje
+- `starts_at`, nullable — UTC; obavezan za svaki status osim `draft`
+- `timezone`, nullable — IANA zona u kojoj je vreme uneto (dokument 06, „Vremenske zone“)
 - `duration_minutes`, nullable
-- `status`
-- `topics`, nullable
-- `internal_notes`, nullable
-- `client_summary`, nullable
-- `next_steps`, nullable
+- `status` — `draft`, `scheduled`, `completed`, `cancelled`, `no_show`
+- `topics`, nullable — običan tekst
+- `internal_notes`, nullable — formatiran tekst (sanitizovan HTML)
+- `client_summary`, nullable — formatiran tekst
+- `next_steps`, nullable — formatiran tekst
 - timestamps
 - soft deletes
+
+Indeksi: `(workspace_id, starts_at)`, `(workspace_id, client_id, starts_at)`, `(workspace_id, status)`.
+
+`chart_calculation_id` pokazuje na red u `chart_calculations`. Proračuni se ne prepisuju — promena ulaza daje novi red — pa snimak ostaje tačno ono što je astrolog gledao. Zato se red na koji pokazuje konsultacija ne sme brisati pri eventualnom čišćenju keša; strani ključ ima `nullOnDelete` kao poslednju zaštitu.
 
 ### `consultation_astrology_method`
 
@@ -246,12 +255,12 @@ INDEX  (workspace_id, subject_type, subject_id)
 
 - `id`
 - `workspace_id`
-- `client_id`
-- `consultation_id`, nullable
+- `client_id` — postavlja se pri kreiranju i ne menja
+- `consultation_id`, nullable — samo konsultacija istog klijenta
 - `created_by`
 - `title`, nullable
-- `content`
-- `visibility`
+- `content` — formatiran tekst (sanitizovan HTML)
+- `visibility` — `private` (podrazumevano), `team`, `shared_with_client`
 - timestamps
 - soft deletes
 
@@ -261,20 +270,25 @@ INDEX  (workspace_id, subject_type, subject_id)
 
 - `id`
 - `workspace_id`
+- `client_id`, nullable — klijent kome prilog pripada, i kada je na konsultaciji (Faza 4)
 - `uploaded_by`
-- `attachable_type`
+- `attachable_type` — `client`, `consultation` (kasnije `note`, `task`)
 - `attachable_id`
-- `original_name`
-- `storage_disk`
-- `storage_path`
-- `mime_type`
-- `file_size`
+- `kind` — `file` ili `link` (Faza 4)
+- `original_name` — naziv fajla kakav je poslat, ili naslov linka; samo metapodatak
+- `url`, nullable — samo za `link`, `http`/`https`
+- `storage_disk`, nullable — za `file`
+- `storage_path`, nullable — interno ime: `{workspace}/{godina}/{mesec}/{uuid}.{ekstenzija}`
+- `mime_type`, nullable — tip potvrđen iz sadržaja, ne onaj koji je poslao browser
+- `file_size`, nullable
 - `visibility`
-- `checksum`, nullable
+- `checksum`, nullable — sha256
 - timestamps
 - soft deletes
 
-Polimorfna veza omogućava priloge na klijentu, konsultaciji, belešci ili zadatku.
+Indeksi: `(attachable_type, attachable_id)`, `(workspace_id, client_id, created_at)`.
+
+Polimorfna veza omogućava priloge na klijentu, konsultaciji, belešci ili zadatku. `client_id` je denormalizovan (klijent konsultacije se ne menja), da bi svi fajlovi jednog klijenta bili jedan indeksirani upit.
 
 ## Usluge i termini
 
@@ -358,7 +372,9 @@ Za početak vremenska linija može biti izvedena iz konsultacija, beležaka, pri
 
 Zato se projekciona tabela `activity_events` planira kao **verovatna, a ne hipotetička** potreba, i uvodi se čim se pojavi prvi problem sa performansama ili složenošću upita — realno tokom Faze 4.
 
-### `activity_events` (planirano)
+> Uvedeno u Fazi 4, odmah, umesto UNION-a: vremenska linija je od početka jedan indeksiran upit, a svaka sledeća faza (termini, uplate, zadaci) dodaje samo nove vrste događaja.
+
+### `activity_events`
 
 - `id`
 - `workspace_id`
@@ -367,11 +383,23 @@ Zato se projekciona tabela `activity_events` planira kao **verovatna, a ne hipot
 - `event_type`
 - `occurred_at`
 - `created_by`, nullable
+- `visibility`, nullable — kopija vidljivosti beleške ili fajla, da vremenska linija ne prikaže tuđe privatne stavke (Faza 4)
 - `summary`, nullable
 - `metadata`, JSON, nullable
 - timestamps
 
+Indeksi: `(workspace_id, client_id, occurred_at)` za vremensku liniju i `(subject_type, subject_id, event_type)` za održavanje projekcije.
+
 Tabela je projekcija i ne sme biti jedini izvor poslovnih podataka. Mora se moći ponovo izgraditi iz osnovnih tabela.
+
+Dve vrste događaja:
+
+| Vrsta | `event_type` | Kako nastaje |
+|---|---|---|
+| Projekcija reda | `client_created`, `consultation`, `note`, `file`, `chart_calculated` | Jedan događaj po redu u osnovnoj tabeli, održava ga model pri svakom čuvanju i brisanju (`ProjectsActivity`, `ActivityProjector`). Konsultacija stoji na svom datumu, ne na datumu unosa. |
+| Zapis promene | `client_updated`, `client_archived`, `client_restored`, `birth_details_updated` | Beleži se u trenutku promene (`ActivityLog`), sa nazivima promenjenih polja, nikad vrednostima. |
+
+`php artisan activity:rebuild [--workspace=]` briše i ponovo pravi sve projekcije iz osnovnih tabela; zapisi promena ne postoje nigde drugde i ostaju netaknuti.
 
 ## Obavezna pravila
 

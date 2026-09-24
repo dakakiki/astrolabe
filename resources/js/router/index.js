@@ -77,6 +77,24 @@ const routes = [
         meta: { verified: true },
     },
     {
+        path: '/consultations',
+        name: 'consultations.index',
+        component: () => import('@/pages/consultations/ConsultationsPage.vue'),
+        meta: { verified: true },
+    },
+    {
+        path: '/consultations/new',
+        name: 'consultations.create',
+        component: () => import('@/pages/consultations/ConsultationPage.vue'),
+        meta: { verified: true },
+    },
+    {
+        path: '/consultations/:id(\\d+)',
+        name: 'consultations.show',
+        component: () => import('@/pages/consultations/ConsultationPage.vue'),
+        meta: { verified: true },
+    },
+    {
         path: '/settings',
         component: () => import('@/pages/settings/SettingsPage.vue'),
         meta: { verified: true },

@@ -6,6 +6,7 @@ use App\Enums\ClientStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ClientResource;
 use App\Models\Client;
+use App\Support\Activity\ActivityLog;
 use Illuminate\Support\Facades\Gate;
 
 /**
@@ -28,7 +29,12 @@ class ClientArchiveController extends Controller
     {
         Gate::authorize('update', $client);
 
+        $previous = $client->status;
         $client->update(['status' => $status]);
+
+        if ($previous !== $status) {
+            app(ActivityLog::class)->clientChanged($client, ['status'], $previous);
+        }
 
         return ClientResource::make($client->load(['tags', 'astrologyMethods', 'birthDetails']))->withNotes();
     }

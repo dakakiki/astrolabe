@@ -55,6 +55,26 @@ before starting a phase. The user communicates in Serbian.
 - Accuracy tests against NASA JPL Horizons (`tests/fixtures/ephemeris`) must stay green; they skip
   where swetest is not installed.
 - Longitudes are shown truncated to whole minutes (never rounded into the next sign).
+- A consultation's chart snapshot is a `chart_calculation_id`; calculations are never overwritten,
+  so never delete a calculation a consultation points to.
+
+## Consultations, notes, files, timeline
+
+- `internal_notes`, `client_summary` and `next_steps` are separate fields; lists never return them.
+- Formatted text (notes, consultation notes) is sanitized on save with `App\Support\RichText`
+  (allowlist). The SPA renders stored HTML only through `RichText.vue`. Never render any other
+  user HTML with `v-html`, and never store editor output without `RichText::sanitize()`.
+- The client of a consultation or note is set on creation and never changes.
+- Visibility (`private`, `team`, `shared_with_client`): someone else's private note or file must be
+  a 404 (`Response::denyAsNotFound()` in the policy, `Gate::authorize` in FormRequests) and must
+  be left out of lists and the timeline (`visibleTo($user)` scopes).
+- Uploads: `App\Support\Attachments\AllowedFileTypes` decides from the file's content, not its
+  name or the browser's type. Files go to the private `attachments` disk under a generated name;
+  downloads only through `GET /api/v1/attachments/{id}/download`. Tests use `Storage::fake('attachments')`.
+- The timeline reads `activity_events`. Models with one timeline entry use `ProjectsActivity`
+  (kept in step on save/delete); changes that exist nowhere else are recorded with `ActivityLog`
+  (field names only, never values). `php artisan activity:rebuild` must be able to recreate every
+  projected entry — a new projected type needs its model in `RebuildActivity::SUBJECTS`.
 
 ## Database
 

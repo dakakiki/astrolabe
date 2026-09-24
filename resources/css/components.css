@@ -760,6 +760,301 @@
         color: #fff;
     }
 
+    /* ---------------- Tabs and segmented filters ---------------- */
+
+    .tabs {
+        display: flex;
+        gap: 2px;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 18px;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    .tabs a {
+        color: var(--ink-3);
+        font-size: 13px;
+        font-weight: 500;
+        padding: 9px 13px;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        white-space: nowrap;
+        text-decoration: none;
+    }
+
+    .tabs a:hover {
+        color: var(--ink);
+    }
+
+    .tabs a[aria-current='page'] {
+        color: var(--link);
+        border-bottom-color: var(--brand-300);
+    }
+
+    .tabs .count {
+        margin-left: 5px;
+        font-size: 11px;
+        color: var(--ink-4);
+    }
+
+    .seg {
+        display: inline-flex;
+        border: 1px solid var(--line);
+        border-radius: var(--r);
+        overflow: hidden;
+        background: var(--surface-2);
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    .seg button {
+        border: 0;
+        background: none;
+        font: inherit;
+        font-size: 12.5px;
+        padding: 5px 11px;
+        cursor: pointer;
+        color: var(--ink-2);
+        border-right: 1px solid var(--line);
+        white-space: nowrap;
+    }
+
+    .seg button:last-child {
+        border-right: 0;
+    }
+
+    .seg button[aria-pressed='true'] {
+        background: var(--brand);
+        color: var(--on-brand);
+    }
+
+    /* ---------------- Timeline ---------------- */
+
+    .timeline {
+        position: relative;
+        padding-left: 26px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 9px;
+        top: 6px;
+        bottom: 6px;
+        width: 1px;
+        background: var(--line);
+    }
+
+    .tl-item {
+        position: relative;
+        padding: 0 0 18px;
+    }
+
+    .tl-item::before {
+        content: '';
+        position: absolute;
+        left: -21px;
+        top: 5px;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--surface);
+        border: 2px solid var(--ink-4);
+    }
+
+    .tl-item.t-chart::before {
+        border-color: var(--brand-300);
+        box-shadow: 0 0 9px var(--brand-300);
+    }
+
+    .tl-item.t-consultation::before {
+        border-color: var(--ok);
+    }
+
+    .tl-item.t-note::before {
+        border-color: var(--brass);
+    }
+
+    .tl-item.t-file::before {
+        border-color: var(--info);
+    }
+
+    .tl-when {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-4);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .tl-title {
+        font-weight: 500;
+        margin-top: 2px;
+    }
+
+    .tl-body {
+        font-size: 12.5px;
+        color: var(--ink-2);
+        margin-top: 3px;
+    }
+
+    /* ---------------- Formatted text and the editor ---------------- */
+
+    .rich {
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+    }
+
+    .rich > * + * {
+        margin-top: 0.6em;
+    }
+
+    .rich h2 {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .rich h3,
+    .rich h4 {
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .rich ul {
+        list-style: disc;
+        padding-left: 1.4em;
+    }
+
+    .rich ol {
+        list-style: decimal;
+        padding-left: 1.4em;
+    }
+
+    .rich blockquote {
+        border-left: 3px solid var(--brand-100);
+        padding-left: 12px;
+        color: var(--ink-2);
+    }
+
+    .rich code,
+    .rich pre {
+        font-family: var(--mono);
+        font-size: 12.5px;
+        background: var(--surface-2);
+        border-radius: 4px;
+        padding: 1px 4px;
+    }
+
+    .rich hr {
+        border: 0;
+        border-top: 1px solid var(--line);
+    }
+
+    .editor {
+        border: 1px solid var(--line);
+        border-radius: var(--r);
+        background: var(--canvas);
+    }
+
+    .editor:focus-within {
+        border-color: var(--brand-300);
+        box-shadow: 0 0 0 3px var(--brand-050);
+    }
+
+    .editor[aria-invalid='true'] {
+        border-color: var(--danger);
+    }
+
+    .editor-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px;
+        padding: 4px;
+        border-bottom: 1px solid var(--line-soft);
+    }
+
+    .editor-toolbar button {
+        min-width: 28px;
+        height: 26px;
+        padding: 0 6px;
+        border: 0;
+        border-radius: 4px;
+        background: transparent;
+        color: var(--ink-2);
+        font: inherit;
+        font-size: 12.5px;
+        cursor: pointer;
+    }
+
+    .editor-toolbar button:hover {
+        background: var(--surface-2);
+    }
+
+    .editor-toolbar button[aria-pressed='true'] {
+        background: var(--brand-050);
+        color: var(--link);
+    }
+
+    .editor-toolbar .sep {
+        width: 1px;
+        margin: 3px 4px;
+        background: var(--line);
+    }
+
+    .editor .ProseMirror {
+        min-height: var(--editor-height, 110px);
+        padding: 9px 11px;
+        outline: none;
+    }
+
+    .editor .ProseMirror p.is-editor-empty:first-child::before {
+        content: attr(data-placeholder);
+        float: left;
+        height: 0;
+        color: var(--ink-4);
+        pointer-events: none;
+    }
+
+    /* ---------------- Files ---------------- */
+
+    .dropzone {
+        border: 1px dashed var(--line);
+        border-radius: var(--r-lg);
+        padding: 18px;
+        text-align: center;
+        color: var(--ink-3);
+        font-size: 13px;
+        transition: background 0.15s ease;
+    }
+
+    .dropzone.is-over {
+        border-color: var(--brand-300);
+        background: var(--brand-050);
+        color: var(--ink);
+    }
+
+    .engine-note {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-4);
+        padding: 10px 16px;
+        border-top: 1px solid var(--line-soft);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 14px;
+    }
+
+    .empty {
+        text-align: center;
+        padding: 32px 16px;
+        color: var(--ink-3);
+    }
+
+    .empty .e-glyph {
+        font-size: 24px;
+        color: var(--ink-4);
+    }
+
     /* ---------------- Auth screens ---------------- */
 
     .auth {

@@ -149,6 +149,8 @@ Kriterijum završetka: astrolog unese klijenta i odmah vidi tačne planetarne po
 
 Kriterijum završetka: astrolog može pratiti punu istoriju rada sa klijentom. **Ovo je prvi proizvod pogodan za interno testiranje i za pokazivanje astrolozima iz validacione grupe.**
 
+> Status: završeno 24. 9. 2026. Konsultacije sa internim beleškama, sažetkom za klijenta i zaključcima kao odvojenim poljima formatiranog teksta; beleške sa vidljivošću; fajlovi i linkovi u privatnom storage-u sa proverom stvarnog tipa i autorizovanim download-om; vremenska linija klijenta iz projekcione tabele `activity_events`; profil klijenta sa tabovima. Uz to je već sada moguće priložiti trenutnu kartu konsultaciji kao snimak stanja (pozicije planeta) — u Fazi 5 snimak dobija uglove, kuće i točak.
+
 ## Faza 5 — puna natalna karta
 
 - Ascendent, MC i ostali uglovi;
@@ -157,7 +159,7 @@ Kriterijum završetka: astrolog može pratiti punu istoriju rada sa klijentom. *
 - aspekti sa orbima podesivim po workspace-u;
 - tropski i siderealni zodijak sa ayanamsom;
 - SVG komponenta točka karte;
-- karta kao snimak stanja priložen konsultaciji;
+- karta kao snimak stanja priložen konsultaciji (mehanizam postoji od Faze 4; ovde snimak dobija uglove, kuće, aspekte i točak);
 - testovi za južnu hemisferu, DST granice i visoke geografske širine.
 
 Procena: 2–3 nedelje.

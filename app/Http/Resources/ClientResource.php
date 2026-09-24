@@ -16,6 +16,9 @@ class ClientResource extends JsonResource
     /** Private notes are sent only with a single client, never in lists. */
     public bool $withNotes = false;
 
+    /** @var array<string, int>|null counts for the profile's summary card */
+    public ?array $stats = null;
+
     public function toArray(Request $request): array
     {
         return [
@@ -44,6 +47,7 @@ class ClientResource extends JsonResource
             'birth' => $this->whenLoaded('birthDetails', fn () => $this->birthDetails
                 ? BirthDetailsResource::make($this->birthDetails)->resolve()
                 : null),
+            'stats' => $this->when($this->stats !== null, fn () => $this->stats),
             'last_activity_at' => $this->last_activity_at?->toIso8601ZuluString(),
             'created_at' => $this->created_at?->toIso8601ZuluString(),
         ];
@@ -52,6 +56,16 @@ class ClientResource extends JsonResource
     public function withNotes(): static
     {
         $this->withNotes = true;
+
+        return $this;
+    }
+
+    /**
+     * @param  array<string, int>  $stats
+     */
+    public function withStats(array $stats): static
+    {
+        $this->stats = $stats;
 
         return $this;
     }

@@ -11,7 +11,10 @@
         "add": "Add",
         "optional": "optional",
         "none": "None",
-        "loading": "Loading…"
+        "loading": "Loading…",
+        "edit": "Edit",
+        "close": "Close",
+        "more": "Show more"
     },
     "errors": {
         "generic": "Something went wrong. Please try again.",
@@ -31,7 +34,8 @@
         "openMenu": "Open menu",
         "userMenu": "Account menu",
         "signOut": "Sign out",
-        "clients": "Clients"
+        "clients": "Clients",
+        "consultations": "Consultations"
     },
     "auth": {
         "art": {
@@ -375,7 +379,19 @@
             "source": "Location",
             "dataSource": "Source",
             "chartReady": "Ready for the chart",
-            "chartSoon": "The natal chart arrives with the astrology module."
+            "chartSoon": "The natal chart arrives with the astrology module.",
+            "tabs": {
+                "overview": "Overview",
+                "chart": "Birth data & chart",
+                "consultations": "Consultations",
+                "notes": "Notes",
+                "files": "Files"
+            },
+            "summary": "Summary",
+            "consultations": "Consultations",
+            "consultationsCount": "{total} · {completed} completed",
+            "notesCount": "Notes",
+            "filesCount": "Files"
         },
         "missing": {
             "title": "Before a chart can be calculated:",
@@ -389,7 +405,8 @@
             "ambiguous": "This time happened twice: clocks went back that night. Check which of the two moments is meant.",
             "zoneHistory": "Time-zone records before 1970 are unreliable in some regions. Check the offset if the chart looks wrong.",
             "approximate": "The birth time is approximate, so angles and houses will be unreliable."
-        }
+        },
+        "addConsultation": "New consultation"
     },
     "bodies": {
         "sun": "Sun",
@@ -440,5 +457,233 @@
         "tropical": "Tropical zodiac",
         "sidereal": "Sidereal zodiac, {ayanamsa}",
         "housesSoon": "Angles, houses, aspects and the chart wheel arrive with the full natal chart."
+    },
+    "consultations": {
+        "eyebrow": "Practice",
+        "title": "Consultations",
+        "sub": "The professional record: topics, notes, methods and the chart as it stood on the day.",
+        "add": "New consultation",
+        "empty": "No consultations yet. Record one after a session with a client.",
+        "emptyClient": "No consultations with this client yet.",
+        "noMatches": "No consultations match these filters.",
+        "created": "Consultation recorded",
+        "saved": "Consultation saved",
+        "deleted": "Consultation deleted",
+        "confirmDelete": "Delete this consultation and the files attached to it? Notes linked to it stay with the client.",
+        "unsaved": "You have unsaved changes. Leave this page anyway?",
+        "untitled": "Consultation",
+        "minutes": "{n} min",
+        "snapshot": "Snapshot",
+        "otherZone": "Entered in {zone}: {time}",
+        "filters": {
+            "search": "Search by client, title or topic",
+            "status": "Status",
+            "anyStatus": "Any status",
+            "from": "From",
+            "to": "To",
+            "clear": "Clear"
+        },
+        "columns": {
+            "date": "Date",
+            "client": "Client",
+            "consultation": "Consultation",
+            "topics": "Topics",
+            "status": "Status",
+            "chart": "Chart",
+            "methods": "Methods"
+        },
+        "form": {
+            "newTitle": "New consultation",
+            "client": "Client",
+            "chooseClient": "Choose a client",
+            "title": "Title",
+            "titlePlaceholder": "e.g. Natal reading, Solar return",
+            "status": "Status",
+            "startsAt": "Date and time",
+            "timezone": "Time zone",
+            "timezoneHint": "The time as it was in this zone. Defaults to yours.",
+            "duration": "Duration (minutes)",
+            "details": "Details",
+            "methods": "Methods used",
+            "topics": "Topics and questions",
+            "topicsPlaceholder": "What the client came with",
+            "internalNotes": "Internal notes",
+            "internalNotesHint": "Never shown to the client and never part of a shared summary or export. A separate field, not a formatting choice.",
+            "clientSummary": "Summary for the client",
+            "clientSummaryHint": "Written for the client. It stays here until the client portal arrives.",
+            "nextSteps": "Conclusions and next steps",
+            "create": "Record consultation",
+            "save": "Save changes",
+            "delete": "Delete"
+        },
+        "chart": {
+            "title": "Attached chart",
+            "none": "No chart attached",
+            "attachHint": "Attach the current chart to keep a record of what you were reading from.",
+            "attach": "Attach current chart",
+            "attached": "Chart snapshot attached",
+            "replace": "Attach the current chart instead",
+            "detach": "Remove snapshot",
+            "detached": "Snapshot removed",
+            "snapshotNote": "The chart as it stood when attached. Later corrections to the birth data do not change it.",
+            "incomplete": "The birth data is incomplete, so there is no chart to attach yet."
+        },
+        "attachments": "Files and links",
+        "notes": "Notes on this consultation",
+        "saveFirst": "Save the consultation first; files and the chart can be attached after that."
+    },
+    "consultationStatuses": {
+        "draft": "Draft",
+        "scheduled": "Scheduled",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "no_show": "No show"
+    },
+    "visibility": {
+        "label": "Visibility",
+        "private": "Private",
+        "team": "Team",
+        "shared_with_client": "Shared with client",
+        "hints": {
+            "private": "Only you",
+            "team": "Everyone in your practice",
+            "shared_with_client": "Ready for the client portal"
+        }
+    },
+    "notes": {
+        "title": "Notes",
+        "add": "Add a note",
+        "edit": "Edit note",
+        "titleLabel": "Title",
+        "titlePlaceholder": "What is this about?",
+        "content": "Note",
+        "consultation": "Consultation",
+        "noConsultation": "Not tied to a consultation",
+        "save": "Save note",
+        "update": "Save changes",
+        "saved": "Note saved",
+        "deleted": "Note deleted",
+        "confirmDelete": "Delete this note?",
+        "empty": "No notes yet. Notes stay private unless you mark them otherwise.",
+        "meta": "{name} · {when}",
+        "edited": "edited {when}"
+    },
+    "files": {
+        "title": "Files",
+        "drop": "Drop files here, or",
+        "choose": "choose files",
+        "dropActive": "Drop to upload",
+        "uploading": "Uploading {name}…",
+        "uploaded": "{name} uploaded",
+        "refusedType": "{name} cannot be uploaded: this type of file is not allowed.",
+        "refusedSize": "{name} is larger than the limit of {size}.",
+        "allowed": "Allowed: {types}. Up to {size} each.",
+        "addLink": "Add a link",
+        "linkUrl": "Link",
+        "linkTitle": "Title",
+        "linkTitlePlaceholder": "e.g. Recording of the session",
+        "linkSave": "Add link",
+        "linkAdded": "Link added",
+        "uploadVisibility": "New files are",
+        "columns": {
+            "name": "Name",
+            "size": "Size",
+            "visibility": "Visibility",
+            "added": "Added"
+        },
+        "download": "Download",
+        "open": "Open",
+        "remove": "Remove",
+        "removed": "Removed",
+        "confirmRemove": "Remove {name}?",
+        "visibilityChanged": "Visibility changed",
+        "empty": "No files yet. Charts, recordings and documents for this client live here.",
+        "emptyConsultation": "Nothing attached yet.",
+        "onConsultation": "From a consultation",
+        "footer": {
+            "private": "Private storage",
+            "verified": "File type checked on upload",
+            "authorised": "Every download is authorised"
+        },
+        "kinds": {
+            "image": "Image",
+            "pdf": "PDF",
+            "document": "Document",
+            "audio": "Audio",
+            "video": "Video",
+            "text": "Text",
+            "file": "File",
+            "link": "Link"
+        }
+    },
+    "timeline": {
+        "title": "Timeline",
+        "filters": {
+            "all": "All",
+            "consultations": "Consultations",
+            "notes": "Notes",
+            "files": "Files",
+            "charts": "Charts"
+        },
+        "empty": "Nothing here yet.",
+        "emptyFilter": "Nothing of this kind yet.",
+        "loadMore": "Show earlier",
+        "upcoming": "Upcoming",
+        "private": "Private",
+        "by": "by {name}",
+        "consultation": {
+            "draft": "Consultation draft",
+            "scheduled": "Consultation scheduled",
+            "completed": "Consultation",
+            "cancelled": "Consultation cancelled",
+            "no_show": "Missed consultation"
+        },
+        "note": "Note",
+        "noteTitled": "Note: {title}",
+        "file": "File added: {name}",
+        "link": "Link added: {name}",
+        "chartCalculated": "Natal chart calculated",
+        "chartRecalculated": "Natal chart recalculated",
+        "birthAdded": "Birth data added",
+        "birthUpdated": "Birth data changed",
+        "profileUpdated": "Profile updated",
+        "archived": "Client archived",
+        "restored": "Client restored from the archive",
+        "created": "Client added",
+        "unknown": "Activity",
+        "changed": "Changed: {fields}",
+        "fields": {
+            "first_name": "first name",
+            "last_name": "last name",
+            "email": "email",
+            "phone": "phone",
+            "country_code": "country",
+            "timezone": "time zone",
+            "preferred_locale": "language",
+            "status": "status",
+            "internal_notes": "private notes",
+            "assigned_user_id": "assigned astrologer",
+            "tags": "tags",
+            "methods": "methods",
+            "date": "date",
+            "time": "time",
+            "time_accuracy": "time accuracy",
+            "place": "place",
+            "data_source": "source",
+            "notes": "notes"
+        }
+    },
+    "editor": {
+        "toolbar": "Formatting",
+        "bold": "Bold",
+        "italic": "Italic",
+        "heading": "Heading",
+        "bulletList": "Bulleted list",
+        "orderedList": "Numbered list",
+        "quote": "Quote",
+        "link": "Link",
+        "linkPrompt": "Link address (https://…). Leave empty to remove the link.",
+        "undo": "Undo",
+        "redo": "Redo"
     }
 }

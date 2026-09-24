@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Clients\SaveClient;
 use App\Enums\ClientStatus;
+use App\Enums\ConsultationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SaveClientRequest;
 use App\Http\Resources\ClientResource;
@@ -58,11 +59,18 @@ class ClientController extends Controller
         return ClientResource::make($client)->withNotes();
     }
 
-    public function show(Client $client): ClientResource
+    public function show(Request $request, Client $client): ClientResource
     {
         Gate::authorize('view', $client);
 
-        return ClientResource::make($client->load(['tags', 'astrologyMethods', 'birthDetails']))->withNotes();
+        return ClientResource::make($client->load(['tags', 'astrologyMethods', 'birthDetails']))
+            ->withNotes()
+            ->withStats([
+                'consultations' => $client->consultations()->count(),
+                'completed_consultations' => $client->consultations()->where('status', ConsultationStatus::Completed)->count(),
+                'notes' => $client->notes()->visibleTo($request->user())->count(),
+                'files' => $client->attachments()->visibleTo($request->user())->count(),
+            ]);
     }
 
     public function update(SaveClientRequest $request, Client $client, SaveClient $saveClient): ClientResource

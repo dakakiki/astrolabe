@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\Ayanamsa;
 use App\Enums\ClientStatus;
+use App\Enums\ConsultationStatus;
 use App\Enums\HouseSystem;
 use App\Enums\TimeAccuracy;
+use App\Enums\Visibility;
 use App\Enums\ZodiacMode;
 use App\Http\Controllers\Controller;
 use App\Models\Country;
+use App\Support\Attachments\AllowedFileTypes;
+use App\Support\Attachments\UploadLimit;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -39,6 +43,12 @@ class ReferenceDataController extends Controller
                     ]),
                 'client_statuses' => array_column(ClientStatus::cases(), 'value'),
                 'time_accuracies' => array_column(TimeAccuracy::cases(), 'value'),
+                'consultation_statuses' => array_column(ConsultationStatus::cases(), 'value'),
+                'visibilities' => array_column(Visibility::cases(), 'value'),
+                'attachments' => [
+                    'max_size' => UploadLimit::bytes(),
+                    'extensions' => AllowedFileTypes::extensions(),
+                ],
             ],
         ]);
     }

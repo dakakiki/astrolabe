@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
+use App\Enums\ActivityType;
 use App\Enums\ClientStatus;
 use App\Models\Concerns\BelongsToWorkspace;
+use App\Models\Concerns\ProjectsActivity;
+use App\Support\Activity\ActivityProjection;
 use Database\Factories\ClientFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -25,7 +29,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Client extends Model
 {
     /** @use HasFactory<ClientFactory> */
-    use BelongsToWorkspace, HasFactory, SoftDeletes;
+    use BelongsToWorkspace, HasFactory, ProjectsActivity, SoftDeletes;
 
     protected function casts(): array
     {
@@ -72,8 +76,56 @@ class Client extends Model
         return $this->belongsTo(User::class, 'assigned_user_id');
     }
 
+    /**
+     * @return HasMany<Consultation, $this>
+     */
+    public function consultations(): HasMany
+    {
+        return $this->hasMany(Consultation::class);
+    }
+
+    /**
+     * @return HasMany<Note, $this>
+     */
+    public function notes(): HasMany
+    {
+        return $this->hasMany(Note::class);
+    }
+
+    /**
+     * Files and links on the client and on their consultations.
+     *
+     * @return HasMany<Attachment, $this>
+     */
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(Attachment::class);
+    }
+
+    /**
+     * @return HasMany<ActivityEvent, $this>
+     */
+    public function activityEvents(): HasMany
+    {
+        return $this->hasMany(ActivityEvent::class);
+    }
+
     public function touchActivity(): void
     {
         $this->forceFill(['last_activity_at' => now()])->saveQuietly();
+    }
+
+    public static function activityType(): ActivityType
+    {
+        return ActivityType::ClientCreated;
+    }
+
+    public function activityProjection(): ActivityProjection
+    {
+        return new ActivityProjection(
+            type: self::activityType(),
+            clientId: $this->getKey(),
+            occurredAt: $this->created_at,
+        );
     }
 }

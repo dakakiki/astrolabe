@@ -79,6 +79,17 @@ Planetarne pozicije (Sunce–Pluton, pravi i srednji Mesečev čvor) preko Swiss
 - 05: `chart_calculations.time_accuracy`; `input_hash` obuhvata i `time_accuracy` i otisak engine-a; tabela `countries`.
 - 11: stanje referentnih testova (NASA JPL Horizons) i napomene o pozivu `swetest`.
 
+## Faza 4 — implementirano
+
+Konsultacije (CRUD, statusi, metode, teme, interne beleške / sažetak za klijenta / zaključci kao odvojena polja formatiranog teksta, snimak karte), beleške sa vidljivošću, fajlovi i linkovi u privatnom storage-u sa autorizovanim download-om, vremenska linija klijenta i profil klijenta sa tabovima. Izmene u dokumentima:
+
+- 02: šta je implementirano kod konsultacija, vremenske linije, beležaka i fajlova (lista dozvoljenih tipova, ograničenje veličine, linkovi, pravila vidljivosti); odloženo: oznake, prilozi i istorija izmena na beleškama.
+- 03: kako je rešen storage fajlova (disk, potpisani URL-ovi na bucket-u, zaglavlja pri download-u) i sanitizacija formatiranog teksta.
+- 04: status Faze 4; mehanizam snimka karte je u Fazi 4, a Faza 5 ga dopunjuje uglovima, kućama i točkom.
+- 05: `consultations.title`, `timezone`, `created_by`; `attachments.client_id`, `kind`, `url`; `activity_events` uvedena sa kolonom `visibility`, dve vrste događaja (projekcija reda i zapis promene) i komandom `activity:rebuild`.
+
+Odluke donete usput: `activity_events` je uvedena odmah (ne UNION izvedenih tabela), jer bi svaka sledeća faza inače dodala još jedan krak upita; formatiran tekst je HTML sa listom dozvoljenih elemenata na serveru, a ne JSON editora, jer se isti sadržaj kasnije izvozi u PDF i prikazuje u portalu.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

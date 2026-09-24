@@ -17,6 +17,7 @@ const navGroups = [
         items: [
             { to: { name: 'dashboard' }, label: 'nav.dashboard', icon: '◈', exact: true },
             { to: '/clients', label: 'nav.clients', icon: '◉' },
+            { to: '/consultations', label: 'nav.consultations', icon: '☉' },
         ],
     },
     { label: 'nav.workspace', items: [{ to: '/settings', label: 'nav.settings', icon: '⚙' }] },

@@ -71,4 +71,23 @@ return [
         'timeout' => (int) env('EPHEMERIS_TIMEOUT', 10),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Attachments
+    |--------------------------------------------------------------------------
+    |
+    | Where client files are kept and how large they may be. The disk must be
+    | private: "attachments" (local, storage/app/private/attachments) or an
+    | S3-compatible bucket, in which case downloads use short-lived signed URLs.
+    | The effective limit is also capped by PHP's upload_max_filesize and
+    | post_max_size; the smaller value is what the interface shows.
+    |
+    */
+
+    'attachments' => [
+        'disk' => env('ATTACHMENTS_DISK', 'attachments'),
+        'max_size_mb' => (int) env('ATTACHMENTS_MAX_MB', 100),
+        'signed_url_minutes' => 5,
+    ],
+
 ];

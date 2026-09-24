@@ -7,7 +7,11 @@ use App\Astrology\Contracts\Geocoder;
 use App\Astrology\Engines\FakeEngine;
 use App\Astrology\Engines\SwissEphemerisEngine;
 use App\Astrology\Geocoding\LocalGeoNamesGeocoder;
+use App\Models\Attachment;
+use App\Models\ChartCalculation;
 use App\Models\Client;
+use App\Models\Consultation;
+use App\Models\Note;
 use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -56,8 +60,15 @@ class AppServiceProvider extends ServiceProvider
 
         $this->pointAuthEmailsAtTheSpa();
 
-        // Stable names in polymorphic columns (chart_calculations.subject_type).
-        Relation::morphMap(['client' => Client::class]);
+        // Stable names in polymorphic columns (chart_calculations.subject_type,
+        // attachments.attachable_type, activity_events.subject_type).
+        Relation::morphMap([
+            'client' => Client::class,
+            'consultation' => Consultation::class,
+            'note' => Note::class,
+            'attachment' => Attachment::class,
+            'chart_calculation' => ChartCalculation::class,
+        ]);
     }
 
     /**

@@ -3,10 +3,12 @@
 namespace App\Actions\Clients;
 
 use App\Astrology\Contracts\Geocoder;
+use App\Enums\ActivityType;
 use App\Enums\GeocodeSource;
 use App\Enums\TimeAccuracy;
 use App\Models\Client;
 use App\Models\ClientBirthDetails;
+use App\Support\Activity\ActivityLog;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -19,7 +21,26 @@ use Illuminate\Validation\ValidationException;
  */
 class SaveBirthDetails
 {
-    public function __construct(private readonly Geocoder $geocoder) {}
+    /** Stored columns grouped into what the astrologer thinks of as one thing. */
+    private const FIELD_GROUPS = [
+        'birth_date' => 'date',
+        'birth_time' => 'time',
+        'time_accuracy' => 'time_accuracy',
+        'birth_place' => 'place',
+        'birth_country_code' => 'place',
+        'latitude' => 'place',
+        'longitude' => 'place',
+        'place_id' => 'place',
+        'geocode_source' => 'place',
+        'birth_timezone' => 'timezone',
+        'data_source' => 'data_source',
+        'notes' => 'notes',
+    ];
+
+    public function __construct(
+        private readonly Geocoder $geocoder,
+        private readonly ActivityLog $activity,
+    ) {}
 
     /**
      * @param  array<string, mixed>  $input  validated "birth" payload
@@ -28,6 +49,7 @@ class SaveBirthDetails
     {
         $details = $client->birthDetails ?? new ClientBirthDetails(['client_id' => $client->id]);
         $details->client_id = $client->id;
+        $adding = ! $details->exists;
 
         $accuracy = TimeAccuracy::from($input['time_accuracy']);
 
@@ -40,11 +62,36 @@ class SaveBirthDetails
         ]);
 
         $this->applyLocation($details, $input);
+        $changed = $this->changedFields($details);
 
         $details->save();
         $client->setRelation('birthDetails', $details);
 
+        // A client created with birth data already has its "created" entry.
+        if (! $client->wasRecentlyCreated && ($adding || $changed !== [])) {
+            $this->activity->record($client, ActivityType::BirthDetailsUpdated, [
+                'added' => $adding,
+                'fields' => $adding ? [] : $changed,
+            ]);
+        }
+
         return $details;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function changedFields(ClientBirthDetails $details): array
+    {
+        $dirty = $details->getDirty();
+
+        // "14:30" typed again over the stored "14:30:00" is no change.
+        if (array_key_exists('birth_time', $dirty)
+            && substr((string) $details->getOriginal('birth_time'), 0, 5) === substr((string) $dirty['birth_time'], 0, 5)) {
+            unset($dirty['birth_time']);
+        }
+
+        return array_values(array_unique(array_intersect_key(self::FIELD_GROUPS, $dirty)));
     }
 
     /**

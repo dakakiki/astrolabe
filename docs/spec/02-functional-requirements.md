@@ -172,6 +172,16 @@ Konsultacija sadrži:
 
 `internal_notes` i `client_summary` moraju biti odvojeni podaci.
 
+### Implementirano u Fazi 4
+
+- Dok usluge ne postoje (Faza 6), vrstu konsultacije opisuje slobodan **naslov** (npr. „Natalno čitanje“); `service_id` i `appointment_id` dolaze sa uslugama i terminima, a status naplate sa uplatama (Faza 7).
+- Datum i vreme se unose kao lokalno vreme u izabranoj IANA zoni (podrazumevano zona astrologa) i čuvaju u UTC-u zajedno sa zonom. Promena samo zone zadržava uneto vreme („15:00, ali u Lisabonu“).
+- Svaki status osim `draft` traži datum; nacrt može biti bez njega.
+- Klijent konsultacije se bira jednom, pri kreiranju, i više se ne menja — beleške, fajlovi i snimak karte pripadaju tom klijentu.
+- Interne beleške, sažetak za klijenta i zaključci su tri odvojena polja sa formatiranim tekstom (vidi „Beleške“); liste konsultacija ih ne vraćaju, samo pojedinačna konsultacija.
+- **Snimak karte:** konsultaciji se prilaže trenutna natalna karta klijenta (`chart_calculation_id`). Proračuni se nikada ne prepisuju, pa kasnija ispravka podataka rođenja pravi novu kartu, a priložena ostaje kakva je bila. Za sada snimak sadrži pozicije planeta; uglovi, kuće i točak dolaze u Fazi 5.
+- Brisanje konsultacije je soft delete i briše i njene priloge; beleške povezane sa njom ostaju kod klijenta.
+
 ## Vremenska linija klijenta
 
 Centralni ekran prikazuje hronološki:
@@ -187,6 +197,12 @@ Centralni ekran prikazuje hronološki:
 
 Filteri: `all`, `consultations`, `notes`, `files`, `payments`, `tasks`, `charts`.
 
+### Implementirano u Fazi 4
+
+Vremenska linija se čita iz projekcione tabele `activity_events` (dokument 05), jednim indeksiranim i paginiranim upitom, najnovije prvo. Sadrži: dodavanje klijenta, izmene profila (samo nazivi promenjenih polja, nikad vrednosti), arhiviranje i vraćanje, izmene podataka rođenja, svaki novi proračun karte (prvi ili ponovni, sa zodijakom i engine-om), konsultacije (na datumu konsultacije, pa buduće stoje na vrhu kao „predstojeće“), beleške i fajlove. Privatne beleške i fajlovi se na vremenskoj liniji vide samo autoru.
+
+Filteri u interfejsu: `all`, `consultations`, `notes`, `files`, `charts`; API prima i `profile`. `payments` i `tasks` se dodaju sa svojim fazama.
+
 ## Beleške
 
 - rich-text sadržaj;
@@ -195,6 +211,14 @@ Filteri: `all`, `consultations`, `notes`, `files`, `payments`, `tasks`, `charts`
 - oznake;
 - prilozi;
 - soft delete i istorija osnovnih promena.
+
+### Implementirano u Fazi 4
+
+- Formatiran tekst se čuva kao HTML koji je prošao listu dozvoljenih elemenata: pasusi, naslovi, liste, citati, podebljano, kurziv, podvučeno, precrtano, kod, horizontalna linija i linkovi (`http`, `https`, `mailto`, uvek sa `rel="noopener noreferrer nofollow"`). Skripte, slike, stilovi, iframe-ovi, forme i event atributi se uklanjaju na serveru (`App\Support\RichText`, Symfony HtmlSanitizer), pa frontend čuvani HTML samo prikazuje. Običan tekst bez oznaka postaje pasusi. Isto važi za interne beleške, sažetak i zaključke konsultacije.
+- Editor je TipTap (MIT), sa trakom samo za ono što server propušta.
+- Nova beleška je privatna dok se drugačije ne označi. Privatnu belešku vidi i menja samo autor — za sve ostale ona ne postoji (404, ne 403). Timske i deljive beleške čitaju svi članovi; menjaju ih autor i vlasnik workspace-a.
+- Beleška pripada jednom klijentu i može biti vezana za jednu njegovu konsultaciju.
+- Odloženo: oznake na beleškama, prilozi na beleškama i istorija izmena (za sada samo `updated_at`).
 
 ## Fajlovi i dokumenti
 
@@ -214,6 +238,22 @@ Vidljivost:
 - `private` — vidi astrolog;
 - `team` — vide ovlašćeni saradnici;
 - `shared_with_client` — spremno za budući portal.
+
+### Implementirano u Fazi 4
+
+| Vrsta | Ekstenzije |
+|---|---|
+| Slike | `jpg`, `jpeg`, `png`, `webp` |
+| Dokumenti | `pdf`, `docx`, `txt`, `md` |
+| Audio | `mp3`, `m4a`, `wav`, `ogg` |
+| Video | `mp4`, `mov`, `webm` |
+
+- Fajl se prihvata samo ako je ekstenzija na listi **i** ako sadržaj (fileinfo) odgovara toj ekstenziji; DOCX se prepoznaje po sadržaju ZIP arhive. Skripta preimenovana u `.pdf`, SVG i HTML se odbijaju. Sačuvani MIME tip je naš, ne onaj koji je poslao browser.
+- Ograničenje veličine: `ATTACHMENTS_MAX_MB` (podrazumevano 100 MB), ali ne više od PHP limita `upload_max_filesize` i `post_max_size`; interfejs prikazuje manju vrednost.
+- **Eksterni linkovi** (npr. snimak sesije na Zoom-u ili dokument na Drive-u) čuvaju se kao prilog vrste `link`, samo `http`/`https`.
+- Fajl ili link može biti na klijentu ili na njegovoj konsultaciji; prilozi na beleškama i zadacima dolaze kasnije. Lista fajlova klijenta obuhvata i one sa njegovih konsultacija.
+- Vidljivost važi i za download: tuđ privatni fajl je 404. Novi fajlovi su privatni dok se drugačije ne izabere; vidljivost i naziv se mogu promeniti, sam fajl ne.
+- Obrisan fajl je soft delete i ostaje na disku dok ga ne uklone pravila čuvanja podataka (Faza 8).
 
 ## Usluge
 

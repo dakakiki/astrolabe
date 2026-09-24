@@ -1,11 +1,16 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AstrologyMethodController;
+use App\Http\Controllers\Api\V1\AttachmentController;
 use App\Http\Controllers\Api\V1\ClientArchiveController;
 use App\Http\Controllers\Api\V1\ClientBirthDetailsController;
 use App\Http\Controllers\Api\V1\ClientChartController;
 use App\Http\Controllers\Api\V1\ClientController;
+use App\Http\Controllers\Api\V1\ClientTimelineController;
+use App\Http\Controllers\Api\V1\ConsultationChartController;
+use App\Http\Controllers\Api\V1\ConsultationController;
 use App\Http\Controllers\Api\V1\MeController;
+use App\Http\Controllers\Api\V1\NoteController;
 use App\Http\Controllers\Api\V1\PlaceController;
 use App\Http\Controllers\Api\V1\ReferenceDataController;
 use App\Http\Controllers\Api\V1\StatusController;
@@ -44,6 +49,25 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::get('/clients/{client}/chart', [ClientChartController::class, 'show'])->name('clients.chart');
             Route::post('/clients/{client}/archive', [ClientArchiveController::class, 'store'])->name('clients.archive');
             Route::delete('/clients/{client}/archive', [ClientArchiveController::class, 'destroy'])->name('clients.restore');
+
+            Route::get('/clients/{client}/timeline', [ClientTimelineController::class, 'index'])->name('clients.timeline');
+
+            Route::apiResource('consultations', ConsultationController::class);
+            Route::post('/consultations/{consultation}/chart', [ConsultationChartController::class, 'store'])
+                ->name('consultations.chart.store');
+            Route::delete('/consultations/{consultation}/chart', [ConsultationChartController::class, 'destroy'])
+                ->name('consultations.chart.destroy');
+
+            Route::apiResource('notes', NoteController::class);
+
+            Route::get('/attachments', [AttachmentController::class, 'index'])->name('attachments.index');
+            Route::post('/attachments', [AttachmentController::class, 'store'])
+                ->middleware('throttle:60,1')
+                ->name('attachments.store');
+            Route::patch('/attachments/{attachment}', [AttachmentController::class, 'update'])->name('attachments.update');
+            Route::delete('/attachments/{attachment}', [AttachmentController::class, 'destroy'])->name('attachments.destroy');
+            Route::get('/attachments/{attachment}/download', [AttachmentController::class, 'download'])
+                ->name('attachments.download');
 
             Route::get('/tags', [TagController::class, 'index'])->name('tags.index');
 
