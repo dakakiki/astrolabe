@@ -36,6 +36,8 @@ const STATUSES = ['draft', 'scheduled', 'completed', 'cancelled', 'no_show'];
 
 const consultation = ref(null);
 const client = ref(null);
+// The calendar appointment a new consultation is recorded from.
+const appointment = ref(null);
 const notFound = ref(false);
 const loaded = ref(false);
 const methods = ref([]);
@@ -102,6 +104,7 @@ async function load(consultationId) {
     notFound.value = false;
 
     if (consultationId) {
+        appointment.value = null;
         try {
             const { data } = await http.get(`/consultations/${consultationId}`);
             fill(data.data);
@@ -112,10 +115,13 @@ async function load(consultationId) {
     } else {
         consultation.value = null;
         client.value = null;
+        appointment.value = null;
         const zone = auth.user?.timezone ?? 'UTC';
         form.reset({ ...blank(), timezone: zone, starts_at: localInputNow(zone) });
 
-        if (route.query.client) {
+        if (route.query.appointment) {
+            await fromAppointment(route.query.appointment);
+        } else if (route.query.client) {
             const { data } = await http.get(`/clients/${route.query.client}`);
             selectClient(data.data);
         }
@@ -147,6 +153,22 @@ function selectClient(chosen) {
     client.value = { id: chosen.id, full_name: chosen.full_name };
     // A new consultation starts with the client's default method, if one is set.
     form.data.method_ids = (chosen.methods ?? []).filter((method) => method.is_default).map((method) => method.id);
+}
+
+// "Record consultation" from the calendar: the client, service and time come from the appointment.
+async function fromAppointment(appointmentId) {
+    const { data: booked } = await http.get(`/appointments/${appointmentId}`);
+    const { data: owner } = await http.get(`/clients/${booked.data.client.id}`);
+
+    appointment.value = booked.data;
+    selectClient(owner.data);
+    Object.assign(form.data, {
+        status: 'completed',
+        service_id: booked.data.service_id,
+        starts_at: booked.data.starts_at_local,
+        timezone: booked.data.timezone,
+        duration_minutes: booked.data.duration_minutes,
+    });
 }
 
 // On a new consultation the service fills in what is still empty: its length and its methods.
@@ -185,7 +207,11 @@ async function save() {
             };
 
             return creating
-                ? http.post('/consultations', { ...payload, client_id: client.value?.id ?? null })
+                ? http.post('/consultations', {
+                      ...payload,
+                      client_id: client.value?.id ?? null,
+                      appointment_id: appointment.value?.id ?? null,
+                  })
                 : http.patch(`/consultations/${id.value}`, payload);
         });
 
@@ -310,6 +336,24 @@ const otherZone = computed(() => {
                     </template>
                 </div>
                 <div v-if="otherZone" class="mt-1 text-xs text-ink-3">{{ otherZone }}</div>
+                <div v-if="consultation?.appointment || appointment" class="mt-1 text-xs">
+                    <RouterLink
+                        :to="{
+                            name: 'calendar',
+                            query: { appointment: (consultation?.appointment ?? appointment).id },
+                        }"
+                        class="hover:underline"
+                        >{{
+                            t('consultations.fromAppointment', {
+                                date: formatDateTime(
+                                    (consultation?.appointment ?? appointment).starts_at,
+                                    locale,
+                                    auth.user?.timezone,
+                                ),
+                            })
+                        }}</RouterLink
+                    >
+                </div>
             </div>
             <div class="ml-auto flex gap-2">
                 <button v-if="id" type="button" class="btn btn-ghost" @click="remove">

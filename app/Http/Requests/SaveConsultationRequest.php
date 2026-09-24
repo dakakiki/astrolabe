@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\ConsultationStatus;
+use App\Models\Appointment;
 use App\Models\Consultation;
 use App\Models\Service;
 use App\Support\RichText;
@@ -41,6 +42,10 @@ class SaveConsultationRequest extends FormRequest
                 ? ['required', 'integer', Rule::exists('clients', 'id')->where('workspace_id', $workspaceId)->whereNull('deleted_at')]
                 : ['prohibited'],
             'service_id' => ['nullable', 'integer', Rule::exists('services', 'id')->where('workspace_id', $workspaceId)],
+            // Recorded from a calendar appointment: set once, on creation.
+            'appointment_id' => $creating
+                ? ['nullable', 'integer', Rule::exists('appointments', 'id')->where('workspace_id', $workspaceId)->whereNull('deleted_at')]
+                : ['prohibited'],
             'title' => ['nullable', 'string', 'max:150'],
             'status' => [...$sometimes, $creating ? 'nullable' : 'required', Rule::enum(ConsultationStatus::class)],
             'starts_at' => ['nullable', 'date_format:Y-m-d\TH:i'],
@@ -80,6 +85,17 @@ class SaveConsultationRequest extends FormRequest
                 $validator->errors()->add('service_id', __('consultations.service_inactive'));
             }
         }, function (Validator $validator) {
+            // One consultation per appointment, for the appointment's own client.
+            $appointment = $this->filled('appointment_id') && ! $validator->errors()->hasAny(['appointment_id', 'client_id'])
+                ? Appointment::query()->find($this->input('appointment_id'))
+                : null;
+
+            if ($appointment && $appointment->client_id !== (int) $this->input('client_id')) {
+                $validator->errors()->add('appointment_id', __('appointments.other_client'));
+            } elseif ($appointment && $appointment->consultation()->exists()) {
+                $validator->errors()->add('appointment_id', __('appointments.already_recorded'));
+            }
+        }, function (Validator $validator) {
             if ($validator->errors()->hasAny(['status', 'starts_at'])) {
                 return;
             }
@@ -104,6 +120,7 @@ class SaveConsultationRequest extends FormRequest
     {
         return [
             'client_id.prohibited' => __('consultations.client_fixed'),
+            'appointment_id.prohibited' => __('consultations.appointment_fixed'),
         ];
     }
 }

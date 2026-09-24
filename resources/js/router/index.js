@@ -119,6 +119,12 @@ const routes = [
         meta: { verified: true },
     },
     {
+        path: '/calendar',
+        name: 'calendar',
+        component: () => import('@/pages/calendar/CalendarPage.vue'),
+        meta: { verified: true },
+    },
+    {
         path: '/settings',
         component: () => import('@/pages/settings/SettingsPage.vue'),
         meta: { verified: true },

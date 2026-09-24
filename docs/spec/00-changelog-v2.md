@@ -113,6 +113,17 @@ Usluge sa cenom, bojom, načinom održavanja, avansom i metodama; usluga na kons
 
 Odluke donete usput: podaci rođenja povezane osobe su u zasebnoj tabeli iste strukture kao kod klijenta, a ne kolone u `related_people`, pa ista logika (zamrzavanje mesta, šta nedostaje za kartu, karta) važi za oba i pretvaranje u klijenta je kopija reda; veza dva klijenta je jedan red koji se sa druge strane čita obrnuto; vrsti veze dodat je brat/sestra; boja usluge je imenovana boja iz tokena, ne hex; usluga u upotrebi se deaktivira, ne briše; uklanjanje poslednje veze uklanja i povezanu osobu.
 
+## Faza 6b — implementirano
+
+Kalendar i termini: prikazi dan, nedelja, mesec i agenda, termini sa zonom unosa, statusi, pomeranje i otkazivanje uz razlog, provera preklapanja na serveru, idempotentno kreiranje i konsultacija zabeležena iz termina. Izmene u dokumentima:
+
+- 02: „Implementirano u Fazi 6b“ kod kalendara i termina.
+- 04: status dela 6b.
+- 05: `appointments` (`created_by`, `cancellation_reason`, `cancelled_at`, vrednosti statusa i mesta), `consultations.appointment_id`, nove vrste događaja vremenske linije (`appointment`, `appointment_rescheduled`, `appointment_cancelled`).
+- 10: odluka o preklapanju za kalendar astrologa (upozorenje uz svesno čuvanje; za portal booking pravilo ostaje strogo), status Faze 6 i dopuna kriterijuma 4.
+
+Odluke donete usput: provera preklapanja zaključava red članstva astrologa u `workspace_user`, pa se paralelni zahtevi za istog astrologa redom proveravaju; 409 vraća termine koji smetaju, a `allow_overlap: true` čuva; `Idempotency-Key` pamti samo uspešne odgovore (dan dana), pa se odbijeno preklapanje sme potvrditi istim ključem; termin se ne briše, a otkazan može ponovo da se zakaže; kada je iz termina zabeležena konsultacija, termin nema svoju stavku na vremenskoj liniji; zapisi pomeranja i otkazivanja nose vremena i razlog, jer su to podaci o rasporedu, a ne izmene profila; kalendar je u zoni astrologa, nedelja počinje ponedeljkom.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

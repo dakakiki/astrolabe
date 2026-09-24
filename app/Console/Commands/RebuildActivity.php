@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Enums\ActivityType;
 use App\Models\ActivityEvent;
+use App\Models\Appointment;
 use App\Models\Attachment;
 use App\Models\ChartCalculation;
 use App\Models\Client;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Recreates the timeline entries that mirror other tables — clients,
- * consultations, notes, files and charts — from those tables (docs/spec/05:
+ * consultations, notes, files, charts and appointments — from those tables (docs/spec/05:
  * the projection must be rebuildable). Entries that only record a change
  * (profile edits, new birth data, archiving) exist nowhere else and are kept.
  */
@@ -29,7 +30,7 @@ class RebuildActivity extends Command
     protected $description = 'Rebuild the client timeline projection (activity_events) from the tables it mirrors';
 
     /** @var list<class-string<Model>> */
-    private const SUBJECTS = [Client::class, Consultation::class, Note::class, Attachment::class, ChartCalculation::class];
+    private const SUBJECTS = [Client::class, Consultation::class, Note::class, Attachment::class, ChartCalculation::class, Appointment::class];
 
     public function handle(ActivityProjector $projector, CurrentWorkspace $current): int
     {

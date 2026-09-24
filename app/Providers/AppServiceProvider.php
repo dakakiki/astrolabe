@@ -7,6 +7,7 @@ use App\Astrology\Contracts\Geocoder;
 use App\Astrology\Engines\FakeEngine;
 use App\Astrology\Engines\SwissEphemerisEngine;
 use App\Astrology\Geocoding\LocalGeoNamesGeocoder;
+use App\Models\Appointment;
 use App\Models\Attachment;
 use App\Models\ChartCalculation;
 use App\Models\Client;
@@ -67,6 +68,7 @@ class AppServiceProvider extends ServiceProvider
             'client' => Client::class,
             'related_person' => RelatedPerson::class,
             'consultation' => Consultation::class,
+            'appointment' => Appointment::class,
             'note' => Note::class,
             'attachment' => Attachment::class,
             'chart_calculation' => ChartCalculation::class,

@@ -68,7 +68,7 @@ class ConsultationController extends Controller
     {
         Gate::authorize('view', $consultation);
 
-        return ConsultationResource::make($consultation->load(['client', 'service', 'astrologyMethods', 'chart']))->withContent();
+        return ConsultationResource::make($consultation->load(['client', 'service', 'appointment', 'astrologyMethods', 'chart']))->withContent();
     }
 
     public function update(SaveConsultationRequest $request, Consultation $consultation, SaveConsultation $save): ConsultationResource

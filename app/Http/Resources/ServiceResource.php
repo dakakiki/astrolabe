@@ -36,8 +36,11 @@ class ServiceResource extends JsonResource
                     'is_system' => $method->isSystem(),
                 ]
             )->values()),
-            // Whether a consultation refers to it: then it can be deactivated, not deleted.
-            'in_use' => $this->when(isset($this->in_use), fn () => (bool) $this->in_use),
+            // Whether a consultation or an appointment refers to it: then it can be deactivated, not deleted.
+            'in_use' => $this->when(
+                isset($this->used_by_consultations),
+                fn () => (bool) $this->used_by_consultations || (bool) $this->used_by_appointments,
+            ),
             'created_at' => $this->created_at?->toIso8601ZuluString(),
             'updated_at' => $this->updated_at?->toIso8601ZuluString(),
         ];

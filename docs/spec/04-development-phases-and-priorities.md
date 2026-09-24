@@ -182,6 +182,8 @@ Kriterijum završetka: dnevni rad astrologa može se organizovati unutar aplikac
 > Odluka 24. 9. 2026: Faza 6 se gradi pre validacionih razgovora, kao predlog koji razgovori mogu promeniti. Izvodi se u tri dela: 6a usluge i povezane osobe, 6b termini i kalendar, 6c zadaci i dashboard. Preklapanje termina: upozorenje uz mogućnost da se termin ipak sačuva; prevlačenje termina mišem kasnije.
 >
 > Status 6a: završeno 24. 9. 2026. Usluge (cena u najmanjoj jedinici valute, boja iz tokena, online/uživo, avans kao oznaka, metode), usluga na konsultaciji; povezane osobe sa sopstvenim podacima rođenja i kartom, veze između klijenata vidljive sa obe strane, pretvaranje povezane osobe u klijenta bez ponovnog unosa.
+>
+> Status 6b: završeno 24. 9. 2026. Kalendar (dan, nedelja, mesec, agenda; agenda na telefonu), termini u UTC sa zonom unosa i proverom preko promene sata, kreiranje iz praznog polja, izmena, pomeranje (zapis „pomeren sa X na Y“), statusi i otkazivanje uz razlog bez brisanja, serverska provera preklapanja u transakciji kao upozorenje uz svesno čuvanje, `Idempotency-Key` za kreiranje, konsultacija iz termina (najviše jedna po terminu) i karta klijenta iz detalja termina.
 
 ## Faza 7 — tranziti i finansije
 

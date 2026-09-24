@@ -18,7 +18,7 @@ use Illuminate\Validation\Rule;
  */
 class ClientTimelineController extends Controller
 {
-    public const FILTERS = ['all', 'consultations', 'notes', 'files', 'charts', 'profile'];
+    public const FILTERS = ['all', 'appointments', 'consultations', 'notes', 'files', 'charts', 'profile'];
 
     public function index(Request $request, Client $client): AnonymousResourceCollection
     {

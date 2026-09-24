@@ -162,6 +162,9 @@ async function toggleArchive() {
                 <button type="button" class="btn btn-ghost" @click="toggleArchive">
                     {{ client.status === 'archived' ? t('clients.restore') : t('clients.archive') }}
                 </button>
+                <RouterLink :to="{ name: 'calendar', query: { new: 1, client: client.id } }" class="btn"
+                    >+ {{ t('clients.addAppointment') }}</RouterLink
+                >
                 <RouterLink :to="{ name: 'consultations.create', query: { client: client.id } }" class="btn btn-primary"
                     >+ {{ t('clients.addConsultation') }}</RouterLink
                 >

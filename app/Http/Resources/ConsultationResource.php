@@ -32,6 +32,12 @@ class ConsultationResource extends JsonResource
                 'is_active' => $this->service->is_active,
             ] : null),
             'service_id' => $this->service_id,
+            'appointment' => $this->whenLoaded('appointment', fn () => $this->appointment ? [
+                'id' => $this->appointment->id,
+                'starts_at' => $this->appointment->starts_at->toIso8601ZuluString(),
+                'status' => $this->appointment->status->value,
+            ] : null),
+            'appointment_id' => $this->appointment_id,
             'title' => $this->title,
             'status' => $this->status->value,
             'starts_at' => $this->starts_at?->toIso8601ZuluString(),

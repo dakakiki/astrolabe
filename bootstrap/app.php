@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureIdempotency;
 use App\Http\Middleware\ResolveCurrentWorkspace;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'workspace' => ResolveCurrentWorkspace::class,
+            'idempotent' => EnsureIdempotency::class,
         ]);
 
         // Route model binding must already see the tenant scope, so the workspace is

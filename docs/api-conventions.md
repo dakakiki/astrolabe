@@ -58,7 +58,7 @@ Linkovi u emailovima vode na SPA stranice (`/verify-email/...`, `/reset-password
 | PUT | `/clients/{id}/birth-details` | samo podaci rođenja |
 | POST / DELETE | `/clients/{id}/archive` | arhiviranje / vraćanje iz arhive |
 | GET | `/clients/{id}/chart` | natalna karta (računa se pri prvom zahtevu, zatim iz keša); `status: incomplete` sa `missing` kada podaci rođenja nisu potpuni. `?house_system=` crta kartu u drugom sistemu kuća, samo za taj prikaz |
-| GET | `/clients/{id}/timeline` | vremenska linija, najnovije prvo; `type` (`all`, `consultations`, `notes`, `files`, `charts`, `profile`), `page`, `per_page` (do 50) |
+| GET | `/clients/{id}/timeline` | vremenska linija, najnovije prvo; `type` (`all`, `appointments`, `consultations`, `notes`, `files`, `charts`, `profile`), `page`, `per_page` (do 50) |
 | GET | `/tags` | oznake workspace-a sa brojem klijenata |
 | GET | `/places?q=` | autocomplete mesta rođenja (lokalni GeoNames); mesta u zemlji prakse prva |
 | GET | `/places/nearest?latitude=&longitude=` | najbliže mesto, za predlog zone uz ručne koordinate |
@@ -97,6 +97,24 @@ Usluga u odgovoru nosi `price` (`{amount, currency}` ili `null`), `currency` (i 
 | POST | `/related-people/{id}/convert` | pravi klijenta od osobe (201, klijent); lični podaci i podaci rođenja se kopiraju bez ponovnog traženja mesta, veze prelaze na klijenta, osoba se uklanja |
 
 Veza u listi (`/clients/{id}/relationships`) je viđena sa tog profila: `relationship_type` (šta je druga strana klijentu — kod veze koju je napravio drugi klijent obrnuto, `child` ↔ `parent`), `direction` (`outgoing` / `incoming`), `kind` (`person` / `client`), `notes` i `party` (`id`, `full_name`, `status` za klijenta, `birth` sa `birth_date`, `birth_time`, `time_accuracy`, `birth_place`, `birth_country_code`, `chart_ready`, ili `null`). Vrste veze su u `reference-data.relationship_types`.
+
+### Kalendar (Faza 6b)
+
+| Metoda | Putanja | Namena |
+|---|---|---|
+| GET | `/appointments` | termini koji dodiruju dane `from`–`to` (`YYYY-MM-DD`, obavezno, dani u zoni korisnika, najviše 62 dana), najraniji prvi, bez paginacije; filteri `client_id`, `service_id`, `assigned_user_id`, `status`, `location_type` |
+| POST | `/appointments` | novi termin: `client_id` (kasnije se ne menja), `starts_at` (`YYYY-MM-DDTHH:MM`, lokalno vreme), `timezone` (podrazumevano zona korisnika), `duration_minutes` (obavezno bez usluge; 5–1440), `service_id` (aktivna usluga), `location_type` (`online`, `in_person`; podrazumevano iz usluge), `location_details`, `notes`, `assigned_user_id` (podrazumevano korisnik), `allow_overlap`. Zaglavlje `Idempotency-Key` (8–100 znakova) |
+| GET / PATCH | `/appointments/{id}` | jedan termin sa internom beleškom; PATCH menja samo poslata polja, uključujući `status` (`scheduled`, `completed`, `no_show`; `scheduled` vraća otkazan termin) i vreme (pomeranje) |
+| POST | `/appointments/{id}/cancel` | otkazivanje sa obaveznim `reason` (do 500 znakova); samo zakazan termin |
+
+Pravila:
+
+- **Preklapanje:** kada astrolog već ima termin (neotkazan) u to vreme, POST i PATCH vraćaju **409** sa `message` i `conflicts` (termini koji smetaju, bez internih beležaka). Isti zahtev sa `allow_overlap: true` čuva termin. Termini koji se samo dodiruju se ne preklapaju.
+- **Idempotency-Key:** ponovljen POST sa istim ključem vraća prvi uspešan odgovor (zaglavlje `Idempotent-Replayed: true`) i ne pravi drugi termin; isti ključ sa drugačijim telom je 422; odbijen zahtev (409, 422) se ne pamti. Ključ važi dan dana, po korisniku i endpointu.
+- Termin nema DELETE: otkazuje se uz razlog i ostaje u istoriji.
+- Termin u odgovoru nosi `starts_at` / `ends_at` (UTC), `timezone`, `starts_at_local`, `duration_minutes`, `status`, `client` (sa `chart_ready`), `service`, `assigned_user`, `consultation` (`id`, `status` ili `null`), `cancellation_reason`, `cancelled_at`. `notes` samo pojedinačan termin.
+- Konsultacija se beleži iz termina sa `appointment_id` pri kreiranju (`POST /consultations`): termin istog klijenta, bez druge konsultacije (422 inače); zakazan termin tada postaje `completed`. Konsultacija u odgovoru nosi `appointment` (`id`, `starts_at`, `status`).
+- Vremenska linija klijenta ima i `type=appointments` (termin na svom vremenu, pomeranje sa `from` / `to`, otkazivanje sa `starts_at` i `reason` u `metadata`).
 
 ### Konsultacije, beleške i fajlovi
 
@@ -141,6 +159,7 @@ Liste su paginirane na serveru i nose `links` i `meta` kako ih generiše Laravel
 | 401 | nije prijavljen |
 | 403 | prijavljen, ali nema pravo (Policy) |
 | 404 | resurs ne postoji **ili pripada drugom workspace-u** — ne otkriva se razlika |
+| 409 | sukob sa postojećim stanjem: usluga u upotrebi ne može da se obriše; termin se preklapa (`conflicts`, vidi „Kalendar“) |
 | 419 | istekao CSRF token |
 | 422 | validacija (Form Request) |
 | 429 | rate limit |

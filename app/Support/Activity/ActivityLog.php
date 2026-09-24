@@ -6,25 +6,31 @@ use App\Enums\ActivityType;
 use App\Enums\ClientStatus;
 use App\Models\ActivityEvent;
 use App\Models\Client;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Records that something about a client changed — a profile edit, new birth
- * data, archiving. Unlike projected entries these exist only here, so they
- * carry which fields changed, never their values (docs/spec/06, logging).
+ * data, archiving, a moved or cancelled appointment. Unlike projected entries
+ * these exist only here. Profile changes carry which fields changed, never
+ * their values (docs/spec/06, logging); scheduling entries carry the times
+ * (and a cancellation its reason), since that is what the entry is about.
  */
 class ActivityLog
 {
     /**
      * @param  array<string, mixed>  $metadata
+     * @param  Model|null  $subject  what the entry is about, when not the client itself (e.g. a moved appointment)
      */
-    public function record(Client $client, ActivityType $type, array $metadata = []): ActivityEvent
+    public function record(Client $client, ActivityType $type, array $metadata = [], ?Model $subject = null): ActivityEvent
     {
+        $subject ??= $client;
+
         $event = new ActivityEvent;
         $event->forceFill([
             'workspace_id' => $client->workspace_id,
             'client_id' => $client->getKey(),
-            'subject_type' => $client->getMorphClass(),
-            'subject_id' => $client->getKey(),
+            'subject_type' => $subject->getMorphClass(),
+            'subject_id' => $subject->getKey(),
             'event_type' => $type,
             'occurred_at' => now(),
             'created_by' => auth()->id(),

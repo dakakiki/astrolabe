@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AppointmentController;
 use App\Http\Controllers\Api\V1\AstrologyMethodController;
 use App\Http\Controllers\Api\V1\AttachmentController;
 use App\Http\Controllers\Api\V1\ClientArchiveController;
@@ -75,6 +76,16 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 ->name('related-people.convert');
 
             Route::apiResource('services', ServiceController::class);
+
+            // The calendar (docs/spec/10). No DELETE: appointments are cancelled, never removed.
+            Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
+            Route::post('/appointments', [AppointmentController::class, 'store'])
+                ->middleware('idempotent')
+                ->name('appointments.store');
+            Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
+            Route::patch('/appointments/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
+            Route::post('/appointments/{appointment}/cancel', [AppointmentController::class, 'cancel'])
+                ->name('appointments.cancel');
 
             Route::apiResource('consultations', ConsultationController::class);
             Route::post('/consultations/{consultation}/chart', [ConsultationChartController::class, 'store'])

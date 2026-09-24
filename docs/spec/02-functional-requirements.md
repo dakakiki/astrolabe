@@ -302,6 +302,16 @@ Vidljivost:
 - interna beleška;
 - podsetnik astrologu.
 
+### Implementirano u Fazi 6b
+
+- Kalendar sa prikazima dan, nedelja, mesec i agenda (agenda je podrazumevana na telefonu), u zoni astrologa; svaki termin čuva zonu u kojoj je unet i u detaljima pokazuje i to vreme. Filteri: usluga, status, online/uživo (filter po astrologu dolazi sa timovima).
+- Novi termin iz praznog polja (pola sata) ili dugmetom; sa profila klijenta „New appointment“. Trajanje i mesto održavanja dolaze iz usluge ako nisu uneti.
+- Statusi: zakazan, održan, otkazan, klijent nije došao. Otkazivanje traži razlog i ne briše termin; otkazan termin može ponovo da se zakaže. Brisanje termina ne postoji.
+- Pomeranje menja isti termin, a vremenska linija klijenta beleži „pomeren sa X na Y“; otkazivanje beleži vreme i razlog.
+- Preklapanje (odluka korisnika, 24. 9. 2026): server u transakciji pronalazi termine istog astrologa u isto vreme i vraća ih; astrolog vidi šta se preklapa i može svesno da sačuva. U kalendaru je preklapanje označeno sa ⚠ i tekstom. Otkazani termini ne zauzimaju vreme.
+- Iz detalja termina: „Zabeleži konsultaciju“ otvara formu konsultacije popunjenu klijentom, uslugom i vremenom; konsultacija se vezuje za termin (najviše jedna po terminu), a termin postaje održan. Na vremenskoj liniji tada konsultacija zamenjuje termin. Iz detalja se otvara i klijent i njegova natalna karta, bez napuštanja kalendara; tranziti za datum termina dolaze u Fazi 7.
+- Podsetnici astrologu dolaze u Fazi 7 (sa email notifikacijama); prevlačenje termina mišem kasnije.
+
 ### Posle MVP-a
 
 - javna booking stranica;

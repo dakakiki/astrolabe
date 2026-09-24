@@ -37,7 +37,8 @@
         "clients": "Clients",
         "consultations": "Consultations",
         "business": "Business",
-        "services": "Services"
+        "services": "Services",
+        "calendar": "Calendar"
     },
     "auth": {
         "art": {
@@ -421,7 +422,8 @@
             "ambiguous": "This time happened twice: clocks went back that night. Check which of the two moments is meant.",
             "zoneHistory": "Time-zone records before 1970 are unreliable in some regions. Check the offset if the chart looks wrong."
         },
-        "addConsultation": "New consultation"
+        "addConsultation": "New consultation",
+        "addAppointment": "New appointment"
     },
     "bodies": {
         "sun": "Sun",
@@ -599,7 +601,8 @@
         },
         "attachments": "Files and links",
         "notes": "Notes on this consultation",
-        "saveFirst": "Save the consultation first; files and the chart can be attached after that."
+        "saveFirst": "Save the consultation first; files and the chart can be attached after that.",
+        "fromAppointment": "Recorded from the appointment on {date}"
     },
     "consultationStatuses": {
         "draft": "Draft",
@@ -685,6 +688,102 @@
         "friend": "Friend",
         "business_partner": "Business partner",
         "other": "Other"
+    },
+    "calendar": {
+        "eyebrow": "Practice",
+        "title": "Calendar",
+        "zoneNote": "Times in {zone}. Each appointment keeps the zone it was entered in.",
+        "views": {
+            "day": "Day",
+            "week": "Week",
+            "month": "Month",
+            "agenda": "Agenda"
+        },
+        "view": "View",
+        "today": "Today",
+        "previous": "Previous",
+        "next": "Next",
+        "date": "Go to date",
+        "new": "New appointment",
+        "filters": {
+            "service": "Service",
+            "anyService": "Any service",
+            "status": "Status",
+            "anyStatus": "Any status",
+            "place": "Held",
+            "anyPlace": "Online and in person"
+        },
+        "empty": "Nothing booked in this period.",
+        "emptyHint": "Click an empty slot in the day or week view to book one.",
+        "more": "+{n} more",
+        "conflict": "Overlaps another appointment",
+        "slot": "New appointment on {date} at {time}",
+        "minutes": "{n} min",
+        "loading": "Loading the calendar…"
+    },
+    "appointmentStatuses": {
+        "scheduled": "Scheduled",
+        "completed": "Held",
+        "cancelled": "Cancelled",
+        "no_show": "No-show"
+    },
+    "appointments": {
+        "created": "Appointment booked",
+        "saved": "Appointment saved",
+        "cancelled": "Appointment cancelled",
+        "statusChanged": "Status changed",
+        "detail": {
+            "title": "Appointment",
+            "when": "When",
+            "entered": "Entered in {zone}: {time}",
+            "where": "Held",
+            "status": "Status",
+            "with": "With",
+            "notes": "Internal note",
+            "cancelledBecause": "Cancelled {when}: {reason}",
+            "conflict": "Overlaps with {names}.",
+            "consultation": "Consultation",
+            "recordConsultation": "Record consultation",
+            "openConsultation": "Open the consultation",
+            "openClient": "Open client",
+            "showChart": "Show chart",
+            "hideChart": "Hide chart",
+            "noChart": "The client’s birth data is incomplete, so there is no chart yet.",
+            "markHeld": "Mark as held",
+            "markNoShow": "Mark as no-show",
+            "reinstate": "Schedule again",
+            "cancel": "Cancel appointment",
+            "cancelReason": "Reason for cancelling",
+            "cancelHint": "The appointment stays in the history, with this reason.",
+            "confirmCancel": "Cancel it",
+            "keep": "Keep it",
+            "edit": "Edit",
+            "close": "Close"
+        },
+        "form": {
+            "newTitle": "New appointment",
+            "editTitle": "Edit appointment",
+            "client": "Client",
+            "service": "Service",
+            "noService": "No service",
+            "startsAt": "Date and time",
+            "duration": "Duration (minutes)",
+            "durationHint": "Taken from the service when left empty.",
+            "timezone": "Time zone",
+            "timezoneHint": "The time as it is in this zone. Defaults to yours.",
+            "location": "Held",
+            "details": "Link or address",
+            "detailsPlaceholder": "Zoom link, studio address …",
+            "notes": "Internal note",
+            "notesHint": "Only for you and your team.",
+            "create": "Book appointment",
+            "save": "Save changes",
+            "cancel": "Cancel",
+            "overlapTitle": "This time is already taken",
+            "overlapText": "You already have something at this time:",
+            "overlapHint": "Overlaps are allowed when intended — for example a short call inside a longer block.",
+            "saveAnyway": "Save anyway"
+        }
     },
     "related": {
         "title": "Related people",
@@ -829,6 +928,7 @@
         "title": "Timeline",
         "filters": {
             "all": "All",
+            "appointments": "Appointments",
             "consultations": "Consultations",
             "notes": "Notes",
             "files": "Files",
@@ -880,7 +980,17 @@
             "place": "place",
             "data_source": "source",
             "notes": "notes"
-        }
+        },
+        "appointment": {
+            "scheduled": "Appointment",
+            "completed": "Appointment held",
+            "cancelled": "Cancelled appointment",
+            "no_show": "Missed appointment"
+        },
+        "appointmentMoved": "Appointment moved",
+        "appointmentCancelled": "Appointment cancelled",
+        "movedFromTo": "From {from} to {to}",
+        "wasAt": "It was set for {time}"
     },
     "editor": {
         "toolbar": "Formatting",

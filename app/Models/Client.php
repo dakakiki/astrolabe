@@ -85,6 +85,14 @@ class Client extends Model
     }
 
     /**
+     * @return HasMany<Appointment, $this>
+     */
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
+    /**
      * @return HasMany<Note, $this>
      */
     public function notes(): HasMany

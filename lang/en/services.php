@@ -2,5 +2,5 @@
 
 return [
     'name_taken' => 'There is already a service with this name.',
-    'in_use' => 'This service is used on consultations, so it cannot be deleted. Deactivate it instead.',
+    'in_use' => 'This service is used on consultations or appointments, so it cannot be deleted. Deactivate it instead.',
 ];

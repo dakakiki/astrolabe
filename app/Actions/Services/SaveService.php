@@ -38,9 +38,7 @@ class SaveService
                 $service->astrologyMethods()->sync(array_map('intval', $input['method_ids'] ?? []));
             }
 
-            return $service->load('astrologyMethods')->loadExists([
-                'consultations as in_use' => fn ($query) => $query->withTrashed(),
-            ]);
+            return $service->load('astrologyMethods')->loadExists(Service::usage());
         });
     }
 }

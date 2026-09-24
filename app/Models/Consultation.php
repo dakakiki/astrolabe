@@ -7,6 +7,7 @@ use App\Enums\ConsultationStatus;
 use App\Models\Concerns\BelongsToWorkspace;
 use App\Models\Concerns\ProjectsActivity;
 use App\Support\Activity\ActivityProjection;
+use App\Support\Activity\ActivityProjector;
 use Carbon\CarbonImmutable;
 use Database\Factories\ConsultationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -39,6 +40,21 @@ class Consultation extends Model
     /** @use HasFactory<ConsultationFactory> */
     use BelongsToWorkspace, HasFactory, ProjectsActivity, SoftDeletes;
 
+    protected static function booted(): void
+    {
+        // The appointment's timeline entry gives way to the consultation recorded
+        // from it, and comes back if the consultation is deleted.
+        $syncAppointment = function (Consultation $consultation) {
+            $ids = array_filter([$consultation->appointment_id, $consultation->getOriginal('appointment_id')]);
+
+            Appointment::withoutGlobalScopes()->whereKey($ids)->get()
+                ->each(fn (Appointment $appointment) => app(ActivityProjector::class)->sync($appointment));
+        };
+
+        static::saved($syncAppointment);
+        static::deleted($syncAppointment);
+    }
+
     protected function casts(): array
     {
         return [
@@ -62,6 +78,16 @@ class Consultation extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * The calendar appointment this consultation was recorded from, if any.
+     *
+     * @return BelongsTo<Appointment, $this>
+     */
+    public function appointment(): BelongsTo
+    {
+        return $this->belongsTo(Appointment::class);
     }
 
     /**

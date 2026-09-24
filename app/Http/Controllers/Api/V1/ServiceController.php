@@ -31,7 +31,7 @@ class ServiceController extends Controller
 
         $services = Service::query()
             ->with('astrologyMethods')
-            ->withExists(['consultations as in_use' => fn (Builder $query) => $query->withTrashed()])
+            ->withExists(Service::usage())
             ->when($status, fn (Builder $query) => $query->where('is_active', $status === 'active'))
             ->orderByDesc('is_active')
             ->orderBy('name')
@@ -49,9 +49,7 @@ class ServiceController extends Controller
     {
         Gate::authorize('view', $service);
 
-        return ServiceResource::make($service->load('astrologyMethods')->loadExists([
-            'consultations as in_use' => fn (Builder $query) => $query->withTrashed(),
-        ]));
+        return ServiceResource::make($service->load('astrologyMethods')->loadExists(Service::usage()));
     }
 
     public function update(SaveServiceRequest $request, Service $service, SaveService $save): ServiceResource

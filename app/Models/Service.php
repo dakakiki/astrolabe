@@ -79,9 +79,33 @@ class Service extends Model
         return $this->hasMany(Consultation::class);
     }
 
-    /** Whether anything refers to it, deleted consultations included (the foreign key sees those too). */
+    /**
+     * @return HasMany<Appointment, $this>
+     */
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
+    /**
+     * Whether anything refers to it, deleted consultations and appointments
+     * included (the foreign keys see those too).
+     */
     public function isInUse(): bool
     {
-        return $this->consultations()->withTrashed()->exists();
+        return $this->consultations()->withTrashed()->exists() || $this->appointments()->withTrashed()->exists();
+    }
+
+    /**
+     * The two "is it used" flags ServiceResource reads as `in_use`.
+     *
+     * @return array<string, callable>
+     */
+    public static function usage(): array
+    {
+        return [
+            'consultations as used_by_consultations' => fn ($query) => $query->withTrashed(),
+            'appointments as used_by_appointments' => fn ($query) => $query->withTrashed(),
+        ];
     }
 }

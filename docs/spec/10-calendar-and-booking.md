@@ -15,6 +15,8 @@
 
 Sekcija „Dostupnost i booking pravila" je najsloženiji deo ovog dokumenta i ne implementira se pre nego što se u beti potvrdi da astrolozi žele da klijenti sami zakazuju.
 
+> Status: delovi Faze 6 završeni 24. 9. 2026 (Faza 6b) — prikazi, ručno kreiranje, izmena, pomeranje, otkazivanje uz razlog, statusi, zone i serverska provera preklapanja (upozorenje, vidi „Konflikti“). Pomeranje menja isti termin; „veza sa prethodnim terminom i audit događaj“ je zapis „pomeren sa X na Y“ na vremenskoj liniji klijenta. Prevlačenje termina mišem i filter po astrologu (timovi) dolaze kasnije; tranziti za datum termina u Fazi 7.
+
 ## Cilj
 
 Kalendar je centralni radni ekran astrologa za pregled prošlih i budućih konsultacija, kreiranje novih termina i svakodnevnu organizaciju. Isti podaci se u klijentskom portalu prikazuju u strogo ograničenom obliku: klijent vidi samo sopstvene termine i dostupne opcije za novo zakazivanje.
@@ -111,6 +113,10 @@ Frontend upozorenje služi korisničkom iskustvu, ali Laravel donosi konačnu od
 
 Ako dva klijenta pokušaju da rezervišu isti slot, samo jedan zahtev uspeva. Drugi dobija bezbednu poruku da termin više nije dostupan i novu listu slobodnih opcija.
 
+> Odluka 24. 9. 2026 (Faza 6b) — **kalendar astrologa:** preklapanje nije strogo zabranjeno, nego upozorenje uz mogućnost čuvanja. Server u transakciji (uz zaključan red članstva astrologa, pa paralelni zahtevi za istog astrologa idu jedan za drugim) pronalazi termine istog astrologa koji se preklapaju i odbija zahtev sa 409 i njihovom listom; isti zahtev sa `allow_overlap: true` čuva termin. Razlog: astrolog ponekad namerno ubacuje kratak poziv u duži blok ili vodi dva klijenta istovremeno. Otkazani termini ne zauzimaju vreme; termini koji se samo dodiruju (10–11 i 11–12) se ne preklapaju. Kreiranje prima `Idempotency-Key`: ponovljen zahtev dobija prvi odgovor umesto drugog termina.
+>
+> Za **portal booking** (Faza 9) pravilo iz ovog odeljka ostaje strogo: klijent ne može da rezerviše zauzeto vreme.
+
 ## Notifikacije
 
 Događaji kalendara mogu kreirati Notification Center zapis i email/push isporuku prema preferencama:
@@ -163,7 +169,7 @@ PWA ne kešira događaje kalendara. Bez mreže može prikazati samo aplikacioni 
 1. Astrolog može da vidi iste termine u day, week, month i agenda prikazu.
 2. Može da kreira, izmeni, pomeri i otkaže termin bez gubitka istorije.
 3. Kalendar pravilno radi u različitim vremenskim zonama i preko DST granice.
-4. Server sprečava konflikt i duplikat i pri konkurentnim zahtevima.
+4. Server sprečava konflikt i duplikat i pri konkurentnim zahtevima. (Za kalendar astrologa od 24. 9. 2026: server otkriva konflikt i čuva ga samo uz izričitu potvrdu; duplikat sprečava idempotency ključ.)
 5. Klijent vidi samo svoje prošle i buduće termine.
 6. Portal nudi samo stvarno dostupne slotove i proverava ih ponovo pre potvrde.
 7. Klijent ne vidi identitet ili zauzetost drugih klijenata.

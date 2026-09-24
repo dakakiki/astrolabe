@@ -100,12 +100,31 @@ before starting a phase. The user communicates in Serbian.
   decimals. Never use floats for money, in PHP or in JS (`resources/js/lib/money.js`).
 - Service colours are the names in `App\Enums\ServiceColor`, drawn from the `--svc-*` tokens
   (`resources/js/lib/services.js`); never store or render a hex value.
-- A service in use (any consultation, deleted ones too) is deactivated, never deleted; the
-  foreign key restricts deletion as the last guard.
+- A service in use (any consultation or appointment, deleted ones too) is deactivated, never
+  deleted; the foreign keys restrict deletion as the last guard.
 - `ClientRelationship` has exactly one of `related_client_id` / `related_person_id`. A link
   between two clients is one row; seen from `related_client_id` its type is inverted
   (`RelationshipType::inverse()`), and edits from that side send `as_seen_by`.
 - Related people exist through their links: removing the last link soft-deletes the person.
+
+## Calendar
+
+- Appointments store `starts_at` / `ends_at` in UTC plus the IANA `timezone` they were entered
+  in; the API takes local wall-clock time + zone (`SaveAppointment::applyTime`). Test anything
+  time-related across a DST change.
+- Appointments are never deleted: they are moved (same row, `appointment_rescheduled` on the
+  timeline), marked held / no-show, or cancelled with a reason (`CancelAppointment`).
+- Overlaps are checked in `SaveAppointment::guardOverlaps` inside the transaction, after locking
+  the astrologer's `workspace_user` row. They are refused with 409 (`OverlappingAppointments`)
+  unless the request sends `allow_overlap: true` — never silently allowed or silently refused.
+- Creating endpoints that must not run twice use the `idempotent` middleware
+  (`Idempotency-Key`); only successful responses are remembered.
+- At most one consultation per appointment (`consultations.appointment_id`), checked again under
+  `lockForUpdate` in `SaveConsultation`. A consultation recorded from an appointment replaces the
+  appointment's timeline entry (`Consultation::booted` re-syncs the appointment's projection).
+- The calendar UI works on day keys in the astrologer's zone (`resources/js/lib/calendar.js`);
+  keep date arithmetic there, pure and covered by Vitest. Generate idempotency keys with
+  `idempotencyKey()` from `lib/http.js` (`crypto.randomUUID` needs HTTPS; the local host is HTTP).
 
 ## Database
 

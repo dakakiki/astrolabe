@@ -7,6 +7,7 @@
  * - body: text the astrologer wrote (topics, an excerpt), shown as is
  * - fields: changed field names, each translated under timeline.fields.*
  * - to: where the entry leads — a route, or a tab of the client profile
+ * - moved / wasAt: moments (UTC) the component formats in the viewer's zone
  */
 export function describeEvent(event) {
     const meta = event.metadata ?? {};
@@ -20,6 +21,30 @@ export function describeEvent(event) {
                 titled: Boolean(meta.title || meta.service),
                 body: meta.topics ?? null,
                 to: { name: 'consultations.show', params: { id: event.subject.id } },
+            };
+        case 'appointment':
+            return {
+                tone: 'appointment',
+                title: [`timeline.appointment.${meta.status}`, { title: meta.service ?? '' }],
+                titled: Boolean(meta.service),
+                // A cancelled appointment is not coming up, even when its time is.
+                cancelled: meta.status === 'cancelled',
+                to: appointmentRoute(event.subject.id),
+            };
+        case 'appointment_rescheduled':
+            return {
+                tone: 'appointment',
+                title: ['timeline.appointmentMoved', {}],
+                moved: { from: meta.from, to: meta.to },
+                to: appointmentRoute(event.subject.id),
+            };
+        case 'appointment_cancelled':
+            return {
+                tone: 'appointment',
+                title: ['timeline.appointmentCancelled', {}],
+                body: meta.reason ?? null,
+                wasAt: meta.starts_at ?? null,
+                to: appointmentRoute(event.subject.id),
             };
         case 'note':
             return {
@@ -68,4 +93,9 @@ export function describeEvent(event) {
 }
 
 /** Filters offered above the timeline (docs/spec/02); payments and tasks arrive with their phases. */
-export const TIMELINE_FILTERS = ['all', 'consultations', 'notes', 'files', 'charts'];
+export const TIMELINE_FILTERS = ['all', 'appointments', 'consultations', 'notes', 'files', 'charts'];
+
+/** An appointment opens in the calendar, on its own day, with its details. */
+function appointmentRoute(id) {
+    return { name: 'calendar', query: { appointment: id } };
+}

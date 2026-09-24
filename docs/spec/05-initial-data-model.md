@@ -11,6 +11,8 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 > Faza 5 (implementirano): `workspaces.aspect_orbs` uveden; `chart_calculations.payload` dobija verziju formata (2) sa uglovima, kućama i aspektima, a verzija je deo `input_hash`; `chart_calculations.house_system` je traženi sistem.
 >
 > Faza 6a (implementirano): `services` sa pivot tabelom `service_astrology_method`; `consultations.service_id`; `related_people` bez podataka rođenja u sebi — oni su u zasebnoj tabeli `related_person_birth_details` iste strukture kao `client_birth_details`; `related_people.converted_client_id`; `client_relationships` sa jedinstvenim parovima; `chart_calculations.subject_type` dobija vrednost `related_person`.
+>
+> Faza 6b (implementirano): `appointments` sa `created_by`, `cancellation_reason`, `cancelled_at`; `consultations.appointment_id`; nove vrste događaja u `activity_events`.
 
 ## Nalozi i workspace
 
@@ -241,7 +243,7 @@ INDEX  (workspace_id, subject_type, subject_id)
 - `client_id` — postavlja se pri kreiranju i ne menja
 - `created_by`, nullable
 - `service_id`, nullable — Faza 6a; strani ključ bez brisanja (usluga u upotrebi se ne briše)
-- `appointment_id`, nullable — Faza 6 (termini)
+- `appointment_id`, nullable — Faza 6b; termin iz kog je konsultacija zabeležena (postavlja se pri kreiranju i ne menja)
 - `chart_calculation_id`, nullable — snimak karte u trenutku konsultacije
 - `title`, nullable — vrsta konsultacije slobodnim tekstom; od Faze 6a opcion i uz uslugu (bez naslova konsultacija se zove po usluzi)
 - `starts_at`, nullable — UTC; obavezan za svaki status osim `draft`
@@ -349,6 +351,8 @@ Metode za koje je usluga namenjena; bez njih — bilo koja.
 - timestamps
 - soft deletes
 
+> Faza 6b (implementirano): `created_by` (nullable), `cancellation_reason` i `cancelled_at` (nullable). `starts_at` / `ends_at` su UTC (`datetime`), `timezone` je IANA zona unosa. `status` — `scheduled`, `completed`, `cancelled`, `no_show`; otkazan termin ne zauzima vreme. `location_type` — `online` ili `in_person` (usluga sa `either` prepušta izbor terminu). `service_id` ima strani ključ bez brisanja (usluga u upotrebi se ne briše). Indeksi: `(workspace_id, starts_at)`, `(workspace_id, assigned_user_id, starts_at)`, `(workspace_id, client_id, starts_at)`. Termini se ne brišu kroz aplikaciju (soft delete kolona postoji za pravila čuvanja podataka). Veza sa konsultacijom je `consultations.appointment_id` (najviše jedna konsultacija po terminu, proverava aplikacija pod zaključavanjem reda termina).
+
 ## Plaćanja
 
 ### `payments`
@@ -418,8 +422,8 @@ Dve vrste događaja:
 
 | Vrsta | `event_type` | Kako nastaje |
 |---|---|---|
-| Projekcija reda | `client_created`, `consultation`, `note`, `file`, `chart_calculated` | Jedan događaj po redu u osnovnoj tabeli, održava ga model pri svakom čuvanju i brisanju (`ProjectsActivity`, `ActivityProjector`). Konsultacija stoji na svom datumu, ne na datumu unosa. |
-| Zapis promene | `client_updated`, `client_archived`, `client_restored`, `birth_details_updated` | Beleži se u trenutku promene (`ActivityLog`), sa nazivima promenjenih polja, nikad vrednostima. |
+| Projekcija reda | `client_created`, `consultation`, `note`, `file`, `chart_calculated`, `appointment` | Jedan događaj po redu u osnovnoj tabeli, održava ga model pri svakom čuvanju i brisanju (`ProjectsActivity`, `ActivityProjector`). Konsultacija i termin stoje na svom datumu, ne na datumu unosa; termin iz kog je zabeležena konsultacija nema svoju stavku (konsultacija ga zamenjuje). |
+| Zapis promene | `client_updated`, `client_archived`, `client_restored`, `birth_details_updated`, `appointment_rescheduled`, `appointment_cancelled` | Beleži se u trenutku promene (`ActivityLog`). Izmene profila i podataka rođenja nose nazive promenjenih polja, nikad vrednosti; pomeranje termina nosi staro i novo vreme, a otkazivanje vreme termina i razlog (`subject` je tada termin). |
 
 `php artisan activity:rebuild [--workspace=]` briše i ponovo pravi sve projekcije iz osnovnih tabela; zapisi promena ne postoje nigde drugde i ostaju netaknuti.
 

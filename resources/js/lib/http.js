@@ -56,4 +56,14 @@ export function validationErrors(error) {
     );
 }
 
+/**
+ * A fresh Idempotency-Key for one creating request (docs/spec/10). Built from
+ * getRandomValues, which — unlike randomUUID — also works on plain HTTP hosts.
+ */
+export function idempotencyKey(prefix = 'request') {
+    const bytes = crypto.getRandomValues(new Uint8Array(16));
+
+    return `${prefix}-${Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')}`;
+}
+
 export default http;

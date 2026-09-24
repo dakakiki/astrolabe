@@ -21,11 +21,16 @@ enum ActivityType: string
     case Consultation = 'consultation';
     case Note = 'note';
     case File = 'file';
+    case Appointment = 'appointment';
+    case AppointmentRescheduled = 'appointment_rescheduled';
+    case AppointmentCancelled = 'appointment_cancelled';
 
     /** Mirrors a row elsewhere and is rebuilt from it. */
     public function isProjection(): bool
     {
-        return in_array($this, [self::ClientCreated, self::ChartCalculated, self::Consultation, self::Note, self::File], true);
+        return in_array($this, [
+            self::ClientCreated, self::ChartCalculated, self::Consultation, self::Note, self::File, self::Appointment,
+        ], true);
     }
 
     /** The timeline filter this entry appears under (docs/spec/02, "Vremenska linija klijenta"). */
@@ -35,6 +40,7 @@ enum ActivityType: string
             self::Consultation => 'consultations',
             self::Note => 'notes',
             self::File => 'files',
+            self::Appointment, self::AppointmentRescheduled, self::AppointmentCancelled => 'appointments',
             self::ChartCalculated, self::BirthDetailsUpdated => 'charts',
             default => 'profile',
         };

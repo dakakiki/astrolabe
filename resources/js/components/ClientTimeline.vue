@@ -50,6 +50,7 @@ onMounted(() => load());
 defineExpose({ reload: () => load() });
 
 const when = (event) => formatDateTime(event.occurred_at, locale.value, auth.user?.timezone);
+const moment = (isoTimestamp) => formatDateTime(isoTimestamp, locale.value, auth.user?.timezone);
 
 function fieldList(fields) {
     return fields.map((field) => (te(`timeline.fields.${field}`) ? t(`timeline.fields.${field}`) : field)).join(', ');
@@ -88,7 +89,10 @@ function chartLine(chart) {
                 <li v-for="entry in entries" :key="entry.event.id" class="tl-item" :class="`t-${entry.tone}`">
                     <div class="tl-when">
                         {{ when(entry.event) }}
-                        <span v-if="isFuture(entry.event.occurred_at)" class="badge b-info b-plain ml-1 normal-case">
+                        <span
+                            v-if="isFuture(entry.event.occurred_at) && !entry.cancelled"
+                            class="badge b-info b-plain ml-1 normal-case"
+                        >
                             {{ t('timeline.upcoming') }}
                         </span>
                         <span v-if="entry.private" class="badge b-plain ml-1 normal-case">
@@ -113,6 +117,12 @@ function chartLine(chart) {
                         {{ t('timeline.changed', { fields: fieldList(entry.fields) }) }}
                     </div>
                     <div v-if="entry.chart" class="tl-body">{{ chartLine(entry.chart) }}</div>
+                    <div v-if="entry.moved" class="tl-body">
+                        {{ t('timeline.movedFromTo', { from: moment(entry.moved.from), to: moment(entry.moved.to) }) }}
+                    </div>
+                    <div v-if="entry.wasAt" class="tl-body">
+                        {{ t('timeline.wasAt', { time: moment(entry.wasAt) }) }}
+                    </div>
                     <div v-if="entry.event.created_by && entry.event.created_by.id !== auth.user?.id" class="tl-body">
                         {{ t('timeline.by', { name: entry.event.created_by.name }) }}
                     </div>

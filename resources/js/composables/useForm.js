@@ -17,7 +17,11 @@ export function useForm(initial) {
     const errors = ref({});
     const processing = ref(false);
 
-    async function submit(request) {
+    /**
+     * `handles` lists response statuses the caller deals with itself (e.g. 409
+     * for an overlap it explains), so no generic toast is shown for them.
+     */
+    async function submit(request, { handles = [] } = {}) {
         processing.value = true;
         errors.value = {};
 
@@ -28,6 +32,8 @@ export function useForm(initial) {
 
             if (fieldErrors) {
                 errors.value = fieldErrors;
+            } else if (handles.includes(error.response?.status)) {
+                // The caller shows what happened.
             } else if (error.response?.status === 429) {
                 toast.error(t('errors.tooManyAttempts'));
             } else if (error.response?.status === 403) {
