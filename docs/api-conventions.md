@@ -41,10 +41,12 @@ Linkovi u emailovima vode na SPA stranice (`/verify-email/...`, `/reset-password
 | Metoda | Putanja | Namena |
 |---|---|---|
 | GET | `/me` | korisnik + trenutni workspace i uloga (radi i pre verifikacije emaila) |
-| GET | `/reference-data` | dozvoljene vrednosti za forme (jezici, valute, sistemi kuća …) |
-| GET / PATCH | `/workspace` | trenutni workspace; nema `{workspace}` parametra |
+| GET | `/reference-data` | dozvoljene vrednosti za forme (jezici, valute, sistemi kuća, tipovi aspekata sa podrazumevanim orbima …) |
+| GET / PATCH | `/workspace` | trenutni workspace; nema `{workspace}` parametra. PATCH menja samo poslata polja, uključujući `aspect_orbs` |
 | PUT | `/workspace/astrology-methods` | izbor metoda i podrazumevana metoda |
 | GET / POST / PATCH / DELETE | `/astrology-methods` | ugrađene + sopstvene metode |
+
+`aspect_orbs`: `{"aspects": {"conjunction": {"enabled": true, "orb": 8}, …}, "luminary_bonus": 1.5}` — tipovi iz `reference-data.aspects.types`. PATCH prima i samo deo aspekata; izostavljeni dobijaju podrazumevane vrednosti, a čuva se ceo objekat. Orb je veći od 0 i najviše 15, `luminary_bonus` od 0 do 5. `GET` uvek vraća ceo objekat.
 
 ### Klijenti i mesta
 
@@ -55,7 +57,7 @@ Linkovi u emailovima vode na SPA stranice (`/verify-email/...`, `/reset-password
 | GET / PATCH | `/clients/{id}` | profil; PATCH menja samo poslata polja, može i `birth` |
 | PUT | `/clients/{id}/birth-details` | samo podaci rođenja |
 | POST / DELETE | `/clients/{id}/archive` | arhiviranje / vraćanje iz arhive |
-| GET | `/clients/{id}/chart` | natalna karta (računa se pri prvom zahtevu, zatim iz keša); `status: incomplete` sa `missing` kada podaci rođenja nisu potpuni |
+| GET | `/clients/{id}/chart` | natalna karta (računa se pri prvom zahtevu, zatim iz keša); `status: incomplete` sa `missing` kada podaci rođenja nisu potpuni. `?house_system=` crta kartu u drugom sistemu kuća, samo za taj prikaz |
 | GET | `/clients/{id}/timeline` | vremenska linija, najnovije prvo; `type` (`all`, `consultations`, `notes`, `files`, `charts`, `profile`), `page`, `per_page` (do 50) |
 | GET | `/tags` | oznake workspace-a sa brojem klijenata |
 | GET | `/places?q=` | autocomplete mesta rođenja (lokalni GeoNames); mesta u zemlji prakse prva |
@@ -68,6 +70,8 @@ Podaci rođenja (`birth`): `time_accuracy` (obavezno), `birth_date` (`YYYY-MM-DD
 
 Odgovor uz podatke rođenja vraća i izvedene vrednosti: `chart.ready` / `chart.missing`, `moment` (UTC trenutak i istorijski offset), `clock_change` (`skipped` / `ambiguous` kod promene sata) i `zone_history_uncertain` (pre 1970).
 
+Karta (`/clients/{id}/chart` i `chart` na konsultaciji): `version` formata (1 = samo pozicije, snimci od pre Faze 5), `positions` (sa `house`), `houses` (`system`, `requested_system`, `cusps` — 12 dužina, kuspida 1 prva; `system` se razlikuje od `requested_system` kada traženi sistem ne može da se nacrta na toj širini), `angles` (`asc`, `mc`, `dsc`, `ic`, `vertex`, `armc`), `aspects` (`a`, `b`, `type`, `orb`, `applying` — `null` za aspekte prema uglovima), `aspect_settings` (orbi sa kojima je računato), `location`, `moon_range` (samo kod nepoznatog vremena) i `engine`. Dužine su u stepenima, u zodijaku karte. Bez vremena rođenja `houses` i `angles` su `null`, a Mesec nije u aspektima.
+
 Pojedinačan klijent (`GET /clients/{id}`) nosi i `stats`: broj konsultacija (ukupno i završenih) i broj beležaka i fajlova koje korisnik sme da vidi.
 
 ### Konsultacije, beleške i fajlovi
@@ -77,7 +81,7 @@ Pojedinačan klijent (`GET /clients/{id}`) nosi i `stats`: broj konsultacija (uk
 | GET | `/consultations` | lista; `client_id`, `status`, `search` (naslov, teme, ime klijenta), `from` / `to` (`YYYY-MM-DD`, dani u zoni korisnika), `sort` (`-starts_at`, `starts_at`), `page`, `per_page` |
 | POST | `/consultations` | nova; `client_id` (obavezno, kasnije se ne menja), `title`, `status` (podrazumevano `draft`), `starts_at` (`YYYY-MM-DDTHH:MM`, lokalno vreme), `timezone` (podrazumevano zona korisnika), `duration_minutes`, `topics`, `internal_notes`, `client_summary`, `next_steps`, `method_ids` |
 | GET / PATCH / DELETE | `/consultations/{id}` | jedna konsultacija sa internim beleškama, sažetkom, zaključcima i snimkom karte; PATCH menja samo poslata polja; DELETE je soft delete zajedno sa prilozima |
-| POST / DELETE | `/consultations/{id}/chart` | priloži trenutnu kartu kao snimak / ukloni snimak (sam proračun ostaje); 422 sa `missing` kada podaci rođenja nisu potpuni |
+| POST / DELETE | `/consultations/{id}/chart` | priloži trenutnu kartu kao snimak (opciono `house_system`; inače sistem workspace-a) / ukloni snimak (sam proračun ostaje); 422 sa `missing` kada podaci rođenja nisu potpuni |
 | GET | `/notes` | beleške klijenta (`client_id`) ili konsultacije (`consultation_id`), najnovije prvo; tuđe privatne se ne vraćaju |
 | POST / GET / PATCH / DELETE | `/notes`, `/notes/{id}` | `client_id` (samo pri kreiranju), `consultation_id` (konsultacija istog klijenta), `title`, `content` (obavezno), `visibility` (podrazumevano `private`) |
 | GET | `/attachments` | fajlovi i linkovi klijenta (`client_id`, uključujući one sa njegovih konsultacija) ili konsultacije (`consultation_id`) |

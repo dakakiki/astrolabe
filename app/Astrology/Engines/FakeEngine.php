@@ -5,14 +5,20 @@ namespace App\Astrology\Engines;
 use App\Astrology\Contracts\EphemerisEngine;
 use App\Astrology\ValueObjects\ChartRequest;
 use App\Astrology\ValueObjects\ChartResult;
+use App\Astrology\ValueObjects\Houses;
 use App\Astrology\ValueObjects\PlanetPosition;
 use App\Enums\CelestialBody;
+use App\Enums\HouseSystem;
 use App\Enums\ZodiacMode;
 
 /**
  * A stand-in for tests and CI (docs/spec/11): deterministic, needs no binary,
  * data files or licence. Positions follow each body's mean motion from J2000 —
  * plausible, never correct. Tests can pin exact positions with fix().
+ *
+ * Angles come from mean sidereal time and a fixed obliquity; Equal and Whole
+ * Sign cusps are exact, every other system is drawn as Porphyry. Inside the
+ * polar circles Placidus and Koch fall back to Porphyry, as the real engine does.
  */
 class FakeEngine implements EphemerisEngine
 {
@@ -34,11 +40,16 @@ class FakeEngine implements EphemerisEngine
 
     private const J2000 = 2451545.0;
 
+    private const OBLIQUITY = 23.4393;
+
     /** A fixed ayanamsa, so sidereal charts differ from tropical ones in tests. */
     public const AYANAMSA = 24.0;
 
     /** @var array<string, array{0: float, 1: float}> body => [longitude, speed] */
     private array $fixed = [];
+
+    /** @var array{0: float, 1: float}|null [ascendant, midheaven], tropical */
+    private ?array $fixedAngles = null;
 
     public int $calls = 0;
 
@@ -67,6 +78,16 @@ class FakeEngine implements EphemerisEngine
         return $this;
     }
 
+    /**
+     * Pin the Ascendant and Midheaven (tropical) for every following calculation.
+     */
+    public function fixAngles(float $ascendant, float $midheaven): static
+    {
+        $this->fixedAngles = [$ascendant, $midheaven];
+
+        return $this;
+    }
+
     public function calculate(ChartRequest $request): ChartResult
     {
         $this->calls++;
@@ -79,9 +100,87 @@ class FakeEngine implements EphemerisEngine
                 self::MEAN_MOTION[$body->value][1],
             ];
 
-            return new PlanetPosition($body, fmod(fmod($longitude - $shift, 360) + 360, 360), $speed);
+            return new PlanetPosition($body, self::normalize($longitude - $shift), $speed);
         }, $request->bodies);
 
-        return new ChartResult($positions, $this->name(), $this->version(), null);
+        return new ChartResult(
+            $positions,
+            $this->name(),
+            $this->version(),
+            null,
+            $request->wantsHouses() ? $this->houses($request, $days, $shift) : null,
+        );
+    }
+
+    private function houses(ChartRequest $request, float $days, float $shift): Houses
+    {
+        $armc = self::normalize(280.46061837 + 360.98564736629 * $days + $request->longitude);
+        [$ascendant, $midheaven] = $this->fixedAngles ?? [
+            self::ascendant($armc, $request->latitude),
+            self::normalize(rad2deg(atan2(sin(deg2rad($armc)), cos(deg2rad($armc)) * cos(deg2rad(self::OBLIQUITY))))),
+        ];
+        $vertex = self::ascendant($armc + 180, $request->latitude >= 0 ? 90 - $request->latitude : -90 - $request->latitude);
+
+        $ascendant = self::normalize($ascendant - $shift);
+        $midheaven = self::normalize($midheaven - $shift);
+
+        $system = $request->houseSystem;
+        if ($system->failsNearPoles() && abs($request->latitude) >= 90 - self::OBLIQUITY) {
+            $system = HouseSystem::Porphyry;
+        }
+
+        $cusps = match ($system) {
+            HouseSystem::Equal => array_map(fn (int $i) => self::normalize($ascendant + 30 * $i), range(0, 11)),
+            HouseSystem::WholeSign => array_map(fn (int $i) => self::normalize(floor($ascendant / 30) * 30 + 30 * $i), range(0, 11)),
+            default => self::porphyry($ascendant, $midheaven),
+        };
+
+        return new Houses(
+            system: $system,
+            requestedSystem: $request->houseSystem,
+            cusps: $cusps,
+            ascendant: $ascendant,
+            midheaven: $midheaven,
+            armc: $armc,
+            vertex: self::normalize($vertex - $shift),
+        );
+    }
+
+    private static function ascendant(float $armc, float $latitude): float
+    {
+        $theta = deg2rad($armc);
+        $obliquity = deg2rad(self::OBLIQUITY);
+
+        return self::normalize(rad2deg(atan2(
+            cos($theta),
+            -(sin($theta) * cos($obliquity) + tan(deg2rad($latitude)) * sin($obliquity)),
+        )));
+    }
+
+    /**
+     * Each quadrant between the angles divided into three equal parts.
+     *
+     * @return list<float>
+     */
+    private static function porphyry(float $ascendant, float $midheaven): array
+    {
+        $ic = self::normalize($midheaven + 180);
+        $descendant = self::normalize($ascendant + 180);
+        $third = fn (float $from, float $to) => self::normalize($to - $from) / 3;
+
+        $cusps = [];
+        foreach ([[$ascendant, $ic], [$ic, $descendant], [$descendant, $midheaven], [$midheaven, $ascendant]] as [$from, $to]) {
+            $step = $third($from, $to);
+            array_push($cusps, $from, self::normalize($from + $step), self::normalize($from + 2 * $step));
+        }
+
+        return $cusps;
+    }
+
+    private static function normalize(float $degrees): float
+    {
+        $degrees = fmod($degrees, 360);
+
+        return $degrees < 0 ? $degrees + 360 : $degrees;
     }
 }

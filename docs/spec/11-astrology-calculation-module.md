@@ -160,7 +160,7 @@ Polje koje već postoji u specifikaciji postaje funkcionalno:
 | `exact` | Planete, uglovi, kuće, aspekti |
 | `rectified` | Isto, uz oznaku da je vreme rektifikovano |
 | `approximate` | Isto, uz vidljivo upozorenje da su uglovi i kuće nepouzdani |
-| `unknown` | Samo planetarne pozicije za 12:00 UT; **bez uglova i kuća**; Mesec kao opseg stepeni |
+| `unknown` | Samo planetarne pozicije za 12:00 UT; **bez uglova i kuća**; Mesec kao opseg stepeni; aspekti bez Meseca |
 
 Mesec pređe oko 13° dnevno i kod nepoznatog vremena može promeniti znak. Prikazuje se opseg, ne tačka. Astrolozi to odmah prepoznaju kao znak da neko razume zanat.
 
@@ -264,6 +264,17 @@ Referentne karte treba pribaviti iz nezavisnog izvora i zapisati očekivane vred
 - Mesečevi čvorovi (pravi i srednji) računaju se, ali nisu u JPL skupu; Hiron zahteva dodatni fajl `seas_18.se1` i uvodi se naknadno.
 - Poziv: `swetest -bj<JD> -ut -p<tela> -fpls -g| -head -eswe -edir<putanja> [-sid<n>]`, uvek kao niz argumenata, bez shell-a.
 
+### Stanje posle Faze 5
+
+- **Uglovi i kuće** dolaze iz istog `swetest` poziva kao planete: `-house<dužina>,<širina>,<kod>` i format `-fPpls` (naziv, broj, dužina, brzina — linije kuća su numerisane 1–20, pa se razlikuju od planeta po nazivu). Rezultat: 12 kuspida, ASC, MC, ARMC i Vertex; DSC i IC su izvedeni. Deset sistema (`App\Enums\HouseSystem`). Podrazumevani je sa workspace-a; na ekranu karte može se izabrati drugi, samo za taj prikaz — svaki sistem je zaseban keširan proračun.
+- **Visoke širine:** unutar polarnih krugova (|φ| ≥ 90° − ε, oko 66,56°) Placidus i Koch nisu definisani, jer neki stepeni ekliptike tu nikad ne izlaze ni ne zalaze. `swetest` tada sam računa Porphyry i javlja to porukom `House method Placidus failed, Porphyry calculated instead`; adapter prepoznaje samo tu poruku (svaka druga greška i dalje obara proračun) i karta čuva i traženi i upotrebljeni sistem. Ekran kaže npr. „Placidus houses cannot be drawn at 69°39′N … Porphyry is shown instead“. Izmereno: Regiomontanus, Campanus, Alcabitius, Topocentric, Equal, Whole Sign i Morinus rade i na 69,6°N bez zamene. Poseban `HouseSystemResolver` iz skice arhitekture nije bio potreban.
+- **`time_accuracy`:** `unknown` — bez uglova i kuća; točak ima 0° Ovna levo, Mesec je luk dnevnog opsega, a iz aspekata je izostavljen jer se tokom dana pomeri oko 13°, više od svakog orba. `approximate` — puna karta uz upozorenje; `rectified` — puna karta uz napomenu.
+- **Aspekti** (`AspectCalculator`, na serveru): tela Sunce–Pluton i pravi čvor, plus ASC i MC. Srednji čvor se izostavlja jer bi ponavljao aspekte pravog, a par ASC–MC jer je uvek u istom odnosu. Svaki par dobija najviše jedan aspekt, najbliži u okviru orba. Aplikujući ili separirajući iz dnevnih brzina; za aspekte prema uglovima se ne navodi.
+- **Orbi** (`workspaces.aspect_orbs`, Settings → Chart & methods): konjunkcija 8°, opozicija 7°, kvadrat i trigon 6°, sekstil 4°; manji aspekti isključeni dok se ne uključe (kvinkunks 3°, polusekstil, polukvadrat i seskvikvadrat 2°); +1,5° kada učestvuje Sunce ili Mesec (jednom, i kada učestvuju oba). Orbi su deo `input_hash`: promena vodi novom proračunu pri sledećem otvaranju karte, stari ostaju.
+- **Format payload-a** ima verziju (dokument 05), koja je deo `input_hash`: keš iz Faze 3 (samo pozicije) se ne koristi za novu kartu, a stari snimci na konsultacijama ostaju kakvi su i prikazuju se sa napomenom.
+- **Prikaz:** SVG točak kao Vue komponenta, bez biblioteke, sa bojama iz design tokena (i dnevna tema i budući brend); bliske planete se razmiču uz liniju do pravog stepena; linije aspekata po tipu i jačini; ASC i MC istaknuti; tekstualni opis za čitače ekrana. Uz točak: tabela pozicija sa kućama i uglovima, tabela kuspida i tabela aspekata od najužeg orba. Na konsultaciji je isti prikaz u jednoj koloni.
+- **Testovi tačnosti** (`HouseAccuracyTest`, tamo gde postoji `swetest`): ASC, MC i ARMC prema zvezdanom vremenu, nagibu ekliptike i nutaciji iz formula J. Meeus-a (*Astronomical Algorithms*, gl. 12 i 22); Equal, Whole Sign i Porphyry iz uglova; Placidus po definiciji — kuspide 11, 12, 2 i 3 dele polulukove na trećine, rešeno iteracijom. Sedam trenutaka od 1900. do 2039, obe hemisfere, od ekvatora do 64°N; izmereno odstupanje oko 0,3″, granica 1′. Iznad polarnog kruga (Tromsø, Longyearbyen, McMurdo i 66,6°N) Placidus i Koch uvek daju Porphyry, nikad grešku. Sideralni uglovi su pomereni za istu ayanamsu kao planete. Dan promene sata i dvosmisleno vreme pri vraćanju sata pokriveni su testovima kroz API, sa `FakeEngine`-om.
+
 ## Rezime obima
 
 | Stavka | Procena |
@@ -279,8 +290,8 @@ Za taj trošak proizvod prestaje da bude još jedan CRM.
 
 1. ~~Koja je aktuelna cena i uslovi komercijalne licence Swiss Ephemeris-a?~~ Rešeno 24. 9. 2026 — vidi „Detalji odluke“.
 2. ~~Koji provajder geokodiranja daje i koordinate i IANA zonu po prihvatljivoj ceni?~~ Rešeno 24. 9. 2026 — lokalna kopija GeoNames.
-3. Koji sistem kuća je podrazumevan po metodi, i da li astrolozi iz validacione grupe to potvrđuju?
-4. Da li astrolozi žele mogućnost da menjaju orbe, ili je to nepotrebna složenost u prvoj verziji?
+3. Koji sistem kuća je podrazumevan po metodi, i da li astrolozi iz validacione grupe to potvrđuju? — *Privremeno, od Faze 5:* podrazumevani sistem je sa workspace-a, metode ga predlažu (zapadna Placidus, vedska i helenistička Whole Sign), a na ekranu karte može se izabrati drugi. Potvrđuje se u razgovorima.
+4. Da li astrolozi žele mogućnost da menjaju orbe, ili je to nepotrebna složenost u prvoj verziji? — *Privremeno, od Faze 5:* orbi su podesivi od početka, sa podrazumevanim vrednostima iz „Stanja posle Faze 5“. Razgovori mogu promeniti podrazumevane vrednosti, ne mehanizam.
 5. Koliko je izvoz karte u PDF važan u odnosu na prikaz u aplikaciji?
 
 Pitanja 3, 4 i 5 idu u validacione razgovore iz Faze 0.

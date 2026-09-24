@@ -90,6 +90,17 @@ Konsultacije (CRUD, statusi, metode, teme, interne beleške / sažetak za klijen
 
 Odluke donete usput: `activity_events` je uvedena odmah (ne UNION izvedenih tabela), jer bi svaka sledeća faza inače dodala još jedan krak upita; formatiran tekst je HTML sa listom dozvoljenih elemenata na serveru, a ne JSON editora, jer se isti sadržaj kasnije izvozi u PDF i prikazuje u portalu.
 
+## Faza 5 — implementirano
+
+Puna natalna karta: uglovi i kuće (deset sistema, izbor na ekranu karte), Porphyry kao zamena za Placidus i Koch iznad polarnog kruga, aspekti sa orbima po workspace-u, SVG točak, tabele kuspida i aspekata i snimak sa svim tim na konsultaciji. Izmene u dokumentima:
+
+- 02: stanje P1 natalne karte; pravilo o zamenskom sistemu kuća; sadržaj snimka na konsultaciji.
+- 04: status Faze 5.
+- 05: `workspaces.aspect_orbs` (oblik, podrazumevane vrednosti); `chart_calculations.payload` verzija 2 i njeno mesto u `input_hash`; `house_system` je traženi sistem.
+- 11: „Stanje posle Faze 5“; kod nepoznatog vremena aspekti bez Meseca; otvorena pitanja 3 i 4 dobila privremene odgovore.
+
+Odluke donete usput: aspekti uključuju ASC i MC (bez smera kretanja), a srednji čvor ne; kod nepoznatog vremena Mesec se izostavlja iz aspekata; svaki izabrani sistem kuća je zaseban proračun, pa i zasebna stavka na vremenskoj liniji; posebna klasa `HouseSystemResolver` nije potrebna, jer zamenu sistema radi sam engine, a adapter je samo prepoznaje.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

@@ -188,6 +188,19 @@
             "sessionsIntro": "Signing them out needs your password.",
             "sessionsSubmit": "Sign out other sessions",
             "sessionsDone": "Other sessions signed out"
+        },
+        "orbs": {
+            "title": "Aspects and orbs",
+            "intro": "Which aspects your charts show and how far from exact they may be. Charts are recalculated with the new orbs when they are next opened; earlier versions, and chart snapshots on consultations, stay as they were.",
+            "aspect": "Aspect",
+            "shown": "Shown",
+            "orb": "Orb (°)",
+            "major": "Major aspects",
+            "minor": "Minor aspects",
+            "luminaryBonus": "Extra orb for the Sun and Moon (°)",
+            "luminaryBonusHint": "Added when either of them takes part.",
+            "reset": "Restore defaults",
+            "saved": "Aspects and orbs saved"
         }
     },
     "roles": {
@@ -403,8 +416,7 @@
         "warnings": {
             "skipped": "This time did not exist: clocks went forward that night. Check the time, or whether the record used the old time.",
             "ambiguous": "This time happened twice: clocks went back that night. Check which of the two moments is meant.",
-            "zoneHistory": "Time-zone records before 1970 are unreliable in some regions. Check the offset if the chart looks wrong.",
-            "approximate": "The birth time is approximate, so angles and houses will be unreliable."
+            "zoneHistory": "Time-zone records before 1970 are unreliable in some regions. Check the offset if the chart looks wrong."
         },
         "addConsultation": "New consultation"
     },
@@ -437,7 +449,7 @@
         "pisces": "Pisces"
     },
     "chart": {
-        "title": "Planetary positions",
+        "title": "Natal chart",
         "body": "Body",
         "sign": "Sign",
         "position": "Position",
@@ -448,15 +460,63 @@
         "loading": "Calculating…",
         "unavailable": "Charts cannot be calculated right now. Everything else keeps working.",
         "moonRange": "Time unknown: the Moon moved through this span during the birth date.",
-        "noonNote": "Positions for 12:00 UT on the birth date; angles and houses need a birth time.",
-        "approximateNote": "The birth time is approximate.",
-        "rectifiedNote": "Rectified birth time.",
+        "noonNote": "Positions for 12:00 UT on the birth date. Angles and houses need a birth time; the Moon is drawn as the span it covered that day, and its aspects are left out.",
+        "approximateNote": "The birth time is approximate: angles and house cusps are shown, but do not lean on them. Four minutes of clock time move the Ascendant by about a degree.",
+        "rectifiedNote": "Rectified birth time. Earlier calculations are kept.",
         "engine": "{engine} {version}",
         "tzdata": "tzdata {version}",
         "calculated": "Calculated {when}",
         "tropical": "Tropical zodiac",
         "sidereal": "Sidereal zodiac, {ayanamsa}",
-        "housesSoon": "Angles, houses, aspects and the chart wheel arrive with the full natal chart."
+        "positionsTitle": "Positions",
+        "house": "House",
+        "houseShort": "H",
+        "houseSystem": "House system",
+        "fallback": "{requested} houses cannot be drawn at {latitude}, inside the polar circle: some degrees of the zodiac never rise or set there. {used} is shown instead.",
+        "wholeSignNote": "Whole Sign houses: the first house begins at 0° {sign}, not at the Ascendant, which falls inside the first house.",
+        "oldSnapshot": "Taken before angles, houses and aspects were calculated: positions only.",
+        "julianDay": "JD {value} UT",
+        "switching": "Calculating…",
+        "angles": {
+            "asc": "Ascendant",
+            "mc": "Midheaven",
+            "dsc": "Descendant",
+            "ic": "Imum Coeli"
+        },
+        "angleAbbr": {
+            "asc": "ASC",
+            "mc": "MC",
+            "dsc": "DSC",
+            "ic": "IC"
+        },
+        "cusps": {
+            "title": "House cusps",
+            "house": "House",
+            "cusp": "Cusp"
+        },
+        "aspects": {
+            "title": "Aspects",
+            "count": "none within orb | one within orb | {count} within orb",
+            "none": "No aspects within the orbs.",
+            "pair": "Between",
+            "aspect": "Aspect",
+            "orb": "Orb",
+            "motion": "Motion",
+            "applying": "applying",
+            "separating": "separating",
+            "orbsHint": "Orbs are set in Settings → Chart & methods.",
+            "legend": "Aspect lines",
+            "show": "Show aspects ({count})"
+        },
+        "wheel": {
+            "title": "Chart wheel of {name}",
+            "titleNoName": "Chart wheel"
+        },
+        "describe": {
+            "house": "house {house}",
+            "range": "between {from} and {to}",
+            "aspects": "No aspects | One aspect, listed in the aspects table | {count} aspects, listed in the aspects table"
+        }
     },
     "consultations": {
         "eyebrow": "Practice",
@@ -685,5 +745,16 @@
         "linkPrompt": "Link address (https://…). Leave empty to remove the link.",
         "undo": "Undo",
         "redo": "Redo"
+    },
+    "aspectTypes": {
+        "conjunction": "Conjunction",
+        "sextile": "Sextile",
+        "square": "Square",
+        "trine": "Trine",
+        "opposition": "Opposition",
+        "quincunx": "Quincunx",
+        "semisextile": "Semi-sextile",
+        "semisquare": "Semi-square",
+        "sesquisquare": "Sesquiquadrate"
     }
 }

@@ -28,6 +28,18 @@ final readonly class ChartRequest
     ) {}
 
     /**
+     * Angles and houses need a birth time (decided by the caller from
+     * time_accuracy), a place and a house system.
+     */
+    public function wantsHouses(): bool
+    {
+        return $this->includeHouses
+            && $this->houseSystem !== null
+            && $this->latitude !== null
+            && $this->longitude !== null;
+    }
+
+    /**
      * The request as plain values, rounded to what the engine can resolve:
      * 1e-8 day is under a millisecond, 1e-6 degree about 10 cm.
      *

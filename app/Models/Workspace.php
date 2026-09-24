@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Astrology\ValueObjects\AspectSettings;
 use App\Enums\Ayanamsa;
 use App\Enums\HouseSystem;
 use App\Enums\ZodiacMode;
@@ -21,10 +22,11 @@ use Throwable;
  * @property HouseSystem $default_house_system
  * @property ZodiacMode $default_zodiac_mode
  * @property Ayanamsa|null $default_ayanamsa
+ * @property array<string, mixed>|null $aspect_orbs
  */
 #[Fillable([
     'name', 'default_locale', 'timezone', 'default_currency',
-    'default_house_system', 'default_zodiac_mode', 'default_ayanamsa',
+    'default_house_system', 'default_zodiac_mode', 'default_ayanamsa', 'aspect_orbs',
 ])]
 class Workspace extends Model
 {
@@ -44,7 +46,14 @@ class Workspace extends Model
             'default_house_system' => HouseSystem::class,
             'default_zodiac_mode' => ZodiacMode::class,
             'default_ayanamsa' => Ayanamsa::class,
+            'aspect_orbs' => 'array',
         ];
+    }
+
+    /** The aspects and orbs this workspace works with, over the defaults. */
+    public function aspectSettings(): AspectSettings
+    {
+        return AspectSettings::fromArray($this->aspect_orbs);
     }
 
     /**

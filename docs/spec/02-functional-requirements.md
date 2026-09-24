@@ -112,6 +112,8 @@ Detaljna specifikacija: `11-astrology-calculation-module.md`.
 - karta se može priložiti konsultaciji kao snimak stanja;
 - izvoz karte u PDF.
 
+> Status posle Faze 5 (24. 9. 2026): uglovi (ASC, MC, DSC, IC; Vertex u podacima), 12 kuspida u deset sistema kuća, aspekti sa orbima po workspace-u, SVG točak, tabele pozicija sa kućama, kuspida i aspekata, i snimak sa svim tim na konsultaciji. Podrazumevani sistem kuća je sa workspace-a; na ekranu karte može se izabrati drugi, samo za taj prikaz (svaki sistem je zaseban keširan proračun). Izvoz u PDF ostaje za Fazu 9.
+
 ### P1 — tranziti
 
 - trenutne planetarne pozicije u odnosu na natalnu kartu;
@@ -133,7 +135,8 @@ Detaljna specifikacija: `11-astrology-calculation-module.md`.
 - rezultat je keširan, ali podaci rođenja ostaju jedini izvor istine;
 - promena bilo kog ulaznog podatka poništava keš i vodi ponovnom proračunu;
 - prethodne verzije proračuna se čuvaju, što je korisno pri rektifikaciji vremena;
-- karta se nikada ne prikazuje bez podataka o engine-u i verziji koja ju je proizvela.
+- karta se nikada ne prikazuje bez podataka o engine-u i verziji koja ju je proizvela;
+- ako traženi sistem kuća ne može da se nacrta na geografskoj širini rođenja (Placidus i Koch iznad polarnog kruga), karta prikazuje zamenski sistem (Porphyry) i to jasno kaže, uz širinu; nikada greška ni tiha zamena.
 
 ## Povezane osobe
 
@@ -179,7 +182,7 @@ Konsultacija sadrži:
 - Svaki status osim `draft` traži datum; nacrt može biti bez njega.
 - Klijent konsultacije se bira jednom, pri kreiranju, i više se ne menja — beleške, fajlovi i snimak karte pripadaju tom klijentu.
 - Interne beleške, sažetak za klijenta i zaključci su tri odvojena polja sa formatiranim tekstom (vidi „Beleške“); liste konsultacija ih ne vraćaju, samo pojedinačna konsultacija.
-- **Snimak karte:** konsultaciji se prilaže trenutna natalna karta klijenta (`chart_calculation_id`). Proračuni se nikada ne prepisuju, pa kasnija ispravka podataka rođenja pravi novu kartu, a priložena ostaje kakva je bila. Za sada snimak sadrži pozicije planeta; uglovi, kuće i točak dolaze u Fazi 5.
+- **Snimak karte:** konsultaciji se prilaže trenutna natalna karta klijenta (`chart_calculation_id`). Proračuni se nikada ne prepisuju, pa kasnija ispravka podataka rođenja pravi novu kartu, a priložena ostaje kakva je bila. Od Faze 5 snimak sadrži i uglove, kuće, aspekte i točak; snimci napravljeni ranije ostaju samo sa pozicijama i to je na njima naznačeno.
 - Brisanje konsultacije je soft delete i briše i njene priloge; beleške povezane sa njom ostaju kod klijenta.
 
 ## Vremenska linija klijenta

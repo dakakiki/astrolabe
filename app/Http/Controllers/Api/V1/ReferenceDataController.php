@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Astrology\ValueObjects\AspectSettings;
+use App\Enums\AspectType;
 use App\Enums\Ayanamsa;
 use App\Enums\ClientStatus;
 use App\Enums\ConsultationStatus;
@@ -10,6 +12,7 @@ use App\Enums\TimeAccuracy;
 use App\Enums\Visibility;
 use App\Enums\ZodiacMode;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateWorkspaceRequest;
 use App\Models\Country;
 use App\Support\Attachments\AllowedFileTypes;
 use App\Support\Attachments\UploadLimit;
@@ -32,6 +35,16 @@ class ReferenceDataController extends Controller
                 'house_systems' => array_column(HouseSystem::cases(), 'value'),
                 'zodiac_modes' => array_column(ZodiacMode::cases(), 'value'),
                 'ayanamsas' => array_column(Ayanamsa::cases(), 'value'),
+                'aspects' => [
+                    'types' => array_map(fn (AspectType $type) => [
+                        'type' => $type->value,
+                        'angle' => $type->angle(),
+                        'major' => $type->isMajor(),
+                    ], AspectType::cases()),
+                    'defaults' => AspectSettings::defaults()->toArray(),
+                    'max_orb' => UpdateWorkspaceRequest::MAX_ORB,
+                    'max_luminary_bonus' => UpdateWorkspaceRequest::MAX_LUMINARY_BONUS,
+                ],
                 'countries' => Country::query()
                     ->orderBy('code')
                     ->get(['code', 'phone_code', 'currency_code', 'languages'])

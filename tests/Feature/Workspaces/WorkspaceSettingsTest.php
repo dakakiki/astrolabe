@@ -70,6 +70,54 @@ class WorkspaceSettingsTest extends TestCase
         ]);
     }
 
+    public function test_aspect_orbs_start_from_the_defaults_and_can_be_changed(): void
+    {
+        $owner = User::factory()->withWorkspace()->create();
+
+        $this->actingAs($owner)->getJson('/api/v1/workspace')
+            ->assertJsonPath('data.aspect_orbs.luminary_bonus', 1.5)
+            ->assertJsonPath('data.aspect_orbs.aspects.conjunction', ['enabled' => true, 'orb' => 8])
+            ->assertJsonPath('data.aspect_orbs.aspects.quincunx', ['enabled' => false, 'orb' => 3]);
+
+        $this->actingAs($owner)->patchJson('/api/v1/workspace', [
+            'aspect_orbs' => [
+                'aspects' => ['square' => ['enabled' => true, 'orb' => 5.25], 'quincunx' => ['enabled' => true, 'orb' => 2]],
+                'luminary_bonus' => 2,
+            ],
+        ])->assertOk()
+            ->assertJsonPath('data.aspect_orbs.aspects.square', ['enabled' => true, 'orb' => 5.25])
+            ->assertJsonPath('data.aspect_orbs.aspects.quincunx', ['enabled' => true, 'orb' => 2])
+            ->assertJsonPath('data.aspect_orbs.aspects.trine', ['enabled' => true, 'orb' => 6])
+            ->assertJsonPath('data.aspect_orbs.luminary_bonus', 2);
+
+        // Stored complete, so later changes to the defaults do not move existing settings.
+        $this->assertCount(9, $owner->currentWorkspace->fresh()->aspect_orbs['aspects']);
+    }
+
+    public function test_aspect_orbs_are_validated(): void
+    {
+        $owner = User::factory()->withWorkspace()->create();
+
+        $this->actingAs($owner)->patchJson('/api/v1/workspace', [
+            'aspect_orbs' => [
+                'aspects' => [
+                    'square' => ['enabled' => true, 'orb' => 0],
+                    'trine' => ['enabled' => 'sometimes', 'orb' => 16],
+                ],
+                'luminary_bonus' => 6,
+            ],
+        ])->assertUnprocessable()->assertJsonValidationErrors([
+            'aspect_orbs.aspects.square.orb',
+            'aspect_orbs.aspects.trine.enabled',
+            'aspect_orbs.aspects.trine.orb',
+            'aspect_orbs.luminary_bonus',
+        ]);
+
+        $this->actingAs($owner)->patchJson('/api/v1/workspace', [
+            'aspect_orbs' => ['aspects' => ['parallel' => ['enabled' => true, 'orb' => 1]], 'luminary_bonus' => 1],
+        ])->assertUnprocessable()->assertJsonValidationErrors('aspect_orbs.aspects');
+    }
+
     public function test_a_member_who_is_not_the_owner_cannot_change_settings(): void
     {
         $owner = User::factory()->withWorkspace()->create();

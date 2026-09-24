@@ -7,6 +7,8 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 > Faza 1 (implementirano): `users.current_workspace_id`; `astrology_methods.workspace_id` umesto para `is_system` + `created_by_workspace_id`; `logo_path` i `aspect_orbs` odloženi do faza u kojima se koriste.
 >
 > Faza 4 (implementirano): `consultations` dobija `title`, `timezone` i `created_by`, a `service_id` i `appointment_id` čekaju usluge i termine; `attachments` dobija `client_id`, `kind` i `url`; `activity_events` je uvedena i dobila `visibility`.
+>
+> Faza 5 (implementirano): `workspaces.aspect_orbs` uveden; `chart_calculations.payload` dobija verziju formata (2) sa uglovima, kućama i aspektima, a verzija je deo `input_hash`; `chart_calculations.house_system` je traženi sistem.
 
 ## Nalozi i workspace
 
@@ -34,7 +36,7 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 - `default_house_system` — npr. `placidus`
 - `default_zodiac_mode` — `tropical` ili `sidereal`
 - `default_ayanamsa`, nullable — npr. `lahiri`; obavezno samo za `sidereal`
-- `aspect_orbs`, JSON, nullable — orbi po tipu aspekta; Faza 5
+- `aspect_orbs`, JSON, nullable — koji aspekti se prikazuju i sa kojim orbom (Faza 5): `{"aspects": {"conjunction": {"enabled": true, "orb": 8}, …}, "luminary_bonus": 1.5}`; `null` znači podrazumevane vrednosti iz dokumenta 11. Čuva se ceo i normalizovan, pa kasnija promena podrazumevanih vrednosti ne pomera već sačuvana podešavanja
 - timestamps
 
 `slug` je jedinstven, generisan jednom pri kreiranju i ne menja se sa nazivom, jer će se koristiti u javnim booking URL-ovima.
@@ -192,10 +194,10 @@ Povezana osoba sa kompletnim podacima rođenja može imati sopstvenu izračunatu
 - `chart_type` — `natal`, `transit`, kasnije `synastry`, `solar_return`
 - `input_hash` — sha256 normalizovanog ulaza
 - `julian_day_ut` — decimal, visoke preciznosti
-- `house_system`
+- `house_system` — traženi sistem; `null` kada nema vremena rođenja. Stvarno upotrebljeni sistem je u `payload.houses.system` (razlikuju se iznad polarnog kruga)
 - `zodiac_mode`
 - `ayanamsa`, nullable
-- `payload` — JSON: pozicije, uglovi, kuspide, aspekti
+- `payload` — JSON. Verzija 2 (Faza 5): `version`, `location` (širina i dužina), `positions` (telo, dužina, brzina, retrogradno, `house`), `houses` (`system`, `requested_system`, `cusps` — 12 dužina), `angles` (`asc`, `mc`, `dsc`, `ic`, `vertex`, `armc`), `aspects` (`a`, `b`, `type`, `orb`, `applying`), `aspect_settings` (orbi sa kojima je računato) i `moon_range` kod nepoznatog vremena. Verzija 1 (Faza 3) ima samo `positions` i `moon_range`; takvi redovi ostaju kakvi jesu
 - `engine_name`
 - `engine_version`
 - `ephemeris_version`, nullable
@@ -210,6 +212,8 @@ Indeksi:
 UNIQUE (subject_type, subject_id, chart_type, input_hash)
 INDEX  (workspace_id, subject_type, subject_id)
 ```
+
+`input_hash` obuhvata i verziju formata `payload`-a i orbe workspace-a: promena formata ili orba vodi novom proračunu, a postojeći redovi — i snimci na konsultacijama — ostaju.
 
 **Ova tabela je keš i istorijski zapis, nikada izvor istine.** Izvor istine ostaje `client_birth_details`. Ako se tabela obriše, sve karte se mogu ponovo izračunati iz podataka rođenja.
 

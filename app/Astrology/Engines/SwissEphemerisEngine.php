@@ -6,8 +6,10 @@ use App\Astrology\Contracts\EphemerisEngine;
 use App\Astrology\Exceptions\EphemerisException;
 use App\Astrology\ValueObjects\ChartRequest;
 use App\Astrology\ValueObjects\ChartResult;
+use App\Astrology\ValueObjects\Houses;
 use App\Astrology\ValueObjects\PlanetPosition;
 use App\Enums\CelestialBody;
+use App\Enums\HouseSystem;
 use App\Enums\ZodiacMode;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
@@ -20,6 +22,13 @@ use Symfony\Component\Process\Process;
  */
 class SwissEphemerisEngine implements EphemerisEngine
 {
+    /**
+     * Inside the polar circles Placidus and Koch cannot be drawn; swetest then
+     * calculates Porphyry and says so on a line of its own. That is an expected
+     * outcome, not a failure: the chart records both systems (docs/spec/11).
+     */
+    private const HOUSE_FALLBACK = '/^error: House method (.+?) failed, (.+?) calculated instead\.?\s*$/mi';
+
     private static ?string $version = null;
 
     private static ?string $ephemerisVersion = null;
@@ -41,24 +50,32 @@ class SwissEphemerisEngine implements EphemerisEngine
             '-bj'.sprintf('%.8f', $request->julianDayUt),
             '-ut',
             '-p'.implode('', array_map(fn (CelestialBody $body) => $body->swetestLetter(), $request->bodies)),
-            '-fpls',
+            // Name, number, longitude, speed: the name tells house lines from planets.
+            '-fPpls',
             '-g|',
             '-head',
             '-eswe',
             '-edir'.$this->ephemerisPath,
         ];
 
+        $houses = $request->wantsHouses();
+
+        if ($houses) {
+            $arguments[] = sprintf('-house%.6f,%.6f,%s', $request->longitude, $request->latitude, $request->houseSystem->swissEphemerisCode());
+        }
+
         if ($request->zodiacMode === ZodiacMode::Sidereal && $request->ayanamsa !== null) {
             $arguments[] = '-sid'.$request->ayanamsa->swissEphemerisMode();
         }
 
-        $output = $this->run($arguments);
+        $rows = $this->rows($this->run($arguments));
 
         return new ChartResult(
-            positions: $this->parsePositions($output, $request->bodies),
+            positions: $this->parsePositions($rows, $request->bodies),
             engineName: $this->name(),
             engineVersion: $this->version(),
             ephemerisVersion: $this->ephemerisVersion(),
+            houses: $houses ? $this->parseHouses($rows, $request->houseSystem) : null,
         );
     }
 
@@ -122,7 +139,10 @@ class SwissEphemerisEngine implements EphemerisEngine
 
         // Without its data files swetest silently falls back to the less precise
         // Moshier ephemeris and still exits 0; that must never pass unnoticed.
-        if (! $allowWarnings && preg_match('/warning|error|moshier|not found/i', $output)) {
+        // The polar house fallback is the one message that is expected.
+        $problems = preg_replace(self::HOUSE_FALLBACK, '', $output);
+
+        if (! $allowWarnings && preg_match('/warning|error|moshier|not found/i', $problems)) {
             throw new EphemerisException('swetest reported a problem: '.trim($output));
         }
 
@@ -130,26 +150,59 @@ class SwissEphemerisEngine implements EphemerisEngine
     }
 
     /**
-     * Lines like "0|112.9549256|0.9542723": planet number, longitude, speed.
+     * Lines like "Sun|0|112.9549256|0.9542723" (name, number, longitude, speed).
+     * swetest prints every planet first, then the houses from "house  1" on;
+     * house lines are numbered 1–20, so the number alone would be ambiguous.
      *
-     * @param  list<CelestialBody>  $expected
-     * @return list<PlanetPosition>
+     * @return array{
+     *     planets: list<array{name: string, number: int, longitude: float, speed: float}>,
+     *     houses: list<array{name: string, number: int, longitude: float, speed: float}>,
+     *     output: string,
+     * }
      */
-    private function parsePositions(string $output, array $expected): array
+    private function rows(string $output): array
     {
-        $positions = [];
+        $planets = [];
+        $houses = [];
 
         foreach (preg_split('/\R/', trim($output)) as $line) {
             $columns = array_map('trim', explode('|', $line));
 
-            if (count($columns) < 3 || ! is_numeric($columns[0]) || ! is_numeric($columns[1]) || ! is_numeric($columns[2])) {
+            if (count($columns) < 4 || ! is_numeric($columns[1]) || ! is_numeric($columns[2]) || ! is_numeric($columns[3])) {
                 continue;
             }
 
-            $body = CelestialBody::fromSwissEphemerisNumber((int) $columns[0]);
+            $row = [
+                'name' => $columns[0],
+                'number' => (int) $columns[1],
+                'longitude' => (float) $columns[2],
+                'speed' => (float) $columns[3],
+            ];
+
+            if ($houses === [] && ! preg_match('/^house\s+1$/i', $row['name'])) {
+                $planets[] = $row;
+            } else {
+                $houses[] = $row;
+            }
+        }
+
+        return ['planets' => $planets, 'houses' => $houses, 'output' => $output];
+    }
+
+    /**
+     * @param  array{planets: list<array{name: string, number: int, longitude: float, speed: float}>}  $parsed
+     * @param  list<CelestialBody>  $expected
+     * @return list<PlanetPosition>
+     */
+    private function parsePositions(array $parsed, array $expected): array
+    {
+        $positions = [];
+
+        foreach ($parsed['planets'] as $row) {
+            $body = CelestialBody::fromSwissEphemerisNumber($row['number']);
 
             if ($body !== null) {
-                $positions[$body->value] = new PlanetPosition($body, (float) $columns[1], (float) $columns[2]);
+                $positions[$body->value] = new PlanetPosition($body, $row['longitude'], $row['speed']);
             }
         }
 
@@ -160,5 +213,51 @@ class SwissEphemerisEngine implements EphemerisEngine
         }
 
         return $ordered;
+    }
+
+    /**
+     * Lines "house  1" … "house 12", then "Ascendant", "MC", "ARMC", "Vertex"
+     * and further points this adapter does not use.
+     *
+     * @param  array{houses: list<array{name: string, number: int, longitude: float, speed: float}>, output: string}  $parsed
+     */
+    private function parseHouses(array $parsed, HouseSystem $requested): Houses
+    {
+        $cusps = [];
+        $points = [];
+
+        foreach ($parsed['houses'] as $row) {
+            if (preg_match('/^house\s+(\d{1,2})$/i', $row['name'], $match)) {
+                $cusps[(int) $match[1]] = $row['longitude'];
+            } elseif (in_array($row['name'], ['Ascendant', 'MC', 'ARMC', 'Vertex'], true)) {
+                $points[$row['name']] = $row['longitude'];
+            }
+        }
+
+        ksort($cusps);
+
+        if (array_keys($cusps) !== range(1, 12) || count($points) !== 4) {
+            throw new EphemerisException('swetest returned incomplete houses: '.trim($parsed['output']));
+        }
+
+        return new Houses(
+            system: $this->calculatedSystem($parsed['output'], $requested),
+            requestedSystem: $requested,
+            cusps: array_values($cusps),
+            ascendant: $points['Ascendant'],
+            midheaven: $points['MC'],
+            armc: $points['ARMC'],
+            vertex: $points['Vertex'],
+        );
+    }
+
+    private function calculatedSystem(string $output, HouseSystem $requested): HouseSystem
+    {
+        if (! preg_match(self::HOUSE_FALLBACK, $output, $match)) {
+            return $requested;
+        }
+
+        return HouseSystem::fromSwissEphemerisName($match[2])
+            ?? throw new EphemerisException("swetest fell back to an unknown house system: {$match[2]}.");
     }
 }

@@ -61,7 +61,9 @@ function chartLine(chart) {
             ? t('chart.sidereal', { ayanamsa: labels.ayanamsa(chart.ayanamsa) })
             : t('chart.tropical');
 
-    return [zodiac, chart.engine].filter(Boolean).join(' · ');
+    const houses = chart.house_system ? labels.houseSystem(chart.house_system) : null;
+
+    return [zodiac, houses, chart.engine].filter(Boolean).join(' · ');
 }
 </script>
 

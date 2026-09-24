@@ -6,8 +6,8 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
 import ClientTimeline from '@/components/ClientTimeline.vue';
 import ConsultationsTable from '@/components/ConsultationsTable.vue';
+import NatalChart from '@/components/NatalChart.vue';
 import NotesPanel from '@/components/NotesPanel.vue';
-import PositionsTable from '@/components/PositionsTable.vue';
 import StatusBadge from '@/components/StatusBadge.vue';
 import { useLabels } from '@/composables/useLabels';
 import { formatCoordinate, formatDate, formatRelative, initials } from '@/lib/format';
@@ -56,6 +56,21 @@ async function loadChart() {
         chartState.value = 'done';
     } catch {
         chartState.value = 'failed';
+    }
+}
+
+// Another house system for this view only; the workspace default stays as it is.
+const switchingHouses = ref(false);
+
+async function changeHouseSystem(houseSystem) {
+    switchingHouses.value = true;
+    try {
+        const { data } = await http.get(`/clients/${client.value.id}/chart`, { params: { house_system: houseSystem } });
+        if (data.data.status === 'ready') chart.value = data.data;
+    } catch {
+        toast.error(t('chart.unavailable'));
+    } finally {
+        switchingHouses.value = false;
     }
 }
 
@@ -328,9 +343,6 @@ async function toggleArchive() {
                         <div v-if="birth.clock_change" class="notice n-warn" role="status">
                             {{ t(`clients.warnings.${birth.clock_change}`) }}
                         </div>
-                        <div v-if="birth.time_accuracy === 'approximate'" class="notice n-info">
-                            {{ t('clients.warnings.approximate') }}
-                        </div>
                         <div v-if="birth.zone_history_uncertain" class="notice n-neutral">
                             {{ t('clients.warnings.zoneHistory') }}
                         </div>
@@ -345,13 +357,20 @@ async function toggleArchive() {
                 </div>
             </section>
 
-            <section v-if="chartState !== 'idle'" class="card">
+            <NatalChart
+                v-if="chart"
+                :chart="chart"
+                :name="client.full_name"
+                selectable
+                :busy="switchingHouses"
+                @house-system="changeHouseSystem"
+            />
+            <section v-else-if="chartState !== 'idle'" class="card">
                 <div class="card-head">
                     <h2>{{ t('chart.title') }}</h2>
                 </div>
                 <div class="card-body">
-                    <PositionsTable v-if="chart" :chart="chart" />
-                    <p v-else-if="chartState === 'loading'" class="text-ink-3" role="status">
+                    <p v-if="chartState === 'loading'" class="text-ink-3" role="status">
                         {{ t('chart.loading') }}
                     </p>
                     <div v-else-if="chartState === 'failed'" class="notice n-warn" role="alert">

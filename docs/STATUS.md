@@ -1,6 +1,6 @@
 # Status projekta — AstroLabe
 
-Stanje na dan **24. 9. 2026**, posle Faze 4. Ovaj dokument je polazna tačka za svaku novu radnu sesiju: šta je gotovo, gde se šta nalazi, šta je odlučeno i šta sledi.
+Stanje na dan **24. 9. 2026**, posle Faze 5. Ovaj dokument je polazna tačka za svaku novu radnu sesiju: šta je gotovo, gde se šta nalazi, šta je odlučeno i šta sledi.
 
 ## Gde je šta
 
@@ -16,7 +16,7 @@ Stanje na dan **24. 9. 2026**, posle Faze 4. Ovaj dokument je polazna tačka za 
 | GeoNames | `storage/app/private/geonames/` (van Git-a); `countryInfo.txt` je i u `database/data/geonames` |
 | Fajlovi klijenata | `storage/app/private/attachments/` (disk `attachments`, van Git-a); u produkciji privatni S3-kompatibilan bucket (`ATTACHMENTS_DISK`) |
 | Lokalni email | `storage/logs/laravel.log` (`MAIL_MAILER=log`) |
-| Test nalog | `mila.e2e@example.com` (samo lokalna baza; lozinka nije u repou — po potrebi se resetuje preko „Forgot password“, link je u `laravel.log`), sa test klijentkinjom „Ana Marković“ i jednom konsultacijom („Natal reading“, sa snimkom karte, dva fajla i beleškom) |
+| Test nalog | `mila.e2e@example.com` (samo lokalna baza; lozinka nije u repou — po potrebi se resetuje preko „Forgot password“, link je u `laravel.log`). Klijenti: „Ana Marković“ (konsultacija „Natal reading“ sa snimkom karte iz Faze 4 — prikazuje se kao stari snimak, samo pozicije), „Test Tromsø (Faza 5)“ (69,6°N, za Porphyry zamenu; konsultacija „Test snimka (Faza 5)“ sa novim snimkom) i „Test Nepoznato vreme (Faza 5)“ |
 
 ## Urađeno
 
@@ -27,9 +27,10 @@ Stanje na dan **24. 9. 2026**, posle Faze 4. Ovaj dokument je polazna tačka za 
 | 2 | `36e0772`, `73d4cac` | Klijenti, podaci rođenja („zamrzavanje“ lokacije), oznake, lokalni GeoNames (5,2 mil. mesta) |
 | — | `52221b8` | Tabela `countries` (pozivni brojevi), polje telefona sa pozivnim brojem |
 | 3 | `f9f073f` | Planetarne pozicije (Swiss Ephemeris), keš `chart_calculations`, pravila `time_accuracy`, tabela pozicija na profilu |
-| 4 | „Phase 4: consultations, notes, files and the client timeline“ | Konsultacije, beleške sa vidljivošću, fajlovi i linkovi u privatnom storage-u, vremenska linija (`activity_events`), snimak karte na konsultaciji, profil klijenta sa tabovima |
+| 4 | `8e7692e` | Konsultacije, beleške sa vidljivošću, fajlovi i linkovi u privatnom storage-u, vremenska linija (`activity_events`), snimak karte na konsultaciji, profil klijenta sa tabovima |
+| 5 | „Phase 5: the full natal chart“ | Uglovi i kuće (10 sistema, izbor na ekranu karte), Porphyry umesto Placidusa/Koch-a iznad polarnog kruga, aspekti sa orbima po workspace-u (`aspect_orbs`, Settings → Chart & methods), SVG točak, tabele kuspida i aspekata, snimak sa svim tim na konsultaciji |
 
-Testovi na kraju Faze 4: **160 PHP** (822 provere, uključujući 12 referentnih testova tačnosti prema NASA JPL Horizons) i **52 Vitest**; CI: GitHub Actions (Pint, Prettier, Vitest, build, PHPUnit na MariaDB 11.8).
+Testovi na kraju Faze 5: **217 PHP** (1650 provera; od toga 12 referentnih testova pozicija prema NASA JPL Horizons i 29 testova uglova i kuća prema nezavisnim formulama — oba skupa se izvršavaju samo gde postoji `swetest`) i **67 Vitest**; CI: GitHub Actions (Pint, Prettier, Vitest, build, PHPUnit na MariaDB 11.8).
 
 ## Ključne odluke
 
@@ -41,32 +42,34 @@ Testovi na kraju Faze 4: **160 PHP** (822 provere, uključujući 12 referentnih 
 - **Vremenska linija (Faza 4):** projekciona tabela `activity_events` odmah, ne UNION više tabela. Redovi koji imaju svoju stavku (klijent, konsultacija, beleška, fajl, karta) održavaju je sami; izmene profila i podataka rođenja se beleže posebno, samo nazivi polja. `php artisan activity:rebuild` pravi projekcije iznova.
 - **Formatiran tekst (Faza 4):** TipTap editor (MIT) + serverska lista dozvoljenih HTML elemenata (Symfony HtmlSanitizer, MIT). Čuva se HTML, jer isti sadržaj ide u PDF i portal.
 - **Fajlovi (Faza 4):** tip se proverava iz sadržaja; interno ime; download samo kroz autorizovanu rutu (na bucket-u potpisani URL od 5 minuta). Tuđ privatni sadržaj je 404.
+- **Karta (Faza 5):**
+  - kuće i uglovi iz istog `swetest` poziva kao planete; iznad polarnog kruga engine sam prelazi na Porphyry, adapter to prepoznaje, a karta čuva i traženi i upotrebljeni sistem i kaže to na ekranu;
+  - format `payload`-a ima verziju (sada 2) i ona je u `input_hash`, kao i orbi workspace-a; stari snimci ostaju samo sa pozicijama i prikazuju se sa napomenom;
+  - aspekti uključuju ASC i MC (bez smera kretanja), ne i srednji čvor; kod nepoznatog vremena Mesec se izostavlja iz aspekata;
+  - privremene podrazumevane vrednosti (do validacionih razgovora): orbi 8 / 4 / 6 / 6 / 7, kvinkunks 3, ostali manji 2, manji aspekti isključeni, +1,5° za Sunce i Mesec;
+  - izbor sistema kuća na ekranu karte je samo za taj prikaz; svaki sistem je zaseban proračun, pa i zasebna stavka „Natal chart recalculated“ na vremenskoj liniji (sa nazivom sistema);
+  - tačnost uglova i kuća se proverava formulama iz udžbenika (Meeus), ne drugim programima.
 
 ## Otvoreno — čeka odluku ili akciju
 
-1. **Validacioni razgovori sa 5 astrologa** (dokument 01) — po dokumentu 04 Faza 4 je „prvi proizvod pogodan za pokazivanje astrolozima iz validacione grupe“, pa je sada pravi trenutak. Preduslov za redosled od Faze 6.
+1. **Validacioni razgovori sa 5 astrologa** (dokument 01). Po dokumentu 04 „ništa iza Faze 5 se ne gradi bez potvrde iz razgovora sa stvarnim astrolozima“ — ovo je sada blokirajuće za redosled od Faze 6. U razgovore idu i pitanja 3–5 iz dokumenta 11 (sistem kuća po metodi, orbi, značaj PDF-a).
 2. **Hiron:** traži fajl `ephe/seas_18.se1` (0,2 MB) iz istog repozitorijuma — treba potvrda za preuzimanje.
 3. **Srpski prevod interfejsa:** infrastruktura je spremna, dodaje se na zahtev.
 4. **Produkcioni server** (Hetzner) i lokalni prelazak na MariaDB 11.8. Za upload na produkciji: PHP-FPM `upload_max_filesize` / `post_max_size` i `client_max_body_size` web servera moraju biti bar `ATTACHMENTS_MAX_MB`.
 5. **Linux build `swetest`-a** za produkciju (`make swetest`).
 6. **Dokument 08** nedostaje u specifikaciji.
 7. Odloženo iz Faze 4: oznake, prilozi i istorija izmena na beleškama; brisanje fajlova sa diska posle soft delete-a (pravila čuvanja, Faza 8); thumbnail-ovi, antivirus i uklanjanje EXIF podataka (bezbednosna provera, Faza 8).
-8. Lokalno: stara baza `astrolabe.online__10.2026` (sa tačkom) može da se obriše; test workspace je podešen na **sidereal/Lahiri** (iz testa u Fazi 1), pa su pozicije kod Ane sidereal — menja se u Settings → Chart & methods.
+8. Odloženo iz Faze 5: izvoz karte u PDF (Faza 9); izbor sistema kuća pri prilaganju snimka postoji u API-ju (`house_system`), ali ne i u interfejsu konsultacije.
+9. Lokalno: stara baza `astrolabe.online__10.2026` (sa tačkom) može da se obriše; test workspace je podešen na **sidereal/Lahiri i Whole Sign** (iz testa u Fazi 1) — menja se u Settings → Chart & methods. Tri test klijenta iz Faze 5 mogu da se arhiviraju.
 
-## Sledeće: Faza 5 — puna natalna karta
+## Sledeće
 
-Prema `docs/spec/04` i `11`. Plan dogovoren 24. 9. 2026, korisnik je rekao da se nastavlja sa njim:
+Faze 0–5 su završene. Dokument 04 kaže da je Faza 5 poslednja koja se gradi bez potvrde astrologa, pa su dva puta:
 
-1. **Uglovi i kuće.** ASC, MC, DSC, IC i 12 kuspida. Sistem kuća: podrazumevani sa workspace-a, uz izbor na ekranu karte (svaki sistem je svoj keširan proračun, `input_hash` ga već obuhvata). `swetest` daje kuće i uglove u istom pozivu kao planete: dodati `-house<lon>,<lat>,<kod>` (kodovi su u `App\Enums\HouseSystem::swissEphemerisCode()`); izlaz sadrži `house 1..12`, `Ascendant`, `MC`, `ARMC`, `Vertex`.
-2. **Visoke širine (izmereno):** iznad polarnog kruga `swetest` sam prelazi na Porphyry i piše `error: House method Placidus failed, Porphyry calculated instead` (isto za Koch). `SwissEphemerisEngine` danas svaku takvu liniju tretira kao grešku — treba da prepozna baš ovu poruku, sačuva i traženi i stvarno upotrebljeni sistem, a karta da kaže „Placidus nije moguć na 69°N, prikazan Porphyry“.
-3. **`time_accuracy`:** `unknown` — bez uglova i kuća (točak samo sa planetama, 0° Ovna levo, Mesec kao luk); `approximate` — puna karta uz upozorenje.
-4. **Aspekti** (`AspectCalculator`, serverski): konjunkcija, sekstil, kvadrat, trigon, opozicija; manji (kvinkunks, polusekstil, polukvadrat, seskvikvadrat) isključeni dok se ne uključe. Orbi po workspace-u u `workspaces.aspect_orbs` (JSON, uvodi se sada), podešavanje u Settings → Chart & methods; podrazumevano 8 / 4 / 6 / 6 / 7, kvinkunks 3, +1,5° kada učestvuje Sunce ili Mesec. Aplikujući / separirajući iz brzina.
-5. **SVG točak** (inline Vue komponenta, boje iz `tokens.css`, bez biblioteke): prsten znakova, kuspide sa brojevima, planete sa stepenom i minutom i ℞, razmicanje bliskih planeta, linije aspekata po tipu, istaknuti ASC/MC, tekstualni opis za čitače ekrana. Dizajn: `prototype/v1/prototype/assets/js/chart.js` (`drawWheel`). Tabela pozicija dobija kolonu kuće; nova tabela aspekata.
-6. **Snimak na konsultaciji** dobija uglove, kuće, aspekte i točak. U `input_hash` dodati verziju formata payload-a, da se stari keš (samo pozicije) ne koristi za novu kartu; stari snimci ostaju kakvi su.
-7. **Testovi tačnosti:** južna hemisfera, dan promene sata, širine iznad 66° (očekivani Porphyry, nikad greška), `unknown` bez uglova. Nezavisna provera: ASC i MC formulom (zvezdano vreme + nagib ekliptike) u granici 1′; Equal, Whole Sign i Porphyry iz uglova; Placidus po definicionom svojstvu (deljenje polulukova). JPL Horizons ne daje uglove; izvori koje ugovor zabranjuje da se pominju ne koriste se ni u fixture-ima.
-8. Dokumentacija: 02 (karta), 05 (`aspect_orbs`, payload), 11 (stanje, odgovori na otvorena pitanja 3 i 4 kao privremene podrazumevane vrednosti), 00-changelog, `api-conventions.md`, CLAUDE.md/AGENTS.md.
+1. **Validacioni razgovori** (preporuka): prikazati Fazu 5 astrolozima iz validacione grupe i zapisati odgovore; oni mogu promeniti redosled od Faze 6 i podrazumevane vrednosti karte.
+2. **Faza 6 — organizacija prakse** po dokumentu 04 (usluge; kalendar dan / nedelja / mesec / agenda; termini sa vremenskim zonama i serverskom proverom konflikata; povezane osobe; zadaci i follow-up; dashboard), ako korisnik odluči da ne čeka razgovore. Specifikacija: 02, 05, 10.
 
-Hiron nije deo plana dok korisnik ne potvrdi preuzimanje `seas_18.se1`.
+Pre početka Faze 6 dogovoriti obim i podrazumevane odluke, pa ih upisati ovde.
 
 ## Način rada
 

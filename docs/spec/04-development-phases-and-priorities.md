@@ -166,6 +166,8 @@ Procena: 2–3 nedelje.
 
 Kriterijum završetka: astrolog vidi kompletnu natalnu kartu u aplikaciji i može je priložiti konsultaciji.
 
+> Status: završeno 24. 9. 2026. Uglovi i 12 kuspida u deset sistema kuća, sa izborom sistema na ekranu karte; iznad polarnog kruga Porphyry umesto Placidusa i Koch-a, a karta čuva i prikazuje i traženi i upotrebljeni sistem; aspekti sa orbima podesivim po workspace-u; SVG točak; tabele pozicija sa kućama, kuspida i aspekata; snimak na konsultaciji sa svim tim. Uglovi i kuće su provereni formulama nezavisnim od engine-a (odstupanje ispod lučne sekunde); testovi pokrivaju južnu hemisferu, dan promene sata i širine iznad 66°.
+
 ## Faza 6 — organizacija prakse
 
 - usluge;

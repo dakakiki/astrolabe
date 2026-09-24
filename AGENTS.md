@@ -57,6 +57,17 @@ before starting a phase. The user communicates in Serbian.
 - Longitudes are shown truncated to whole minutes (never rounded into the next sign).
 - A consultation's chart snapshot is a `chart_calculation_id`; calculations are never overwritten,
   so never delete a calculation a consultation points to.
+- Houses and angles come from the same swetest call (`-house<lon>,<lat>,<code>`, format `-fPpls`).
+  Inside the polar circles swetest replaces Placidus/Koch with Porphyry and prints
+  `error: House method … failed, Porphyry calculated instead`; the adapter tolerates exactly that
+  line and records both `requested_system` and `system`. Any other error or warning still fails.
+- `ChartService::PAYLOAD_VERSION` and the workspace's aspect orbs are part of `input_hash`. Bump
+  the version whenever the payload shape changes; `ChartResource` must keep reading older rows
+  (consultation snapshots from before Phase 5 have positions only).
+- Aspects and houses are calculated on the server (`AspectCalculator`, `AspectSettings`,
+  `Houses`); `resources/js/lib/chart.js` is geometry and wording only.
+- `HouseAccuracyTest` checks angles and houses against textbook formulas (Meeus); keep reference
+  values independent of the engine and never from sources the licence contract forbids naming.
 
 ## Consultations, notes, files, timeline
 

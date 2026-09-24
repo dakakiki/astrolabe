@@ -25,6 +25,8 @@ class WorkspaceResource extends JsonResource
             'default_house_system' => $this->default_house_system->value,
             'default_zodiac_mode' => $this->default_zodiac_mode->value,
             'default_ayanamsa' => $this->default_ayanamsa?->value,
+            // Always complete: stored values laid over the defaults.
+            'aspect_orbs' => $this->aspectSettings()->toArray(),
             'role' => $request->user()?->roleIn($this->resource)?->value,
         ];
     }

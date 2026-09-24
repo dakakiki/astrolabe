@@ -656,6 +656,19 @@
         cursor: pointer;
     }
 
+    /* Narrow columns, such as the consultation sidebar. */
+    table.data.dense td,
+    table.data.dense th {
+        padding-left: 6px;
+        padding-right: 6px;
+    }
+
+    table.data.dense td,
+    table.data.dense tbody th {
+        padding-top: 7px;
+        padding-bottom: 7px;
+    }
+
     table.data tbody tr:hover {
         background: var(--brand-050);
     }
@@ -1053,6 +1066,255 @@
     .empty .e-glyph {
         font-size: 24px;
         color: var(--ink-4);
+    }
+
+    /* ---------------- Chart wheel ---------------- */
+
+    .wheel-wrap {
+        position: relative;
+    }
+
+    /* A faint glow of the night sky behind the wheel; off in the day theme. */
+    .wheel-wrap::before {
+        content: '';
+        position: absolute;
+        inset: 6%;
+        border-radius: 50%;
+        background: radial-gradient(circle at 50% 50%, var(--brand-050) 0%, transparent 68%);
+        opacity: var(--stars);
+        pointer-events: none;
+    }
+
+    .wheel {
+        position: relative;
+        display: block;
+        width: 100%;
+        max-width: 600px;
+        height: auto;
+        margin: 0 auto;
+        font-family: var(--sans);
+    }
+
+    .wheel .band {
+        fill: var(--surface-2);
+        stroke: var(--line);
+    }
+
+    .wheel .face {
+        fill: var(--surface);
+        stroke: var(--line);
+    }
+
+    .wheel .ring {
+        fill: none;
+        stroke: var(--line);
+    }
+
+    .wheel .tick {
+        stroke: var(--ink-4);
+        stroke-width: 0.6;
+        opacity: 0.55;
+    }
+
+    .wheel .sign-edge {
+        stroke: var(--line);
+    }
+
+    .wheel .sign-glyph {
+        font-size: 18px;
+        text-anchor: middle;
+        dominant-baseline: central;
+    }
+
+    .wheel .sign-glyph.el-fire {
+        fill: var(--fire);
+    }
+
+    .wheel .sign-glyph.el-earth {
+        fill: var(--earth);
+    }
+
+    .wheel .sign-glyph.el-air {
+        fill: var(--air);
+    }
+
+    .wheel .sign-glyph.el-water {
+        fill: var(--water);
+    }
+
+    .wheel .cusp {
+        stroke: var(--line);
+    }
+
+    .wheel .house-num {
+        font-family: var(--mono);
+        font-size: 10px;
+        fill: var(--ink-4);
+        text-anchor: middle;
+        dominant-baseline: central;
+    }
+
+    .wheel .angle-line {
+        stroke: var(--ink-3);
+        stroke-width: 1.2;
+    }
+
+    .wheel .angle-line.is-main {
+        stroke: var(--ink-2);
+        stroke-width: 1.8;
+    }
+
+    .wheel .angle-label {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 500;
+        fill: var(--ink-3);
+        text-anchor: middle;
+        dominant-baseline: central;
+    }
+
+    .wheel .angle-label.is-main {
+        fill: var(--ink);
+        font-weight: 600;
+    }
+
+    .wheel .planet-glyph {
+        font-size: 19px;
+        fill: var(--ink);
+        text-anchor: middle;
+        dominant-baseline: central;
+    }
+
+    /* Drawn small in a sidebar: larger glyphs, no degree labels. */
+    .wheel.is-compact .planet-glyph {
+        font-size: 26px;
+    }
+
+    .wheel.is-compact .sign-glyph {
+        font-size: 22px;
+    }
+
+    .wheel .planet-deg {
+        font-family: var(--mono);
+        font-size: 9.5px;
+        fill: var(--ink-3);
+        text-anchor: middle;
+        dominant-baseline: central;
+    }
+
+    .wheel .planet-retro {
+        fill: var(--brass);
+    }
+
+    .wheel .marker {
+        stroke: var(--ink-2);
+        stroke-width: 1.2;
+    }
+
+    .wheel .leader {
+        stroke: var(--ink-4);
+        stroke-width: 0.6;
+    }
+
+    .wheel .body:hover .planet-glyph {
+        fill: var(--link);
+    }
+
+    .wheel .moon-range {
+        fill: none;
+        stroke: var(--brass);
+        stroke-width: 4;
+        stroke-linecap: round;
+        opacity: 0.6;
+    }
+
+    /* Aspect colours, shared by the wheel, its legend and the aspect table. */
+    .asp-conjunction {
+        --asp: var(--ink-3);
+    }
+
+    .asp-sextile {
+        --asp: var(--ok);
+        --asp-dash: 5 3;
+    }
+
+    .asp-square {
+        --asp: var(--danger);
+    }
+
+    .asp-trine {
+        --asp: var(--info);
+    }
+
+    .asp-opposition {
+        --asp: var(--danger);
+        --asp-dash: 7 3;
+    }
+
+    .asp-quincunx {
+        --asp: var(--brass);
+        --asp-dash: 2 3;
+    }
+
+    .asp-semisextile {
+        --asp: var(--ok);
+        --asp-dash: 2 3;
+    }
+
+    .asp-semisquare,
+    .asp-sesquisquare {
+        --asp: var(--warn);
+        --asp-dash: 2 3;
+    }
+
+    .wheel .asp {
+        fill: none;
+        stroke: var(--asp);
+        stroke-dasharray: var(--asp-dash, none);
+    }
+
+    .wheel .asp-tight {
+        stroke-width: 1.7;
+        opacity: 0.9;
+    }
+
+    .wheel .asp-close {
+        stroke-width: 1.1;
+        opacity: 0.7;
+    }
+
+    .wheel .asp-wide {
+        stroke-width: 0.8;
+        opacity: 0.5;
+    }
+
+    .aspect-glyph {
+        color: var(--asp);
+    }
+
+    .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 16px;
+        font-size: 11.5px;
+        color: var(--ink-2);
+    }
+
+    .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .legend svg {
+        width: 20px;
+        height: 4px;
+    }
+
+    .legend line {
+        stroke: var(--asp);
+        stroke-width: 2;
+        stroke-dasharray: var(--asp-dash, none);
     }
 
     /* ---------------- Auth screens ---------------- */

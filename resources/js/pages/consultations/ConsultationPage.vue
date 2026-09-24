@@ -7,8 +7,8 @@ import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
 import ClientPicker from '@/components/ClientPicker.vue';
 import ConsultationStatusBadge from '@/components/ConsultationStatusBadge.vue';
 import FormField from '@/components/FormField.vue';
+import NatalChart from '@/components/NatalChart.vue';
 import NotesPanel from '@/components/NotesPanel.vue';
-import PositionsTable from '@/components/PositionsTable.vue';
 import VisibilityBadge from '@/components/VisibilityBadge.vue';
 import { useForm } from '@/composables/useForm';
 import { timeZoneOptions, useLabels } from '@/composables/useLabels';
@@ -482,7 +482,7 @@ const otherZone = computed(() => {
                         </div>
                         <div class="card-body space-y-3">
                             <template v-if="consultation.chart">
-                                <PositionsTable :chart="consultation.chart" />
+                                <NatalChart :chart="consultation.chart" :name="client?.full_name" compact />
                                 <p class="text-xs text-ink-3">{{ t('consultations.chart.snapshotNote') }}</p>
                                 <div class="flex flex-wrap gap-2">
                                     <button type="button" class="btn btn-sm" :disabled="chartBusy" @click="attachChart">

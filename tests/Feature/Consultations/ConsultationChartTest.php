@@ -7,6 +7,8 @@ use App\Astrology\Engines\FakeEngine;
 use App\Astrology\Exceptions\EphemerisException;
 use App\Astrology\ValueObjects\ChartRequest;
 use App\Astrology\ValueObjects\ChartResult;
+use App\Models\ChartCalculation;
+use App\Models\Consultation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -66,9 +68,56 @@ class ConsultationChartTest extends TestCase
             ->assertJsonPath('data.has_chart', true)
             ->assertJsonPath('data.chart.status', 'ready')
             ->assertJsonPath('data.chart.engine.name', 'Fake engine')
-            ->assertJsonCount(12, 'data.chart.positions');
+            ->assertJsonCount(12, 'data.chart.positions')
+            ->assertJsonPath('data.chart.version', 2)
+            ->assertJsonPath('data.chart.houses.system', 'placidus')
+            ->assertJsonCount(12, 'data.chart.houses.cusps')
+            ->assertJsonStructure(['data' => ['chart' => ['angles' => ['asc', 'mc', 'dsc', 'ic'], 'aspects', 'aspect_settings']]]);
 
         $this->actingAs($this->user)->getJson('/api/v1/consultations')->assertJsonPath('data.0.has_chart', true);
+    }
+
+    public function test_the_snapshot_can_be_taken_in_another_house_system(): void
+    {
+        ['consultation' => $id] = $this->consultation();
+
+        $this->actingAs($this->user)->postJson("/api/v1/consultations/{$id}/chart", ['house_system' => 'koch'])
+            ->assertOk()
+            ->assertJsonPath('data.chart.house_system', 'koch')
+            ->assertJsonPath('data.chart.houses.requested_system', 'koch');
+
+        $this->actingAs($this->user)->postJson("/api/v1/consultations/{$id}/chart", ['house_system' => 'made_up'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('house_system');
+    }
+
+    public function test_a_snapshot_from_before_houses_existed_still_shows_its_positions(): void
+    {
+        ['client' => $client, 'consultation' => $id] = $this->consultation();
+        $old = ChartCalculation::withoutGlobalScopes()->forceCreate([
+            'workspace_id' => $this->user->current_workspace_id,
+            'subject_type' => 'client',
+            'subject_id' => $client,
+            'chart_type' => 'natal',
+            'input_hash' => str_repeat('b', 64),
+            'julian_day_ut' => 2446262.02083333,
+            'house_system' => 'placidus',
+            'zodiac_mode' => 'tropical',
+            'time_accuracy' => 'exact',
+            'payload' => ['positions' => [['body' => 'sun', 'longitude' => 112.95, 'speed' => 0.95, 'retrograde' => false]]],
+            'engine_name' => 'Fake engine',
+            'engine_version' => '1',
+            'calculated_at' => now()->subYear(),
+        ]);
+        Consultation::withoutGlobalScopes()->whereKey($id)->update(['chart_calculation_id' => $old->id]);
+
+        $this->actingAs($this->user)->getJson("/api/v1/consultations/{$id}")
+            ->assertOk()
+            ->assertJsonPath('data.chart.version', 1)
+            ->assertJsonPath('data.chart.positions.0.body', 'sun')
+            ->assertJsonPath('data.chart.houses', null)
+            ->assertJsonPath('data.chart.angles', null)
+            ->assertJsonPath('data.chart.aspects', null);
     }
 
     public function test_the_snapshot_survives_a_correction_of_the_birth_time(): void

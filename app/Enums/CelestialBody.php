@@ -30,6 +30,21 @@ enum CelestialBody: string
         ];
     }
 
+    /** The Sun and Moon, which get a wider orb. */
+    public function isLuminary(): bool
+    {
+        return $this === self::Sun || $this === self::Moon;
+    }
+
+    /**
+     * Whether aspects to this body are listed. The mean node sits within a
+     * degree or two of the true node, so it would only repeat its aspects.
+     */
+    public function takesAspects(): bool
+    {
+        return $this !== self::MeanNode;
+    }
+
     /** SE_SUN … SE_PLUTO, SE_MEAN_NODE (10), SE_TRUE_NODE (11). */
     public function swissEphemerisNumber(): int
     {
