@@ -47,7 +47,7 @@ Laravel sa `SESSION_DRIVER=database` koristi sopstvenu `sessions` tabelu. Sudar 
 
 ## Verzija 2.1 — baza
 
-Baza je **MariaDB** umesto MySQL 8. Produkcija ide na Hetzner, koji koristi MariaDB, pa se razvoj radi na istoj bazi da prenos ne bi pravio probleme. JSON kolone ostaju (u MariaDB-u su `LONGTEXT` sa proverom validnosti), Laravel koristi `mariadb` driver. Izmenjeni dokumenti 03 i 04. Otvoreno: upisati tačnu MariaDB verziju sa Hetzner-a i uskladiti lokalnu.
+Baza je **MariaDB** umesto MySQL 8. Produkcija ide na Hetzner, koji koristi MariaDB, pa se razvoj radi na istoj bazi da prenos ne bi pravio probleme. JSON kolone ostaju (u MariaDB-u su `LONGTEXT` sa proverom validnosti), Laravel koristi `mariadb` driver. Izmenjeni dokumenti 03 i 04. Produkciona verzija utvrđena 24. 9. 2026: **MariaDB 11.8** (LTS, podrška do juna 2028); CI je prebačen na istu granu. Otvoreno: lokalni server uskladiti na 11.8.
 
 Iz Faze 0: ime baze ne sme sadržati tačku (Laravel ga deli po tački), pa je baza `astrolabe_online__10_2026`; InnoDB se zadaje u konfiguraciji aplikacije jer lokalni WAMP server podrazumeva MyISAM; testovi idu nad MariaDB-om, ne SQLite-om. Laravel je fiksiran na 13, CSS sistem je Tailwind 4 nad design tokenima iz prototipa.
 

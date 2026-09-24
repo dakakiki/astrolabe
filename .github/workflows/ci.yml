@@ -10,10 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      # Production runs on Hetzner MariaDB (docs/spec/03). Keep this image on
-      # the same major version once the Hetzner version is confirmed.
+      # Same LTS branch as production on Hetzner (docs/spec/03).
       mariadb:
-        image: mariadb:10.11
+        image: mariadb:11.8
         env:
           MARIADB_ROOT_PASSWORD: root
           MARIADB_DATABASE: astrolabe_test
