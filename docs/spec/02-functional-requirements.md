@@ -69,6 +69,8 @@ Zahtevi:
 - ako geokoder ne uspe, klijent se može sačuvati bez koordinata, ali se karta ne računa i prikazuje se jasna poruka šta nedostaje;
 - provajder geokodiranja se poziva kroz apstrakciju, da bi mogao biti zamenjen.
 
+**Odluka (24. 9. 2026):** lokalna kopija GeoNames baze (CC BY 4.0) u sopstvenoj MariaDB tabeli, sa sopstvenim autocomplete-om. Nijedan unos ne odlazi trećoj strani, rezultati se smeju trajno čuvati, a svaki zapis već sadrži IANA zonu. Mesta u zemlji prakse rangiraju se više; pretraga pronalazi i druga pisma (ćirilica) i istorijske nazive (Titograd → Podgorica). Za ručno unete koordinate zona se predlaže prema najbližem mestu. Geoapify ostaje rezervni izvor iza istog interfejsa, ako se pokaže da mesta nedostaju. U aplikaciji se navodi „Place data © GeoNames“.
+
 ### `time_accuracy` određuje šta se prikazuje
 
 Polje nije više samo informativno. Ono direktno kontroliše obim proračuna:

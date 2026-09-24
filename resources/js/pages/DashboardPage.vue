@@ -12,10 +12,15 @@ const auth = useAuthStore();
 const labels = useLabels();
 
 const methods = ref(null);
+const clientCount = ref(null);
 
 onMounted(async () => {
-    const { data } = await http.get('/astrology-methods');
-    methods.value = data.data.filter((method) => method.selected);
+    const [methodResponse, clientResponse] = await Promise.all([
+        http.get('/astrology-methods'),
+        http.get('/clients', { params: { status: 'all', per_page: 1 } }),
+    ]);
+    methods.value = methodResponse.data.data.filter((method) => method.selected);
+    clientCount.value = clientResponse.data.meta.total;
 });
 
 const firstName = computed(() => auth.user?.name.split(/\s+/)[0] ?? '');
@@ -48,7 +53,7 @@ const steps = computed(() => [
     { label: t('dashboard.setup.methods'), to: { name: 'settings.chart' }, done: (methods.value?.length ?? 0) > 0 },
     { label: t('dashboard.setup.chart'), to: { name: 'settings.chart' } },
     { label: t('dashboard.setup.regional'), to: { name: 'settings.regional' } },
-    { label: t('dashboard.setup.clients'), soon: true },
+    { label: t('dashboard.setup.clients'), to: { name: 'clients.create' }, done: (clientCount.value ?? 0) > 0 },
 ]);
 </script>
 

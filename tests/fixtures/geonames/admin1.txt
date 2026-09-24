@@ -1,0 +1,5 @@
+RS.SE	Central Serbia	Central Serbia	7581
+RS.VO	Vojvodina	Vojvodina	3237205
+ME.16	Podgorica	Podgorica	3193044
+FR.93	Provence-Alpes-Côte d'Azur	Provence-Alpes-Cote d'Azur	2985244
+CH.ZH	Zurich	Zurich	2657895

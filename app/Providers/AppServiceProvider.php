@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Astrology\Contracts\Geocoder;
+use App\Astrology\Geocoding\LocalGeoNamesGeocoder;
 use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -20,6 +22,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // One per request or job; forgotten between them.
         $this->app->scoped(CurrentWorkspace::class);
+
+        $this->app->bind(Geocoder::class, LocalGeoNamesGeocoder::class);
     }
 
     /**

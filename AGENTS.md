@@ -37,6 +37,14 @@ before starting a phase. The user communicates in Serbian.
   practice data. Session-based helper routes live in `routes/web.php` under the same prefix.
 - Mail goes to `storage/logs/laravel.log` locally (`MAIL_MAILER=log`).
 
+## Birth data
+
+- Birth places come from the local GeoNames copy (`places`, `place_names`) through the
+  `App\Astrology\Contracts\Geocoder` contract. Never call an external geocoder directly.
+- A chosen place is copied into `client_birth_details` and frozen: re-sending the same
+  `place_id` must not re-resolve it (`SaveBirthDetails`). Hand-entered locations are `manual`.
+- Birth date/time are stored as entered (local), never converted to UTC in the database.
+
 ## Database
 
 - MariaDB, connection `mariadb`. Local server: `127.0.0.1:3307`, databases

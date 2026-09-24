@@ -6,12 +6,14 @@ use App\Enums\Ayanamsa;
 use App\Enums\HouseSystem;
 use App\Enums\ZodiacMode;
 use Database\Factories\WorkspaceFactory;
+use DateTimeZone;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Throwable;
 
 /**
  * The business space of one astrologer or studio; the tenant boundary.
@@ -76,6 +78,18 @@ class Workspace extends Model
     public function ownAstrologyMethods(): HasMany
     {
         return $this->hasMany(AstrologyMethod::class);
+    }
+
+    /** The country of the practice's time zone, e.g. "RS" for Europe/Belgrade; null for UTC. */
+    public function countryCode(): ?string
+    {
+        try {
+            $code = (new DateTimeZone($this->timezone))->getLocation()['country_code'] ?? null;
+        } catch (Throwable) {
+            return null;
+        }
+
+        return $code && $code !== '??' ? $code : null;
     }
 
     /**

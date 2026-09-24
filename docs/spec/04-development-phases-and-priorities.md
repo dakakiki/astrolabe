@@ -81,7 +81,7 @@ Rezultati:
 ### Blokirajuće odluke koje moraju biti rešene pre koda
 
 1. **Licenca ephemeris biblioteke.** Swiss Ephemeris je dvojno licenciran: AGPL-3.0 ili plaćena komercijalna licenca. AGPL nije primenljiv na zatvoreni SaaS jer mrežno korišćenje aktivira obavezu objavljivanja izvornog koda. Alternativa bez tog troška je Astronomy Engine pod MIT licencom, ali on ne računa kuće. Odluka mora biti doneta i dokumentovana pre Faze 3. Detalji: `11-astrology-calculation-module.md`.
-2. **Izbor provajdera geokodiranja** sa razrešavanjem IANA vremenske zone, uključujući cenu i uslove korišćenja.
+2. **Izbor provajdera geokodiranja** sa razrešavanjem IANA vremenske zone, uključujući cenu i uslove korišćenja. — *Rešeno 24. 9. 2026: lokalna kopija GeoNames (dokument 02).*
 3. **Tržišna validacija.** Razgovori sa najmanje pet astrologa koji naplaćuju konsultacije, prema pitanjima iz dokumenta 01. Rezultat može promeniti redosled faza od Faze 6 nadalje.
 
 Kriterijum završetka: projekat se može klonirati i pokrenuti iz dokumentovanih koraka, licenca je izabrana, a validacioni razgovori su obavljeni i zapisani.

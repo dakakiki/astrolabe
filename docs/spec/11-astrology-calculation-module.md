@@ -149,6 +149,8 @@ Bez koordinata nema karte. Zahtevi:
 - ručna korekcija je dozvoljena, jer istorijske granice i nazivi mesta nisu uvek tačni;
 - provajder se poziva kroz `Geocoder` interfejs, da bi mogao biti zamenjen.
 
+Izabrana je lokalna kopija GeoNames baze (vidi dokument 02). Implementacija: `App\Astrology\Contracts\Geocoder`, `App\Astrology\Geocoding\LocalGeoNamesGeocoder`.
+
 ## `time_accuracy` određuje obim proračuna
 
 Polje koje već postoji u specifikaciji postaje funkcionalno:
@@ -268,7 +270,7 @@ Za taj trošak proizvod prestaje da bude još jedan CRM.
 ## Otvorena pitanja
 
 1. ~~Koja je aktuelna cena i uslovi komercijalne licence Swiss Ephemeris-a?~~ Rešeno 24. 9. 2026 — vidi „Detalji odluke“.
-2. Koji provajder geokodiranja daje i koordinate i IANA zonu po prihvatljivoj ceni?
+2. ~~Koji provajder geokodiranja daje i koordinate i IANA zonu po prihvatljivoj ceni?~~ Rešeno 24. 9. 2026 — lokalna kopija GeoNames.
 3. Koji sistem kuća je podrazumevan po metodi, i da li astrolozi iz validacione grupe to potvrđuju?
 4. Da li astrolozi žele mogućnost da menjaju orbe, ili je to nepotrebna složenost u prvoj verziji?
 5. Koliko je izvoz karte u PDF važan u odnosu na prikaz u aplikaciji?

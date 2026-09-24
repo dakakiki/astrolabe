@@ -34,6 +34,7 @@ Adjust `DB_*` in `.env` if your server differs from the defaults (`127.0.0.1:330
 
 ```bash
 php artisan migrate
+php artisan places:import   # birth-place gazetteer from GeoNames (~14 MB download, about a minute)
 npm run build
 ```
 
@@ -65,6 +66,13 @@ resources/css/tokens.css      design tokens (night/day themes), carried over fro
 docs/spec                     product and technical specification, documents 00–11
 docs/api-conventions.md       API rules
 ```
+
+## Birth places
+
+Birth places come from a local copy of [GeoNames](https://www.geonames.org) (CC BY 4.0), loaded by
+`php artisan places:import` and refreshed monthly by the scheduler. `PLACES_SOURCE=cities500` (default)
+holds places above 500 inhabitants; `PLACES_SOURCE=all` holds every populated place. Nothing a user
+types into the place search leaves the server.
 
 ## Licensing note
 

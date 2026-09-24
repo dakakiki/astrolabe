@@ -53,6 +53,30 @@ const routes = [
         meta: { verified: true },
     },
     {
+        path: '/clients',
+        name: 'clients.index',
+        component: () => import('@/pages/clients/ClientsPage.vue'),
+        meta: { verified: true },
+    },
+    {
+        path: '/clients/new',
+        name: 'clients.create',
+        component: () => import('@/pages/clients/ClientFormPage.vue'),
+        meta: { verified: true },
+    },
+    {
+        path: '/clients/:id(\\d+)',
+        name: 'clients.show',
+        component: () => import('@/pages/clients/ClientPage.vue'),
+        meta: { verified: true },
+    },
+    {
+        path: '/clients/:id(\\d+)/edit',
+        name: 'clients.edit',
+        component: () => import('@/pages/clients/ClientFormPage.vue'),
+        meta: { verified: true },
+    },
+    {
         path: '/settings',
         component: () => import('@/pages/settings/SettingsPage.vue'),
         meta: { verified: true },

@@ -98,7 +98,8 @@ Ugrađene metode su referentni podaci i unose se u samoj migraciji, ne preko see
 ### `client_birth_details`
 
 - `id`
-- `client_id`
+- `workspace_id` — kao i svaki tenant entitet
+- `client_id`, jedinstven
 - `birth_date`, nullable
 - `birth_time`, nullable
 - `birth_timezone` — IANA identifikator, nullable samo dok datum nije unet
@@ -106,8 +107,8 @@ Ugrađene metode su referentni podaci i unose se u samoj migraciji, ne preko see
 - `birth_country_code`, nullable
 - `latitude`, decimal(9,6), nullable
 - `longitude`, decimal(9,6), nullable
-- `geocode_source`, nullable — provajder ili `manual`
-- `geocode_confidence`, nullable
+- `place_id`, nullable — GeoNames id izabranog mesta; samo trag porekla, vrednosti su već kopirane
+- `geocode_source`, nullable — `geonames` ili `manual`
 - `time_accuracy` — `exact`, `approximate`, `unknown`, `rectified`
 - `data_source`, nullable
 - `notes`, nullable
@@ -120,7 +121,17 @@ Originalni lokalni datum, vreme i vremenska zona čuvaju se odvojeno. Podatak ro
 - `latitude`, `longitude` i `birth_timezone` su tehnički nullable, ali su **obavezni da bi se karta izračunala**; validacija to proverava na nivou akcije, ne kolone;
 - razrešene vrednosti se zamrzavaju pri unosu i ne razrešavaju se ponovo pri proračunu;
 - ručna izmena koordinata i zone mora biti dozvoljena i beleži se preko `geocode_source = manual`;
-- promena bilo kog polja u ovoj tabeli poništava keš izračunatih karata za tog klijenta.
+- promena bilo kog polja u ovoj tabeli poništava keš izračunatih karata za tog klijenta;
+- ponovno slanje istog `place_id` ne kopira mesto iznova, pa ni kasniji uvoz GeoNames podataka ne menja sačuvane koordinate i zonu.
+
+`geocode_confidence` je izostavljen: kod lokalne baze astrolog sam bira mesto sa liste, pa nema procene pouzdanosti.
+
+### `places` i `place_names` (referentni podaci, nisu tenant)
+
+Lokalna kopija GeoNames baze, puni je `php artisan places:import`, a osvežava se mesečno.
+
+- `places`: `id` (GeoNames id), `name`, `ascii_name`, `country_code`, `admin1_code`, `admin1_name`, `latitude`, `longitude`, `timezone` (IANA), `population`, `feature_code`, `modified_on`
+- `place_names`: `place_id`, `search_name` — svi nazivi mesta (drugi jezici i pisma, istorijski nazivi) normalizovani u mala ASCII slova, za pretragu po prefiksu
 
 ### `client_relationships`
 

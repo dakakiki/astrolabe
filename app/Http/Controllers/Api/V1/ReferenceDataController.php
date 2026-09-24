@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\Ayanamsa;
+use App\Enums\ClientStatus;
 use App\Enums\HouseSystem;
+use App\Enums\TimeAccuracy;
 use App\Enums\ZodiacMode;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -25,6 +27,9 @@ class ReferenceDataController extends Controller
                 'house_systems' => array_column(HouseSystem::cases(), 'value'),
                 'zodiac_modes' => array_column(ZodiacMode::cases(), 'value'),
                 'ayanamsas' => array_column(Ayanamsa::cases(), 'value'),
+                'countries' => config('countries'),
+                'client_statuses' => array_column(ClientStatus::cases(), 'value'),
+                'time_accuracies' => array_column(TimeAccuracy::cases(), 'value'),
             ],
         ]);
     }

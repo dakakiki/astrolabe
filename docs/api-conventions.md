@@ -46,6 +46,26 @@ Linkovi u emailovima vode na SPA stranice (`/verify-email/...`, `/reset-password
 | PUT | `/workspace/astrology-methods` | izbor metoda i podrazumevana metoda |
 | GET / POST / PATCH / DELETE | `/astrology-methods` | ugrađene + sopstvene metode |
 
+### Klijenti i mesta
+
+| Metoda | Putanja | Namena |
+|---|---|---|
+| GET | `/clients` | lista; `search`, `status` (bez parametra: svi osim arhiviranih; `all`), `tag`, `method`, `activity` (`week`, `month`, `quarter`, `older`), `sort` (`name`, `-last_activity_at`, `-created_at`), `page`, `per_page` |
+| POST | `/clients` | novi klijent; opciono `tags` (nazivi, prave se po potrebi), `method_ids`, `default_method_id`, `birth` |
+| GET / PATCH | `/clients/{id}` | profil; PATCH menja samo poslata polja, može i `birth` |
+| PUT | `/clients/{id}/birth-details` | samo podaci rođenja |
+| POST / DELETE | `/clients/{id}/archive` | arhiviranje / vraćanje iz arhive |
+| GET | `/tags` | oznake workspace-a sa brojem klijenata |
+| GET | `/places?q=` | autocomplete mesta rođenja (lokalni GeoNames); mesta u zemlji prakse prva |
+| GET | `/places/nearest?latitude=&longitude=` | najbliže mesto, za predlog zone uz ručne koordinate |
+
+Podaci rođenja (`birth`): `time_accuracy` (obavezno), `birth_date` (`YYYY-MM-DD`), `birth_time` (`HH:MM`, obavezno osim za `unknown`), `data_source`, `notes`, i lokacija na jedan od dva načina:
+
+- `place_id` — mesto iz autocomplete-a; server kopira naziv, državu, koordinate i zonu i više ih ne menja dok se ne izabere drugo mesto;
+- ručno: `latitude`, `longitude`, `birth_timezone` (zajedno), uz `birth_place` i `birth_country_code`.
+
+Odgovor uz podatke rođenja vraća i izvedene vrednosti: `chart.ready` / `chart.missing`, `moment` (UTC trenutak i istorijski offset), `clock_change` (`skipped` / `ambiguous` kod promene sata) i `zone_history_uncertain` (pre 1970).
+
 ## Odgovori
 
 Uspešan odgovor uvek ima omotač `data` (Laravel API Resources):

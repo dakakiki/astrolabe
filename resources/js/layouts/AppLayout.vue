@@ -12,7 +12,13 @@ const route = useRoute();
 const router = useRouter();
 
 const navGroups = [
-    { label: 'nav.practice', items: [{ to: { name: 'dashboard' }, label: 'nav.dashboard', icon: '◈', exact: true }] },
+    {
+        label: 'nav.practice',
+        items: [
+            { to: { name: 'dashboard' }, label: 'nav.dashboard', icon: '◈', exact: true },
+            { to: '/clients', label: 'nav.clients', icon: '◉' },
+        ],
+    },
     { label: 'nav.workspace', items: [{ to: '/settings', label: 'nav.settings', icon: '⚙' }] },
 ];
 

@@ -30,7 +30,8 @@
         "settings": "Settings",
         "openMenu": "Open menu",
         "userMenu": "Account menu",
-        "signOut": "Sign out"
+        "signOut": "Sign out",
+        "clients": "Clients"
     },
     "auth": {
         "art": {
@@ -103,7 +104,8 @@
             "chart": "Check the chart defaults",
             "regional": "Confirm your time zone and currency",
             "clients": "Add your first client",
-            "soon": "Coming next"
+            "soon": "Coming next",
+            "clientsDone": "Add your first client"
         },
         "practice": {
             "title": "Your practice",
@@ -226,5 +228,166 @@
     "notFound": {
         "title": "Page not found",
         "back": "Back to start"
+    },
+    "statuses": {
+        "lead": "Lead",
+        "active": "Active",
+        "inactive": "Inactive",
+        "archived": "Archived"
+    },
+    "timeAccuracy": {
+        "exact": {
+            "label": "Exact",
+            "hint": "Full chart: planets, angles, houses and aspects."
+        },
+        "rectified": {
+            "label": "Rectified",
+            "hint": "Full chart, marked as a rectified time."
+        },
+        "approximate": {
+            "label": "Approximate",
+            "hint": "Full chart, with a warning that angles and houses are unreliable."
+        },
+        "unknown": {
+            "label": "Unknown",
+            "hint": "Planets only, for 12:00 UT. No angles or houses; the Moon is shown as a range."
+        }
+    },
+    "geocodeSource": {
+        "geonames": "From the place list",
+        "manual": "Entered by hand"
+    },
+    "clients": {
+        "eyebrow": "Practice",
+        "title": "Clients",
+        "sub": "Everyone you work with, and their birth data.",
+        "add": "Add client",
+        "edit": "Edit",
+        "archive": "Archive",
+        "restore": "Restore",
+        "archived": "Client archived",
+        "restored": "Client restored",
+        "created": "Client added",
+        "saved": "Client saved",
+        "filters": {
+            "search": "Search by name, email or phone",
+            "status": "Status",
+            "statusDefault": "All but archived",
+            "statusAll": "All, including archived",
+            "tag": "Tag",
+            "method": "Method",
+            "activity": "Last activity",
+            "any": "Any",
+            "activityWeek": "Past week",
+            "activityMonth": "Past month",
+            "activityQuarter": "Past 3 months",
+            "activityOlder": "Longer ago or never",
+            "sort": "Sort",
+            "sortName": "Name",
+            "sortActivity": "Recent activity",
+            "sortCreated": "Newest"
+        },
+        "columns": {
+            "client": "Client",
+            "status": "Status",
+            "born": "Born",
+            "methods": "Methods",
+            "tags": "Tags",
+            "activity": "Last activity"
+        },
+        "empty": "No clients yet. Add the first one to see their birth data here.",
+        "noMatches": "No clients match these filters.",
+        "pagination": "{from}–{to} of {total}",
+        "previous": "Previous",
+        "next": "Next",
+        "chartIncomplete": "Birth data incomplete",
+        "form": {
+            "newTitle": "New client",
+            "editTitle": "Edit {name}",
+            "person": "Person",
+            "firstName": "First name",
+            "lastName": "Last name",
+            "email": "Email",
+            "phone": "Phone",
+            "country": "Country",
+            "timezone": "Time zone",
+            "language": "Preferred language",
+            "languageHint": "For your messages to the client; separate from your own interface language.",
+            "status": "Status",
+            "practice": "Practice",
+            "methods": "Methods",
+            "methodsHint": "The methods you use with this client.",
+            "showAllMethods": "Show all methods",
+            "defaultMethod": "Default",
+            "tags": "Tags",
+            "tagsPlaceholder": "Type a tag and press Enter",
+            "notes": "Private notes",
+            "notesHint": "Only you see these. Never shared with the client.",
+            "save": "Save client",
+            "cancel": "Cancel",
+            "none": "—"
+        },
+        "birth": {
+            "title": "Birth data",
+            "date": "Date of birth",
+            "time": "Local time of birth",
+            "accuracy": "Birth time",
+            "place": "Place of birth",
+            "placePlaceholder": "Start typing a town or city",
+            "placeAttribution": "Place data © GeoNames",
+            "noPlaces": "No place found. You can enter the coordinates by hand.",
+            "selected": "{label}",
+            "change": "Change",
+            "enterManually": "Enter coordinates by hand",
+            "backToList": "Choose from the list instead",
+            "placeName": "Place name",
+            "country": "Country",
+            "latitude": "Latitude",
+            "longitude": "Longitude",
+            "latitudeHint": "Decimal degrees, north positive (e.g. 45.2517)",
+            "longitudeHint": "Decimal degrees, east positive (e.g. 19.8369)",
+            "timezone": "Time zone",
+            "suggestTimezone": "Suggest from the nearest place",
+            "suggested": "Suggested from {place}.",
+            "dataSource": "Source of the birth data",
+            "dataSourceHint": "e.g. birth certificate, client’s memory, family record",
+            "notes": "Notes on the birth data",
+            "frozenHint": "Coordinates and time zone are saved with the client and never looked up again, so the chart stays the same."
+        },
+        "profile": {
+            "contact": "Contact & preferences",
+            "birth": "Birth data",
+            "notes": "Private notes",
+            "noNotes": "No private notes yet.",
+            "noBirth": "No birth data yet.",
+            "addBirth": "Add birth data",
+            "localTime": "Their local time now",
+            "created": "Client since",
+            "lastActivity": "Last activity",
+            "born": "Born",
+            "time": "Time",
+            "place": "Place",
+            "coordinates": "Coordinates",
+            "zone": "Time zone at birth",
+            "offset": "UTC{offset} · {abbr}",
+            "summerTime": "summer time",
+            "source": "Location",
+            "dataSource": "Source",
+            "chartReady": "Ready for the chart",
+            "chartSoon": "The natal chart arrives with the astrology module."
+        },
+        "missing": {
+            "title": "Before a chart can be calculated:",
+            "birth_date": "the date of birth",
+            "birth_time": "the time of birth (or mark it as unknown)",
+            "location": "the place of birth, with coordinates",
+            "timezone": "the time zone of the birth place"
+        },
+        "warnings": {
+            "skipped": "This time did not exist: clocks went forward that night. Check the time, or whether the record used the old time.",
+            "ambiguous": "This time happened twice: clocks went back that night. Check which of the two moments is meant.",
+            "zoneHistory": "Time-zone records before 1970 are unreliable in some regions. Check the offset if the chart looks wrong.",
+            "approximate": "The birth time is approximate, so angles and houses will be unreliable."
+        }
     }
 }

@@ -36,4 +36,19 @@ return [
 
     'default_currency' => 'EUR',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Birth places
+    |--------------------------------------------------------------------------
+    |
+    | The local GeoNames gazetteer (`php artisan places:import`). "cities500"
+    | holds every place above 500 inhabitants plus administrative seats;
+    | "all" holds every populated place, including small villages.
+    |
+    */
+
+    'places' => [
+        'source' => env('PLACES_SOURCE', 'cities500'),
+    ],
+
 ];
