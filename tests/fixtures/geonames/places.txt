@@ -1,8 +1,10 @@
 792680	Belgrade	Belgrade	BEG,Beograd,Belgrad,Београд,https://en.wikipedia.org/wiki/Belgrade	44.80401	20.46513	P	PPLC	RS		SE				1273651		100	Europe/Belgrade	2026-09-01
-3194360	Novi Sad	Novi Sad	Neusatz,Újvidék,Нови Сад	45.25167	19.83694	P	PPLA	RS		VO				215400		100	Europe/Belgrade	2026-09-01
-787657	Niš	Nis	Nish,Ниш,Naissus	43.32472	21.90333	P	PPLA2	RS		SE				250000		100	Europe/Belgrade	2026-09-01
+3194360	Novi Sad	Novi Sad	Neusatz,Újvidék,Нови Сад	45.25167	19.83694	P	PPLA	RS		VO	7			215400		100	Europe/Belgrade	2026-09-01
+787657	Niš	Nis	Nish,Ниш,Naissus	43.32472	21.90333	P	PPLA2	RS		SE	20			250000		100	Europe/Belgrade	2026-09-01
 2990440	Nice	Nice	Nis,Nizza,Niça	43.70313	7.26608	P	PPLA2	FR		93				342522		100	Europe/Paris	2026-09-01
 3193044	Podgorica	Podgorica	Titograd,Подгорица	42.44111	19.26361	P	PPLC	ME		16				236852		100	Europe/Podgorica	2026-09-01
 2657896	Zürich	Zurich	Zuerich,Zurigo	47.36667	8.55	P	PPLA	CH		ZH				341730		100	Europe/Zurich	2026-09-01
 9000001	Zürich (Kreis 3)	Zurich (Kreis 3)		47.37	8.51	P	PPLX	CH		ZH				900000		100	Europe/Zurich	2026-09-01
 792679	Belgrade Fortress	Belgrade Fortress	Kalemegdan	44.8231	20.4506	S	CSTL	RS		SE				0		100	Europe/Belgrade	2026-09-01
+9000002	Ub	Ub	Уб	44.45611	20.07389	P	PPLA3	RS		SE				6000		110	Europe/Belgrade	2026-09-01
+9000003	Novi Banovci	Novi Banovci	Нови Бановци	44.95	20.28	P	PPL	RS		VO	7			0		80	Europe/Belgrade	2026-09-01

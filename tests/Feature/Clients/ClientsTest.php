@@ -56,7 +56,7 @@ class ClientsTest extends TestCase
             ->assertJsonPath('data.tags', ['returning', 'VIP'])
             ->assertJsonPath('data.methods.0.slug', 'western')
             ->assertJsonPath('data.methods.0.is_default', true)
-            ->assertJsonPath('data.birth.birth_place', 'Novi Sad, Vojvodina')
+            ->assertJsonPath('data.birth.birth_place', 'Novi Sad, South Backa, Vojvodina')
             ->assertJsonPath('data.birth.birth_country_code', 'RS')
             ->assertJsonPath('data.birth.latitude', 45.25167)
             ->assertJsonPath('data.birth.birth_timezone', 'Europe/Belgrade')

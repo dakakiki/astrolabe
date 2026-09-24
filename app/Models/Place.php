@@ -29,10 +29,13 @@ class Place extends Model
         ];
     }
 
-    /** "Novi Sad, Vojvodina" — the country is shown separately, in the viewer's language. */
+    /**
+     * "Kraljevo, Raska, Central Serbia" — the district tells same-named villages
+     * apart; the country is shown separately, in the viewer's language.
+     */
     public function label(): string
     {
-        return collect([$this->name, $this->admin1_name])
+        return collect([$this->name, $this->admin2_name, $this->admin1_name])
             ->filter()
             ->unique()
             ->implode(', ');

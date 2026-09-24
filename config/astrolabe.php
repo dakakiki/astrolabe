@@ -41,14 +41,15 @@ return [
     | Birth places
     |--------------------------------------------------------------------------
     |
-    | The local GeoNames gazetteer (`php artisan places:import`). "cities500"
-    | holds every place above 500 inhabitants plus administrative seats;
-    | "all" holds every populated place, including small villages.
+    | The local GeoNames gazetteer (`php artisan places:import`). "all" holds
+    | every populated place (~5.2 million, ~1 GB, ~13 minutes to import) and is
+    | what production uses: "cities500" has only 492 places in Serbia, against
+    | some 4,700 settlements. "cities500" (~14 MB) is a quick option for development.
     |
     */
 
     'places' => [
-        'source' => env('PLACES_SOURCE', 'cities500'),
+        'source' => env('PLACES_SOURCE', 'all'),
     ],
 
 ];

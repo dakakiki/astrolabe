@@ -71,6 +71,10 @@ Zahtevi:
 
 **Odluka (24. 9. 2026):** lokalna kopija GeoNames baze (CC BY 4.0) u sopstvenoj MariaDB tabeli, sa sopstvenim autocomplete-om. Nijedan unos ne odlazi trećoj strani, rezultati se smeju trajno čuvati, a svaki zapis već sadrži IANA zonu. Mesta u zemlji prakse rangiraju se više; pretraga pronalazi i druga pisma (ćirilica) i istorijske nazive (Titograd → Podgorica). Za ručno unete koordinate zona se predlaže prema najbližem mestu. Geoapify ostaje rezervni izvor iza istog interfejsa, ako se pokaže da mesta nedostaju. U aplikaciji se navodi „Place data © GeoNames“.
 
+**Obim (izmereno u Fazi 2):** koristi se skup svih naseljenih mesta (5,2 miliona). Izvod `cities500` ima samo 492 mesta u Srbiji, 66 u Crnoj Gori i 313 u BiH, dok svih naseljenih mesta ima 9.514, 4.041 i 21.984, a klijenti su često rođeni u selima. Pun skup zauzima oko 1 GB, a lokalni uvoz traje oko 13 minuta; nove tabele se prave pored postojećih i atomski zamenjuju, pa pretraga radi i tokom mesečnog osvežavanja.
+
+**Pretraga:** tačan naziv uvek pronalazi i najmanje mesto; početak od 3–4 slova pretražuje veća mesta (preko 1.000 stanovnika ili administrativna sedišta); od 5 slova i sela. Rangiranje kombinuje: poklapanje sopstvenog imena (jače od alternativnog), zemlju prakse i broj stanovnika. Uz naziv se prikazuje okrug (admin2), da se razlikuju istoimena sela. Izmereno lokalno na punom skupu: najsporiji upit oko 80 ms.
+
 ### `time_accuracy` određuje šta se prikazuje
 
 Polje nije više samo informativno. Ono direktno kontroliše obim proračuna:

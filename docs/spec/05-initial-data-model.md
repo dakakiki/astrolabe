@@ -130,8 +130,8 @@ Originalni lokalni datum, vreme i vremenska zona čuvaju se odvojeno. Podatak ro
 
 Lokalna kopija GeoNames baze, puni je `php artisan places:import`, a osvežava se mesečno.
 
-- `places`: `id` (GeoNames id), `name`, `ascii_name`, `country_code`, `admin1_code`, `admin1_name`, `latitude`, `longitude`, `timezone` (IANA), `population`, `feature_code`, `modified_on`
-- `place_names`: `place_id`, `search_name` — svi nazivi mesta (drugi jezici i pisma, istorijski nazivi) normalizovani u mala ASCII slova, za pretragu po prefiksu
+- `places`: `id` (GeoNames id), `name`, `ascii_name`, `country_code`, `admin1_code`, `admin1_name`, `admin2_code`, `admin2_name`, `latitude`, `longitude`, `timezone` (IANA), `population`, `feature_code`, `modified_on`
+- `place_names`: `place_id`, `search_name`, `major` — svi nazivi mesta (drugi jezici i pisma, istorijski nazivi) normalizovani u mala ASCII slova, za pretragu po prefiksu; `major` označava mesta sa 1.000+ stanovnika i administrativna sedišta (za kratke upite)
 
 ### `client_relationships`
 

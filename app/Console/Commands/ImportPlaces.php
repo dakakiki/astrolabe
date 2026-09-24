@@ -36,6 +36,7 @@ class ImportPlaces extends Command
 
         $placesFile = $this->option('file') ?: $this->download($archive);
         $admin1File = $this->download('admin1CodesASCII.txt');
+        $admin2File = $this->download('admin2Codes.txt');
         $countries = $this->option('countries')
             ? array_filter(array_map('trim', explode(',', $this->option('countries'))))
             : null;
@@ -46,10 +47,10 @@ class ImportPlaces extends Command
         $count = $importer->import(
             $placesFile,
             $admin1File,
-            populatedPlacesOnly: true,
+            $admin2File,
             countries: $countries,
             progress: function (int $count) {
-                if ($count % 50000 === 0) {
+                if ($count % 200000 === 0) {
                     $this->line(number_format($count).' places');
                 }
             },

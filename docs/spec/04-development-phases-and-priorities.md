@@ -115,6 +115,8 @@ Kriterijum završetka: dva korisnika ne mogu pristupiti podacima jedan drugog.
 
 Kriterijum završetka: astrolog može kompletno voditi bazu klijenata, a svaki klijent sa poznatim vremenom rođenja ima razrešene koordinate i vremensku zonu.
 
+> Status: završeno 24. 9. 2026. Mesto rođenja se bira iz lokalne GeoNames baze (5,2 miliona mesta) ili unosi ručno; uz podatke rođenja prikazuje se istorijski UTC offset, upozorenje za vreme koje pada na promenu sata i spisak onoga što nedostaje za kartu.
+
 ## Faza 3 — planetarne pozicije
 
 > Nova faza. Prva tačka u kojoj proizvod radi nešto astrološko.

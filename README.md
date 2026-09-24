@@ -34,7 +34,7 @@ Adjust `DB_*` in `.env` if your server differs from the defaults (`127.0.0.1:330
 
 ```bash
 php artisan migrate
-php artisan places:import   # birth-place gazetteer from GeoNames (~14 MB download, about a minute)
+php artisan places:import --source=cities500   # quick gazetteer for development (~14 MB, ~1 min)
 npm run build
 ```
 
@@ -70,9 +70,11 @@ docs/api-conventions.md       API rules
 ## Birth places
 
 Birth places come from a local copy of [GeoNames](https://www.geonames.org) (CC BY 4.0), loaded by
-`php artisan places:import` and refreshed monthly by the scheduler. `PLACES_SOURCE=cities500` (default)
-holds places above 500 inhabitants; `PLACES_SOURCE=all` holds every populated place. Nothing a user
-types into the place search leaves the server.
+`php artisan places:import` and refreshed monthly by the scheduler. The default, `PLACES_SOURCE=all`,
+holds every populated place (~5.2 million; 422 MB download, ~1 GB in the database, ~13 minutes to import
+locally); the import builds new tables and swaps them in atomically, so search keeps working meanwhile.
+`cities500` (places above 500 inhabitants) is enough for development. Nothing a user types into the
+place search leaves the server.
 
 ## Licensing note
 

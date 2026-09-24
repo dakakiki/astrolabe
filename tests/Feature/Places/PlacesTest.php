@@ -21,7 +21,7 @@ class PlacesTest extends TestCase
 
     public function test_only_populated_places_are_imported_with_region_names(): void
     {
-        $this->assertDatabaseCount('places', 7);
+        $this->assertDatabaseCount('places', 9);
         $this->assertDatabaseMissing('places', ['name' => 'Belgrade Fortress']);
         $this->assertDatabaseHas('places', ['id' => 3194360, 'admin1_name' => 'Vojvodina', 'timezone' => 'Europe/Belgrade']);
     }
@@ -32,14 +32,21 @@ class PlacesTest extends TestCase
         $this->assertDatabaseHas('place_names', ['place_id' => 792680, 'search_name' => 'beograd']);
     }
 
-    public function test_importing_again_updates_instead_of_duplicating(): void
+    public function test_each_spelling_is_stored_once_per_place(): void
     {
-        $names = DB::table('place_names')->count();
+        $duplicates = DB::table('place_names')
+            ->select('place_id', 'search_name')
+            ->groupBy('place_id', 'search_name')
+            ->havingRaw('count(*) > 1')
+            ->get();
 
-        $this->importPlaces();
+        $this->assertCount(0, $duplicates);
 
-        $this->assertDatabaseCount('places', 7);
-        $this->assertSame($names, DB::table('place_names')->count());
+        // Zürich, Zurich, Zuerich and Zurigo: the first two meet on one key.
+        $this->assertSame(
+            ['zuerich', 'zurich', 'zurigo'],
+            DB::table('place_names')->where('place_id', 2657896)->orderBy('search_name')->pluck('search_name')->all(),
+        );
     }
 
     public function test_places_are_found_by_any_script_spelling_or_former_name(): void
@@ -53,17 +60,45 @@ class PlacesTest extends TestCase
         $this->assertSame('Novi Sad', $geocoder->search('Novi Sad, Serbia')->first()?->name);
     }
 
+    public function test_two_letters_match_whole_names_only(): void
+    {
+        $geocoder = app(Geocoder::class);
+
+        $this->assertSame([], $geocoder->search('be')->pluck('name')->all());
+        $this->assertSame(['Ub'], $geocoder->search('Уб')->pluck('name')->all());
+    }
+
+    public function test_short_prefixes_search_major_places_and_longer_ones_everything(): void
+    {
+        $geocoder = app(Geocoder::class);
+
+        // "novi" (4 letters): the town, not the hamlet of 0 inhabitants.
+        $this->assertSame(['Novi Sad'], $geocoder->search('novi')->pluck('name')->all());
+        // "novi b" (5+ letters): every populated place.
+        $this->assertSame(['Novi Banovci'], $geocoder->search('novi b')->pluck('name')->all());
+        // A whole name is always found, however small the place.
+        $this->assertSame(['Novi Banovci'], $geocoder->search('Нови Бановци')->pluck('name')->all());
+    }
+
+    public function test_the_district_tells_same_named_places_apart(): void
+    {
+        $this->assertSame('Novi Sad, South Backa, Vojvodina', app(Geocoder::class)->search('novi sad')->first()->label);
+    }
+
     public function test_a_city_ranks_above_its_districts(): void
     {
         $this->assertSame(['Zürich', 'Zürich (Kreis 3)'], app(Geocoder::class)->search('zurich')->pluck('name')->all());
     }
 
-    public function test_the_practice_country_wins_between_equal_matches(): void
+    public function test_a_place_named_so_outranks_one_merely_also_called_so(): void
     {
-        $geocoder = app(Geocoder::class);
+        // Niš is called "Nis"; Nice only has "Nis" among its alternate names.
+        $this->assertSame('Niš', app(Geocoder::class)->search('nis')->first()->name);
+    }
 
-        $this->assertSame('Nice', $geocoder->search('nis')->first()->name);
-        $this->assertSame('Niš', $geocoder->search('nis', preferCountry: 'RS')->first()->name);
+    public function test_the_practice_country_can_outweigh_that(): void
+    {
+        $this->assertSame('Nice', app(Geocoder::class)->search('nis', preferCountry: 'FR')->first()->name);
     }
 
     public function test_the_nearest_place_suggests_a_time_zone(): void
@@ -82,7 +117,7 @@ class PlacesTest extends TestCase
         $this->actingAs($user)->getJson('/api/v1/places?q=nis')
             ->assertOk()
             ->assertJsonPath('data.0.name', 'Niš')
-            ->assertJsonPath('data.0.label', 'Niš, Central Serbia')
+            ->assertJsonPath('data.0.label', 'Niš, Nisava, Central Serbia')
             ->assertJsonPath('data.0.country_code', 'RS')
             ->assertJsonPath('data.0.timezone', 'Europe/Belgrade');
 

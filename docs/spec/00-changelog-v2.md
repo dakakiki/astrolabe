@@ -62,6 +62,16 @@ Autentifikacija (Laravel Fortify: registracija, prijava, reset lozinke, email ve
 - 05: `users.current_workspace_id`; `astrology_methods.workspace_id` umesto `is_system` + `created_by_workspace_id`; `logo_path` i `aspect_orbs` odloženi.
 - 09: u sekciji Security & Data „konsultacije“ je bila greška pri preimenovanju `Session` → `Consultation`; misli se na aktivne sesije (prijave).
 
+## Faza 2 — implementirano
+
+Klijenti (CRUD, statusi, pretraga, filteri, paginacija, arhiviranje), podaci rođenja, oznake i metode klijenta, i lokalna GeoNames baza mesta. Izmene u dokumentima:
+
+- 02: odluka o geokodiranju — lokalna kopija GeoNames, pun skup naseljenih mesta, opis pretrage.
+- 05: `client_birth_details` dobija `workspace_id` i `place_id`, a gubi `geocode_confidence`; nove tabele `places` i `place_names`.
+- 11: otvoreno pitanje o provajderu geokodiranja zatvoreno.
+
+Primećeno usput: uz podatke rođenja sada se vidi istorijski UTC offset (npr. letnje računanje vremena 1985. u Jugoslaviji), a vreme koje pada na promenu sata (preskočeno ili dvostruko) dobija upozorenje — to je ulaz za Fazu 3.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.
