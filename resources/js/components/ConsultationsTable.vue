@@ -6,6 +6,7 @@ import ConsultationStatusBadge from '@/components/ConsultationStatusBadge.vue';
 import { useLabels } from '@/composables/useLabels';
 import { formatDateTime } from '@/lib/datetime';
 import { initials } from '@/lib/format';
+import { serviceColorClass } from '@/lib/services';
 import { useAuthStore } from '@/stores/auth';
 
 defineProps({
@@ -59,12 +60,23 @@ const time = (consultation) =>
                     </div>
                 </td>
                 <td class="max-w-80">
+                    <span
+                        v-if="consultation.service"
+                        class="mr-1.5 inline-block size-2 rounded-sm"
+                        :class="serviceColorClass(consultation.service.color)"
+                        :title="consultation.service.name"
+                    />
                     <RouterLink
                         :to="{ name: 'consultations.show', params: { id: consultation.id } }"
                         class="font-medium text-ink hover:underline"
                         @click.stop
-                        >{{ consultation.title || t('consultations.untitled') }}</RouterLink
+                        >{{
+                            consultation.title || consultation.service?.name || t('consultations.untitled')
+                        }}</RouterLink
                     >
+                    <div v-if="consultation.title && consultation.service" class="text-xs text-ink-3">
+                        {{ consultation.service.name }}
+                    </div>
                     <div v-if="consultation.topics" class="truncate text-xs text-ink-3">{{ consultation.topics }}</div>
                     <div v-if="consultation.duration_minutes" class="text-xs text-ink-4">
                         {{ t('consultations.minutes', { n: consultation.duration_minutes }) }}

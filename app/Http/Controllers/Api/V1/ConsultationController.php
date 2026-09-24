@@ -29,6 +29,7 @@ class ConsultationController extends Controller
 
         $filters = $request->validate([
             'client_id' => ['nullable', 'integer'],
+            'service_id' => ['nullable', 'integer'],
             'status' => ['nullable', Rule::enum(ConsultationStatus::class)],
             'search' => ['nullable', 'string', 'max:100'],
             'from' => ['nullable', 'date_format:Y-m-d'],
@@ -40,8 +41,9 @@ class ConsultationController extends Controller
         $zone = $request->user()->timezone ?: 'UTC';
 
         $consultations = Consultation::query()
-            ->with(['client', 'astrologyMethods'])
+            ->with(['client', 'service', 'astrologyMethods'])
             ->when($filters['client_id'] ?? null, fn (Builder $query, int $id) => $query->where('client_id', $id))
+            ->when($filters['service_id'] ?? null, fn (Builder $query, int $id) => $query->where('service_id', $id))
             ->when($filters['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
             ->when($filters['search'] ?? null, fn (Builder $query, string $search) => $this->search($query, $search))
             ->when($filters['from'] ?? null, fn (Builder $query, string $from) => $query
@@ -66,7 +68,7 @@ class ConsultationController extends Controller
     {
         Gate::authorize('view', $consultation);
 
-        return ConsultationResource::make($consultation->load(['client', 'astrologyMethods', 'chart']))->withContent();
+        return ConsultationResource::make($consultation->load(['client', 'service', 'astrologyMethods', 'chart']))->withContent();
     }
 
     public function update(SaveConsultationRequest $request, Consultation $consultation, SaveConsultation $save): ConsultationResource
@@ -97,6 +99,7 @@ class ConsultationController extends Controller
         $query->where(fn (Builder $query) => $query
             ->where('title', 'like', $like)
             ->orWhere('topics', 'like', $like)
+            ->orWhereHas('service', fn (Builder $services) => $services->where('name', 'like', $like))
             ->orWhereHas('client', fn (Builder $clients) => $clients
                 ->where('first_name', 'like', $like)
                 ->orWhere('last_name', 'like', $like)

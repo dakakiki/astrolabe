@@ -51,6 +51,15 @@
     --color-air: var(--air);
     --color-water: var(--water);
 
+    --color-svc-indigo: var(--svc-indigo);
+    --color-svc-sky: var(--svc-sky);
+    --color-svc-teal: var(--svc-teal);
+    --color-svc-green: var(--svc-green);
+    --color-svc-amber: var(--svc-amber);
+    --color-svc-coral: var(--svc-coral);
+    --color-svc-rose: var(--svc-rose);
+    --color-svc-violet: var(--svc-violet);
+
     --radius-sm: var(--r);
     --radius-lg: var(--r-lg);
     --shadow-card: var(--shadow);

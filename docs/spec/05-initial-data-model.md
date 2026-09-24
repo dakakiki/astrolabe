@@ -9,6 +9,8 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 > Faza 4 (implementirano): `consultations` dobija `title`, `timezone` i `created_by`, a `service_id` i `appointment_id` čekaju usluge i termine; `attachments` dobija `client_id`, `kind` i `url`; `activity_events` je uvedena i dobila `visibility`.
 >
 > Faza 5 (implementirano): `workspaces.aspect_orbs` uveden; `chart_calculations.payload` dobija verziju formata (2) sa uglovima, kućama i aspektima, a verzija je deo `input_hash`; `chart_calculations.house_system` je traženi sistem.
+>
+> Faza 6a (implementirano): `services` sa pivot tabelom `service_astrology_method`; `consultations.service_id`; `related_people` bez podataka rođenja u sebi — oni su u zasebnoj tabeli `related_person_birth_details` iste strukture kao `client_birth_details`; `related_people.converted_client_id`; `client_relationships` sa jedinstvenim parovima; `chart_calculations.subject_type` dobija vrednost `related_person`.
 
 ## Nalozi i workspace
 
@@ -154,19 +156,26 @@ Lokalna kopija GeoNames baze, puni je `php artisan places:import`, a osvežava s
 - `client_id`
 - `related_client_id`, nullable
 - `related_person_id`, nullable
-- `relationship_type`
-- `notes`, nullable
+- `relationship_type` — `partner`, `child`, `parent`, `sibling`, `friend`, `business_partner`, `other`; šta je druga strana klijentu
+- `notes`, nullable — do 500 znakova
 - timestamps
+
+Tačno jedno od `related_client_id` i `related_person_id` je postavljeno (proverava aplikacija). Jedinstveni parovi `(client_id, related_client_id)` i `(client_id, related_person_id)`; veza dva klijenta se ne unosi dvaput ni u suprotnom smeru. Sa profila `related_client_id` vrsta se čita obrnuto (`child` ↔ `parent`, ostale su simetrične).
 
 ### `related_people`
 
 - `id`
 - `workspace_id`
-- lični podaci
-- opcioni podaci rođenja u istoj strukturi kao `client_birth_details`
+- `first_name`, `last_name` (nullable), `email` (nullable), `phone` (nullable)
+- `converted_client_id`, nullable — klijent u kog je osoba pretvorena
 - timestamps
+- soft deletes
 
-Povezana osoba sa kompletnim podacima rođenja može imati sopstvenu izračunatu kartu.
+### `related_person_birth_details`
+
+Iste kolone i ista pravila kao `client_birth_details`, sa `related_person_id` (jedinstven) umesto `client_id`. Zasebna tabela iste strukture (a ne kolone u `related_people`) znači da ista logika važi za oba — zamrzavanje mesta, provera šta nedostaje za kartu — i da se pri pretvaranju u klijenta podaci kopiraju red u red.
+
+Povezana osoba sa kompletnim podacima rođenja može imati sopstvenu izračunatu kartu (`chart_calculations.subject_type = related_person`).
 
 ## Oznake
 
@@ -231,10 +240,10 @@ INDEX  (workspace_id, subject_type, subject_id)
 - `workspace_id`
 - `client_id` — postavlja se pri kreiranju i ne menja
 - `created_by`, nullable
-- `service_id`, nullable — Faza 6 (usluge)
+- `service_id`, nullable — Faza 6a; strani ključ bez brisanja (usluga u upotrebi se ne briše)
 - `appointment_id`, nullable — Faza 6 (termini)
 - `chart_calculation_id`, nullable — snimak karte u trenutku konsultacije
-- `title`, nullable — vrsta konsultacije slobodnim tekstom dok usluge ne postoje
+- `title`, nullable — vrsta konsultacije slobodnim tekstom; od Faze 6a opcion i uz uslugu (bez naslova konsultacija se zove po usluzi)
 - `starts_at`, nullable — UTC; obavezan za svaki status osim `draft`
 - `timezone`, nullable — IANA zona u kojoj je vreme uneto (dokument 06, „Vremenske zone“)
 - `duration_minutes`, nullable
@@ -305,13 +314,22 @@ Polimorfna veza omogućava priloge na klijentu, konsultaciji, belešci ili zadat
 - `duration_minutes`
 - `price_amount`, nullable
 - `currency`
-- `location_type`
-- `color`, nullable
+- `location_type` — `online`, `in_person`, `either`
+- `color`, nullable — `indigo`, `sky`, `teal`, `green`, `amber`, `coral`, `rose`, `violet` (tokeni `--svc-*`)
 - `requires_deposit`
 - `is_active`
 - timestamps
 
 Novac se čuva kao celobrojna vrednost najmanje valutne jedinice ili kao precizan decimalni tip prema dogovorenoj konvenciji; ne koristi se floating-point.
+
+> Faza 6a: dogovorena konvencija je ceo broj u najmanjoj jedinici (ISO 4217; `config('astrolabe.currency_decimals')` navodi valute bez decimala). Bez cene valuta ostaje (podrazumevana valuta workspace-a). `(workspace_id, name)` je jedinstven.
+
+### `service_astrology_method`
+
+- `service_id`
+- `astrology_method_id`
+
+Metode za koje je usluga namenjena; bez njih — bilo koja.
 
 ### `appointments`
 

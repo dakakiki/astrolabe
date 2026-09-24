@@ -22,8 +22,13 @@ return [
     | Currencies
     |--------------------------------------------------------------------------
     |
-    | ISO 4217 codes a workspace may choose as its default currency. Display
-    | names come from the browser's Intl API, so only the codes live here.
+    | ISO 4217 codes a workspace may choose as its default currency and a
+    | service may be priced in. Display names come from the browser's Intl
+    | API, so only the codes live here.
+    |
+    | Amounts are stored in the smallest unit of the currency. That unit is a
+    | hundredth except for the currencies listed in `currency_decimals`
+    | (ISO 4217 minor units), so 4900 is 49.00 EUR but 4900 JPY.
     |
     */
 
@@ -32,6 +37,12 @@ return [
         'PLN', 'RON', 'BGN', 'SEK', 'NOK', 'DKK', 'ISK', 'TRY', 'UAH', 'CAD',
         'AUD', 'NZD', 'JPY', 'CNY', 'HKD', 'SGD', 'INR', 'ZAR', 'BRL', 'MXN',
         'ARS', 'CLP', 'COP', 'ILS', 'AED',
+    ],
+
+    'currency_decimals' => [
+        'ISK' => 0,
+        'JPY' => 0,
+        'CLP' => 0,
     ],
 
     'default_currency' => 'EUR',

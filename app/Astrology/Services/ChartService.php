@@ -10,14 +10,16 @@ use App\Astrology\ValueObjects\ChartRequest;
 use App\Astrology\ValueObjects\PlanetPosition;
 use App\Enums\CelestialBody;
 use App\Enums\HouseSystem;
+use App\Models\BirthDetails;
 use App\Models\ChartCalculation;
 use App\Models\Client;
-use App\Models\ClientBirthDetails;
+use App\Models\RelatedPerson;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\UniqueConstraintViolationException;
 
 /**
- * Turns a client's birth details into a stored natal chart (docs/spec/11).
+ * Turns the birth details of a client or a related person into a stored natal
+ * chart (docs/spec/11).
  *
  * The chart is cached under a hash of everything that shapes it — the moment,
  * place, chart settings, aspect orbs, time accuracy, the engine with its data
@@ -41,21 +43,22 @@ class ChartService
     ) {}
 
     /**
-     * The client's natal chart in the workspace's house system, or in the one
-     * chosen on the chart screen. Each system is its own cached calculation.
+     * The natal chart of a client or a related person, in the workspace's house
+     * system or in the one chosen on the chart screen. Each system is its own
+     * cached calculation.
      *
      * @throws IncompleteBirthData
      */
-    public function natal(Client $client, ?HouseSystem $houseSystem = null): ChartCalculation
+    public function natal(Client|RelatedPerson $subject, ?HouseSystem $houseSystem = null): ChartCalculation
     {
-        $birth = $client->birthDetails;
+        $birth = $subject->birthDetails;
         $missing = $birth?->missingForChart() ?? ['birth_date', 'birth_time', 'location', 'timezone'];
 
         if ($missing !== []) {
             throw new IncompleteBirthData($missing);
         }
 
-        $workspace = $client->workspace;
+        $workspace = $subject->workspace;
         $timeKnown = $birth->time_accuracy->hasTime();
         $aspectSettings = $workspace->aspectSettings();
 
@@ -85,7 +88,7 @@ class ChartService
             'aspects' => $aspectSettings->toArray(),
         ]));
 
-        $existing = $this->find($client, $hash);
+        $existing = $this->find($subject, $hash);
 
         if ($existing) {
             return $existing;
@@ -115,8 +118,8 @@ class ChartService
         }
 
         $chart = new ChartCalculation([
-            'subject_type' => $client->getMorphClass(),
-            'subject_id' => $client->getKey(),
+            'subject_type' => $subject->getMorphClass(),
+            'subject_id' => $subject->getKey(),
             'chart_type' => self::NATAL,
             'input_hash' => $hash,
             'julian_day_ut' => $request->julianDayUt,
@@ -131,23 +134,23 @@ class ChartService
             'tzdata_version' => timezone_version_get(),
             'calculated_at' => now(),
         ]);
-        $chart->workspace_id = $client->workspace_id;
+        $chart->workspace_id = $subject->workspace_id;
 
         try {
             $chart->save();
         } catch (UniqueConstraintViolationException) {
             // A parallel request stored the same chart first.
-            return $this->find($client, $hash);
+            return $this->find($subject, $hash);
         }
 
         return $chart;
     }
 
-    private function find(Client $client, string $hash): ?ChartCalculation
+    private function find(Client|RelatedPerson $subject, string $hash): ?ChartCalculation
     {
         return ChartCalculation::query()
-            ->where('subject_type', $client->getMorphClass())
-            ->where('subject_id', $client->getKey())
+            ->where('subject_type', $subject->getMorphClass())
+            ->where('subject_id', $subject->getKey())
             ->where('chart_type', self::NATAL)
             ->where('input_hash', $hash)
             ->first();
@@ -159,7 +162,7 @@ class ChartService
      *
      * @return array{from: float, to: float}
      */
-    private function moonRange(ClientBirthDetails $birth, ChartRequest $noon): array
+    private function moonRange(BirthDetails $birth, ChartRequest $noon): array
     {
         $date = $birth->birth_date->format('Y-m-d');
         $start = CarbonImmutable::parse($date.' 00:00:00', $birth->birth_timezone);

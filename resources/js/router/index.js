@@ -95,6 +95,30 @@ const routes = [
         meta: { verified: true },
     },
     {
+        path: '/clients/:clientId(\\d+)/people/new',
+        name: 'related-people.create',
+        component: () => import('@/pages/related/RelatedPersonFormPage.vue'),
+        meta: { verified: true },
+    },
+    {
+        path: '/people/:id(\\d+)',
+        name: 'related-people.show',
+        component: () => import('@/pages/related/RelatedPersonPage.vue'),
+        meta: { verified: true },
+    },
+    {
+        path: '/people/:id(\\d+)/edit',
+        name: 'related-people.edit',
+        component: () => import('@/pages/related/RelatedPersonFormPage.vue'),
+        meta: { verified: true },
+    },
+    {
+        path: '/services',
+        name: 'services.index',
+        component: () => import('@/pages/services/ServicesPage.vue'),
+        meta: { verified: true },
+    },
+    {
         path: '/settings',
         component: () => import('@/pages/settings/SettingsPage.vue'),
         meta: { verified: true },

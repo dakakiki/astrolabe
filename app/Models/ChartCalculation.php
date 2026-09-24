@@ -14,9 +14,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
- * One calculated chart for a client (later also related people), keyed by a
- * hash of its full input. Old rows stay: when a birth time is rectified, the
- * earlier versions remain for comparison (docs/spec/05).
+ * One calculated chart for a client or a related person, keyed by a hash of
+ * its full input. Old rows stay: when a birth time is rectified, the earlier
+ * versions remain for comparison (docs/spec/05). Only a client's charts appear
+ * on a timeline.
  *
  * @property array<string, mixed> $payload
  */

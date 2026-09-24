@@ -21,12 +21,15 @@ const STATUSES = ['draft', 'scheduled', 'completed', 'cancelled', 'no_show'];
 const filters = computed(() => ({
     search: route.query.search ?? '',
     status: route.query.status ?? '',
+    service_id: route.query.service_id ?? '',
     from: route.query.from ?? '',
     to: route.query.to ?? '',
     page: Number(route.query.page ?? 1),
 }));
 
-const hasFilters = computed(() => ['search', 'status', 'from', 'to'].some((key) => filters.value[key] !== ''));
+const hasFilters = computed(() =>
+    ['search', 'status', 'service_id', 'from', 'to'].some((key) => filters.value[key] !== ''),
+);
 
 function setFilter(key, value) {
     const query = { ...route.query, [key]: value || undefined };
@@ -56,6 +59,13 @@ async function load() {
 
 watch(() => route.query, load);
 onMounted(load);
+
+// Inactive services stay in the filter: past consultations still have them.
+const services = ref([]);
+onMounted(async () => {
+    const { data } = await http.get('/services');
+    services.value = data.data;
+});
 
 function clear() {
     searchDraft.value = '';
@@ -93,6 +103,18 @@ function clear() {
                 <option value="">{{ t('consultations.filters.anyStatus') }}</option>
                 <option v-for="status in STATUSES" :key="status" :value="status">
                     {{ t(`consultationStatuses.${status}`) }}
+                </option>
+            </select>
+            <select
+                v-if="services.length"
+                class="input w-auto"
+                :aria-label="t('consultations.filters.service')"
+                :value="filters.service_id"
+                @change="setFilter('service_id', $event.target.value)"
+            >
+                <option value="">{{ t('consultations.filters.anyService') }}</option>
+                <option v-for="service in services" :key="service.id" :value="String(service.id)">
+                    {{ service.name }}
                 </option>
             </select>
             <label class="flex items-center gap-1.5 text-xs text-ink-3">

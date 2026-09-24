@@ -101,6 +101,18 @@ Puna natalna karta: uglovi i kuće (deset sistema, izbor na ekranu karte), Porph
 
 Odluke donete usput: aspekti uključuju ASC i MC (bez smera kretanja), a srednji čvor ne; kod nepoznatog vremena Mesec se izostavlja iz aspekata; svaki izabrani sistem kuća je zaseban proračun, pa i zasebna stavka na vremenskoj liniji; posebna klasa `HouseSystemResolver` nije potrebna, jer zamenu sistema radi sam engine, a adapter je samo prepoznaje.
 
+## Faza 6a — implementirano
+
+Korisnik je 24. 9. 2026. odlučio da se Faza 6 gradi pre validacionih razgovora (kao predlog), da preklapanje termina bude upozorenje uz mogućnost čuvanja (dokument 10 se u tom delu menja u 6b) i da prevlačenje termina mišem dođe kasnije. Faza je podeljena na 6a (usluge i povezane osobe), 6b (termini i kalendar) i 6c (zadaci i dashboard).
+
+Usluge sa cenom, bojom, načinom održavanja, avansom i metodama; usluga na konsultaciji; povezane osobe sa podacima rođenja i kartom; veze između klijenata; pretvaranje povezane osobe u klijenta. Izmene u dokumentima:
+
+- 02: „Implementirano u Fazi 6a“ kod usluga i povezanih osoba; konsultacija dobija uslugu.
+- 04: odluka o Fazi 6 i status dela 6a.
+- 05: `services` (vrednosti `location_type` i `color`, konvencija za novac), nova tabela `service_astrology_method`, `consultations.service_id`, `related_people` (konkretne kolone, `converted_client_id`, soft delete), nova tabela `related_person_birth_details`, pravila za `client_relationships`.
+
+Odluke donete usput: podaci rođenja povezane osobe su u zasebnoj tabeli iste strukture kao kod klijenta, a ne kolone u `related_people`, pa ista logika (zamrzavanje mesta, šta nedostaje za kartu, karta) važi za oba i pretvaranje u klijenta je kopija reda; veza dva klijenta je jedan red koji se sa druge strane čita obrnuto; vrsti veze dodat je brat/sestra; boja usluge je imenovana boja iz tokena, ne hex; usluga u upotrebi se deaktivira, ne briše; uklanjanje poslednje veze uklanja i povezanu osobu.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

@@ -70,6 +70,7 @@ class ClientController extends Controller
                 'completed_consultations' => $client->consultations()->where('status', ConsultationStatus::Completed)->count(),
                 'notes' => $client->notes()->visibleTo($request->user())->count(),
                 'files' => $client->attachments()->visibleTo($request->user())->count(),
+                'related' => $client->relationships()->count() + $client->incomingRelationships()->count(),
             ]);
     }
 

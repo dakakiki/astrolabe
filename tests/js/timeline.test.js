@@ -14,6 +14,14 @@ describe('describeEvent', () => {
         expect(entry.to).toEqual({ name: 'consultations.show', params: { id: 7 } });
     });
 
+    it('names an untitled consultation after its service', () => {
+        const entry = describeEvent(event('consultation', { status: 'completed', title: null, service: 'Solar return' }));
+
+        expect(entry.title).toEqual(['timeline.consultation.completed', { title: 'Solar return' }]);
+        expect(entry.titled).toBe(true);
+        expect(describeEvent(event('consultation', { status: 'draft' })).titled).toBe(false);
+    });
+
     it('marks private notes and falls back to a plain title', () => {
         const entry = describeEvent(event('note', { excerpt: 'Call in March' }, { visibility: 'private' }));
 

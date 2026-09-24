@@ -6,18 +6,22 @@ use App\Astrology\Contracts\Geocoder;
 use App\Enums\ActivityType;
 use App\Enums\GeocodeSource;
 use App\Enums\TimeAccuracy;
+use App\Models\BirthDetails;
 use App\Models\Client;
-use App\Models\ClientBirthDetails;
+use App\Models\RelatedPerson;
 use App\Support\Activity\ActivityLog;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Stores birth data as entered and freezes the location (docs/spec/02):
+ * Stores the birth data of a client or a related person as entered and freezes
+ * the location (docs/spec/02):
  *
  * - a place picked from the gazetteer is copied in once — name, country,
  *   coordinates and time zone — and never looked up again while it stays chosen;
  * - hand-entered coordinates and zone are kept as typed and marked "manual";
  * - no location at all is allowed, the chart then reports what is missing.
+ *
+ * Only a client's changes go on a timeline.
  */
 class SaveBirthDetails
 {
@@ -45,10 +49,9 @@ class SaveBirthDetails
     /**
      * @param  array<string, mixed>  $input  validated "birth" payload
      */
-    public function handle(Client $client, array $input): ClientBirthDetails
+    public function handle(Client|RelatedPerson $owner, array $input): BirthDetails
     {
-        $details = $client->birthDetails ?? new ClientBirthDetails(['client_id' => $client->id]);
-        $details->client_id = $client->id;
+        $details = $owner->birthDetails ?? $owner->birthDetails()->make();
         $adding = ! $details->exists;
 
         $accuracy = TimeAccuracy::from($input['time_accuracy']);
@@ -65,11 +68,11 @@ class SaveBirthDetails
         $changed = $this->changedFields($details);
 
         $details->save();
-        $client->setRelation('birthDetails', $details);
+        $owner->setRelation('birthDetails', $details);
 
         // A client created with birth data already has its "created" entry.
-        if (! $client->wasRecentlyCreated && ($adding || $changed !== [])) {
-            $this->activity->record($client, ActivityType::BirthDetailsUpdated, [
+        if ($owner instanceof Client && ! $owner->wasRecentlyCreated && ($adding || $changed !== [])) {
+            $this->activity->record($owner, ActivityType::BirthDetailsUpdated, [
                 'added' => $adding,
                 'fields' => $adding ? [] : $changed,
             ]);
@@ -81,7 +84,7 @@ class SaveBirthDetails
     /**
      * @return list<string>
      */
-    private function changedFields(ClientBirthDetails $details): array
+    private function changedFields(BirthDetails $details): array
     {
         $dirty = $details->getDirty();
 
@@ -97,7 +100,7 @@ class SaveBirthDetails
     /**
      * @param  array<string, mixed>  $input
      */
-    private function applyLocation(ClientBirthDetails $details, array $input): void
+    private function applyLocation(BirthDetails $details, array $input): void
     {
         $placeId = isset($input['place_id']) ? (string) $input['place_id'] : null;
 

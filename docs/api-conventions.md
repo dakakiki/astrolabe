@@ -72,14 +72,38 @@ Odgovor uz podatke rođenja vraća i izvedene vrednosti: `chart.ready` / `chart.
 
 Karta (`/clients/{id}/chart` i `chart` na konsultaciji): `version` formata (1 = samo pozicije, snimci od pre Faze 5), `positions` (sa `house`), `houses` (`system`, `requested_system`, `cusps` — 12 dužina, kuspida 1 prva; `system` se razlikuje od `requested_system` kada traženi sistem ne može da se nacrta na toj širini), `angles` (`asc`, `mc`, `dsc`, `ic`, `vertex`, `armc`), `aspects` (`a`, `b`, `type`, `orb`, `applying` — `null` za aspekte prema uglovima), `aspect_settings` (orbi sa kojima je računato), `location`, `moon_range` (samo kod nepoznatog vremena) i `engine`. Dužine su u stepenima, u zodijaku karte. Bez vremena rođenja `houses` i `angles` su `null`, a Mesec nije u aspektima.
 
-Pojedinačan klijent (`GET /clients/{id}`) nosi i `stats`: broj konsultacija (ukupno i završenih) i broj beležaka i fajlova koje korisnik sme da vidi.
+Pojedinačan klijent (`GET /clients/{id}`) nosi i `stats`: broj konsultacija (ukupno i završenih), broj beležaka i fajlova koje korisnik sme da vidi i broj veza sa povezanim osobama i drugim klijentima (`related`).
+
+### Usluge (Faza 6a)
+
+| Metoda | Putanja | Namena |
+|---|---|---|
+| GET | `/services` | sve usluge workspace-a, aktivne prve, bez paginacije (kratka lista); `status` (`active`, `inactive`) |
+| POST | `/services` | nova (samo vlasnik); `name` (jedinstven u workspace-u), `description`, `duration_minutes` (1–1440), `price` (`{amount, currency}` ili `null`), `location_type` (`online`, `in_person`, `either`), `color` (iz `reference-data.services.colors`), `requires_deposit`, `is_active`, `method_ids` |
+| GET / PATCH / DELETE | `/services/{id}` | jedna usluga; PATCH menja samo poslata polja (samo vlasnik); DELETE samo za uslugu koju nijedna konsultacija ne koristi, inače **409** — takva se deaktivira |
+
+Usluga u odgovoru nosi `price` (`{amount, currency}` ili `null`), `currency` (i kad cene nema — podrazumevana valuta workspace-a), `methods` i `in_use` (koristi je bar jedna konsultacija, i obrisana). Konsultacija nosi `service` (`id`, `name`, `color`, `is_active`) i `service_id`.
+
+### Povezane osobe (Faza 6a)
+
+| Metoda | Putanja | Namena |
+|---|---|---|
+| GET | `/clients/{id}/relationships` | veze klijenta, bez paginacije: sa povezanim osobama i sa drugim klijentima, i one koje je drugi klijent napravio ka ovom |
+| POST | `/clients/{id}/relationships` | poveži sa drugim klijentom (`related_client_id`) ili sa postojećom povezanom osobom (`related_person_id`) — jedno od dva; `relationship_type`, `notes`. 422 ako su već povezani (i u suprotnom smeru) ili ako je to isti klijent |
+| PATCH / DELETE | `/client-relationships/{id}` | izmena `relationship_type` i `notes`; `as_seen_by` = klijent sa čijeg profila je vrsta izabrana (čuva se obrnuto kada je to druga strana) / brisanje veze; povezana osoba bez ijedne preostale veze briše se s njom |
+| POST | `/related-people` | nova osoba uz klijenta: `client_id`, `relationship_type`, `notes` (za vezu), `first_name`, `last_name`, `email`, `phone`, `birth` (isti oblik i pravila kao kod klijenta) |
+| GET / PATCH / DELETE | `/related-people/{id}` | osoba sa podacima rođenja i vezama (`relationships` sa klijentom); PATCH lični podaci i `birth`; DELETE je soft delete zajedno sa vezama |
+| GET | `/related-people/{id}/chart` | natalna karta osobe, isto kao `/clients/{id}/chart` (`?house_system=`, `status: incomplete`) |
+| POST | `/related-people/{id}/convert` | pravi klijenta od osobe (201, klijent); lični podaci i podaci rođenja se kopiraju bez ponovnog traženja mesta, veze prelaze na klijenta, osoba se uklanja |
+
+Veza u listi (`/clients/{id}/relationships`) je viđena sa tog profila: `relationship_type` (šta je druga strana klijentu — kod veze koju je napravio drugi klijent obrnuto, `child` ↔ `parent`), `direction` (`outgoing` / `incoming`), `kind` (`person` / `client`), `notes` i `party` (`id`, `full_name`, `status` za klijenta, `birth` sa `birth_date`, `birth_time`, `time_accuracy`, `birth_place`, `birth_country_code`, `chart_ready`, ili `null`). Vrste veze su u `reference-data.relationship_types`.
 
 ### Konsultacije, beleške i fajlovi
 
 | Metoda | Putanja | Namena |
 |---|---|---|
-| GET | `/consultations` | lista; `client_id`, `status`, `search` (naslov, teme, ime klijenta), `from` / `to` (`YYYY-MM-DD`, dani u zoni korisnika), `sort` (`-starts_at`, `starts_at`), `page`, `per_page` |
-| POST | `/consultations` | nova; `client_id` (obavezno, kasnije se ne menja), `title`, `status` (podrazumevano `draft`), `starts_at` (`YYYY-MM-DDTHH:MM`, lokalno vreme), `timezone` (podrazumevano zona korisnika), `duration_minutes`, `topics`, `internal_notes`, `client_summary`, `next_steps`, `method_ids` |
+| GET | `/consultations` | lista; `client_id`, `service_id`, `status`, `search` (naslov, usluga, teme, ime klijenta), `from` / `to` (`YYYY-MM-DD`, dani u zoni korisnika), `sort` (`-starts_at`, `starts_at`), `page`, `per_page` |
+| POST | `/consultations` | nova; `client_id` (obavezno, kasnije se ne menja), `service_id` (aktivna usluga; neaktivna ostaje samo ako je već na konsultaciji; bez `duration_minutes` trajanje se uzima iz usluge), `title`, `status` (podrazumevano `draft`), `starts_at` (`YYYY-MM-DDTHH:MM`, lokalno vreme), `timezone` (podrazumevano zona korisnika), `duration_minutes`, `topics`, `internal_notes`, `client_summary`, `next_steps`, `method_ids` |
 | GET / PATCH / DELETE | `/consultations/{id}` | jedna konsultacija sa internim beleškama, sažetkom, zaključcima i snimkom karte; PATCH menja samo poslata polja; DELETE je soft delete zajedno sa prilozima |
 | POST / DELETE | `/consultations/{id}/chart` | priloži trenutnu kartu kao snimak (opciono `house_system`; inače sistem workspace-a) / ukloni snimak (sam proračun ostaje); 422 sa `missing` kada podaci rođenja nisu potpuni |
 | GET | `/notes` | beleške klijenta (`client_id`) ili konsultacije (`consultation_id`), najnovije prvo; tuđe privatne se ne vraćaju |
@@ -134,7 +158,7 @@ Greške proračuna karte i geokodiranja nikada ne prosleđuju sirov izlaz engine
 
 - Trenuci se vraćaju kao ISO 8601 u UTC-u (`2026-09-24T08:15:00Z`); izvorna IANA zona ide kao posebno polje kada je potrebna.
 - Datum i lokalno vreme rođenja vraćaju se kako su uneti (`birth_date`, `birth_time`, `birth_timezone`), ne kao UTC.
-- Novac kao celobrojni iznos u najmanjoj jedinici valute plus ISO 4217 kod: `{ "amount": 4900, "currency": "EUR" }`.
+- Novac kao celobrojni iznos u najmanjoj jedinici valute plus ISO 4217 kod: `{ "amount": 4900, "currency": "EUR" }`. Broj decimala po valuti je u `reference-data.currency_decimals` (2, osim npr. JPY 0).
 - Serverske poruke se lokalizuju prema jeziku korisnika; sadržaj koji je korisnik uneo se ne prevodi.
 
 ## Filteri, sortiranje, paginacija

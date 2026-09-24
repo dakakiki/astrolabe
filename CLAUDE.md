@@ -46,6 +46,10 @@ before starting a phase. The user communicates in Serbian.
 - A chosen place is copied into `client_birth_details` and frozen: re-sending the same
   `place_id` must not re-resolve it (`SaveBirthDetails`). Hand-entered locations are `manual`.
 - Birth date/time are stored as entered (local), never converted to UTC in the database.
+- Clients and related people keep birth data in two tables of the same shape
+  (`client_birth_details`, `related_person_birth_details`), both models extending
+  `App\Models\BirthDetails`. Put birth logic there, and keep `BirthDetails::FIELDS` complete:
+  converting a related person into a client copies exactly those columns.
 
 ## Charts
 
@@ -86,6 +90,22 @@ before starting a phase. The user communicates in Serbian.
   (kept in step on save/delete); changes that exist nowhere else are recorded with `ActivityLog`
   (field names only, never values). `php artisan activity:rebuild` must be able to recreate every
   projected entry — a new projected type needs its model in `RebuildActivity::SUBJECTS`.
+- Projections also run outside a request (`activity:rebuild`, factories), where the workspace
+  scope returns nothing: read related rows with `withoutGlobalScopes()` inside `activityProjection()`.
+
+## Services and related people
+
+- Money is an integer in the currency's smallest unit plus an ISO 4217 code, sent as
+  `{amount, currency}`; `config('astrolabe.currency_decimals')` lists the exceptions to two
+  decimals. Never use floats for money, in PHP or in JS (`resources/js/lib/money.js`).
+- Service colours are the names in `App\Enums\ServiceColor`, drawn from the `--svc-*` tokens
+  (`resources/js/lib/services.js`); never store or render a hex value.
+- A service in use (any consultation, deleted ones too) is deactivated, never deleted; the
+  foreign key restricts deletion as the last guard.
+- `ClientRelationship` has exactly one of `related_client_id` / `related_person_id`. A link
+  between two clients is one row; seen from `related_client_id` its type is inverted
+  (`RelationshipType::inverse()`), and edits from that side send `as_seen_by`.
+- Related people exist through their links: removing the last link soft-deletes the person.
 
 ## Database
 

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Enums\ConsultationStatus;
 use App\Models\Consultation;
+use App\Models\Service;
 use App\Support\RichText;
 use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Foundation\Http\FormRequest;
@@ -39,6 +40,7 @@ class SaveConsultationRequest extends FormRequest
             'client_id' => $creating
                 ? ['required', 'integer', Rule::exists('clients', 'id')->where('workspace_id', $workspaceId)->whereNull('deleted_at')]
                 : ['prohibited'],
+            'service_id' => ['nullable', 'integer', Rule::exists('services', 'id')->where('workspace_id', $workspaceId)],
             'title' => ['nullable', 'string', 'max:150'],
             'status' => [...$sometimes, $creating ? 'nullable' : 'required', Rule::enum(ConsultationStatus::class)],
             'starts_at' => ['nullable', 'date_format:Y-m-d\TH:i'],
@@ -62,12 +64,22 @@ class SaveConsultationRequest extends FormRequest
 
     /**
      * Every status but a draft needs a date, also when a PATCH changes only one of the two.
+     * An inactive service stays where it is but is not chosen anew.
      *
      * @return array<int, callable>
      */
     public function after(): array
     {
         return [function (Validator $validator) {
+            $serviceId = $this->input('service_id');
+            $consultation = $this->route('consultation');
+            $unchanged = $consultation instanceof Consultation && (int) $consultation->service_id === (int) $serviceId;
+
+            if ($serviceId !== null && ! $validator->errors()->has('service_id') && ! $unchanged
+                && ! Service::query()->whereKey($serviceId)->value('is_active')) {
+                $validator->errors()->add('service_id', __('consultations.service_inactive'));
+            }
+        }, function (Validator $validator) {
             if ($validator->errors()->hasAny(['status', 'starts_at'])) {
                 return;
             }

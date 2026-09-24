@@ -14,6 +14,7 @@ import { useForm } from '@/composables/useForm';
 import { timeZoneOptions, useLabels } from '@/composables/useLabels';
 import { formatDateTime, localInputNow } from '@/lib/datetime';
 import http from '@/lib/http';
+import { serviceColorClass } from '@/lib/services';
 import { useAuthStore } from '@/stores/auth';
 import { useToastStore } from '@/stores/toast';
 
@@ -38,11 +39,13 @@ const client = ref(null);
 const notFound = ref(false);
 const loaded = ref(false);
 const methods = ref([]);
+const services = ref([]);
 const showAllMethods = ref(false);
 const chartBusy = ref(false);
 
 // Most consultations are recorded after they happened, so a new one starts as completed, now.
 const blank = () => ({
+    service_id: null,
     title: '',
     status: 'completed',
     starts_at: '',
@@ -55,6 +58,12 @@ const blank = () => ({
     method_ids: [],
 });
 const form = useForm(blank());
+
+// Active services, plus an inactive one the consultation already has.
+const serviceOptions = computed(() =>
+    services.value.filter((service) => service.is_active || service.id === form.data.service_id),
+);
+const selectedService = computed(() => services.value.find((service) => service.id === form.data.service_id) ?? null);
 
 // Unsaved changes are compared against the last saved state.
 const saved = ref('');
@@ -73,6 +82,7 @@ function fill(data) {
     consultation.value = data;
     client.value = data.client;
     form.reset({
+        service_id: data.service_id ?? null,
         title: data.title ?? '',
         status: data.status,
         starts_at: data.starts_at_local ?? '',
@@ -116,8 +126,12 @@ async function load(consultationId) {
 }
 
 onMounted(async () => {
-    const { data } = await http.get('/astrology-methods');
-    methods.value = data.data;
+    const [methodResponse, serviceResponse] = await Promise.all([
+        http.get('/astrology-methods'),
+        http.get('/services'),
+    ]);
+    methods.value = methodResponse.data.data;
+    services.value = serviceResponse.data.data;
     await load(route.params.id);
 });
 
@@ -133,6 +147,24 @@ function selectClient(chosen) {
     client.value = { id: chosen.id, full_name: chosen.full_name };
     // A new consultation starts with the client's default method, if one is set.
     form.data.method_ids = (chosen.methods ?? []).filter((method) => method.is_default).map((method) => method.id);
+}
+
+// On a new consultation the service fills in what is still empty: its length and its methods.
+watch(
+    () => form.data.service_id,
+    (next, previousId) => chooseService(previousId),
+);
+
+function chooseService(previousId) {
+    if (id.value || !selectedService.value) return;
+
+    const previous = services.value.find((service) => service.id === previousId);
+    if (!form.data.duration_minutes || form.data.duration_minutes === previous?.duration_minutes) {
+        form.data.duration_minutes = selectedService.value.duration_minutes;
+    }
+    if (!form.data.method_ids.length) {
+        form.data.method_ids = (selectedService.value.methods ?? []).map((method) => method.id);
+    }
 }
 
 function toggleMethod(methodId, checked) {
@@ -224,7 +256,7 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', warnBeforeUnloa
 
 const heading = computed(() =>
     id.value
-        ? form.data.title || consultation.value?.title || t('consultations.untitled')
+        ? form.data.title || selectedService.value?.name || consultation.value?.title || t('consultations.untitled')
         : t('consultations.form.newTitle'),
 );
 const when = computed(() =>
@@ -265,6 +297,13 @@ const otherZone = computed(() => {
                     >
                     <template v-if="id">
                         <ConsultationStatusBadge :status="consultation.status" />
+                        <span v-if="consultation.service" class="tag inline-flex items-center gap-1.5">
+                            <span
+                                class="inline-block size-2 rounded-sm"
+                                :class="serviceColorClass(consultation.service.color)"
+                                aria-hidden="true"
+                            />{{ consultation.service.name }}
+                        </span>
                         <span v-for="method in consultation.methods" :key="method.id" class="method-pill">{{
                             labels.method(method)
                         }}</span>
@@ -306,6 +345,22 @@ const otherZone = computed(() => {
                         <div class="row">
                             <FormField
                                 v-slot="{ id: fieldId, aria }"
+                                :label="t('consultations.form.service')"
+                                :error="form.errors.value.service_id"
+                            >
+                                <select :id="fieldId" v-model="form.data.service_id" v-bind="aria" class="input">
+                                    <option :value="null">{{ t('consultations.form.noService') }}</option>
+                                    <option v-for="service in serviceOptions" :key="service.id" :value="service.id">
+                                        {{
+                                            service.is_active
+                                                ? service.name
+                                                : t('consultations.form.inactiveService', { name: service.name })
+                                        }}
+                                    </option>
+                                </select>
+                            </FormField>
+                            <FormField
+                                v-slot="{ id: fieldId, aria }"
                                 :label="t('consultations.form.title')"
                                 :error="form.errors.value.title"
                             >
@@ -314,7 +369,11 @@ const otherZone = computed(() => {
                                     v-model="form.data.title"
                                     v-bind="aria"
                                     class="input"
-                                    :placeholder="t('consultations.form.titlePlaceholder')"
+                                    :placeholder="
+                                        form.data.service_id
+                                            ? t('consultations.form.titleWithService')
+                                            : t('consultations.form.titlePlaceholder')
+                                    "
                                     autocomplete="off"
                                 />
                             </FormField>

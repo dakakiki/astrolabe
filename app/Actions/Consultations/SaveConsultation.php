@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
  */
 class SaveConsultation
 {
-    private const FIELDS = ['title', 'status', 'duration_minutes', 'topics'];
+    private const FIELDS = ['service_id', 'title', 'status', 'duration_minutes', 'topics'];
 
     /** Formatted fields, stored only after sanitizing (App\Support\RichText). */
     private const RICH_TEXT = ['internal_notes', 'client_summary', 'next_steps'];
@@ -28,6 +28,11 @@ class SaveConsultation
         return DB::transaction(function () use ($consultation, $input) {
             $consultation->fill(Arr::only($input, self::FIELDS));
 
+            // The timeline entry reads the service's name when the row is saved.
+            if ($consultation->isDirty('service_id')) {
+                $consultation->unsetRelation('service');
+            }
+
             foreach (self::RICH_TEXT as $field) {
                 if (array_key_exists($field, $input)) {
                     $consultation->{$field} = RichText::sanitize($input[$field]);
@@ -38,6 +43,8 @@ class SaveConsultation
                 $consultation->client_id = (int) $input['client_id'];
                 $consultation->created_by = auth()->id();
                 $consultation->status ??= ConsultationStatus::Draft;
+                // A new consultation lasts as long as its service, unless told otherwise.
+                $consultation->duration_minutes ??= $consultation->service?->duration_minutes;
             }
 
             if (array_key_exists('starts_at', $input) || array_key_exists('timezone', $input)) {
@@ -52,7 +59,7 @@ class SaveConsultation
 
             $consultation->client->touchActivity();
 
-            return $consultation->load(['client', 'astrologyMethods', 'chart']);
+            return $consultation->load(['client', 'service', 'astrologyMethods', 'chart']);
         });
     }
 

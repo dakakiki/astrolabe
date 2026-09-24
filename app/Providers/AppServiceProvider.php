@@ -12,6 +12,7 @@ use App\Models\ChartCalculation;
 use App\Models\Client;
 use App\Models\Consultation;
 use App\Models\Note;
+use App\Models\RelatedPerson;
 use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -64,6 +65,7 @@ class AppServiceProvider extends ServiceProvider
         // attachments.attachable_type, activity_events.subject_type).
         Relation::morphMap([
             'client' => Client::class,
+            'related_person' => RelatedPerson::class,
             'consultation' => Consultation::class,
             'note' => Note::class,
             'attachment' => Attachment::class,

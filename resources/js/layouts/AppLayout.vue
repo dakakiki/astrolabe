@@ -20,6 +20,7 @@ const navGroups = [
             { to: '/consultations', label: 'nav.consultations', icon: '☉' },
         ],
     },
+    { label: 'nav.business', items: [{ to: '/services', label: 'nav.services', icon: '◇' }] },
     { label: 'nav.workspace', items: [{ to: '/settings', label: 'nav.settings', icon: '⚙' }] },
 ];
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\ClientArchiveController;
 use App\Http\Controllers\Api\V1\ClientBirthDetailsController;
 use App\Http\Controllers\Api\V1\ClientChartController;
 use App\Http\Controllers\Api\V1\ClientController;
+use App\Http\Controllers\Api\V1\ClientRelationshipController;
 use App\Http\Controllers\Api\V1\ClientTimelineController;
 use App\Http\Controllers\Api\V1\ConsultationChartController;
 use App\Http\Controllers\Api\V1\ConsultationController;
@@ -13,6 +14,10 @@ use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\NoteController;
 use App\Http\Controllers\Api\V1\PlaceController;
 use App\Http\Controllers\Api\V1\ReferenceDataController;
+use App\Http\Controllers\Api\V1\RelatedPersonChartController;
+use App\Http\Controllers\Api\V1\RelatedPersonController;
+use App\Http\Controllers\Api\V1\RelatedPersonConversionController;
+use App\Http\Controllers\Api\V1\ServiceController;
 use App\Http\Controllers\Api\V1\StatusController;
 use App\Http\Controllers\Api\V1\TagController;
 use App\Http\Controllers\Api\V1\WorkspaceAstrologyMethodController;
@@ -51,6 +56,25 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::delete('/clients/{client}/archive', [ClientArchiveController::class, 'destroy'])->name('clients.restore');
 
             Route::get('/clients/{client}/timeline', [ClientTimelineController::class, 'index'])->name('clients.timeline');
+
+            // Related people and links between clients (docs/spec/02, "Povezane osobe").
+            Route::get('/clients/{client}/relationships', [ClientRelationshipController::class, 'index'])
+                ->name('clients.relationships.index');
+            Route::post('/clients/{client}/relationships', [ClientRelationshipController::class, 'store'])
+                ->name('clients.relationships.store');
+            Route::patch('/client-relationships/{relationship}', [ClientRelationshipController::class, 'update'])
+                ->name('client-relationships.update');
+            Route::delete('/client-relationships/{relationship}', [ClientRelationshipController::class, 'destroy'])
+                ->name('client-relationships.destroy');
+            Route::apiResource('related-people', RelatedPersonController::class)
+                ->except('index')
+                ->parameters(['related-people' => 'relatedPerson']);
+            Route::get('/related-people/{relatedPerson}/chart', [RelatedPersonChartController::class, 'show'])
+                ->name('related-people.chart');
+            Route::post('/related-people/{relatedPerson}/convert', [RelatedPersonConversionController::class, 'store'])
+                ->name('related-people.convert');
+
+            Route::apiResource('services', ServiceController::class);
 
             Route::apiResource('consultations', ConsultationController::class);
             Route::post('/consultations/{consultation}/chart', [ConsultationChartController::class, 'store'])

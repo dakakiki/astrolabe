@@ -57,6 +57,9 @@ export function useLabels() {
         languageName,
         timeAccuracy: (value) => fromKey('timeAccuracy', value ? `${value}.label` : value),
         status: (value) => fromKey('statuses', value),
+        locationType: (value) => fromKey('locationTypes', value),
+        serviceColor: (value) => fromKey('serviceColors', value),
+        relationship: (value) => fromKey('relationshipTypes', value),
     };
 }
 

@@ -15,8 +15,9 @@ export function describeEvent(event) {
         case 'consultation':
             return {
                 tone: 'consultation',
-                title: [`timeline.consultation.${meta.status}`, { title: meta.title ?? '' }],
-                titled: Boolean(meta.title),
+                // Without a title, the consultation goes by its service (the summary holds either).
+                title: [`timeline.consultation.${meta.status}`, { title: meta.title ?? meta.service ?? '' }],
+                titled: Boolean(meta.title || meta.service),
                 body: meta.topics ?? null,
                 to: { name: 'consultations.show', params: { id: event.subject.id } },
             };

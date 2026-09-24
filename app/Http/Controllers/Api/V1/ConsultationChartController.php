@@ -49,7 +49,7 @@ class ConsultationChartController extends Controller
 
         $consultation->chart()->associate($chart)->save();
 
-        return ConsultationResource::make($consultation->load(['client', 'astrologyMethods', 'chart']))->withContent();
+        return ConsultationResource::make($consultation->load(['client', 'service', 'astrologyMethods', 'chart']))->withContent();
     }
 
     public function destroy(Consultation $consultation): ConsultationResource
@@ -58,6 +58,6 @@ class ConsultationChartController extends Controller
 
         $consultation->chart()->dissociate()->save();
 
-        return ConsultationResource::make($consultation->load(['client', 'astrologyMethods', 'chart']))->withContent();
+        return ConsultationResource::make($consultation->load(['client', 'service', 'astrologyMethods', 'chart']))->withContent();
     }
 }

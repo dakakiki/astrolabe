@@ -103,6 +103,26 @@ class Client extends Model
     }
 
     /**
+     * Links this client made to related people and to other clients.
+     *
+     * @return HasMany<ClientRelationship, $this>
+     */
+    public function relationships(): HasMany
+    {
+        return $this->hasMany(ClientRelationship::class);
+    }
+
+    /**
+     * Links other clients made to this one; the type reads the other way round.
+     *
+     * @return HasMany<ClientRelationship, $this>
+     */
+    public function incomingRelationships(): HasMany
+    {
+        return $this->hasMany(ClientRelationship::class, 'related_client_id');
+    }
+
+    /**
      * @return HasMany<ActivityEvent, $this>
      */
     public function activityEvents(): HasMany

@@ -4,13 +4,15 @@ import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
+import BirthDetailsCard from '@/components/BirthDetailsCard.vue';
 import ClientTimeline from '@/components/ClientTimeline.vue';
 import ConsultationsTable from '@/components/ConsultationsTable.vue';
 import NatalChart from '@/components/NatalChart.vue';
 import NotesPanel from '@/components/NotesPanel.vue';
+import RelatedPeoplePanel from '@/components/RelatedPeoplePanel.vue';
 import StatusBadge from '@/components/StatusBadge.vue';
 import { useLabels } from '@/composables/useLabels';
-import { formatCoordinate, formatDate, formatRelative, initials } from '@/lib/format';
+import { formatDate, formatRelative, initials } from '@/lib/format';
 import http from '@/lib/http';
 import { useToastStore } from '@/stores/toast';
 
@@ -25,7 +27,7 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToastStore();
 
-const TABS = ['overview', 'chart', 'consultations', 'notes', 'files'];
+const TABS = ['overview', 'chart', 'consultations', 'notes', 'files', 'related'];
 
 const client = ref(null);
 const notFound = ref(false);
@@ -180,6 +182,7 @@ async function toggleArchive() {
                 }}</span>
                 <span v-if="name === 'notes' && client.stats?.notes" class="count">{{ client.stats.notes }}</span>
                 <span v-if="name === 'files' && client.stats?.files" class="count">{{ client.stats.files }}</span>
+                <span v-if="name === 'related' && client.stats?.related" class="count">{{ client.stats.related }}</span>
             </RouterLink>
         </nav>
 
@@ -268,94 +271,7 @@ async function toggleArchive() {
 
         <!-- Birth data and chart -->
         <div v-else-if="tab === 'chart'" class="space-y-4">
-            <section class="card">
-                <div class="card-head">
-                    <h2>{{ t('clients.profile.birth') }}</h2>
-                    <span v-if="birth?.chart.ready" class="badge b-ok right">{{
-                        t('clients.profile.chartReady')
-                    }}</span>
-                </div>
-                <div class="card-body space-y-4">
-                    <template v-if="birth">
-                        <dl class="facts">
-                            <dt>{{ t('clients.profile.born') }}</dt>
-                            <dd>{{ formatDate(birth.birth_date, locale) || '—' }}</dd>
-
-                            <dt>{{ t('clients.profile.time') }}</dt>
-                            <dd>
-                                <span v-if="birth.birth_time" class="font-mono">{{ birth.birth_time }}</span>
-                                <span class="tag ml-2">{{ labels.timeAccuracy(birth.time_accuracy) }}</span>
-                            </dd>
-
-                            <dt>{{ t('clients.profile.place') }}</dt>
-                            <dd>
-                                {{ birth.birth_place || '—'
-                                }}<template v-if="birth.birth_country_code"
-                                    >, {{ labels.country(birth.birth_country_code) }}</template
-                                >
-                            </dd>
-
-                            <template v-if="birth.latitude !== null">
-                                <dt>{{ t('clients.profile.coordinates') }}</dt>
-                                <dd class="font-mono text-xs">
-                                    {{ formatCoordinate(birth.latitude, 'lat') }}
-                                    {{ formatCoordinate(birth.longitude, 'lng') }}
-                                    <span class="text-ink-4">({{ birth.latitude }}, {{ birth.longitude }})</span>
-                                </dd>
-                            </template>
-
-                            <template v-if="birth.birth_timezone">
-                                <dt>{{ t('clients.profile.zone') }}</dt>
-                                <dd>
-                                    <span class="font-mono text-xs">{{ birth.birth_timezone }}</span>
-                                    <span v-if="birth.moment" class="ml-2 text-ink-2">
-                                        {{
-                                            t('clients.profile.offset', {
-                                                offset: birth.moment.utc_offset,
-                                                abbr: birth.moment.abbreviation,
-                                            })
-                                        }}<template v-if="birth.moment.is_dst">
-                                            · {{ t('clients.profile.summerTime') }}</template
-                                        >
-                                    </span>
-                                </dd>
-                            </template>
-
-                            <template v-if="birth.geocode_source">
-                                <dt>{{ t('clients.profile.source') }}</dt>
-                                <dd>{{ t(`geocodeSource.${birth.geocode_source}`) }}</dd>
-                            </template>
-
-                            <template v-if="birth.data_source">
-                                <dt>{{ t('clients.profile.dataSource') }}</dt>
-                                <dd>{{ birth.data_source }}</dd>
-                            </template>
-                        </dl>
-
-                        <p v-if="birth.notes" class="whitespace-pre-line text-ink-2">{{ birth.notes }}</p>
-
-                        <div v-if="!birth.chart.ready" class="notice n-warn" role="status">
-                            <div>
-                                <strong>{{ t('clients.missing.title') }}</strong>
-                                {{ birth.chart.missing.map((key) => t(`clients.missing.${key}`)).join(', ') }}
-                            </div>
-                        </div>
-                        <div v-if="birth.clock_change" class="notice n-warn" role="status">
-                            {{ t(`clients.warnings.${birth.clock_change}`) }}
-                        </div>
-                        <div v-if="birth.zone_history_uncertain" class="notice n-neutral">
-                            {{ t('clients.warnings.zoneHistory') }}
-                        </div>
-                    </template>
-
-                    <div v-else class="flex items-center justify-between gap-3">
-                        <span class="text-ink-3">{{ t('clients.profile.noBirth') }}</span>
-                        <RouterLink :to="{ name: 'clients.edit', params: { id: client.id } }" class="btn btn-sm">{{
-                            t('clients.profile.addBirth')
-                        }}</RouterLink>
-                    </div>
-                </div>
-            </section>
+            <BirthDetailsCard :birth="birth" :edit-to="{ name: 'clients.edit', params: { id: client.id } }" />
 
             <NatalChart
                 v-if="chart"
@@ -414,6 +330,9 @@ async function toggleArchive() {
                 <AttachmentsPanel :client-id="client.id" @changed="refreshStats" />
             </div>
         </section>
+
+        <!-- Related people -->
+        <RelatedPeoplePanel v-else-if="tab === 'related'" :client-id="client.id" @changed="refreshStats" />
     </template>
 
     <p v-else class="text-ink-3">{{ t('common.loading') }}</p>

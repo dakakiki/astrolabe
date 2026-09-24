@@ -31,7 +31,7 @@ use Illuminate\Support\Str;
  * @property CarbonImmutable|null $starts_at UTC
  */
 #[Fillable([
-    'title', 'starts_at', 'timezone', 'duration_minutes', 'status',
+    'service_id', 'title', 'starts_at', 'timezone', 'duration_minutes', 'status',
     'topics', 'internal_notes', 'client_summary', 'next_steps',
 ])]
 class Consultation extends Model
@@ -62,6 +62,14 @@ class Consultation extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return BelongsTo<Service, $this>
+     */
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(Service::class);
     }
 
     /**
@@ -111,15 +119,22 @@ class Consultation extends Model
 
     public function activityProjection(): ActivityProjection
     {
+        // Projections are kept in step outside a request too (activity:rebuild, jobs),
+        // where no workspace scope applies; the service is the consultation's own.
+        $service = $this->service_id === null ? null : ($this->relationLoaded('service')
+            ? $this->service
+            : $this->service()->withoutGlobalScopes()->first());
+
         return new ActivityProjection(
             type: self::activityType(),
             clientId: $this->client_id,
             occurredAt: $this->starts_at ?? $this->created_at,
             createdBy: $this->created_by,
-            summary: $this->title,
+            summary: $this->title ?? $service?->name,
             metadata: [
                 'status' => $this->status->value,
                 'title' => $this->title,
+                'service' => $service?->name,
                 'duration_minutes' => $this->duration_minutes,
                 'timezone' => $this->timezone,
                 'has_chart' => $this->chart_calculation_id !== null,

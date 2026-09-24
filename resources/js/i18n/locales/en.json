@@ -35,7 +35,9 @@
         "userMenu": "Account menu",
         "signOut": "Sign out",
         "clients": "Clients",
-        "consultations": "Consultations"
+        "consultations": "Consultations",
+        "business": "Business",
+        "services": "Services"
     },
     "auth": {
         "art": {
@@ -370,7 +372,7 @@
             "dataSource": "Source of the birth data",
             "dataSourceHint": "e.g. birth certificate, client’s memory, family record",
             "notes": "Notes on the birth data",
-            "frozenHint": "Coordinates and time zone are saved with the client and never looked up again, so the chart stays the same."
+            "frozenHint": "Coordinates and time zone are saved with the birth data and never looked up again, so the chart stays the same."
         },
         "profile": {
             "contact": "Contact & preferences",
@@ -398,7 +400,8 @@
                 "chart": "Birth data & chart",
                 "consultations": "Consultations",
                 "notes": "Notes",
-                "files": "Files"
+                "files": "Files",
+                "related": "Related people"
             },
             "summary": "Summary",
             "consultations": "Consultations",
@@ -536,12 +539,14 @@
         "snapshot": "Snapshot",
         "otherZone": "Entered in {zone}: {time}",
         "filters": {
-            "search": "Search by client, title or topic",
+            "search": "Search by client, service, title or topic",
             "status": "Status",
             "anyStatus": "Any status",
             "from": "From",
             "to": "To",
-            "clear": "Clear"
+            "clear": "Clear",
+            "service": "Service",
+            "anyService": "Any service"
         },
         "columns": {
             "date": "Date",
@@ -574,7 +579,11 @@
             "nextSteps": "Conclusions and next steps",
             "create": "Record consultation",
             "save": "Save changes",
-            "delete": "Delete"
+            "delete": "Delete",
+            "service": "Service",
+            "noService": "No service",
+            "inactiveService": "{name} (inactive)",
+            "titleWithService": "Optional with a service"
         },
         "chart": {
             "title": "Attached chart",
@@ -598,6 +607,146 @@
         "completed": "Completed",
         "cancelled": "Cancelled",
         "no_show": "No show"
+    },
+    "services": {
+        "eyebrow": "Business",
+        "title": "Services",
+        "sub": "What you offer, how long it takes and what it costs. A consultation can name its service; inactive services stay on past records.",
+        "add": "Add service",
+        "edit": "Edit",
+        "empty": "No services yet. Add what you offer — a natal reading, a solar return, a short question.",
+        "columns": {
+            "name": "Name",
+            "duration": "Duration",
+            "price": "Price",
+            "held": "Held",
+            "deposit": "Deposit",
+            "methods": "Methods",
+            "status": "Status"
+        },
+        "active": "Active",
+        "inactive": "Inactive",
+        "anyMethod": "Any",
+        "minutes": "{n} min",
+        "yes": "Yes",
+        "no": "No",
+        "ownerOnly": "Only the workspace owner can change services.",
+        "created": "Service added",
+        "saved": "Service saved",
+        "deleted": "Service deleted",
+        "confirmDelete": "Delete the service “{name}”?",
+        "form": {
+            "newTitle": "New service",
+            "editTitle": "Edit “{name}”",
+            "name": "Name",
+            "namePlaceholder": "e.g. Natal reading",
+            "description": "Description",
+            "duration": "Duration (minutes)",
+            "price": "Price",
+            "priceHint": "Leave empty when it varies.",
+            "priceInvalid": "Enter an amount such as 120 or 49.50.",
+            "currency": "Currency",
+            "held": "Held",
+            "color": "Calendar colour",
+            "noColor": "No colour",
+            "methods": "Methods",
+            "methodsHint": "The methods this service is meant for. None means any.",
+            "deposit": "Requires a deposit",
+            "depositHint": "A marker for now; payments are recorded in a later version.",
+            "active": "Active",
+            "activeHint": "Inactive services cannot be chosen for new consultations but stay on past ones.",
+            "create": "Add service",
+            "save": "Save service",
+            "cancel": "Cancel",
+            "delete": "Delete service",
+            "inUse": "Used on consultations, so it cannot be deleted — deactivate it instead."
+        }
+    },
+    "locationTypes": {
+        "online": "Online",
+        "in_person": "In person",
+        "either": "Online or in person"
+    },
+    "serviceColors": {
+        "indigo": "Indigo",
+        "sky": "Sky",
+        "teal": "Teal",
+        "green": "Green",
+        "amber": "Amber",
+        "coral": "Coral",
+        "rose": "Rose",
+        "violet": "Violet"
+    },
+    "relationshipTypes": {
+        "partner": "Partner",
+        "child": "Child",
+        "parent": "Parent",
+        "sibling": "Sibling",
+        "friend": "Friend",
+        "business_partner": "Business partner",
+        "other": "Other"
+    },
+    "related": {
+        "title": "Related people",
+        "add": "Add person",
+        "linkClient": "Link a client",
+        "emptyTitle": "Nobody linked yet",
+        "emptyText": "Partners, children and others can hold their own birth data and chart, without an account.",
+        "columns": {
+            "name": "Name",
+            "relationship": "Relationship",
+            "birth": "Birth data",
+            "chart": "Chart"
+        },
+        "kinds": {
+            "client": "Client",
+            "person": "Person"
+        },
+        "chartReady": "Available",
+        "chartIncomplete": "Incomplete",
+        "noBirth": "No birth data",
+        "incoming": "Linked from {name}’s profile",
+        "edit": "Edit",
+        "save": "Save",
+        "cancel": "Cancel",
+        "remove": "Remove",
+        "confirmRemove": "Remove the link to {name}? A person linked to nobody else is removed as well.",
+        "removed": "Link removed",
+        "updated": "Link updated",
+        "linked": "Client linked",
+        "linkForm": {
+            "client": "Client",
+            "relationship": "Relationship",
+            "notes": "Notes",
+            "save": "Link client"
+        },
+        "person": {
+            "eyebrow": "Related person",
+            "of": "{relationship} of",
+            "contact": "Contact",
+            "noContact": "No contact details.",
+            "belongsWith": "Linked to",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Delete {name} and every link to them?",
+            "deleted": "Person deleted",
+            "makeClient": "Make a client",
+            "confirmMakeClient": "Make {name} a client of their own? Their details and birth data are copied as they are, and every link moves to the new client.",
+            "converted": "{name} is now a client"
+        },
+        "form": {
+            "newTitle": "Add a person",
+            "newSub": "Related to {name}",
+            "editTitle": "Edit {name}",
+            "person": "Person",
+            "relationship": "Relationship to {name}",
+            "relationshipHint": "What this person is to the client.",
+            "notes": "Notes on the relationship",
+            "save": "Save",
+            "cancel": "Cancel",
+            "created": "Person added",
+            "saved": "Person saved"
+        }
     },
     "visibility": {
         "label": "Visibility",

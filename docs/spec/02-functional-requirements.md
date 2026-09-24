@@ -144,6 +144,16 @@ Klijent može imati partnera, dete, roditelja, prijatelja, poslovnog partnera il
 
 Povezana osoba može imati sopstvene lične i podatke rođenja, bez posebnog korisničkog naloga. Ako ima kompletne podatke rođenja, i za nju se može izračunati karta. Kasnije se može pretvoriti u samostalnog klijenta bez ponovnog unosa.
 
+### Implementirano u Fazi 6a
+
+- Vrste veze: partner (i bračni), dete, roditelj, brat/sestra, prijatelj, poslovni partner, drugo. Vrsta kaže šta je druga strana klijentu („dete“ na Aninom profilu znači Anino dete). Brat/sestra je dodat uz spisak iz specifikacije, jer porodične karte to traže.
+- Klijent se povezuje sa novom povezanom osobom (ime, kontakt, podaci rođenja) ili sa drugim klijentom. Ista osoba može pripadati uz više klijenata (dete dva roditelja).
+- Veza između dva klijenta je jedna i vidi se na oba profila, sa druge strane obrnuto (Anino „dete“ je na Markovom profilu „roditelj“); menja se i briše sa bilo koje strane.
+- Podaci rođenja povezane osobe imaju istu strukturu i ista pravila kao kod klijenta (izbor mesta iz liste se zamrzava, ručne koordinate, `time_accuracy`, upozorenja o promeni sata), a karta se računa i kešira isto, sa izborom sistema kuća. Karta povezane osobe ne ide na vremensku liniju klijenta.
+- Povezane osobe nemaju sopstvenu listu: dolaze preko taba „Povezane osobe“ na profilu klijenta. Uklanjanje poslednje veze uklanja i osobu (soft delete).
+- „Napravi klijenta“: lični podaci i podaci rođenja se kopiraju kakvi jesu (mesto se ne traži ponovo, pa karta ostaje ista), sve veze prelaze na novog klijenta, a povezana osoba se uklanja uz zapis u kog klijenta je prešla.
+- Sinastrija („Uporedi karte“ u prototipu) nije deo Faze 6; ostaje u „Kasnije“ iz sekcije o kartama.
+
 ## Astrološke metode
 
 Metode postoje na tri nivoa:
@@ -177,7 +187,7 @@ Konsultacija sadrži:
 
 ### Implementirano u Fazi 4
 
-- Dok usluge ne postoje (Faza 6), vrstu konsultacije opisuje slobodan **naslov** (npr. „Natalno čitanje“); `service_id` i `appointment_id` dolaze sa uslugama i terminima, a status naplate sa uplatama (Faza 7).
+- Dok usluge ne postoje (Faza 6), vrstu konsultacije opisuje slobodan **naslov** (npr. „Natalno čitanje“); `service_id` i `appointment_id` dolaze sa uslugama i terminima, a status naplate sa uplatama (Faza 7). Od Faze 6a konsultacija ima i uslugu (vidi „Usluge“); naslov ostaje opcion.
 - Datum i vreme se unose kao lokalno vreme u izabranoj IANA zoni (podrazumevano zona astrologa) i čuvaju u UTC-u zajedno sa zonom. Promena samo zone zadržava uneto vreme („15:00, ali u Lisabonu“).
 - Svaki status osim `draft` traži datum; nacrt može biti bez njega.
 - Klijent konsultacije se bira jednom, pri kreiranju, i više se ne menja — beleške, fajlovi i snimak karte pripadaju tom klijentu.
@@ -268,6 +278,16 @@ Vidljivost:
 - aktivna/neaktivna;
 - potreban avans;
 - dozvoljene astrološke metode.
+
+### Implementirano u Fazi 6a
+
+- Cena se čuva kao ceo broj u najmanjoj jedinici valute (4900 = 49,00 EUR), u jednoj od valuta koje workspace sme da izabere; bez cene je dozvoljeno („zavisi“). Valute bez decimala (JPY, ISK, CLP) su izuzetak, a SPA broj decimala dobija sa servera.
+- Boja je jedna od osam imenovanih boja vezanih za dizajn tokene (indigo, nebo, tirkiz, zelena, ćilibar, koral, ruža, ljubičasta), ne proizvoljan hex, da bi bila čitljiva u noćnoj i dnevnoj temi.
+- „Online ili uživo“ ima i treću vrednost, „online ili uživo“ — tada termin (6b) bira jedno od dva.
+- Naziv je jedinstven u workspace-u. Usluge vide svi članovi, a menja ih vlasnik workspace-a (kao sopstvene metode).
+- Usluga koju koristi bar jedna konsultacija (i obrisana) ne može da se obriše, samo deaktivira; neaktivna usluga ostaje na starim konsultacijama, ali se ne bira za nove.
+- „Potreban avans“ je za sada samo oznaka; uplate dolaze u Fazi 7. „Dozvoljene metode“ su predlog: nova konsultacija sa uslugom dobija te metode ako nijedna nije izabrana, ali ih astrolog može promeniti.
+- Konsultacija ima opcionu uslugu; nova konsultacija preuzima trajanje usluge ako trajanje nije uneto. Bez naslova, konsultacija se na listi, u zaglavlju i na vremenskoj liniji zove po usluzi, a preimenovanje usluge osvežava vremensku liniju.
 
 ## Kalendar i termini
 

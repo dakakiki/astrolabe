@@ -51,6 +51,18 @@
     --air: #7fb6f5;
     --water: #a79bf0;
 
+    /* Service colours in the calendar (App\Enums\ServiceColor). All but
+       indigo follow the element and status colours of the theme; indigo has
+       its own value, because --brand changes with workspace branding. */
+    --svc-indigo: #8a90f5;
+    --svc-sky: var(--air);
+    --svc-teal: var(--ok);
+    --svc-green: var(--earth);
+    --svc-amber: var(--brass);
+    --svc-coral: var(--fire);
+    --svc-rose: var(--danger);
+    --svc-violet: var(--water);
+
     --on-brand: #ffffff;
     --toast-bg: #2a3458;
     --toast-fg: #ffffff;
@@ -106,6 +118,8 @@
     --earth: #57703f;
     --air: #3a6b96;
     --water: #5a4f96;
+
+    --svc-indigo: #4a54b8;
 
     --toast-bg: #10182b;
     --stars: 0;
