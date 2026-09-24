@@ -9,7 +9,7 @@ Laravel 13 API + Vue 3 SPA, MariaDB. Specification (Serbian) lives in [`docs/spe
 
 - PHP 8.3+ with `pdo_mysql`, `mbstring`, `intl`, `bcmath`, `zip`
 - Composer 2
-- Node.js 20+ and npm
+- Node.js 24 LTS and npm (managed with nvm-windows locally)
 - MariaDB 11.8 LTS (target branch; CI runs on it)
 
 ## Local setup (WAMP)

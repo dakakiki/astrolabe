@@ -82,7 +82,7 @@ Postojeći WAMP:
 Dodatni alati:
 
 - Composer 2 (ažuran, `composer self-update`);
-- Node.js LTS i npm;
+- Node.js 24 LTS i npm, preko nvm-windows (stariji projekti na istoj mašini zadržavaju svoje verzije);
 - Mailpit ili ekvivalent za lokalni email;
 - Redis opciono u početku;
 - ephemeris binarni fajl i datoteke efemerida, dokumentovane u `11-astrology-calculation-module.md`.
