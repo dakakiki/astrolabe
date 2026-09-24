@@ -4,6 +4,8 @@ Practice-management SaaS for professional astrologers. Laravel 13 API + Vue 3 SP
 The specification in `docs/spec` (Serbian) is the source of truth; read the relevant document
 before starting a phase. The user communicates in Serbian.
 
+**Start every session with `docs/STATUS.md`**: what is done, decisions, open items, the next phase.
+
 ## Must-follow rules
 
 - Never name a table `sessions` for business data — Laravel owns it. The entity is `Consultation`.
