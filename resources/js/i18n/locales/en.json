@@ -325,7 +325,8 @@
             "notesHint": "Only you see these. Never shared with the client.",
             "save": "Save client",
             "cancel": "Cancel",
-            "none": "—"
+            "none": "—",
+            "dialCode": "Dialling code"
         },
         "birth": {
             "title": "Birth data",

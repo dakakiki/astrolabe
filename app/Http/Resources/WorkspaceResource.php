@@ -19,6 +19,8 @@ class WorkspaceResource extends JsonResource
             'slug' => $this->slug,
             'default_locale' => $this->default_locale,
             'timezone' => $this->timezone,
+            // Derived from the time zone; used as the default country in forms.
+            'country_code' => $this->countryCode(),
             'default_currency' => $this->default_currency,
             'default_house_system' => $this->default_house_system->value,
             'default_zodiac_mode' => $this->default_zodiac_mode->value,

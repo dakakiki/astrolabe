@@ -76,6 +76,9 @@ locally); the import builds new tables and swaps them in atomically, so search k
 `cities500` (places above 500 inhabitants) is enough for development. Nothing a user types into the
 place search leaves the server.
 
+Countries (dialling codes, currencies, languages) ship with the schema from GeoNames `countryInfo.txt`
+and are refreshed by `php artisan countries:import`.
+
 ## Licensing note
 
 Chart calculation will use the Swiss Ephemeris. During development it is used under the AGPL;

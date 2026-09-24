@@ -5,11 +5,13 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 
 import BirthDataFields from '@/components/BirthDataFields.vue';
 import FormField from '@/components/FormField.vue';
+import PhoneInput from '@/components/PhoneInput.vue';
 import TagInput from '@/components/TagInput.vue';
 import { useForm } from '@/composables/useForm';
 import { CLIENT_LANGUAGES, timeZoneOptions, useLabels } from '@/composables/useLabels';
 import { birthFromApi, birthToPayload, emptyBirth, hasBirthInput } from '@/lib/birth';
 import http from '@/lib/http';
+import { useAuthStore } from '@/stores/auth';
 import { useReferenceStore } from '@/stores/reference';
 import { useToastStore } from '@/stores/toast';
 
@@ -18,6 +20,7 @@ const labels = useLabels();
 const route = useRoute();
 const router = useRouter();
 const reference = useReferenceStore();
+const auth = useAuthStore();
 const toast = useToastStore();
 
 const clientId = computed(() => route.params.id ?? null);
@@ -50,7 +53,9 @@ const visibleMethods = computed(() =>
     ),
 );
 const sortedCountries = computed(() =>
-    [...(reference.data?.countries ?? [])].sort((a, b) => labels.country(a).localeCompare(labels.country(b))),
+    (reference.data?.countries ?? [])
+        .map((country) => country.code)
+        .sort((a, b) => labels.country(a).localeCompare(labels.country(b))),
 );
 const zones = computed(() => timeZoneOptions(form.data.timezone));
 const languages = computed(() =>
@@ -178,13 +183,12 @@ async function save() {
                         />
                     </FormField>
                     <FormField v-slot="{ id, aria }" :label="t('clients.form.phone')" :error="form.errors.value.phone">
-                        <input
-                            :id="id"
+                        <PhoneInput
                             v-model="form.data.phone"
-                            v-bind="aria"
-                            class="input"
-                            type="tel"
-                            autocomplete="off"
+                            :input-id="id"
+                            :aria="aria"
+                            :countries="reference.data?.countries ?? []"
+                            :default-country="form.data.country_code || auth.workspace?.country_code"
                         />
                     </FormField>
                 </div>
@@ -236,7 +240,7 @@ async function save() {
                 <BirthDataFields
                     v-model="birth"
                     :errors="form.errors.value"
-                    :countries="reference.data?.countries ?? []"
+                    :countries="(reference.data?.countries ?? []).map((country) => country.code)"
                 />
             </div>
         </section>

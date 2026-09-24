@@ -126,6 +126,16 @@ Originalni lokalni datum, vreme i vremenska zona čuvaju se odvojeno. Podatak ro
 
 `geocode_confidence` je izostavljen: kod lokalne baze astrolog sam bira mesto sa liste, pa nema procene pouzdanosti.
 
+### `countries` (referentni podaci, nisu tenant)
+
+Iz GeoNames `countryInfo.txt`; dolazi uz šemu (fajl je u `database/data/geonames`), a `countries:import` ga mesečno osvežava.
+
+- `code` — ISO 3166-1 alpha-2, primarni ključ
+- `iso3`, `name` (engleski, samo kao rezerva — prikazani naziv daje browser na jeziku korisnika), `capital`, `continent`
+- `currency_code`, `phone_code` (npr. `381`, `1-684`), `languages`, `population`, `geoname_id`
+
+Telefon klijenta se i dalje čuva kao jedan tekst sa međunarodnim prefiksom (`+381 60 1234567`); forma samo nudi izbor pozivnog broja.
+
 ### `places` i `place_names` (referentni podaci, nisu tenant)
 
 Lokalna kopija GeoNames baze, puni je `php artisan places:import`, a osvežava se mesečno.

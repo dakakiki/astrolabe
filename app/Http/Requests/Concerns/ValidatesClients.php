@@ -23,7 +23,7 @@ trait ValidatesClients
             'last_name' => ['nullable', 'string', 'max:100'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
-            'country_code' => ['nullable', Rule::in(config('countries'))],
+            'country_code' => ['nullable', Rule::exists('countries', 'code')],
             'timezone' => ['nullable', 'timezone:all_with_bc'],
             // The client's own language for communication; any language, not only UI locales.
             'preferred_locale' => ['nullable', 'string', 'regex:/^[a-z]{2,3}(-[A-Z]{2})?$/'],
@@ -79,7 +79,7 @@ trait ValidatesClients
             $prefix.'place_id' => ['nullable', 'integer'],
             // …or a hand-entered location, where coordinates and zone go together.
             $prefix.'birth_place' => ['nullable', 'string', 'max:255'],
-            $prefix.'birth_country_code' => ['nullable', Rule::in(config('countries'))],
+            $prefix.'birth_country_code' => ['nullable', Rule::exists('countries', 'code')],
             $prefix.'latitude' => ['nullable', 'numeric', 'between:-90,90', "required_with:{$prefix}longitude"],
             $prefix.'longitude' => ['nullable', 'numeric', 'between:-180,180', "required_with:{$prefix}latitude"],
             $prefix.'birth_timezone' => ['nullable', 'timezone:all_with_bc', "required_with:{$prefix}latitude"],
