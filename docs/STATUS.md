@@ -15,7 +15,7 @@ Stanje na dan **24. 9. 2026**, posle Faze 3. Ovaj dokument je polazna tačka za 
 | Swiss Ephemeris | `storage/app/private/swisseph/swetest64.exe` + `ephe/sepl_18.se1`, `ephe/semo_18.se1` (van Git-a) |
 | GeoNames | `storage/app/private/geonames/` (van Git-a); `countryInfo.txt` je i u `database/data/geonames` |
 | Lokalni email | `storage/logs/laravel.log` (`MAIL_MAILER=log`) |
-| Test nalog | `mila.e2e@example.com` / `Zvezdana-karta-2026` (lokalna baza), sa test klijentkinjom „Ana Marković“ |
+| Test nalog | `mila.e2e@example.com` (samo lokalna baza; lozinka nije u repou — po potrebi se resetuje preko „Forgot password“, link je u `laravel.log`), sa test klijentkinjom „Ana Marković“ |
 
 ## Urađeno
 
