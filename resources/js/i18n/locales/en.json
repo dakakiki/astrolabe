@@ -390,5 +390,55 @@
             "zoneHistory": "Time-zone records before 1970 are unreliable in some regions. Check the offset if the chart looks wrong.",
             "approximate": "The birth time is approximate, so angles and houses will be unreliable."
         }
+    },
+    "bodies": {
+        "sun": "Sun",
+        "moon": "Moon",
+        "mercury": "Mercury",
+        "venus": "Venus",
+        "mars": "Mars",
+        "jupiter": "Jupiter",
+        "saturn": "Saturn",
+        "uranus": "Uranus",
+        "neptune": "Neptune",
+        "pluto": "Pluto",
+        "true_node": "North Node (true)",
+        "mean_node": "North Node (mean)"
+    },
+    "signs": {
+        "aries": "Aries",
+        "taurus": "Taurus",
+        "gemini": "Gemini",
+        "cancer": "Cancer",
+        "leo": "Leo",
+        "virgo": "Virgo",
+        "libra": "Libra",
+        "scorpio": "Scorpio",
+        "sagittarius": "Sagittarius",
+        "capricorn": "Capricorn",
+        "aquarius": "Aquarius",
+        "pisces": "Pisces"
+    },
+    "chart": {
+        "title": "Planetary positions",
+        "body": "Body",
+        "sign": "Sign",
+        "position": "Position",
+        "motion": "Motion",
+        "retrograde": "Retrograde",
+        "retrogradeShort": "R",
+        "direct": "Direct",
+        "loading": "Calculating…",
+        "unavailable": "Charts cannot be calculated right now. Everything else keeps working.",
+        "moonRange": "Time unknown: the Moon moved through this span during the birth date.",
+        "noonNote": "Positions for 12:00 UT on the birth date; angles and houses need a birth time.",
+        "approximateNote": "The birth time is approximate.",
+        "rectifiedNote": "Rectified birth time.",
+        "engine": "{engine} {version}",
+        "tzdata": "tzdata {version}",
+        "calculated": "Calculated {when}",
+        "tropical": "Tropical zodiac",
+        "sidereal": "Sidereal zodiac, {ayanamsa}",
+        "housesSoon": "Angles, houses, aspects and the chart wheel arrive with the full natal chart."
     }
 }

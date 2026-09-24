@@ -2,13 +2,18 @@
 
 namespace App\Providers;
 
+use App\Astrology\Contracts\EphemerisEngine;
 use App\Astrology\Contracts\Geocoder;
+use App\Astrology\Engines\FakeEngine;
+use App\Astrology\Engines\SwissEphemerisEngine;
 use App\Astrology\Geocoding\LocalGeoNamesGeocoder;
+use App\Models\Client;
 use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -24,6 +29,16 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(CurrentWorkspace::class);
 
         $this->app->bind(Geocoder::class, LocalGeoNamesGeocoder::class);
+
+        // One engine per process; the fake one keeps the positions tests pin on it.
+        $this->app->singleton(EphemerisEngine::class, fn () => match (config('astrolabe.ephemeris.engine')) {
+            'fake' => new FakeEngine,
+            default => new SwissEphemerisEngine(
+                config('astrolabe.ephemeris.swetest'),
+                config('astrolabe.ephemeris.path'),
+                config('astrolabe.ephemeris.timeout'),
+            ),
+        });
     }
 
     /**
@@ -40,6 +55,9 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->pointAuthEmailsAtTheSpa();
+
+        // Stable names in polymorphic columns (chart_calculations.subject_type).
+        Relation::morphMap(['client' => Client::class]);
     }
 
     /**

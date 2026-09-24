@@ -52,4 +52,23 @@ return [
         'source' => env('PLACES_SOURCE', 'all'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Ephemeris engine
+    |--------------------------------------------------------------------------
+    |
+    | "swiss" runs the Swiss Ephemeris `swetest` program with the .se1 data
+    | files in `path` (docs/spec/11); "fake" is the deterministic stand-in for
+    | tests and CI. On Linux, `swetest` is built from the Swiss Ephemeris
+    | sources; on Windows the published swetest64.exe is used.
+    |
+    */
+
+    'ephemeris' => [
+        'engine' => env('EPHEMERIS_ENGINE', 'swiss'),
+        'swetest' => env('SWETEST_PATH', storage_path('app/private/swisseph/swetest64.exe')),
+        'path' => env('EPHEMERIS_PATH', storage_path('app/private/swisseph/ephe')),
+        'timeout' => (int) env('EPHEMERIS_TIMEOUT', 10),
+    ],
+
 ];

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AstrologyMethodController;
 use App\Http\Controllers\Api\V1\ClientArchiveController;
 use App\Http\Controllers\Api\V1\ClientBirthDetailsController;
+use App\Http\Controllers\Api\V1\ClientChartController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\PlaceController;
@@ -40,6 +41,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::apiResource('clients', ClientController::class)->except('destroy');
             Route::put('/clients/{client}/birth-details', [ClientBirthDetailsController::class, 'update'])
                 ->name('clients.birth-details.update');
+            Route::get('/clients/{client}/chart', [ClientChartController::class, 'show'])->name('clients.chart');
             Route::post('/clients/{client}/archive', [ClientArchiveController::class, 'store'])->name('clients.archive');
             Route::delete('/clients/{client}/archive', [ClientArchiveController::class, 'destroy'])->name('clients.restore');
 

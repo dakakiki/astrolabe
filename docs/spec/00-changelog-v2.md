@@ -72,6 +72,13 @@ Klijenti (CRUD, statusi, pretraga, filteri, paginacija, arhiviranje), podaci ro�
 
 Primećeno usput: uz podatke rođenja sada se vidi istorijski UTC offset (npr. letnje računanje vremena 1985. u Jugoslaviji), a vreme koje pada na promenu sata (preskočeno ili dvostruko) dobija upozorenje — to je ulaz za Fazu 3.
 
+## Faza 3 — implementirano
+
+Planetarne pozicije (Sunce–Pluton, pravi i srednji Mesečev čvor) preko Swiss Ephemeris-a, keš u `chart_calculations`, pravila za `time_accuracy` (nepoznato vreme: 12:00 UT i Mesec kao opseg) i tabela pozicija na profilu klijenta. Uz to: tabela `countries` iz GeoNames-a sa pozivnim brojevima. Izmene u dokumentima:
+
+- 05: `chart_calculations.time_accuracy`; `input_hash` obuhvata i `time_accuracy` i otisak engine-a; tabela `countries`.
+- 11: stanje referentnih testova (NASA JPL Horizons) i napomene o pozivu `swetest`.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

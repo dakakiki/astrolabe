@@ -198,6 +198,7 @@ Povezana osoba sa kompletnim podacima rođenja može imati sopstvenu izračunatu
 - `engine_version`
 - `ephemeris_version`, nullable
 - `tzdata_version`, nullable
+- `time_accuracy` — kopija iz podataka rođenja u trenutku proračuna (Faza 3)
 - `calculated_at`
 - timestamps
 
@@ -210,7 +211,7 @@ INDEX  (workspace_id, subject_type, subject_id)
 
 **Ova tabela je keš i istorijski zapis, nikada izvor istine.** Izvor istine ostaje `client_birth_details`. Ako se tabela obriše, sve karte se mogu ponovo izračunati iz podataka rođenja.
 
-`input_hash` obuhvata sve što ulazi u proračun: julijanski dan, koordinate, sistem kuća, zodijak, ayanamsu i listu tela. Kada se bilo šta od toga promeni, hash se ne poklapa i pokreće se novi proračun. Stari zapis ostaje, što je korisno pri rektifikaciji vremena kada astrolog upoređuje varijante.
+`input_hash` obuhvata sve što ulazi u proračun: julijanski dan, koordinate, sistem kuća, zodijak, ayanamsu i listu tela, a od Faze 3 i `time_accuracy` i „otisak“ engine-a (naziv, verzija i kontrolne sume fajlova efemerida), tako da nova verzija engine-a ili novi fajlovi daju novi proračun umesto tihe zamene. Kada se bilo šta od toga promeni, hash se ne poklapa i pokreće se novi proračun. Stari zapis ostaje, što je korisno pri rektifikaciji vremena kada astrolog upoređuje varijante.
 
 `engine_version`, `ephemeris_version` i `tzdata_version` se čuvaju jer promena bilo koje od njih može promeniti rezultat. Bez tog podatka nije moguće objasniti zašto se stara i nova karta razlikuju.
 

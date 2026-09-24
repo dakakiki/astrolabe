@@ -256,6 +256,14 @@ Obavezno:
 
 Referentne karte treba pribaviti iz nezavisnog izvora i zapisati očekivane vrednosti u fixture fajl. Kada se promeni verzija engine-a, efemerida ili tzdata, ovi testovi se pokreću ponovo pre deploya.
 
+### Stanje posle Faze 3
+
+- Nezavisni izvor: **NASA JPL Horizons** (geocentrična prividna ekliptička dužina, UT), 9 trenutaka od 1850. do 2040. za Sunce, Mesec i planete do Plutona — `tests/fixtures/ephemeris/jpl-horizons-reference.json`. Swiss Ephemeris 2.10.03 se sa njima poklapa na nivou delova lučne sekunde; granica testa je jedna lučna minuta.
+- `SwissEphemerisReferenceTest` se izvršava tamo gde postoje `swetest` i fajlovi efemerida; u CI-ju se preskače, a ostali testovi koriste `FakeEngine`.
+- Kada fajlovi efemerida nedostaju, `swetest` tiho prelazi na manje precizne Moshier formule i završava bez greške; adapter to prepoznaje i prijavljuje kao grešku.
+- Mesečevi čvorovi (pravi i srednji) računaju se, ali nisu u JPL skupu; Hiron zahteva dodatni fajl `seas_18.se1` i uvodi se naknadno.
+- Poziv: `swetest -bj<JD> -ut -p<tela> -fpls -g| -head -eswe -edir<putanja> [-sid<n>]`, uvek kao niz argumenata, bez shell-a.
+
 ## Rezime obima
 
 | Stavka | Procena |

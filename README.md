@@ -79,6 +79,20 @@ place search leaves the server.
 Countries (dialling codes, currencies, languages) ship with the schema from GeoNames `countryInfo.txt`
 and are refreshed by `php artisan countries:import`.
 
+## Chart calculation (Swiss Ephemeris)
+
+Positions come from the Swiss Ephemeris `swetest` program and its data files (1800–2400), kept in
+`storage/app/private/swisseph` (not in Git). From the official repository
+[github.com/aloistr/swisseph](https://github.com/aloistr/swisseph):
+
+- Windows: `windows/programs/swetest64.exe` → `storage/app/private/swisseph/swetest64.exe`
+- Linux: build `swetest` from the sources (`make swetest`) and set `SWETEST_PATH`
+- data: `ephe/sepl_18.se1` and `ephe/semo_18.se1` → `storage/app/private/swisseph/ephe/`
+
+`EPHEMERIS_ENGINE=fake` runs without them (tests and CI do). `tests/Feature/Astrology/SwissEphemerisReferenceTest.php`
+checks the real engine against NASA JPL Horizons and runs wherever the files are present; run it
+before deploying a new engine, new data files or new tzdata.
+
 ## Licensing note
 
 Chart calculation will use the Swiss Ephemeris. During development it is used under the AGPL;

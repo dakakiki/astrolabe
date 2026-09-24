@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute } from 'vue-router';
 
+import PositionsTable from '@/components/PositionsTable.vue';
 import StatusBadge from '@/components/StatusBadge.vue';
 import { useLabels } from '@/composables/useLabels';
 import { formatCoordinate, formatDate, formatRelative, initials } from '@/lib/format';
@@ -16,6 +17,8 @@ const toast = useToastStore();
 
 const client = ref(null);
 const notFound = ref(false);
+const chart = ref(null);
+const chartState = ref('idle');
 
 onMounted(async () => {
     try {
@@ -25,7 +28,23 @@ onMounted(async () => {
         if (error.response?.status === 404) notFound.value = true;
         else throw error;
     }
+
+    if (client.value?.birth?.chart.ready) {
+        loadChart();
+    }
 });
+
+// Calculated on the server on first request, then served from its cache.
+async function loadChart() {
+    chartState.value = 'loading';
+    try {
+        const { data } = await http.get(`/clients/${client.value.id}/chart`);
+        chart.value = data.data.status === 'ready' ? data.data : null;
+        chartState.value = 'done';
+    } catch {
+        chartState.value = 'failed';
+    }
+}
 
 const birth = computed(() => client.value?.birth ?? null);
 
@@ -87,98 +106,114 @@ async function toggleArchive() {
         </div>
 
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
-            <section class="card">
-                <div class="card-head">
-                    <h2>{{ t('clients.profile.birth') }}</h2>
-                    <span v-if="birth?.chart.ready" class="badge b-ok right">{{
-                        t('clients.profile.chartReady')
-                    }}</span>
-                </div>
-                <div class="card-body space-y-4">
-                    <template v-if="birth">
-                        <dl class="facts">
-                            <dt>{{ t('clients.profile.born') }}</dt>
-                            <dd>{{ formatDate(birth.birth_date, locale) || '—' }}</dd>
-
-                            <dt>{{ t('clients.profile.time') }}</dt>
-                            <dd>
-                                <span v-if="birth.birth_time" class="font-mono">{{ birth.birth_time }}</span>
-                                <span class="tag ml-2">{{ labels.timeAccuracy(birth.time_accuracy) }}</span>
-                            </dd>
-
-                            <dt>{{ t('clients.profile.place') }}</dt>
-                            <dd>
-                                {{ birth.birth_place || '—'
-                                }}<template v-if="birth.birth_country_code"
-                                    >, {{ labels.country(birth.birth_country_code) }}</template
-                                >
-                            </dd>
-
-                            <template v-if="birth.latitude !== null">
-                                <dt>{{ t('clients.profile.coordinates') }}</dt>
-                                <dd class="font-mono text-xs">
-                                    {{ formatCoordinate(birth.latitude, 'lat') }}
-                                    {{ formatCoordinate(birth.longitude, 'lng') }}
-                                    <span class="text-ink-4">({{ birth.latitude }}, {{ birth.longitude }})</span>
-                                </dd>
-                            </template>
-
-                            <template v-if="birth.birth_timezone">
-                                <dt>{{ t('clients.profile.zone') }}</dt>
-                                <dd>
-                                    <span class="font-mono text-xs">{{ birth.birth_timezone }}</span>
-                                    <span v-if="birth.moment" class="ml-2 text-ink-2">
-                                        {{
-                                            t('clients.profile.offset', {
-                                                offset: birth.moment.utc_offset,
-                                                abbr: birth.moment.abbreviation,
-                                            })
-                                        }}<template v-if="birth.moment.is_dst">
-                                            · {{ t('clients.profile.summerTime') }}</template
-                                        >
-                                    </span>
-                                </dd>
-                            </template>
-
-                            <template v-if="birth.geocode_source">
-                                <dt>{{ t('clients.profile.source') }}</dt>
-                                <dd>{{ t(`geocodeSource.${birth.geocode_source}`) }}</dd>
-                            </template>
-
-                            <template v-if="birth.data_source">
-                                <dt>{{ t('clients.profile.dataSource') }}</dt>
-                                <dd>{{ birth.data_source }}</dd>
-                            </template>
-                        </dl>
-
-                        <p v-if="birth.notes" class="whitespace-pre-line text-ink-2">{{ birth.notes }}</p>
-
-                        <div v-if="!birth.chart.ready" class="notice n-warn" role="status">
-                            <div>
-                                <strong>{{ t('clients.missing.title') }}</strong>
-                                {{ birth.chart.missing.map((key) => t(`clients.missing.${key}`)).join(', ') }}
-                            </div>
-                        </div>
-                        <div v-if="birth.clock_change" class="notice n-warn" role="status">
-                            {{ t(`clients.warnings.${birth.clock_change}`) }}
-                        </div>
-                        <div v-if="birth.time_accuracy === 'approximate'" class="notice n-info">
-                            {{ t('clients.warnings.approximate') }}
-                        </div>
-                        <div v-if="birth.zone_history_uncertain" class="notice n-neutral">
-                            {{ t('clients.warnings.zoneHistory') }}
-                        </div>
-                        <p v-if="birth.chart.ready" class="text-xs text-ink-4">{{ t('clients.profile.chartSoon') }}</p>
-                    </template>
-
-                    <div v-else class="flex items-center justify-between gap-3">
-                        <span class="text-ink-3">{{ t('clients.profile.noBirth') }}</span>
-                        <RouterLink :to="{ name: 'clients.edit', params: { id: client.id } }" class="btn btn-sm">{{
-                            t('clients.profile.addBirth')
-                        }}</RouterLink>
+            <div class="space-y-4">
+                <section class="card">
+                    <div class="card-head">
+                        <h2>{{ t('clients.profile.birth') }}</h2>
+                        <span v-if="birth?.chart.ready" class="badge b-ok right">{{
+                            t('clients.profile.chartReady')
+                        }}</span>
                     </div>
-                </div>
-            </section>
+                    <div class="card-body space-y-4">
+                        <template v-if="birth">
+                            <dl class="facts">
+                                <dt>{{ t('clients.profile.born') }}</dt>
+                                <dd>{{ formatDate(birth.birth_date, locale) || '—' }}</dd>
+
+                                <dt>{{ t('clients.profile.time') }}</dt>
+                                <dd>
+                                    <span v-if="birth.birth_time" class="font-mono">{{ birth.birth_time }}</span>
+                                    <span class="tag ml-2">{{ labels.timeAccuracy(birth.time_accuracy) }}</span>
+                                </dd>
+
+                                <dt>{{ t('clients.profile.place') }}</dt>
+                                <dd>
+                                    {{ birth.birth_place || '—'
+                                    }}<template v-if="birth.birth_country_code"
+                                        >, {{ labels.country(birth.birth_country_code) }}</template
+                                    >
+                                </dd>
+
+                                <template v-if="birth.latitude !== null">
+                                    <dt>{{ t('clients.profile.coordinates') }}</dt>
+                                    <dd class="font-mono text-xs">
+                                        {{ formatCoordinate(birth.latitude, 'lat') }}
+                                        {{ formatCoordinate(birth.longitude, 'lng') }}
+                                        <span class="text-ink-4">({{ birth.latitude }}, {{ birth.longitude }})</span>
+                                    </dd>
+                                </template>
+
+                                <template v-if="birth.birth_timezone">
+                                    <dt>{{ t('clients.profile.zone') }}</dt>
+                                    <dd>
+                                        <span class="font-mono text-xs">{{ birth.birth_timezone }}</span>
+                                        <span v-if="birth.moment" class="ml-2 text-ink-2">
+                                            {{
+                                                t('clients.profile.offset', {
+                                                    offset: birth.moment.utc_offset,
+                                                    abbr: birth.moment.abbreviation,
+                                                })
+                                            }}<template v-if="birth.moment.is_dst">
+                                                · {{ t('clients.profile.summerTime') }}</template
+                                            >
+                                        </span>
+                                    </dd>
+                                </template>
+
+                                <template v-if="birth.geocode_source">
+                                    <dt>{{ t('clients.profile.source') }}</dt>
+                                    <dd>{{ t(`geocodeSource.${birth.geocode_source}`) }}</dd>
+                                </template>
+
+                                <template v-if="birth.data_source">
+                                    <dt>{{ t('clients.profile.dataSource') }}</dt>
+                                    <dd>{{ birth.data_source }}</dd>
+                                </template>
+                            </dl>
+
+                            <p v-if="birth.notes" class="whitespace-pre-line text-ink-2">{{ birth.notes }}</p>
+
+                            <div v-if="!birth.chart.ready" class="notice n-warn" role="status">
+                                <div>
+                                    <strong>{{ t('clients.missing.title') }}</strong>
+                                    {{ birth.chart.missing.map((key) => t(`clients.missing.${key}`)).join(', ') }}
+                                </div>
+                            </div>
+                            <div v-if="birth.clock_change" class="notice n-warn" role="status">
+                                {{ t(`clients.warnings.${birth.clock_change}`) }}
+                            </div>
+                            <div v-if="birth.time_accuracy === 'approximate'" class="notice n-info">
+                                {{ t('clients.warnings.approximate') }}
+                            </div>
+                            <div v-if="birth.zone_history_uncertain" class="notice n-neutral">
+                                {{ t('clients.warnings.zoneHistory') }}
+                            </div>
+                        </template>
+
+                        <div v-else class="flex items-center justify-between gap-3">
+                            <span class="text-ink-3">{{ t('clients.profile.noBirth') }}</span>
+                            <RouterLink :to="{ name: 'clients.edit', params: { id: client.id } }" class="btn btn-sm">{{
+                                t('clients.profile.addBirth')
+                            }}</RouterLink>
+                        </div>
+                    </div>
+                </section>
+
+                <section v-if="chartState !== 'idle'" class="card">
+                    <div class="card-head">
+                        <h2>{{ t('chart.title') }}</h2>
+                    </div>
+                    <div class="card-body">
+                        <PositionsTable v-if="chart" :chart="chart" />
+                        <p v-else-if="chartState === 'loading'" class="text-ink-3" role="status">
+                            {{ t('chart.loading') }}
+                        </p>
+                        <div v-else-if="chartState === 'failed'" class="notice n-warn" role="alert">
+                            {{ t('chart.unavailable') }}
+                        </div>
+                    </div>
+                </section>
+            </div>
 
             <div class="space-y-4">
                 <section class="card">

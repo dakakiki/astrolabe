@@ -135,6 +135,8 @@ Procena: 1–2 nedelje.
 
 Kriterijum završetka: astrolog unese klijenta i odmah vidi tačne planetarne pozicije, bez otvaranja drugog programa. Referentne karte se poklapaju sa poznatim vrednostima u toleranciji od jedne lučne minute.
 
+> Status: završeno 24. 9. 2026. Pozicije se računaju Swiss Ephemeris-om (2.10.03), keširaju u `chart_calculations` i prikazuju na profilu klijenta; referentni testovi prema NASA JPL Horizons prolaze sa odstupanjem ispod lučne sekunde.
+
 ## Faza 4 — konsultacije i sadržaj
 
 - CRUD konsultacija;

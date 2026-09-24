@@ -626,10 +626,26 @@
         white-space: nowrap;
     }
 
-    table.data td {
+    table.data td,
+    table.data tbody th {
         padding: 11px 14px;
         border-bottom: 1px solid var(--line-soft);
         vertical-align: middle;
+    }
+
+    /* Row headers (scope="row") read like cells, not like column titles. */
+    table.data tbody th {
+        text-align: left;
+        text-transform: none;
+        letter-spacing: normal;
+        font-size: 13px;
+        font-weight: 400;
+        color: var(--ink);
+        white-space: nowrap;
+    }
+
+    table.data tr:last-child th {
+        border-bottom: 0;
     }
 
     table.data tr:last-child td {

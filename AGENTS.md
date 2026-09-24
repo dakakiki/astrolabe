@@ -45,6 +45,15 @@ before starting a phase. The user communicates in Serbian.
   `place_id` must not re-resolve it (`SaveBirthDetails`). Hand-entered locations are `manual`.
 - Birth date/time are stored as entered (local), never converted to UTC in the database.
 
+## Charts
+
+- `App\Astrology\Contracts\EphemerisEngine` is the only way to an ephemeris: `SwissEphemerisEngine`
+  (swetest process, array arguments, never user input) or `FakeEngine` (tests; `EPHEMERIS_ENGINE=fake`
+  in phpunit.xml). `ChartService` builds the request and caches results in `chart_calculations`.
+- Accuracy tests against NASA JPL Horizons (`tests/fixtures/ephemeris`) must stay green; they skip
+  where swetest is not installed.
+- Longitudes are shown truncated to whole minutes (never rounded into the next sign).
+
 ## Database
 
 - MariaDB, connection `mariadb`. Local server: `127.0.0.1:3307`, databases
