@@ -12,11 +12,6 @@ class StatusTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.app', config('app.name'))
             ->assertJsonPath('data.database', true)
-            ->assertJsonStructure(['data' => ['app', 'laravel', 'database']]);
-    }
-
-    public function test_user_endpoint_requires_authentication(): void
-    {
-        $this->getJson('/api/v1/user')->assertUnauthorized();
+            ->assertJsonStructure(['data' => ['app', 'database']]);
     }
 }

@@ -3,6 +3,8 @@
 Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvrđuju pre implementacije svake faze.
 
 > Verzija 2. Izmene: `sessions` → `consultations`; nova tabela `chart_calculations`; koordinate i vremenska zona rođenja više nisu opcione kada se očekuje karta; dodata podrazumevana podešavanja karte na workspace-u.
+>
+> Faza 1 (implementirano): `users.current_workspace_id`; `astrology_methods.workspace_id` umesto para `is_system` + `created_by_workspace_id`; `logo_path` i `aspect_orbs` odloženi do faza u kojima se koriste.
 
 ## Nalozi i workspace
 
@@ -12,8 +14,9 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 - `name`
 - `email`
 - `password`
-- `locale`
-- `timezone`
+- `locale` — podrazumevano `en`
+- `timezone` — IANA, podrazumevano iz browsera pri registraciji
+- `current_workspace_id`, nullable — poslednji korišćeni workspace; samo nagoveštaj, članstvo se uvek ponovo proverava
 - `email_verified_at`
 - timestamps
 
@@ -25,19 +28,21 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 - `default_locale`
 - `timezone`
 - `default_currency`
-- `logo_path`
+- `logo_path` — Faza 6 (branding)
 - `default_house_system` — npr. `placidus`
 - `default_zodiac_mode` — `tropical` ili `sidereal`
-- `default_ayanamsa`, nullable — npr. `lahiri`
-- `aspect_orbs`, JSON, nullable — orbi po tipu aspekta
+- `default_ayanamsa`, nullable — npr. `lahiri`; obavezno samo za `sidereal`
+- `aspect_orbs`, JSON, nullable — orbi po tipu aspekta; Faza 5
 - timestamps
+
+`slug` je jedinstven, generisan jednom pri kreiranju i ne menja se sa nazivom, jer će se koristiti u javnim booking URL-ovima.
 
 ### `workspace_user`
 
 - `workspace_id`
 - `user_id`
-- `role`
-- `status`
+- `role` — `owner`, `member`
+- `status` — `active`, `invited`, `suspended`; samo `active` daje pristup
 - timestamps
 
 ## Astrološke metode
@@ -46,15 +51,16 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 
 - `id`
 - `name`
-- `slug`
-- `is_system`
-- `created_by_workspace_id`, nullable
+- `slug` — jedinstven unutar workspace-a
+- `workspace_id`, nullable — `null` za ugrađene metode koje vide svi; inače metoda koju je workspace sam dodao
 - `suggested_house_system`, nullable
 - `suggested_zodiac_mode`, nullable
 - `suggested_ayanamsa`, nullable
 - timestamps
 
 Predloženi parametri služe samo kao podrazumevana vrednost pri kreiranju karte. Astrolog ih uvek može promeniti.
+
+Ugrađene metode su referentni podaci i unose se u samoj migraciji, ne preko seedera. Nazivi ugrađenih metoda prevode se na frontendu po `slug`-u. `is_system` nije kolona nego izvedena vrednost (`workspace_id` je `null`), da dve kolone ne bi mogle da se raziđu.
 
 ### `workspace_astrology_method`
 

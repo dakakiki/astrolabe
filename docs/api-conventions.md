@@ -14,8 +14,37 @@ Početna konvencija iz Faze 0. Menja se kroz ovaj dokument, ne usput u kodu.
 
 - SPA koristi Sanctum cookie sesiju (doc 03). Tokeni se ne čuvaju u `localStorage`.
 - Pre prvog zahteva koji menja stanje frontend poziva `GET /sanctum/csrf-cookie` (`ensureCsrfCookie()` u `resources/js/lib/http.js`).
-- Zaštićene rute su u grupi `auth:sanctum`.
-- `workspace_id` se nikada ne prihvata iz zahteva kao dokaz autorizacije (doc 05); aktivni workspace određuje server.
+- Zaštićene rute su u grupi `auth:sanctum`, a rute koje rade sa podacima prakse i u `verified` i `workspace`.
+- `workspace_id` se nikada ne prihvata iz zahteva kao dokaz autorizacije (doc 05); aktivni workspace određuje server (`ResolveCurrentWorkspace` + `users.current_workspace_id`, uz proveru aktivnog članstva).
+
+### Auth endpointi
+
+Registruje ih Laravel Fortify pod `/api/v1/auth` (`config/fortify.php`), sa `web` (sesija) middleware-om i `throttle:auth`:
+
+| Metoda | Putanja | Namena |
+|---|---|---|
+| POST | `/auth/register` | registracija + workspace |
+| POST | `/auth/login` | prijava (dodatno 5/min po emailu + IP) |
+| POST | `/auth/logout` | odjava |
+| POST | `/auth/forgot-password` | link za reset; isti odgovor postojao nalog ili ne |
+| POST | `/auth/reset-password` | nova lozinka sa tokenom |
+| GET | `/auth/email/verify/{id}/{hash}` | potpisani link iz emaila (SPA ga ponavlja sa sesijom) |
+| POST | `/auth/email/verification-notification` | ponovo pošalji link |
+| PUT | `/auth/user/profile-information` | ime, email, jezik, vremenska zona |
+| PUT | `/auth/user/password` | promena lozinke |
+| GET / DELETE | `/auth/other-sessions` | broj i odjava ostalih sesija (DELETE traži lozinku) |
+
+Linkovi u emailovima vode na SPA stranice (`/verify-email/...`, `/reset-password/...`), koje zatim zovu API.
+
+### Podaci prakse
+
+| Metoda | Putanja | Namena |
+|---|---|---|
+| GET | `/me` | korisnik + trenutni workspace i uloga (radi i pre verifikacije emaila) |
+| GET | `/reference-data` | dozvoljene vrednosti za forme (jezici, valute, sistemi kuća …) |
+| GET / PATCH | `/workspace` | trenutni workspace; nema `{workspace}` parametra |
+| PUT | `/workspace/astrology-methods` | izbor metoda i podrazumevana metoda |
+| GET / POST / PATCH / DELETE | `/astrology-methods` | ugrađene + sopstvene metode |
 
 ## Odgovori
 

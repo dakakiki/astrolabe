@@ -3,18 +3,225 @@
         "name": "AstroLabe",
         "tagline": "Practice management for professional astrologers"
     },
-    "theme": {
-        "toggle": "Switch theme",
-        "night": "Night",
-        "day": "Day"
+    "common": {
+        "save": "Save changes",
+        "saved": "Saved",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "add": "Add",
+        "optional": "optional",
+        "none": "None",
+        "loading": "Loading…"
     },
-    "status": {
-        "title": "System status",
-        "api": "API",
-        "database": "Database",
-        "ok": "Connected",
-        "failed": "Unavailable",
-        "checking": "Checking…"
+    "errors": {
+        "generic": "Something went wrong. Please try again.",
+        "forbidden": "You don't have permission to do that.",
+        "tooManyAttempts": "Too many attempts. Please wait a minute and try again.",
+        "sessionExpired": "Your session has ended. Please sign in again."
+    },
+    "theme": {
+        "toNight": "Switch to the night theme",
+        "toDay": "Switch to the day theme"
+    },
+    "nav": {
+        "practice": "Practice",
+        "workspace": "Workspace",
+        "dashboard": "Dashboard",
+        "settings": "Settings",
+        "openMenu": "Open menu",
+        "userMenu": "Account menu",
+        "signOut": "Sign out"
+    },
+    "auth": {
+        "art": {
+            "kicker": "Practice management for astrologers",
+            "title": "The chart is already open.",
+            "body": "Client history, birth data, natal chart and current transits on one screen — so you stop switching between a calendar, a notebook and a chart program three minutes before a consultation."
+        },
+        "fields": {
+            "name": "Full name",
+            "email": "Email",
+            "password": "Password",
+            "passwordConfirmation": "Confirm password",
+            "newPassword": "New password",
+            "currentPassword": "Current password",
+            "practiceName": "Practice name",
+            "remember": "Keep me signed in on this device"
+        },
+        "login": {
+            "title": "Sign in",
+            "sub": "Welcome back to your practice.",
+            "submit": "Sign in",
+            "forgot": "Forgot your password?",
+            "noAccount": "No account yet?",
+            "register": "Create one"
+        },
+        "register": {
+            "title": "Create your account",
+            "sub": "Set up your practice in a minute.",
+            "practiceHint": "How clients will know your practice. You can change it later.",
+            "passwordHint": "At least 8 characters. Passwords found in known data breaches are refused.",
+            "submit": "Create account",
+            "haveAccount": "Already have an account?",
+            "login": "Sign in"
+        },
+        "forgot": {
+            "title": "Reset your password",
+            "sub": "We'll email you a link to choose a new one.",
+            "submit": "Send reset link",
+            "sent": "If an account exists for that address, a reset link is on its way. It is valid for 60 minutes.",
+            "back": "Back to sign in"
+        },
+        "reset": {
+            "title": "Choose a new password",
+            "sub": "For {email}",
+            "submit": "Save new password",
+            "done": "Your password has been changed. Please sign in."
+        },
+        "verify": {
+            "title": "Confirm your email address",
+            "sub": "We sent a link to {email}. Open it to finish setting up your account.",
+            "resend": "Send the link again",
+            "resent": "A new link is on its way.",
+            "wrongAddress": "Wrong address?",
+            "changeEmail": "Change it",
+            "updateEmail": "Update and resend",
+            "signOut": "Sign out",
+            "checking": "Confirming your email address…",
+            "done": "Your email address is confirmed.",
+            "failed": "This link is invalid or has expired.",
+            "failedHint": "Links are valid for 60 minutes and only for the account they were sent to."
+        }
+    },
+    "dashboard": {
+        "eyebrow": "Today",
+        "greeting": "Welcome, {name}",
+        "sub": "{workspace} · {date}",
+        "setup": {
+            "title": "Setting up your practice",
+            "methods": "Choose the astrological methods you work with",
+            "chart": "Check the chart defaults",
+            "regional": "Confirm your time zone and currency",
+            "clients": "Add your first client",
+            "soon": "Coming next"
+        },
+        "practice": {
+            "title": "Your practice",
+            "methods": "Methods",
+            "noMethods": "No methods chosen yet",
+            "chart": "Chart defaults",
+            "timezone": "Time zone",
+            "currency": "Currency"
+        }
+    },
+    "settings": {
+        "eyebrow": "Workspace",
+        "title": "Settings",
+        "sub": "Your identity, your practice and how charts are calculated.",
+        "sections": {
+            "profile": "My profile",
+            "practice": "Practice",
+            "chart": "Chart & methods",
+            "regional": "Regional",
+            "security": "Security"
+        },
+        "ownerOnly": "Only the owner of this workspace can change these settings.",
+        "profile": {
+            "title": "My profile",
+            "emailHint": "If you change it, you'll need to confirm the new address before continuing.",
+            "saved": "Profile saved",
+            "emailChanged": "Profile saved. Check your inbox to confirm the new address."
+        },
+        "practice": {
+            "title": "Practice",
+            "nameHint": "Shown in the app and, later, on booking pages and the client portal.",
+            "saved": "Practice saved"
+        },
+        "chart": {
+            "title": "Chart defaults",
+            "intro": "Used when a chart is first calculated. Your methods suggest values, and every chart can override them.",
+            "houseSystem": "House system",
+            "zodiac": "Zodiac",
+            "ayanamsa": "Ayanamsa",
+            "ayanamsaHint": "Sidereal only.",
+            "saved": "Chart defaults saved"
+        },
+        "methods": {
+            "title": "Astrological methods",
+            "intro": "The traditions and methods you work with. Used for filtering and to suggest chart settings.",
+            "default": "Default",
+            "custom": "your own",
+            "suggests": "Suggests {value}",
+            "applySuggestion": "Use its chart settings",
+            "applied": "Chart defaults filled in from {method}. Save to keep them.",
+            "addLabel": "Add your own method",
+            "addPlaceholder": "e.g. Uranian Astrology",
+            "added": "Method added",
+            "deleteConfirm": "Delete \"{name}\"? It is removed from this workspace.",
+            "deleted": "Method deleted",
+            "saved": "Methods saved"
+        },
+        "regional": {
+            "yoursTitle": "You",
+            "yoursIntro": "Your interface language and the time zone times are shown in.",
+            "language": "Interface language",
+            "timezone": "Your time zone",
+            "practiceTitle": "Practice defaults",
+            "practiceIntro": "Defaults for the practice as a whole. Each client keeps their own language.",
+            "practiceLanguage": "Default language",
+            "practiceTimezone": "Practice time zone",
+            "currency": "Default currency",
+            "saved": "Regional settings saved"
+        },
+        "security": {
+            "passwordTitle": "Password",
+            "passwordSaved": "Password changed",
+            "sessionsTitle": "Other sessions",
+            "sessionsNone": "You are not signed in anywhere else.",
+            "sessionsSome": "You are signed in on one other browser or device. | You are signed in on {count} other browsers or devices.",
+            "sessionsIntro": "Signing them out needs your password.",
+            "sessionsSubmit": "Sign out other sessions",
+            "sessionsDone": "Other sessions signed out"
+        }
+    },
+    "roles": {
+        "owner": "Owner",
+        "member": "Member"
+    },
+    "houseSystems": {
+        "placidus": "Placidus",
+        "koch": "Koch",
+        "porphyry": "Porphyry",
+        "regiomontanus": "Regiomontanus",
+        "campanus": "Campanus",
+        "equal": "Equal",
+        "whole_sign": "Whole Sign",
+        "alcabitius": "Alcabitius",
+        "topocentric": "Topocentric",
+        "morinus": "Morinus"
+    },
+    "zodiacModes": {
+        "tropical": "Tropical",
+        "sidereal": "Sidereal"
+    },
+    "ayanamsas": {
+        "lahiri": "Lahiri",
+        "raman": "Raman",
+        "krishnamurti": "Krishnamurti",
+        "fagan_bradley": "Fagan/Bradley",
+        "yukteshwar": "Yukteshwar",
+        "true_citra": "True Citra"
+    },
+    "methods": {
+        "western": "Western Astrology",
+        "vedic": "Vedic Astrology / Jyotish",
+        "chinese": "Chinese Astrology",
+        "hellenistic": "Hellenistic Astrology",
+        "psychological": "Psychological Astrology",
+        "evolutionary": "Evolutionary Astrology",
+        "horary": "Horary Astrology",
+        "electional": "Electional Astrology",
+        "other": "Other"
     },
     "notFound": {
         "title": "Page not found",

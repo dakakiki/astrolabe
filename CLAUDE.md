@@ -17,6 +17,26 @@ before starting a phase. The user communicates in Serbian.
 - Colours come from the tokens in `resources/css/tokens.css` via Tailwind utilities
   (`bg-surface`, `text-ink-2`, `text-brand` …), never raw hex values in components.
 
+## Multi-tenancy
+
+- Tenant models use the `BelongsToWorkspace` trait: a global `WorkspaceScope` filters by the
+  current workspace and new records are stamped with it. The scope fails closed — with no
+  current workspace a query returns nothing (or only shared rows, e.g. built-in methods).
+- The current workspace lives in `App\Support\Tenancy\CurrentWorkspace`, set by the
+  `workspace` middleware (`ResolveCurrentWorkspace`). Jobs and commands must use
+  `CurrentWorkspace::run($workspace, fn () => ...)`.
+- `workspace` middleware runs before `SubstituteBindings` (bootstrap/app.php), so route model
+  binding already sees the scope and another workspace's id yields 404.
+- Every new tenant resource gets isolation tests like `tests/Feature/Workspaces/TenantIsolationTest.php`.
+
+## Auth
+
+- Laravel Fortify provides the endpoints (no views) under `/api/v1/auth`; the SPA renders
+  every screen. Email links point at SPA routes (`AppServiceProvider`).
+- SPA auth is the Sanctum cookie session; `auth:sanctum` + `verified` + `workspace` protect
+  practice data. Session-based helper routes live in `routes/web.php` under the same prefix.
+- Mail goes to `storage/logs/laravel.log` locally (`MAIL_MAILER=log`).
+
 ## Database
 
 - MariaDB, connection `mariadb`. Local server: `127.0.0.1:3307`, databases
@@ -31,6 +51,7 @@ before starting a phase. The user communicates in Serbian.
 
 ```bash
 php artisan test
+npm test
 vendor/bin/pint
 npm run format
 npm run build

@@ -41,15 +41,19 @@ Point an Apache virtual host at `public/` with `AllowOverride All`
 (local default: `http://dev.lcl.astrolabe.online`). During frontend work run `npm run dev`
 for hot reload.
 
+Locally `MAIL_MAILER=log`, so verification and password-reset emails (with their links) are
+written to `storage/logs/laravel.log`.
+
 ## Checks
 
 ```bash
 php artisan test          # PHPUnit, against the MariaDB test database
+npm test                  # Vitest (frontend logic)
 vendor/bin/pint           # PHP code style
 npm run format            # Prettier for resources/js and resources/css
 ```
 
-CI (`.github/workflows/ci.yml`) runs Pint, Prettier, the frontend build and the test suite
+CI (`.github/workflows/ci.yml`) runs Pint, Prettier, Vitest, the frontend build and the PHP test suite
 against a MariaDB service on every push to `main` and on pull requests.
 
 ## Project layout

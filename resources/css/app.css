@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import './tokens.css';
+@import './components.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -8,9 +9,9 @@
 /* Tailwind utilities resolve to the runtime tokens, so theme switching
    and workspace branding only ever touch the CSS variables. */
 @theme inline {
-    --font-sans: 'Inter Tight', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
-    --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    --font-sans: var(--sans);
+    --font-serif: var(--serif);
+    --font-mono: var(--mono);
 
     --color-brand: var(--brand);
     --color-brand-600: var(--brand-600);
@@ -50,8 +51,8 @@
     --color-air: var(--air);
     --color-water: var(--water);
 
-    --radius-sm: 6px;
-    --radius-lg: 10px;
+    --radius-sm: var(--r);
+    --radius-lg: var(--r-lg);
     --shadow-card: var(--shadow);
 }
 

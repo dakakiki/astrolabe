@@ -99,6 +99,8 @@ Kriterijum završetka: projekat se može klonirati i pokrenuti iz dokumentovanih
 
 Kriterijum završetka: dva korisnika ne mogu pristupiti podacima jedan drugog.
 
+> Status: završeno 24. 9. 2026. Kriterijum pokrivaju automatski testovi izolacije (`tests/Feature/Workspaces/TenantIsolationTest.php`).
+
 ## Faza 2 — klijenti i podaci rođenja
 
 - CRUD klijenata;

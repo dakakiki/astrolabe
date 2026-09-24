@@ -55,6 +55,13 @@ Iz Faze 0: ime baze ne sme sadržati tačku (Laravel ga deli po tački), pa je b
 
 Doneta blokirajuća odluka iz dokumenta 11: **Swiss Ephemeris**, besplatna AGPL verzija tokom razvoja, Professional License (CHF 700, jednokratno) pre zatvorene bete. GitHub repo je javan tokom razvoja i zatvara se na dan završetka. Detalji i obaveze iz ugovora u dokumentu 11.
 
+## Faza 1 — implementirano
+
+Autentifikacija (Laravel Fortify: registracija, prijava, reset lozinke, email verifikacija), workspace sa ulogama, astrološke metode, podrazumevana podešavanja karte, lokalizacija i vremenske zone, izolacija podataka između workspace-ova i osnovni layout po prototipu. Izmene u dokumentima:
+
+- 05: `users.current_workspace_id`; `astrology_methods.workspace_id` umesto `is_system` + `created_by_workspace_id`; `logo_path` i `aspect_orbs` odloženi.
+- 09: u sekciji Security & Data „konsultacije“ je bila greška pri preimenovanju `Session` → `Consultation`; misli se na aktivne sesije (prijave).
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

@@ -19,7 +19,6 @@ class StatusController extends Controller
         return response()->json([
             'data' => [
                 'app' => config('app.name'),
-                'laravel' => app()->version(),
                 'database' => $this->databaseIsReachable(),
             ],
         ]);

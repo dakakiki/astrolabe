@@ -63,6 +63,9 @@ jobs:
       - name: Check frontend style (Prettier)
         run: npm run format:check
 
+      - name: Run frontend tests (Vitest)
+        run: npm test
+
       - name: Build frontend
         run: npm run build
 
