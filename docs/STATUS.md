@@ -55,7 +55,18 @@ Testovi na kraju Faze 4: **160 PHP** (822 provere, uključujući 12 referentnih 
 
 ## Sledeće: Faza 5 — puna natalna karta
 
-Prema `docs/spec/04` i `11`: Ascendent, MC i ostali uglovi; kuspide kuća za više sistema, sa definisanim fallback-om iznad ~66° širine; aspekti sa orbima po workspace-u (`workspaces.aspect_orbs`); tropski i siderealni zodijak; SVG točak karte (inline Vue komponenta, boje iz tokena); snimak na konsultaciji dobija uglove, kuće i točak (mehanizam postoji od Faze 4); testovi za južnu hemisferu, DST granice i visoke širine; `time_accuracy = unknown` ne sme dati uglove ni kuće.
+Prema `docs/spec/04` i `11`. Plan dogovoren 24. 9. 2026, korisnik je rekao da se nastavlja sa njim:
+
+1. **Uglovi i kuće.** ASC, MC, DSC, IC i 12 kuspida. Sistem kuća: podrazumevani sa workspace-a, uz izbor na ekranu karte (svaki sistem je svoj keširan proračun, `input_hash` ga već obuhvata). `swetest` daje kuće i uglove u istom pozivu kao planete: dodati `-house<lon>,<lat>,<kod>` (kodovi su u `App\Enums\HouseSystem::swissEphemerisCode()`); izlaz sadrži `house 1..12`, `Ascendant`, `MC`, `ARMC`, `Vertex`.
+2. **Visoke širine (izmereno):** iznad polarnog kruga `swetest` sam prelazi na Porphyry i piše `error: House method Placidus failed, Porphyry calculated instead` (isto za Koch). `SwissEphemerisEngine` danas svaku takvu liniju tretira kao grešku — treba da prepozna baš ovu poruku, sačuva i traženi i stvarno upotrebljeni sistem, a karta da kaže „Placidus nije moguć na 69°N, prikazan Porphyry“.
+3. **`time_accuracy`:** `unknown` — bez uglova i kuća (točak samo sa planetama, 0° Ovna levo, Mesec kao luk); `approximate` — puna karta uz upozorenje.
+4. **Aspekti** (`AspectCalculator`, serverski): konjunkcija, sekstil, kvadrat, trigon, opozicija; manji (kvinkunks, polusekstil, polukvadrat, seskvikvadrat) isključeni dok se ne uključe. Orbi po workspace-u u `workspaces.aspect_orbs` (JSON, uvodi se sada), podešavanje u Settings → Chart & methods; podrazumevano 8 / 4 / 6 / 6 / 7, kvinkunks 3, +1,5° kada učestvuje Sunce ili Mesec. Aplikujući / separirajući iz brzina.
+5. **SVG točak** (inline Vue komponenta, boje iz `tokens.css`, bez biblioteke): prsten znakova, kuspide sa brojevima, planete sa stepenom i minutom i ℞, razmicanje bliskih planeta, linije aspekata po tipu, istaknuti ASC/MC, tekstualni opis za čitače ekrana. Dizajn: `prototype/v1/prototype/assets/js/chart.js` (`drawWheel`). Tabela pozicija dobija kolonu kuće; nova tabela aspekata.
+6. **Snimak na konsultaciji** dobija uglove, kuće, aspekte i točak. U `input_hash` dodati verziju formata payload-a, da se stari keš (samo pozicije) ne koristi za novu kartu; stari snimci ostaju kakvi su.
+7. **Testovi tačnosti:** južna hemisfera, dan promene sata, širine iznad 66° (očekivani Porphyry, nikad greška), `unknown` bez uglova. Nezavisna provera: ASC i MC formulom (zvezdano vreme + nagib ekliptike) u granici 1′; Equal, Whole Sign i Porphyry iz uglova; Placidus po definicionom svojstvu (deljenje polulukova). JPL Horizons ne daje uglove; izvori koje ugovor zabranjuje da se pominju ne koriste se ni u fixture-ima.
+8. Dokumentacija: 02 (karta), 05 (`aspect_orbs`, payload), 11 (stanje, odgovori na otvorena pitanja 3 i 4 kao privremene podrazumevane vrednosti), 00-changelog, `api-conventions.md`, CLAUDE.md/AGENTS.md.
+
+Hiron nije deo plana dok korisnik ne potvrdi preuzimanje `seas_18.se1`.
 
 ## Način rada
 
