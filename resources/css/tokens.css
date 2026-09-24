@@ -1,0 +1,105 @@
+/* ============================================================
+   Design tokens, carried over from the clickable prototype.
+
+   Night is the default: a dark sky, starlight blue and an
+   old-brass accent borrowed from astronomical instruments.
+   Day is the same layout on paper, for long note-writing.
+
+   A workspace's brand colours (doc 09) will be injected by
+   overriding the --brand* tokens; the chart wheel reads the
+   same tokens, so branding reaches it without code changes.
+   ============================================================ */
+
+/* ---------------- NIGHT (default) ---------------- */
+:root {
+    color-scheme: dark;
+
+    --brand: #5a61e0;
+    --brand-600: #4950c9;
+    --brand-300: #9aa2ff;
+    --brand-100: #232c58;
+    --brand-050: #1a2145;
+    --link: #a3aaff;
+
+    --ink: #e8ecf8;
+    --ink-2: #b4bfd8;
+    --ink-3: #8590ac;
+    --ink-4: #616c88;
+    --line: #273052;
+    --line-soft: #1c2440;
+    --surface: #131a2e;
+    --surface-2: #1a2340;
+    --canvas: #090d1b;
+    --shell: #060a15;
+    --shell-2: #151d36;
+    --shell-ink: #b9c3dc;
+    --shell-ink-2: #6d7a99;
+
+    --ok: #4fd1b0;
+    --ok-bg: #0f3830;
+    --warn: #e5b25c;
+    --warn-bg: #382c13;
+    --danger: #f0839a;
+    --danger-bg: #3a1924;
+    --info: #7fb6f5;
+    --info-bg: #12273f;
+    --neutral-bg: #1c2440;
+
+    --brass: #e5b25c;
+    --fire: #e08a72;
+    --earth: #a3c27a;
+    --air: #7fb6f5;
+    --water: #a79bf0;
+
+    --on-brand: #ffffff;
+
+    --stars: 0.55;
+    --glow: 0 0 22px rgba(90, 97, 224, 0.22);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.28);
+}
+
+/* ---------------- DAY ---------------- */
+:root[data-theme='day'] {
+    color-scheme: light;
+
+    --brand: #3b46a8;
+    --brand-600: #2f3a92;
+    --brand-300: #8f97e0;
+    --brand-100: #e5e7fa;
+    --brand-050: #f1f2fd;
+    --link: #3b46a8;
+
+    --ink: #10182b;
+    --ink-2: #3b475f;
+    --ink-3: #6b7889;
+    --ink-4: #9aa5b4;
+    --line: #dfe3ea;
+    --line-soft: #eceef3;
+    --surface: #ffffff;
+    --surface-2: #f5f7fb;
+    --canvas: #eef0f5;
+    --shell: #141b2d;
+    --shell-2: #1d2740;
+    --shell-ink: #c4ccdd;
+    --shell-ink-2: #6d7a94;
+
+    --ok: #1c7a63;
+    --ok-bg: #e2f3ee;
+    --warn: #a2701f;
+    --warn-bg: #faf0dc;
+    --danger: #a83a52;
+    --danger-bg: #fbe8ec;
+    --info: #2f5fa8;
+    --info-bg: #e6eefa;
+    --neutral-bg: #eceef2;
+
+    --brass: #a2701f;
+    --fire: #b8503f;
+    --earth: #57703f;
+    --air: #3a6b96;
+    --water: #5a4f96;
+
+    --stars: 0;
+    --glow: none;
+    --shadow: 0 1px 2px rgba(16, 24, 43, 0.06), 0 4px 14px rgba(16, 24, 43, 0.05);
+}

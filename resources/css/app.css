@@ -1,0 +1,68 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../js/**/*.vue';
+
+/* Tailwind utilities resolve to the runtime tokens, so theme switching
+   and workspace branding only ever touch the CSS variables. */
+@theme inline {
+    --font-sans: 'Inter Tight', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+    --color-brand: var(--brand);
+    --color-brand-600: var(--brand-600);
+    --color-brand-300: var(--brand-300);
+    --color-brand-100: var(--brand-100);
+    --color-brand-050: var(--brand-050);
+    --color-link: var(--link);
+    --color-on-brand: var(--on-brand);
+
+    --color-ink: var(--ink);
+    --color-ink-2: var(--ink-2);
+    --color-ink-3: var(--ink-3);
+    --color-ink-4: var(--ink-4);
+    --color-line: var(--line);
+    --color-line-soft: var(--line-soft);
+    --color-surface: var(--surface);
+    --color-surface-2: var(--surface-2);
+    --color-canvas: var(--canvas);
+    --color-shell: var(--shell);
+    --color-shell-2: var(--shell-2);
+    --color-shell-ink: var(--shell-ink);
+    --color-shell-ink-2: var(--shell-ink-2);
+
+    --color-ok: var(--ok);
+    --color-ok-bg: var(--ok-bg);
+    --color-warn: var(--warn);
+    --color-warn-bg: var(--warn-bg);
+    --color-danger: var(--danger);
+    --color-danger-bg: var(--danger-bg);
+    --color-info: var(--info);
+    --color-info-bg: var(--info-bg);
+    --color-neutral-bg: var(--neutral-bg);
+
+    --color-brass: var(--brass);
+    --color-fire: var(--fire);
+    --color-earth: var(--earth);
+    --color-air: var(--air);
+    --color-water: var(--water);
+
+    --radius-sm: 6px;
+    --radius-lg: 10px;
+    --shadow-card: var(--shadow);
+}
+
+@layer base {
+    html,
+    body {
+        height: 100%;
+    }
+
+    body {
+        @apply bg-canvas font-sans text-ink antialiased;
+        font-size: 14px;
+    }
+}

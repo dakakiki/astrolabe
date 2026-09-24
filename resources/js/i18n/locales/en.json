@@ -1,0 +1,23 @@
+{
+    "app": {
+        "name": "AstroLabe",
+        "tagline": "Practice management for professional astrologers"
+    },
+    "theme": {
+        "toggle": "Switch theme",
+        "night": "Night",
+        "day": "Day"
+    },
+    "status": {
+        "title": "System status",
+        "api": "API",
+        "database": "Database",
+        "ok": "Connected",
+        "failed": "Unavailable",
+        "checking": "Checking…"
+    },
+    "notFound": {
+        "title": "Page not found",
+        "back": "Back to start"
+    }
+}
