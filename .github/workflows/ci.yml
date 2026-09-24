@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      # Same LTS branch as production on Hetzner (docs/spec/03).
+      # Target MariaDB LTS branch (docs/spec/03).
       mariadb:
         image: mariadb:11.8
         env:

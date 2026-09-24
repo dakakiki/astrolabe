@@ -61,7 +61,7 @@ Dashboard ne zahteva Nuxt. Marketing sajt ili javne SEO stranice mogu kasnije bi
 
 - **MariaDB** — produkcija ide na Hetzner, koji koristi MariaDB, pa se i razvoj radi na njoj da prenos ne bi pravio probleme;
 - Laravel konekcija: `DB_CONNECTION=mariadb` (namenski driver, ne `mysql`);
-- **produkcija: MariaDB 11.8** (izmereno 24. 9. 2026: `11.8.6-MariaDB` iz Debian 13 paketa, `innodb_default_row_format=dynamic`). Grana 11.8 je LTS sa podrškom do juna 2028; CI koristi istu granu;
+- **ciljna verzija: MariaDB 11.8** (LTS, podrška do juna 2028); CI koristi istu granu. Produkcioni server još nije određen — kada bude, potvrditi da nudi istu granu;
 - razvojna i produkcijska glavna verzija baze moraju biti iste; lokalni 10.6.5 je prelazan, jer je grana 10.6 izašla iz podrške u julu 2026 — lokalno treba preći na 11.8;
 - charset `utf8mb4`, collation `utf8mb4_unicode_ci`; engine uvek InnoDB, zadat u konfiguraciji aplikacije, ne preko podrazumevanog podešavanja servera. MariaDB 11.8 kao serverski podrazumevani collation koristi `utf8mb4_uca1400_ai_ci`, ali aplikacija eksplicitno zadaje `utf8mb4_unicode_ci`, koji postoji i na lokalnom 10.6. Prelazak na `uca1400` (novija Unicode pravila sortiranja) razmatra se tek kada lokalni server bude na 11.8, i to pre prvih produkcionih podataka;
 - podaci o produkcionom serveru (host, IP, pristup) ne upisuju se u repozitorijum dok je javan;
@@ -76,7 +76,7 @@ Postojeći WAMP:
 
 - Apache 2.4.66.3 — odgovara;
 - PHP 8.3.29 — kompatibilan, ažurirati na najnoviji dostupan PHP 8.3 patch;
-- MariaDB 10.6.5 na portu `3307`, baza `astrolabe_online__10_2026`, test baza `astrolabe_online__10_2026_test` — prelazno; cilj je MariaDB 11.8 kao na produkciji, pre ozbiljnijih migracija;
+- MariaDB 10.6.5 na portu `3307`, baza `astrolabe_online__10_2026`, test baza `astrolabe_online__10_2026_test` — prelazno; cilj je MariaDB 11.8, pre ozbiljnijih migracija;
 - Git repozitorijum `https://github.com/dakakiki/astrolabe.git` — obavezan izvor istine za kod.
 
 Dodatni alati:
