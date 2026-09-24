@@ -67,9 +67,32 @@ Testovi na kraju Faze 5: **217 PHP** (1650 provera; od toga 12 referentnih testo
 Faze 0–5 su završene. Dokument 04 kaže da je Faza 5 poslednja koja se gradi bez potvrde astrologa, pa su dva puta:
 
 1. **Validacioni razgovori** (preporuka): prikazati Fazu 5 astrolozima iz validacione grupe i zapisati odgovore; oni mogu promeniti redosled od Faze 6 i podrazumevane vrednosti karte.
-2. **Faza 6 — organizacija prakse** po dokumentu 04 (usluge; kalendar dan / nedelja / mesec / agenda; termini sa vremenskim zonama i serverskom proverom konflikata; povezane osobe; zadaci i follow-up; dashboard), ako korisnik odluči da ne čeka razgovore. Specifikacija: 02, 05, 10.
+2. **Faza 6 — organizacija prakse** po dokumentu 04, ako korisnik odluči da ne čeka razgovore. Specifikacija: 02 (Usluge, Kalendar i termini, Povezane osobe, Zadaci, Dashboard), 05 (`services`, `appointments`, `related_people`, `client_relationships`, `tasks`), 10 (kalendar), prototip: `calendar.html`, `services.html`, `tasks.html`, `dashboard.html`, tab „Related“ u `client.html`.
 
-Pre početka Faze 6 dogovoriti obim i podrazumevane odluke, pa ih upisati ovde.
+### Predlog za Fazu 6 (predstavljen korisniku 24. 9. 2026, čeka odgovore)
+
+Procena iz dokumenta 04: 5–8 nedelja, najveća faza. Ništa od nje još ne postoji (ni `consultations.service_id` / `appointment_id`).
+
+**Obim:**
+
+1. **Usluge:** naziv, opis, trajanje, cena i valuta, boja, online/uživo, aktivna, potreban avans (samo oznaka), dozvoljene metode. Konsultacija dobija `service_id` (naslov ostaje opcion).
+2. **Termini i kalendar:** dan / nedelja / mesec / agenda (agenda podrazumevana na telefonu); kreiranje iz praznog polja; izmena, pomeranje i otkazivanje uz razlog, bez brisanja; filteri (usluga, status, online/uživo; astrolog samo kada workspace ima više članova); UTC + IANA zona unosa; serverska provera preklapanja u transakciji, uz `Idempotency-Key`.
+3. **Veza termin ↔ konsultacija:** odvojeni entiteti; „Zabeleži konsultaciju“ iz termina pravi konsultaciju (klijent, usluga, vreme, `appointment_id`), najviše jednu po terminu. Iz termina se otvara klijent i karta.
+4. **Povezane osobe:** partner, dete, roditelj …, sa sopstvenim podacima rođenja i kartom (`ChartService` za oba tipa; `chart_calculations` je već polimorfna); veza i sa postojećim klijentom; pretvaranje u klijenta bez ponovnog unosa.
+5. **Zadaci i follow-up:** klijent, konsultacija, rok, prioritet, status, odgovorni; strana Zadaci, tab na profilu klijenta, stavka na vremenskoj liniji; „follow-up“ iz konsultacije.
+6. **Dashboard:** današnji i naredni termini, nedavno aktivni klijenti, otvoreni i zakasneli zadaci, follow-up, novi dokumenti.
+
+**Van Faze 6:** podsetnici i email (Faza 7), tranziti za datum termina (Faza 7), plaćanja i prihod na dashboardu (Faza 7), radno vreme / dostupnost / booking za klijente (Faza 9).
+
+**Podrazumevane odluke:** novac kao ceo broj najmanje jedinice + ISO valuta; boja usluge iz ~8 boja vezanih za tokene (ne proizvoljni hex); pomeranje termina menja isti red, a vremenska linija beleži „pomeren sa X na Y“; kalendar kao sopstvene Vue komponente po prototipu, bez biblioteke; odgovorni = prijavljeni korisnik; nove stavke vremenske linije (termin zakazan / pomeren / otkazan, zadatak) i filteri; Kalendar, Zadaci i Usluge u levom meniju.
+
+**Izvođenje:** tri dela sa commit-om, zelenim CI-jem i tačkom za pauzu posle svakog — **6a** usluge + povezane osobe, **6b** termini + kalendar, **6c** zadaci + dashboard.
+
+**Pitanja za korisnika (odgovori se upisuju ovde pre početka):**
+
+1. Da li se Faza 6 gradi pre validacionih razgovora (kao predlog koji razgovori mogu promeniti)?
+2. Preklapanje termina: strogo zabranjeno (kako kaže dokument 10) ili upozorenje uz mogućnost da se ipak sačuva?
+3. Prevlačenje termina mišem (drag & drop): sada ili kasnije? Predlog: kasnije.
 
 ## Način rada
 
