@@ -175,6 +175,29 @@ before starting a phase. The user communicates in Serbian.
   scope returns nothing.
 - Money on screen goes through `useMoney()` (decimals per currency from reference-data).
 
+## Notifications
+
+- Email goes only to the astrologer, never to clients (until the portal), and stays generic: times,
+  zones and links — never a client's name, a task title or anything private. Tests assert that.
+- Preferences are per user (`users.notification_preferences`, `NotificationPreferences` laid over
+  the defaults; `UserResource` always sends them complete). Times are wall-clock on the user's clock.
+- Nothing is computed when sending. When an email goes out is planned ahead as a UTC moment:
+  `appointments.remind_at` (`AppointmentReminders::plan`, from `Appointment::booted` whenever the
+  start, lead time, status or astrologer changes) and `users.next_digest_at` (`TaskDigest::nextAt`,
+  from `User::booted`). A change to someone's preferences or zone replans their unsent reminders.
+- Quiet hours (`QuietHours::shift`): a reminder inside them goes when they end, or the minute before
+  they began if the appointment starts first; a moment already past is not planned at all.
+- The scheduled commands (`notifications:send-reminders`, `notifications:send-digests`, every minute)
+  claim each item with one conditional update before queueing it, so nothing is sent twice. Keep
+  that pattern for any new scheduled email. Queued notifications re-check their subject in
+  `shouldSend()` (a moved or cancelled appointment gets no stale reminder).
+- Commands run outside a request: query across workspaces with
+  `withoutGlobalScope(WorkspaceScope::class)` (keeps soft deletes), and count tenant rows inside
+  `CurrentWorkspace::run()`.
+- Locally mail goes to `laravel.log` and the queue is `database`: run `php artisan schedule:run`
+  and `php artisan queue:work --stop-when-empty` to see an email. Tests use `Notification::fake()`
+  and `travelTo()`.
+
 ## Database
 
 - MariaDB, connection `mariadb`. Local server: `127.0.0.1:3307`, databases

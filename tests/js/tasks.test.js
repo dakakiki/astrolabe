@@ -104,12 +104,20 @@ describe('taskPayload', () => {
     it('sends empty fields as null and drops a time without a day', () => {
         expect(
             taskPayload({ title: '  Send it  ', description: ' ', priority: '', due_date: '', due_time: '15:00' }),
-        ).toEqual({ title: 'Send it', description: null, priority: 'normal', due_date: null, due_time: null });
+        ).toEqual({
+            title: 'Send it',
+            description: null,
+            priority: 'normal',
+            remind: true,
+            due_date: null,
+            due_time: null,
+        });
         expect(
             taskPayload({
                 title: 'Call',
                 description: 'About Saturn',
                 priority: 'high',
+                remind: false,
                 due_date: '2026-10-07',
                 due_time: '',
             }),
@@ -117,6 +125,7 @@ describe('taskPayload', () => {
             title: 'Call',
             description: 'About Saturn',
             priority: 'high',
+            remind: false,
             due_date: '2026-10-07',
             due_time: null,
         });

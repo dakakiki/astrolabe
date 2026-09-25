@@ -15,7 +15,7 @@
 
 Sekcija „Dostupnost i booking pravila" je najsloženiji deo ovog dokumenta i ne implementira se pre nego što se u beti potvrdi da astrolozi žele da klijenti sami zakazuju.
 
-> Status: delovi Faze 6 završeni 24. 9. 2026 (Faza 6b) — prikazi, ručno kreiranje, izmena, pomeranje, otkazivanje uz razlog, statusi, zone i serverska provera preklapanja (upozorenje, vidi „Konflikti“). Pomeranje menja isti termin; „veza sa prethodnim terminom i audit događaj“ je zapis „pomeren sa X na Y“ na vremenskoj liniji klijenta. Prevlačenje termina mišem i filter po astrologu (timovi) dolaze kasnije; tranziti za datum termina u Fazi 7.
+> Status: delovi Faze 6 završeni 24. 9. 2026 (Faza 6b) — prikazi, ručno kreiranje, izmena, pomeranje, otkazivanje uz razlog, statusi, zone i serverska provera preklapanja (upozorenje, vidi „Konflikti“). Pomeranje menja isti termin; „veza sa prethodnim terminom i audit događaj“ je zapis „pomeren sa X na Y“ na vremenskoj liniji klijenta. Prevlačenje termina mišem i filter po astrologu (timovi) dolaze kasnije; tranziti za datum termina u Fazi 7. Faza 7: tranziti za vreme termina (7a), avans za termin (7b) i email podsetnik astrologu (7c, vidi „Notifikacije“) su urađeni.
 
 ## Cilj
 
@@ -129,6 +129,8 @@ Događaji kalendara mogu kreirati Notification Center zapis i email/push isporuk
 - promena lokacije ili online linka.
 
 Spoljašnja poruka ostaje generička i privatne detalje učitava tek nakon autentifikacije.
+
+> Faza 7c (implementirano 25. 9. 2026): **podsetnik pred termin**, emailom, astrologu koji vodi termin. Podrazumevano 24 sata ranije (odluka korisnika), po terminu drugo vreme ili bez podsetnika; pomeranje pomera podsetnik, otkazivanje ga zaustavlja; tihi sati astrologa se poštuju (podsetnik ide kada se završe ili, ako termin počinje pre toga, pre nego što počnu). Mejl sadrži dan, vreme i zonu i link ka terminu u kalendaru, bez imena klijenta. Notification Center zapis, push i obaveštenja o pomeranju, otkazivanju, promeni lokacije i portal rezervacijama nisu urađeni: dok termine menja samo astrolog, obaveštenje o sopstvenoj izmeni nema svrhu; dolaze sa timovima i portalom (Faza 9).
 
 ## Mobilni i PWA prikaz
 

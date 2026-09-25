@@ -27,10 +27,12 @@ use Illuminate\Support\Facades\DB;
  *   locked, so two parallel requests cannot both take the same time unnoticed.
  *   An overlap is refused unless the request says it is intended.
  * - Moving an appointment keeps the row and records "moved from X to Y".
+ * - A new appointment gets the astrologer's usual reminder unless the request
+ *   names one (or none); the reminder moves with it (Appointment::booted).
  */
 class SaveAppointment
 {
-    private const FIELDS = ['service_id', 'location_type', 'location_details', 'notes', 'assigned_user_id'];
+    private const FIELDS = ['service_id', 'location_type', 'location_details', 'notes', 'assigned_user_id', 'reminder_minutes'];
 
     public function __construct(
         private readonly ActivityLog $activity,
@@ -62,6 +64,10 @@ class SaveAppointment
                 $appointment->booking_source = BookingSource::Manual;
                 $appointment->status = AppointmentStatus::Scheduled;
                 $appointment->location_type ??= $this->defaultLocation($appointment->service);
+
+                if (! array_key_exists('reminder_minutes', $input)) {
+                    $appointment->reminder_minutes = $appointment->assignedUser?->notificationPreferences()->reminderMinutes;
+                }
             }
 
             if (array_key_exists('status', $input)) {

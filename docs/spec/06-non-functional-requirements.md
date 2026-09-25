@@ -107,6 +107,10 @@ Za proračun karata:
 - strukturisano evidentiranje grešaka;
 - ako ephemeris engine nije dostupan, aplikacija nastavlja da radi u punom obimu osim prikaza karata, uz jasnu poruku.
 
+> Faza 7c (implementirano): podsetnici i jutarnji mejl se planiraju unapred kao UTC trenutak (`appointments.remind_at`, `users.next_digest_at`), a scheduler svakog minuta šalje samo ono što je dospelo. Svaki podsetnik se pre slanja „uzima“ jednim uslovnim upitom (`reminder_sent_at` se upisuje samo ako je još prazan i ako se trenutak nije promenio), a jutarnji mejl pomeranjem `next_digest_at` na sledeće jutro — pa drugo pokretanje, drugi server ili zakasneo minut ne šalju ništa dvaput. Mejlovi idu kroz queue (3 pokušaja, pauza 1 pa 5 minuta); kada worker dođe do podsetnika, termin se ponovo proverava (i dalje zakazan, isto vreme, isti astrolog), pa pomeren ili otkazan termin ne dobija zastareo mejl. Neuspeli poslovi ostaju u `failed_jobs`.
+>
+> Na produkciji su potrebni cron za `php artisan schedule:run` (svakog minuta) i stalno pokrenut `php artisan queue:work` (systemd ili Supervisor), a mail ide preko lokalnog SMTP servera (`MAIL_MAILER=smtp`, `MAIL_HOST=127.0.0.1`, `MAIL_PORT=25`, `MAIL_FROM_ADDRESS`). Za isporuku bez spama domen treba SPF, DKIM i DMARC zapise. Proverava se dugmetom „Send a test email“ u Settings → Notifications.
+
 ## Pristupačnost i mobilna upotreba
 
 - responsive web aplikacija;

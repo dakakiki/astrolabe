@@ -155,6 +155,19 @@ Uplate i pokazatelji. **Izmena modela** (odluka korisnika pri planiranju Faze 7,
 
 Odluke donete usput: duguju se samo održane konsultacije i nedolasci (zakazane, nacrti i otkazane imaju status naplate, ali ne ulaze u dugovanja); „bez naplate“ je cena 0, a nepostavljena cena je `null`; nova konsultacija preuzima cenu usluge, a postojeće konsultacije iz ranijih faza ostaju bez cene; povraćaj ne može biti veći od primljenog za istu konsultaciju ili termin; dan uplate ne sme biti u budućnosti po kalendaru astrologa; uplate jedne konsultacije su u jednoj valuti i ništa se ne preračunava; svi članovi prakse vide i beleže uplate (do timova); uplata na vremenskoj liniji stoji na svom danu, bez vremena; CSV ima potpisane decimalne iznose, BOM za UTF-8 i neutralisane formule; `Idempotency-Key` i na beleženju uplate.
 
+## Faza 7c — implementirano
+
+Obaveštenja i podsetnici. Odgovori korisnika pri planiranju (25. 9. 2026): mail ide preko lokalnog SMTP-a na produkcionom serveru, bez spoljnog provajdera (lokalno u log); podsetnik pred termin je podrazumevano 24 sata ranije, a astrolog pri zakazivanju može da izabere drugo vreme ili da ga nema. Izmene u dokumentima:
+
+- 02: „Implementirano u Fazi 7c“ kod kalendara (podsetnik) i zadataka („Remind me“, jutarnji mejl) i nova sekcija „Obaveštenja“ (Settings → Notifications, tihi sati, probni mejl).
+- 04: status dela 7c; Faza 7 završena.
+- 05: `users.notification_preferences` i `next_digest_at`; `appointments.reminder_minutes`, `remind_at`, `reminder_sent_at`; `tasks.remind`.
+- 06: kako se sprečava dvostruko slanje i šta produkcija treba (cron, queue worker, SMTP, SPF/DKIM/DMARC).
+- 09: šta je od sekcije Notifications urađeno.
+- 10: podsetnik pred termin urađen; ostala obaveštenja kalendara i Notification Center kasnije.
+
+Odluke donete usput: podešavanja obaveštenja su lična (po korisniku), ne po workspace-u; vreme podsetnika se čuva na terminu (promena uobičajenog vremena ne menja već zakazane), a isključeni podsetnici važe i za već zakazane; tihi sati pomeraju podsetnik na svoj kraj, a ako termin počinje pre toga — na minut pre svog početka; podsetnik čije je vreme prošlo u trenutku zakazivanja se ne šalje; jutarnji mejl ne može biti u tihim satima, šalje se samo kada nešto dospeva tog dana i broji i zakasnele; mejlovi nemaju ime klijenta ni naslove zadataka; „Remind me“ je podrazumevano uključen i za postojeće zadatke; nema Notification Center-a, push-a ni kategorija „Payment recorded“ i „Weekly summary“ iz prototipa; dodat probni mejl za proveru slanja na serveru.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

@@ -11,6 +11,7 @@ import { useMoney } from '@/composables/useMoney';
 import { formatDateTime } from '@/lib/datetime';
 import { formatDate, initials } from '@/lib/format';
 import http from '@/lib/http';
+import { reminderState } from '@/lib/notifications';
 import { transitsRoute } from '@/lib/transits';
 import { useAuthStore } from '@/stores/auth';
 import { useToastStore } from '@/stores/toast';
@@ -154,6 +155,26 @@ async function toggleChart() {
 
 const moment = (item) => formatDateTime(item.starts_at, locale.value, zone.value);
 
+// The email reminder to the astrologer (Phase 7c): planned, sent, none, switched off or too late.
+const reminder = computed(() => {
+    const item = appointment.value;
+    const own = !item.assigned_user || item.assigned_user.id === auth.user?.id;
+    const state = reminderState(item, own ? auth.user?.notification_preferences : null);
+    if (!state) return null;
+
+    const lead = item.reminder_minutes ? labels.leadTime(item.reminder_minutes) : null;
+    const at = state.at ? formatDateTime(state.at, locale.value, zone.value) : null;
+    const text = {
+        planned: () => t('appointments.detail.reminderPlanned', { lead, at }),
+        sent: () => t('appointments.detail.reminderSent', { at }),
+        none: () => t('notifications.noReminder'),
+        paused: () => t('appointments.detail.reminderPaused', { lead }),
+        passed: () => t('appointments.detail.reminderPassed', { lead }),
+    }[state.state]();
+
+    return { text, shifted: state.shifted === true };
+});
+
 // Deposits: what was paid before the session; the service may ask for one.
 const payments = computed(() => appointment.value?.payments ?? []);
 const depositExpected = computed(
@@ -222,6 +243,16 @@ async function depositSaved() {
                 <template v-if="appointment.assigned_user && appointment.assigned_user.id !== auth.user?.id">
                     <dt>{{ t('appointments.detail.with') }}</dt>
                     <dd>{{ appointment.assigned_user.name }}</dd>
+                </template>
+
+                <template v-if="reminder">
+                    <dt>{{ t('appointments.detail.reminder') }}</dt>
+                    <dd>
+                        {{ reminder.text }}
+                        <span v-if="reminder.shifted" class="block text-xs text-ink-3">{{
+                            t('appointments.detail.reminderShifted')
+                        }}</span>
+                    </dd>
                 </template>
             </dl>
 

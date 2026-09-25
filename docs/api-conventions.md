@@ -167,6 +167,19 @@ Pravila:
 - `/dashboard` nosi i `payments`: `received_this_month` (lista novca), `outstanding` (`total`, `count`) i `waiting` (do 6 konsultacija koje duguju, najstarije prve, sa `client`, `service`, `fee`, `billing`).
 - `/reference-data` nosi `payments` (`kinds`, `methods`, `max_amount`).
 
+### Obaveštenja (Faza 7c)
+
+| Metoda | Putanja | Namena |
+|---|---|---|
+| PUT | `/notification-preferences` | lična podešavanja obaveštenja (menja samo poslata polja): `appointment_reminders` (bool), `reminder_minutes` (uobičajeno vreme podsetnika: 15, 30, 60, 120, 180, 360, 720, 1440, 2880), `task_digest` (bool), `digest_time` (`HH:MM`, ne u tihim satima dok je jutarnji mejl uključen), `quiet_hours` (`{start, end}` u `HH:MM`, različiti; `null` isključuje). Vraća korisnika kao `/me` |
+| POST | `/notification-preferences/test` | probni mejl korisniku kroz queue; **202**; najviše 3 u 10 minuta (429) |
+
+Pravila:
+
+- Korisnik (`/me`, `user`) uvek nosi potpun `notification_preferences` (sačuvano preko podrazumevanog); vremena su po zoni korisnika.
+- Termin prima `reminder_minutes` (5–10080 ili `null` = bez podsetnika; izostavljeno kod novog — uobičajeno vreme astrologa koji vodi termin) i vraća `reminder_minutes`, `remind_at` (UTC trenutak slanja ili `null`: bez podsetnika, nije zakazan, podsetnici isključeni ili je vreme prošlo) i `reminder_sent_at`.
+- Zadatak prima i vraća `remind` (bool, podrazumevano `true`): ulazi u jutarnji mejl na dan roka.
+
 ### Konsultacije, beleške i fajlovi
 
 | Metoda | Putanja | Namena |

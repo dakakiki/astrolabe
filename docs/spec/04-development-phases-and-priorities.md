@@ -208,6 +208,8 @@ Izvođenje (dogovoreno 25. 9. 2026): tri dela sa commit-om, zelenim CI-jem i ta�
 
 > Status 7b: završeno 25. 9. 2026. Cena na konsultaciji (iz usluge, izmenljiva, „bez naplate“), uplate i povraćaji kao primljen novac, avans za termin koji prelazi na konsultaciju zabeleženu iz njega, izveden status naplate i dugovanje (duguju održane konsultacije i nedolasci), strana Payments sa pokazateljima, filterima, zbirovima po valuti i CSV izvozom, kartica Billing na konsultaciji, uplate na vremenskoj liniji, na profilu klijenta i na dashboardu. Model iz dokumenta 05 (status po uplati) promenjen je uz zapis u changelog-u.
 
+> Status 7c: završeno 25. 9. 2026. Email obaveštenja astrologu: podsetnik pred termin (podrazumevano 24 sata ranije, drugo vreme ili bez podsetnika po terminu; pomera se sa terminom, otkazan termin ga ne šalje), jutarnji mejl sa brojem zadataka dospelih tog dana („Remind me“ na zadatku), tihi sati, Settings → Notifications i probni mejl. Mejlovi su opšti (vreme i link, bez imena klijenta), idu kroz queue, a scheduler ih šalje jednom. Lokalno mail ide u log; pravo slanje (lokalni SMTP) proverava se na produkcionom serveru. Time je Faza 7 završena.
+
 ## Faza 8 — zatvorena beta
 
 - nekoliko testnih astrologa;

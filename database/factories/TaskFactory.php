@@ -19,6 +19,7 @@ class TaskFactory extends Factory
         return [
             'title' => fake()->sentence(4),
             'priority' => TaskPriority::Normal,
+            'remind' => true,
             'status' => TaskStatus::Open,
         ];
     }

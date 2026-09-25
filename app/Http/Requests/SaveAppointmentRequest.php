@@ -7,6 +7,7 @@ use App\Enums\LocationType;
 use App\Enums\MembershipStatus;
 use App\Models\Appointment;
 use App\Models\Service;
+use App\Support\Notifications\NotificationPreferences;
 use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -60,6 +61,8 @@ class SaveAppointmentRequest extends FormRequest
             'location_type' => ['nullable', Rule::enum(LocationType::class)->only([LocationType::Online, LocationType::InPerson])],
             'location_details' => ['nullable', 'string', 'max:500'],
             'notes' => ['nullable', 'string', 'max:5000'],
+            // Minutes before the start; null = no reminder, left out = the astrologer's usual one.
+            'reminder_minutes' => ['nullable', 'integer', 'min:5', 'max:'.NotificationPreferences::MAX_REMINDER_MINUTES],
             'assigned_user_id' => [
                 ...($creating ? ['nullable'] : ['sometimes', 'required']),
                 'integer',

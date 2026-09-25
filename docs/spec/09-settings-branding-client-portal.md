@@ -42,6 +42,8 @@ Klijentski portal je zaštićen, invite-only prostor. Ne pretvara svaki klijents
 
 Poslovna polja su opciona. Svako polje namenjeno klijentu ima eksplicitnu vidljivost, na primer `internal`, `client_visible` ili `public_booking_visible`.
 
+> Notifications — implementirano u Fazi 7c (25. 9. 2026): lično podešavanje svakog korisnika (ne workspace-a), samo email kanal. Podsetnici pred termine (uključeni / isključeni, uobičajeno vreme — podrazumevano dan ranije), jutarnji mejl o zadacima dospelim tog dana (uključen / isključen, vreme — podrazumevano 08:00), tihi sati (podrazumevano 22:00–08:00) i dugme „Send a test email“. Vremena su po zoni korisnika iz Regional. Kategorije iz prototipa „New portal booking“ (Faza 9), „Payment recorded“ i „Weekly summary“, push kanal i uređaji (PWA) dolaze kasnije. Detalji u dokumentu 02, „Obaveštenja“.
+
 ## Branding
 
 Astrolog može da postavi:

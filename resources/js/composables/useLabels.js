@@ -1,5 +1,7 @@
 import { useI18n } from 'vue-i18n';
 
+import { leadTime } from '@/lib/notifications';
+
 /**
  * Display names for values the API sends as codes. Built-in methods are
  * translated by slug; a workspace's own methods show the name it gave them.
@@ -62,6 +64,12 @@ export function useLabels() {
         relationship: (value) => fromKey('relationshipTypes', value),
         /** A chart point: a body, or an angle (asc, mc …). */
         point: (key) => (te(`chart.angles.${key}`) ? t(`chart.angles.${key}`) : fromKey('bodies', key)),
+        /** A reminder's lead time in minutes: "1 day before", "2 hours before" … */
+        leadTime: (minutes) => {
+            const lead = leadTime(minutes);
+
+            return t(`notifications.lead.${lead.unit}`, { count: lead.count }, lead.count);
+        },
     };
 }
 

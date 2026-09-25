@@ -20,6 +20,8 @@ class UserResource extends JsonResource
             'email_verified' => $this->hasVerifiedEmail(),
             'locale' => $this->locale,
             'timezone' => $this->timezone,
+            // Always complete: stored values laid over the defaults.
+            'notification_preferences' => $this->notificationPreferences()->toArray(),
         ];
     }
 }

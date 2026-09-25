@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\V1\ConsultationController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\NoteController;
+use App\Http\Controllers\Api\V1\NotificationPreferencesController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\PlaceController;
 use App\Http\Controllers\Api\V1\ReferenceDataController;
@@ -52,6 +53,13 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::patch('/workspace', [WorkspaceController::class, 'update'])->name('workspace.update');
             Route::put('/workspace/astrology-methods', [WorkspaceAstrologyMethodController::class, 'update'])
                 ->name('workspace.astrology-methods.update');
+
+            // The person's own email notifications (Settings → Notifications).
+            Route::put('/notification-preferences', [NotificationPreferencesController::class, 'update'])
+                ->name('notification-preferences.update');
+            Route::post('/notification-preferences/test', [NotificationPreferencesController::class, 'test'])
+                ->middleware('throttle:3,10')
+                ->name('notification-preferences.test');
 
             Route::apiResource('astrology-methods', AstrologyMethodController::class)->except('show');
 

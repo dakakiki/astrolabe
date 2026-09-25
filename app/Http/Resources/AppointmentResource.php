@@ -61,6 +61,10 @@ class AppointmentResource extends JsonResource
             'location_details' => $this->location_details,
             'booking_source' => $this->booking_source->value,
             'notes' => $this->when($this->withNotes, $this->notes),
+            // The email to the astrologer: how long before, when it goes out, whether it went.
+            'reminder_minutes' => $this->reminder_minutes,
+            'remind_at' => $this->remind_at?->toIso8601ZuluString(),
+            'reminder_sent_at' => $this->reminder_sent_at?->toIso8601ZuluString(),
             'cancellation_reason' => $this->cancellation_reason,
             'cancelled_at' => $this->cancelled_at?->toIso8601ZuluString(),
             'consultation' => $this->whenLoaded('consultation', fn () => $this->consultation ? [

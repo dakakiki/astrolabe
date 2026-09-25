@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 
 import ClientPicker from '@/components/ClientPicker.vue';
 import FormField from '@/components/FormField.vue';
+import ToggleRow from '@/components/ToggleRow.vue';
 import { useForm } from '@/composables/useForm';
 import http, { idempotencyKey } from '@/lib/http';
 import { PRIORITIES, taskPayload } from '@/lib/tasks';
@@ -48,7 +49,13 @@ const form = useForm({
     priority: props.task?.priority ?? 'normal',
     due_date: props.task?.due_date ?? props.preset.due_date ?? '',
     due_time: props.task?.due_time ?? '',
+    remind: props.task?.remind ?? true,
 });
+
+// "Remind me" counts in the morning email, which may be switched off.
+const remindHint = computed(() =>
+    auth.user?.notification_preferences?.task_digest === false ? t('tasks.form.remindOff') : t('tasks.form.remindHint'),
+);
 
 // A time entered in another zone is edited in that zone, and says so.
 const otherZone = computed(() =>
@@ -174,6 +181,14 @@ async function save() {
                 </div>
                 <div v-if="form.errors.value.priority" class="error">{{ form.errors.value.priority }}</div>
             </div>
+
+            <ToggleRow
+                v-if="form.data.due_date"
+                v-model="form.data.remind"
+                class="mb-2"
+                :label="t('tasks.form.remind')"
+                :description="remindHint"
+            />
 
             <FormField
                 v-slot="{ id, aria }"

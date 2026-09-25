@@ -19,6 +19,8 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 > Faza 7a (implementirano): `workspaces.transit_orbs`; tranziti se računaju po zahtevu i ne upisuju se u `chart_calculations` (`chart_type = transit` ostaje nekorišćen); Hiron je u `payload.positions` natalnih karata.
 >
 > Faza 7b (implementirano): `consultations.fee_amount` i `fee_currency`; `payments` bez `status` — status i dugovanje se izvode za konsultaciju; `kind` (`payment` / `refund`), `paid_on` umesto `paid_at`, `method` i `reference` umesto `payment_method` i `external_reference`, `created_by`, soft deletes; nova vrsta događaja `payment` u `activity_events`.
+>
+> Faza 7c (implementirano): `users.notification_preferences` i `users.next_digest_at`; `appointments.reminder_minutes`, `remind_at` i `reminder_sent_at`; `tasks.remind`. Tabela `notifications` (Laravel database kanal, Notification Center) nije uvedena — obaveštenja su za sada samo email.
 
 ## Nalozi i workspace
 
@@ -32,6 +34,8 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 - `timezone` — IANA, podrazumevano iz browsera pri registraciji
 - `current_workspace_id`, nullable — poslednji korišćeni workspace; samo nagoveštaj, članstvo se uvek ponovo proverava
 - `email_verified_at`
+- `notification_preferences`, JSON, nullable — Settings → Notifications (Faza 7c): `appointment_reminders`, `reminder_minutes`, `task_digest`, `digest_time`, `quiet_hours` (`{start, end}` ili `null`); sačuvane vrednosti se slažu preko podrazumevanih (podsetnik 24 h ranije, jutarnji mejl u 08:00, tihi sati 22:00–08:00), pa `null` znači podrazumevano
+- `next_digest_at`, nullable — sledeći jutarnji mejl o zadacima, UTC; računa se iz `digest_time` i `timezone` pri svakoj njihovoj promeni i posle slanja; `null` kada je mejl isključen
 - timestamps
 
 ### `workspaces`
@@ -363,6 +367,8 @@ Metode za koje je usluga namenjena; bez njih — bilo koja.
 - soft deletes
 
 > Faza 6b (implementirano): `created_by` (nullable), `cancellation_reason` i `cancelled_at` (nullable). `starts_at` / `ends_at` su UTC (`datetime`), `timezone` je IANA zona unosa. `status` — `scheduled`, `completed`, `cancelled`, `no_show`; otkazan termin ne zauzima vreme. `location_type` — `online` ili `in_person` (usluga sa `either` prepušta izbor terminu). `service_id` ima strani ključ bez brisanja (usluga u upotrebi se ne briše). Indeksi: `(workspace_id, starts_at)`, `(workspace_id, assigned_user_id, starts_at)`, `(workspace_id, client_id, starts_at)`. Termini se ne brišu kroz aplikaciju (soft delete kolona postoji za pravila čuvanja podataka). Veza sa konsultacijom je `consultations.appointment_id` (najviše jedna konsultacija po terminu, proverava aplikacija pod zaključavanjem reda termina).
+>
+> Faza 7c (implementirano): podsetnik astrologu — `reminder_minutes` (nullable, koliko minuta pre početka; `null` = bez podsetnika; novi termin dobija uobičajeno vreme astrologa), `remind_at` (nullable, UTC trenutak slanja: početak minus `reminder_minutes`, pomeren iz tihih sati astrologa; `null` kada termin nije zakazan, kada astrolog ima isključene podsetnike ili kada je trenutak već prošao) i `reminder_sent_at` (nullable). Pomeranje, promena vremena podsetnika, statusa ili astrologa ponovo računa `remind_at`; novi trenutak znači nov, neposlat podsetnik. Indeks `(reminder_sent_at, remind_at)` bez `workspace_id`, jer scheduler traži dospele podsetnike u svim workspace-ima.
 
 ## Plaćanja
 
@@ -410,6 +416,8 @@ Pravila: primljeno za konsultaciju = zbir uplata − zbir povraćaja; uplate jed
 - soft deletes
 
 > Faza 6c (implementirano): rok se čuva kako je unet — `due_date` (dan), `due_time` (nullable, lokalno vreme) i `timezone` (IANA zona unosa) — a `due_at` je izveden UTC rok: uneto vreme, ili početak sledećeg dana kada vremena nema, pa je „zakasneo“ jedno poređenje (`due_at <= now`). Dodat `completed_by` (nullable). `priority` — `low`, `normal`, `high`; `status` — `open`, `done`. `created_by` i `assigned_user_id` su nullable sa `nullOnDelete`; `client_id` briše zadatak sa klijentom, `consultation_id` se prazni. Indeksi: `(workspace_id, status, due_at)`, `(workspace_id, client_id, status)`, `(workspace_id, consultation_id)`. Na vremenskoj liniji zadatak klijenta ima projekcije `task` (u trenutku dodavanja) i `task_completed` (u trenutku završetka, dok je završen); obe se grade iz reda zadatka.
+>
+> Faza 7c (implementirano): `remind` (boolean, podrazumevano `true`) — „Remind me“: otvoren zadatak sa rokom tog dana ulazi u jutarnji mejl o zadacima.
 
 ## Vremenska linija
 

@@ -215,6 +215,7 @@
             "practice": "Practice",
             "chart": "Chart & methods",
             "regional": "Regional",
+            "notifications": "Notifications",
             "security": "Security"
         },
         "ownerOnly": "Only the owner of this workspace can change these settings.",
@@ -292,6 +293,27 @@
             "title": "Transit orbs",
             "intro": "How close to exact a transit to the natal chart must be to count — much tighter than between natal points. Transits are calculated each time they are opened, so a change applies at once.",
             "saved": "Transit orbs saved"
+        },
+        "notifications": {
+            "title": "Email notifications",
+            "intro": "Emails go to you, never to your clients. Times follow your time zone ({zone}), set under Regional.",
+            "reminders": "Appointment reminders",
+            "remindersHint": "An email before each appointment. Each appointment can have its own time, or none.",
+            "reminderMinutes": "Usual reminder",
+            "reminderMinutesHint": "Suggested for new appointments.",
+            "digest": "Tasks due today",
+            "digestHint": "One email in the morning with how many tasks are due that day, if any — tasks marked “Remind me”.",
+            "digestTime": "Morning email at",
+            "quiet": "Quiet hours",
+            "quietHint": "No email in this stretch. A reminder that falls in it goes out when it ends — or just before it begins, if the appointment starts first.",
+            "quietFrom": "From",
+            "quietTo": "Until",
+            "private": "Emails stay generic: the time and a link, never a client’s name or a task title. The details open after you sign in.",
+            "saved": "Notification preferences saved",
+            "testTitle": "Test email",
+            "testIntro": "Sends a message to {email} the same way reminders go, to check that email reaches you.",
+            "testSend": "Send a test email",
+            "testQueued": "Test email on its way to {email}"
         }
     },
     "roles": {
@@ -866,7 +888,13 @@
             "close": "Close",
             "deposits": "Paid for this appointment",
             "depositExpected": "This service asks for a deposit; none is recorded yet.",
-            "recordDeposit": "Record deposit"
+            "recordDeposit": "Record deposit",
+            "reminder": "Reminder",
+            "reminderPlanned": "{lead} · email {at}",
+            "reminderShifted": "Moved out of your quiet hours.",
+            "reminderSent": "Sent {at}",
+            "reminderPaused": "{lead} · reminders are switched off in Settings",
+            "reminderPassed": "{lead} · that time had already passed"
         },
         "form": {
             "newTitle": "New appointment",
@@ -890,7 +918,10 @@
             "overlapTitle": "This time is already taken",
             "overlapText": "You already have something at this time:",
             "overlapHint": "Overlaps are allowed when intended — for example a short call inside a longer block.",
-            "saveAnyway": "Save anyway"
+            "saveAnyway": "Save anyway",
+            "reminder": "Reminder",
+            "reminderHint": "An email to you before the appointment.",
+            "reminderPaused": "Reminders are switched off in Settings → Notifications."
         }
     },
     "related": {
@@ -1181,7 +1212,10 @@
             "priority": "Priority",
             "description": "Description",
             "create": "Add task",
-            "save": "Save task"
+            "save": "Save task",
+            "remind": "Remind me",
+            "remindHint": "Counted in the morning email on the day it is due.",
+            "remindOff": "The morning email is switched off in Settings → Notifications."
         },
         "priorities": {
             "high": "High",
@@ -1349,5 +1383,13 @@
         "noPayments": "Nothing received yet.",
         "deposit": "deposit",
         "feeHint": "Set the fee in the details on the left."
+    },
+    "notifications": {
+        "lead": {
+            "minutes": "1 minute before | {count} minutes before",
+            "hours": "1 hour before | {count} hours before",
+            "days": "1 day before | {count} days before"
+        },
+        "noReminder": "No reminder"
     }
 }

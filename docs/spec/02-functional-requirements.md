@@ -316,6 +316,13 @@ Vidljivost:
 - Iz detalja termina: „Zabeleži konsultaciju“ otvara formu konsultacije popunjenu klijentom, uslugom i vremenom; konsultacija se vezuje za termin (najviše jedna po terminu), a termin postaje održan. Na vremenskoj liniji tada konsultacija zamenjuje termin. Iz detalja se otvara i klijent i njegova natalna karta, bez napuštanja kalendara, a od Faze 7a i tranziti za vreme termina („Transits for this date“).
 - Podsetnici astrologu dolaze u Fazi 7 (sa email notifikacijama); prevlačenje termina mišem kasnije.
 
+### Implementirano u Fazi 7c
+
+- **Podsetnik astrologu** (odluka korisnika, 25. 9. 2026): email pre termina, podrazumevano 24 sata ranije. U formi termina polje „Reminder“ nudi drugo vreme (15 i 30 minuta, 1, 2, 3, 6 i 12 sati, 1 i 2 dana) ili „No reminder“; novi termin počinje od uobičajenog vremena iz Settings → Notifications.
+- Pomeranje termina pomera i podsetnik (pomeren termin dobija nov podsetnik i kada je stari već poslat); otkazan termin ne šalje podsetnik, a ponovo zakazan ga opet dobija. Kada je vreme podsetnika već prošlo u trenutku zakazivanja (npr. termin za danas po podne uz podsetnik dan ranije), podsetnik se ne šalje.
+- Podsetnik ide astrologu koji vodi termin, na njegovom satu i sa nazivom zone. Mejl je opšti: dan, vreme od–do i zona, i dugme ka terminu u kalendaru — bez imena klijenta i bilo kakvog podatka o njemu (dokument 10: privatni detalji se učitavaju tek posle prijave).
+- Detalj termina kaže šta je sa podsetnikom: kada ide („1 day before · email Sep 29, 2:00 PM“), da je pomeren iz tihih sati, da je poslat, da ga nema, da su podsetnici isključeni ili da je njegovo vreme već prošlo.
+
 ### Posle MVP-a
 
 - javna booking stranica;
@@ -373,6 +380,20 @@ Posle MVP-a: avansi, računi, paketi konsultacija i automatske potvrde. Naplata 
 - Strana „Tasks“ (levi meni, Business) sa tabovima Open, Overdue, Today i Done i brojem zadataka na njima; tab „Tasks“ i kartica „Open tasks“ na profilu klijenta; „Follow-ups“ na strani konsultacije.
 - Dvostruki klik ne pravi dva zadatka (`Idempotency-Key`, kao kod termina).
 - Podsetnik za zadatak dolazi sa notifikacijama (Faza 7).
+
+### Implementirano u Fazi 7c
+
+- **„Remind me“** na zadatku (prototip: „Email on the morning it is due“), podrazumevano uključen; prikazuje se u formi kada zadatak ima rok.
+- **Jutarnji mejl o zadacima:** jednom dnevno, u vreme koje astrolog izabere (podrazumevano 08:00, po njegovom satu), koliko je njegovih otvorenih zadataka sa „Remind me“ (i nedodeljenih) dospelo tog dana i koliko ih je zakasnelo od ranije. Šalje se samo kada nešto dospeva tog dana; jedan mejl po praksi. Bez naslova zadataka — naslov često nosi ime klijenta („Follow up with …“) — samo brojevi i dugme ka tabu „Today“.
+
+## Obaveštenja (Faza 7c)
+
+- Obaveštenja idu samo astrologu, emailom; klijentima tek sa portalom i brendingom (Faza 9). Notification Center (zvonce u aplikaciji) i push dolaze kasnije.
+- **Settings → Notifications** (lično podešavanje, ne workspace): podsetnici pred termine uključeni / isključeni i uobičajeno vreme podsetnika; jutarnji mejl o zadacima i njegovo vreme; tihi sati (podrazumevano 22:00–08:00). Vremena su po zoni iz Regional.
+- **Tihi sati:** u tom periodu ne ide nijedan mejl. Podsetnik koji bi pao u tihe sate ide kada se oni završe, a ako termin počinje pre toga — minut pre nego što počnu (npr. podsetnik sat vremena pre termina u 07:30 ide u 21:59 prethodne večeri). Jutarnji mejl ne može biti postavljen u tihe sate.
+- Isključeni podsetnici važe odmah i za već zakazane termine; ponovo uključeni planiraju se iznova. Promena zone ili tihih sati ponovo računa sve neposlate buduće podsetnike.
+- **„Send a test email“** šalje probni mejl istim putem kao podsetnici (queue, worker, mail server) — za proveru slanja na produkcionom serveru; najviše 3 u 10 minuta.
+- Mejl je na jeziku korisnika (`users.locale`); ništa se ne šalje dvaput, i kada scheduler ili worker rade dvaput (vidi dokument 06).
 
 ## Dashboard
 

@@ -9,6 +9,7 @@ use App\Enums\LocationType;
 use App\Models\Concerns\BelongsToWorkspace;
 use App\Models\Concerns\ProjectsActivity;
 use App\Support\Activity\ActivityProjection;
+use App\Support\Notifications\AppointmentReminders;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Database\Factories\AppointmentFactory;
@@ -26,10 +27,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Moving an appointment changes this row and leaves an entry on the timeline;
  * cancelling keeps it with a reason.
  *
+ * The astrologer gets an email reminder `reminder_minutes` before it (null =
+ * none); `remind_at` is when that works out to (AppointmentReminders).
+ *
  * @property CarbonImmutable $starts_at UTC
  * @property CarbonImmutable $ends_at UTC
  * @property AppointmentStatus $status
  * @property LocationType $location_type
+ * @property int|null $reminder_minutes
+ * @property CarbonImmutable|null $remind_at UTC
+ * @property CarbonImmutable|null $reminder_sent_at UTC
  */
 class Appointment extends Model
 {
@@ -48,7 +55,24 @@ class Appointment extends Model
             'location_type' => LocationType::class,
             'booking_source' => BookingSource::class,
             'cancelled_at' => 'immutable_datetime',
+            'reminder_minutes' => 'integer',
+            'remind_at' => 'immutable_datetime',
+            'reminder_sent_at' => 'immutable_datetime',
         ];
+    }
+
+    /**
+     * The reminder follows the appointment: moving, cancelling, a new lead
+     * time or another astrologer plans it again.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (Appointment $appointment) {
+            if (! $appointment->exists
+                || $appointment->isDirty(['starts_at', 'reminder_minutes', 'status', 'assigned_user_id'])) {
+                AppointmentReminders::plan($appointment);
+            }
+        });
     }
 
     /**

@@ -163,6 +163,11 @@ const routes = [
                 component: () => import('@/pages/settings/RegionalSettings.vue'),
             },
             {
+                path: 'notifications',
+                name: 'settings.notifications',
+                component: () => import('@/pages/settings/NotificationSettings.vue'),
+            },
+            {
                 path: 'security',
                 name: 'settings.security',
                 component: () => import('@/pages/settings/SecuritySettings.vue'),

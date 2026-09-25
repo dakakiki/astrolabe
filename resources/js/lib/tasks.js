@@ -99,6 +99,7 @@ export function taskPayload(data) {
         title: (data.title ?? '').trim(),
         description: (data.description ?? '').trim() || null,
         priority: data.priority || 'normal',
+        remind: data.remind !== false,
         due_date: dueDate,
         due_time: dueDate ? data.due_time || null : null,
     };

@@ -19,10 +19,12 @@ use Illuminate\Support\Facades\DB;
  * - The due date is kept as entered (day, optional time, zone) and as a UTC
  *   deadline. A new date alone keeps the time; removing the date removes it all.
  * - Marking it done records when and by whom; reopening clears that.
+ * - "Remind me" (on unless switched off) puts it in the morning email on the
+ *   day it is due (TaskDigest).
  */
 class SaveTask
 {
-    private const FIELDS = ['title', 'description', 'priority', 'assigned_user_id', 'client_id', 'consultation_id'];
+    private const FIELDS = ['title', 'description', 'priority', 'remind', 'assigned_user_id', 'client_id', 'consultation_id'];
 
     /**
      * @param  array<string, mixed>  $input  validated
@@ -38,6 +40,7 @@ class SaveTask
                 $task->created_by = auth()->id();
                 $task->assigned_user_id ??= auth()->id();
                 $task->priority ??= TaskPriority::Normal;
+                $task->remind ??= true;
                 $task->status = TaskStatus::Open;
 
                 if ($task->consultation_id !== null && $task->client_id === null) {

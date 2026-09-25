@@ -26,6 +26,8 @@ class TaskResource extends JsonResource
             'title' => $this->title,
             'description' => $this->description,
             'priority' => $this->priority->value,
+            // Counts in the morning email on the day it is due.
+            'remind' => $this->remind,
             'status' => $this->status->value,
             'client_id' => $this->client_id,
             'client' => $this->whenLoaded('client', fn () => $this->client ? [

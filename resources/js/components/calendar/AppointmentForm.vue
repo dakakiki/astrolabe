@@ -8,6 +8,7 @@ import { useForm } from '@/composables/useForm';
 import { timeZoneOptions, useLabels } from '@/composables/useLabels';
 import { formatDateTime } from '@/lib/datetime';
 import http, { idempotencyKey } from '@/lib/http';
+import { reminderChoices } from '@/lib/notifications';
 import { useAuthStore } from '@/stores/auth';
 import { useToastStore } from '@/stores/toast';
 
@@ -45,9 +46,21 @@ const form = useForm({
     location_type: props.appointment?.location_type ?? 'online',
     location_details: props.appointment?.location_details ?? '',
     notes: props.appointment?.notes ?? '',
+    // Minutes before the start, or null for none; a new one starts from the usual reminder.
+    reminder_minutes: props.appointment
+        ? props.appointment.reminder_minutes
+        : (auth.user?.notification_preferences?.reminder_minutes ?? null),
 });
 
 const zones = computed(() => timeZoneOptions(form.data.timezone));
+const reminderOptions = computed(() => reminderChoices(form.data.reminder_minutes));
+// Reminders go to whoever runs the appointment; only one's own switch is known here.
+const remindersPaused = computed(
+    () =>
+        form.data.reminder_minutes !== null &&
+        (!props.appointment || props.appointment.assigned_user?.id === auth.user?.id) &&
+        auth.user?.notification_preferences?.appointment_reminders === false,
+);
 // Active services, plus an inactive one the appointment already has.
 const serviceOptions = computed(() =>
     props.services.filter((service) => service.is_active || service.id === form.data.service_id),
@@ -232,6 +245,20 @@ const when = (appointment) =>
                     />
                 </FormField>
             </div>
+
+            <FormField
+                v-slot="{ id, aria }"
+                :label="t('appointments.form.reminder')"
+                :error="form.errors.value.reminder_minutes"
+                :hint="remindersPaused ? t('appointments.form.reminderPaused') : t('appointments.form.reminderHint')"
+            >
+                <select :id="id" v-model="form.data.reminder_minutes" v-bind="aria" class="input">
+                    <option :value="null">{{ t('notifications.noReminder') }}</option>
+                    <option v-for="minutes in reminderOptions" :key="minutes" :value="minutes">
+                        {{ labels.leadTime(minutes) }}
+                    </option>
+                </select>
+            </FormField>
 
             <FormField
                 v-slot="{ id, aria }"

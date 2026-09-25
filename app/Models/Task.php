@@ -45,6 +45,7 @@ class Task extends Model
         return [
             'priority' => TaskPriority::class,
             'status' => TaskStatus::class,
+            'remind' => 'boolean',
             'due_date' => 'immutable_date',
             'due_at' => 'immutable_datetime',
             'completed_at' => 'immutable_datetime',

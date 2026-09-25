@@ -54,6 +54,7 @@ class SaveTaskRequest extends FormRequest
             'due_date' => ['nullable', 'date_format:Y-m-d'],
             'due_time' => ['nullable', 'date_format:H:i'],
             'timezone' => ['nullable', 'timezone:all_with_bc'],
+            'remind' => ['sometimes', 'boolean'],
             'assigned_user_id' => [
                 'nullable',
                 'integer',
