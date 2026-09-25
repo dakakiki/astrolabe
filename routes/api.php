@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\V1\ConsultationController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\NoteController;
+use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\PlaceController;
 use App\Http\Controllers\Api\V1\ReferenceDataController;
 use App\Http\Controllers\Api\V1\RelatedPersonChartController;
@@ -106,6 +107,12 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             // Tasks and follow-ups (docs/spec/02, "Zadaci i follow-up").
             Route::post('/tasks', [TaskController::class, 'store'])->middleware('idempotent')->name('tasks.store');
             Route::apiResource('tasks', TaskController::class)->except('store');
+
+            // What clients paid (docs/spec/02, "Plaćanja"): recorded, never processed.
+            Route::get('/payments/summary', [PaymentController::class, 'summary'])->name('payments.summary');
+            Route::get('/payments/export', [PaymentController::class, 'export'])->name('payments.export');
+            Route::post('/payments', [PaymentController::class, 'store'])->middleware('idempotent')->name('payments.store');
+            Route::apiResource('payments', PaymentController::class)->except('store');
 
             Route::get('/attachments', [AttachmentController::class, 'index'])->name('attachments.index');
             Route::post('/attachments', [AttachmentController::class, 'store'])

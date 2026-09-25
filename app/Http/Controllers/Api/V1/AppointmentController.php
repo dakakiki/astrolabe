@@ -90,7 +90,7 @@ class AppointmentController extends Controller
     {
         Gate::authorize('view', $appointment);
 
-        return AppointmentResource::make($appointment->load(self::RELATIONS))->withNotes();
+        return AppointmentResource::make($appointment->load([...self::RELATIONS, 'payments']))->withNotes();
     }
 
     public function update(SaveAppointmentRequest $request, Appointment $appointment, SaveAppointment $save): AppointmentResource

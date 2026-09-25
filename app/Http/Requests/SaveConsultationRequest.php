@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\ConsultationStatus;
 use App\Models\Appointment;
 use App\Models\Consultation;
+use App\Models\Payment;
 use App\Models\Service;
 use App\Support\RichText;
 use App\Support\Tenancy\CurrentWorkspace;
@@ -17,7 +18,8 @@ use Illuminate\Validation\Validator;
  *
  * `starts_at` is the local wall-clock time ("2026-09-24T15:00") in `timezone`,
  * which defaults to the astrologer's own zone; it is stored in UTC. The client
- * is chosen once, on creation.
+ * is chosen once, on creation. `fee` is money (`{amount, currency}`); left out
+ * on a new consultation, it comes from the service's price.
  */
 class SaveConsultationRequest extends FormRequest
 {
@@ -51,6 +53,10 @@ class SaveConsultationRequest extends FormRequest
             'starts_at' => ['nullable', 'date_format:Y-m-d\TH:i'],
             'timezone' => ['nullable', 'timezone:all_with_bc'],
             'duration_minutes' => ['nullable', 'integer', 'min:1', 'max:1440'],
+            // What the session costs the client, as money; 0 is no charge, null no fee set.
+            'fee' => ['nullable', 'array:amount,currency'],
+            'fee.amount' => ['required_with:fee', 'integer', 'min:0', 'max:'.SaveServiceRequest::MAX_AMOUNT],
+            'fee.currency' => ['required_with:fee', Rule::in(config('astrolabe.currencies'))],
             'topics' => ['nullable', 'string', 'max:5000'],
             'internal_notes' => $richText,
             'client_summary' => $richText,
@@ -112,6 +118,25 @@ class SaveConsultationRequest extends FormRequest
 
             if ($status->needsDate() && ! $hasDate) {
                 $validator->errors()->add('starts_at', __('consultations.date_required'));
+            }
+        }, function (Validator $validator) {
+            // Payments already made — for this consultation, or deposits for its
+            // appointment — fix the currency of the fee.
+            $currency = $this->input('fee.currency');
+
+            if ($currency === null || $validator->errors()->hasAny(['fee', 'fee.amount', 'fee.currency', 'appointment_id'])) {
+                return;
+            }
+
+            $consultation = $this->route('consultation');
+            $paid = match (true) {
+                $consultation instanceof Consultation => Payment::query()->where('consultation_id', $consultation->id)->value('currency'),
+                $this->filled('appointment_id') => Payment::query()->where('appointment_id', $this->input('appointment_id'))->value('currency'),
+                default => null,
+            };
+
+            if ($paid !== null && $paid !== $currency) {
+                $validator->errors()->add('fee.currency', __('payments.fee_currency_mismatch', ['currency' => $paid]));
             }
         }];
     }

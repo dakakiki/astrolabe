@@ -25,6 +25,7 @@ const navGroups = [
         label: 'nav.business',
         items: [
             { to: '/services', label: 'nav.services', icon: '◇' },
+            { to: '/payments', label: 'nav.payments', icon: '¤' },
             { to: '/tasks', label: 'nav.tasks', icon: '✓' },
         ],
     },

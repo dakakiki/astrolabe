@@ -5,7 +5,9 @@ import { RouterLink } from 'vue-router';
 
 import AppointmentStatusBadge from '@/components/calendar/AppointmentStatusBadge.vue';
 import TaskList from '@/components/TaskList.vue';
+import BillingBadge from '@/components/BillingBadge.vue';
 import { useLabels } from '@/composables/useLabels';
+import { useMoney } from '@/composables/useMoney';
 import { wallClock } from '@/lib/calendar';
 import { ASPECT_GLYPHS, formatOrb } from '@/lib/chart';
 import { formatDateTime, isFuture } from '@/lib/datetime';
@@ -21,12 +23,14 @@ import { useToastStore } from '@/stores/toast';
 /**
  * The start screen (docs/spec/02, "Dashboard"): the astrologer's day and the
  * week ahead — appointments, tasks that are due, the clients and files worked
- * on lately, clients whose chart cannot be drawn yet, and the slow transits on
- * the charts of the clients coming this week. A new practice sees its setup
- * steps first. Payments join in Phase 7b.
+ * on lately, clients whose chart cannot be drawn yet, the slow transits on the
+ * charts of the clients coming this week, and the money: received this month,
+ * outstanding, and the consultations waiting on payment. A new practice sees
+ * its setup steps first.
  */
 const { t, locale } = useI18n();
 const labels = useLabels();
+const money = useMoney();
 const auth = useAuthStore();
 const toast = useToastStore();
 
@@ -116,6 +120,24 @@ const stats = computed(() => [
         to: { name: 'tasks.index' },
     },
     {
+        key: t('dashboard.stats.received', { month: monthName.value }),
+        value: money.formatList(board.value?.payments.received_this_month),
+        detail: t('dashboard.stats.receivedDetail'),
+        to: { name: 'payments.index' },
+        money: true,
+    },
+    {
+        key: t('dashboard.stats.outstanding'),
+        value: money.formatList(board.value?.payments.outstanding.total),
+        detail: t(
+            'dashboard.stats.outstandingDetail',
+            { count: board.value?.payments.outstanding.count ?? 0 },
+            board.value?.payments.outstanding.count ?? 0,
+        ),
+        to: { name: 'payments.index', query: { view: 'waiting' } },
+        money: true,
+    },
+    {
         key: t('dashboard.stats.clients'),
         value: counts.value.clients_active,
         detail: t(
@@ -126,6 +148,18 @@ const stats = computed(() => [
         to: { name: 'clients.index' },
     },
 ]);
+
+const monthName = computed(() => {
+    try {
+        return new Intl.DateTimeFormat(locale.value, { month: 'long', timeZone: zone.value }).format(new Date());
+    } catch {
+        return '';
+    }
+});
+
+// "Waiting on payment": held consultations whose fee is not paid in full, the longest waiting first.
+const waitingDate = (consultation) =>
+    formatDateTime(consultation.starts_at, locale.value, zone.value, { day: 'numeric', month: 'short' });
 
 // Appointments: today's, then the week ahead, each under its own heading.
 const nextUp = computed(() =>
@@ -250,7 +284,7 @@ const steps = computed(() => [
     <p v-if="failed" class="notice n-warn mb-4" role="alert">{{ t('errors.generic') }}</p>
 
     <template v-if="board">
-        <div class="mb-4 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+        <div class="mb-4 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 2xl:grid-cols-6">
             <RouterLink
                 v-for="stat in stats"
                 :key="stat.key"
@@ -258,7 +292,7 @@ const steps = computed(() => [
                 class="card stat block hover:border-brand-300"
             >
                 <div class="k">{{ stat.key }}</div>
-                <div class="v">{{ stat.value }}</div>
+                <div class="v" :class="{ 'text-xl!': stat.money }">{{ stat.value }}</div>
                 <div class="d">{{ stat.detail }}</div>
             </RouterLink>
         </div>
@@ -440,6 +474,68 @@ const steps = computed(() => [
                         </table>
                     </div>
                     <p class="engine-note font-sans!">{{ t('dashboard.transits.hint') }}</p>
+                </section>
+
+                <!-- Consultations held and not paid in full -->
+                <section v-if="counts.clients_total > 0" class="card">
+                    <div class="card-head">
+                        <h2>{{ t('dashboard.waiting.title') }}</h2>
+                        <RouterLink :to="{ name: 'payments.index', query: { view: 'waiting' } }" class="right">{{
+                            t('dashboard.waiting.all')
+                        }}</RouterLink>
+                    </div>
+                    <p v-if="!board.payments.waiting.length" class="empty">{{ t('dashboard.waiting.empty') }}</p>
+                    <div v-else class="overflow-x-auto">
+                        <table class="data">
+                            <caption class="sr-only">
+                                {{
+                                    t('dashboard.waiting.title')
+                                }}
+                            </caption>
+                            <tbody>
+                                <tr v-for="consultation in board.payments.waiting" :key="consultation.id">
+                                    <td class="w-20 font-mono text-xs whitespace-nowrap">
+                                        {{ waitingDate(consultation) }}
+                                    </td>
+                                    <td>
+                                        <RouterLink
+                                            :to="{ name: 'clients.show', params: { id: consultation.client.id } }"
+                                            class="block truncate font-medium hover:underline"
+                                            >{{ consultation.client.full_name }}</RouterLink
+                                        >
+                                        <span class="text-xs text-ink-3">{{
+                                            consultation.title ??
+                                            consultation.service?.name ??
+                                            t('consultations.untitled')
+                                        }}</span>
+                                    </td>
+                                    <td class="hidden sm:table-cell">
+                                        <BillingBadge :status="consultation.billing.status" />
+                                    </td>
+                                    <td class="text-right font-mono whitespace-nowrap">
+                                        {{ money.format(consultation.billing.balance) }}
+                                    </td>
+                                    <td class="text-right">
+                                        <RouterLink
+                                            :to="{ name: 'consultations.show', params: { id: consultation.id } }"
+                                            class="btn btn-sm"
+                                            >{{ t('dashboard.waiting.record') }}</RouterLink
+                                        >
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p
+                        v-if="board.payments.outstanding.count > board.payments.waiting.length"
+                        class="border-t border-line-soft px-4 py-2 text-xs"
+                    >
+                        <RouterLink :to="{ name: 'payments.index', query: { view: 'waiting' } }">{{
+                            t('dashboard.waiting.more', {
+                                count: board.payments.outstanding.count - board.payments.waiting.length,
+                            })
+                        }}</RouterLink>
+                    </p>
                 </section>
 
                 <!-- New files -->

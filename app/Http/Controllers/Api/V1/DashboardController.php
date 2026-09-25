@@ -14,12 +14,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\AppointmentResource;
 use App\Http\Resources\AttachmentResource;
 use App\Http\Resources\ClientResource;
+use App\Http\Resources\ConsultationResource;
 use App\Http\Resources\TaskResource;
 use App\Models\Appointment;
 use App\Models\Attachment;
 use App\Models\Client;
+use App\Models\Consultation;
 use App\Models\Task;
 use App\Models\User;
+use App\Support\Billing\Ledger;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -31,8 +34,9 @@ use Illuminate\Support\Facades\Log;
  * The start screen (docs/spec/02, "Dashboard") in one request, on the viewer's
  * own calendar: their appointments today and in the next seven days, their
  * overdue, today's and upcoming tasks, the recently active clients, new files,
- * clients whose chart cannot be drawn yet, and the slow transits on the charts
- * of the clients they see this week. Payments and revenue join in Phase 7b.
+ * clients whose chart cannot be drawn yet, the slow transits on the charts of
+ * the clients they see this week, and the practice's money: received this
+ * month, outstanding, and the consultations waiting on payment.
  */
 class DashboardController extends Controller
 {
@@ -49,7 +53,10 @@ class DashboardController extends Controller
     /** Only transits this close to exact make the dashboard (degrees). */
     public const TRANSIT_ORB = 1.0;
 
-    public function __invoke(Request $request, TransitService $transits): JsonResponse
+    /** "Waiting on payment": how many consultations, the longest waiting first. */
+    private const WAITING = 6;
+
+    public function __invoke(Request $request, TransitService $transits, Ledger $ledger): JsonResponse
     {
         Gate::authorize('viewAny', Client::class);
 
@@ -117,6 +124,20 @@ class DashboardController extends Controller
                 (clone $incomplete)->with('birthDetails')->orderByDesc('last_activity_at')->orderByDesc('id')->limit(5)->get(),
             )->resolve($request),
             'transits' => $this->transits($user, $now, $horizon, $transits),
+            'payments' => [
+                'received_this_month' => $ledger->receivedBetween($today->startOfMonth()->format('Y-m-d'), $today->format('Y-m-d')),
+                'outstanding' => $ledger->outstanding(),
+                'waiting' => ConsultationResource::collection(
+                    Consultation::query()
+                        ->owed()
+                        ->withBilling()
+                        ->with(['client', 'service'])
+                        ->orderBy('starts_at')
+                        ->orderBy('id')
+                        ->limit(self::WAITING)
+                        ->get(),
+                )->resolve($request),
+            ],
             'counts' => [
                 'appointments_today' => $todays->count(),
                 'appointments_upcoming' => $upcoming->count(),

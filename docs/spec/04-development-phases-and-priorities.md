@@ -206,6 +206,8 @@ Izvođenje (dogovoreno 25. 9. 2026): tri dela sa commit-om, zelenim CI-jem i ta�
 
 > Status 7a: završeno 25. 9. 2026. Tranziti prema natalnoj karti klijenta i povezane osobe za izabrani trenutak (tab „Transits“, dvostruki točak, kontakti po orbu sa datumima tačnosti sporih planeta, tranzitne pozicije u natalnim kućama), zaseban skup orba za tranzite po workspace-u, Hiron u karti i tranzitima (proveren prema JPL Horizons), tranziti iz detalja termina i sa konsultacije, i kartica „Before your next consultations“ na dashboardu. Tranziti se računaju po zahtevu, jednim pozivom engine-a za godinu pre i posle trenutka, i ne keširaju se.
 
+> Status 7b: završeno 25. 9. 2026. Cena na konsultaciji (iz usluge, izmenljiva, „bez naplate“), uplate i povraćaji kao primljen novac, avans za termin koji prelazi na konsultaciju zabeleženu iz njega, izveden status naplate i dugovanje (duguju održane konsultacije i nedolasci), strana Payments sa pokazateljima, filterima, zbirovima po valuti i CSV izvozom, kartica Billing na konsultaciji, uplate na vremenskoj liniji, na profilu klijenta i na dashboardu. Model iz dokumenta 05 (status po uplati) promenjen je uz zapis u changelog-u.
+
 ## Faza 8 — zatvorena beta
 
 - nekoliko testnih astrologa;

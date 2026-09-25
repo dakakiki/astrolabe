@@ -11,13 +11,17 @@ import NatalChart from '@/components/NatalChart.vue';
 import NotesPanel from '@/components/NotesPanel.vue';
 import TasksPanel from '@/components/TasksPanel.vue';
 import VisibilityBadge from '@/components/VisibilityBadge.vue';
+import BillingCard from '@/components/BillingCard.vue';
 import { useForm } from '@/composables/useForm';
 import { timeZoneOptions, useLabels } from '@/composables/useLabels';
+import { useMoney } from '@/composables/useMoney';
 import { formatDateTime, localInputNow } from '@/lib/datetime';
 import http from '@/lib/http';
+import { fromMinorUnits, toMinorUnits } from '@/lib/money';
 import { serviceColorClass } from '@/lib/services';
 import { transitsRoute } from '@/lib/transits';
 import { useAuthStore } from '@/stores/auth';
+import { useReferenceStore } from '@/stores/reference';
 import { useToastStore } from '@/stores/toast';
 
 const RichTextEditor = defineAsyncComponent(() => import('@/components/RichTextEditor.vue'));
@@ -34,6 +38,8 @@ const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
 const toast = useToastStore();
+const money = useMoney();
+const reference = useReferenceStore();
 
 const STATUSES = ['draft', 'scheduled', 'completed', 'cancelled', 'no_show'];
 
@@ -61,8 +67,13 @@ const blank = () => ({
     client_summary: '',
     next_steps: '',
     method_ids: [],
+    // The fee as typed ("120.50"), its currency, and "no charge" (a fee of 0).
+    fee_amount: '',
+    fee_currency: auth.workspace?.default_currency ?? 'EUR',
+    no_charge: false,
 });
 const form = useForm(blank());
+const feeError = ref(null);
 
 // Active services, plus an inactive one the consultation already has.
 const serviceOptions = computed(() =>
@@ -98,8 +109,28 @@ function fill(data) {
         client_summary: data.client_summary ?? '',
         next_steps: data.next_steps ?? '',
         method_ids: (data.methods ?? []).map((method) => method.id),
+        fee_amount: data.fee?.amount ? fromMinorUnits(data.fee.amount, money.decimals(data.fee.currency)) : '',
+        fee_currency: data.fee?.currency ?? auth.workspace?.default_currency ?? 'EUR',
+        no_charge: data.fee?.amount === 0,
     });
+    feeError.value = null;
     saved.value = snapshot();
+}
+
+// The fee as the API takes it: money, 0 for no charge, null when left empty; NaN when it is not an amount.
+function feePayload(data) {
+    if (data.no_charge) return { amount: 0, currency: data.fee_currency };
+
+    const amount = toMinorUnits(data.fee_amount, money.decimals(data.fee_currency));
+    if (amount === null) return null;
+
+    return Number.isNaN(amount) ? NaN : { amount, currency: data.fee_currency };
+}
+
+// Payments recorded or removed on the billing card: the billing figures change, the form stays as it is.
+async function reloadBilling() {
+    const { data } = await http.get(`/consultations/${id.value}`);
+    consultation.value = { ...consultation.value, billing: data.data.billing, payments: data.data.payments };
 }
 
 async function load(consultationId) {
@@ -135,9 +166,11 @@ async function load(consultationId) {
 }
 
 onMounted(async () => {
+    // Reference data first: the fee is shown with its currency's decimals.
     const [methodResponse, serviceResponse] = await Promise.all([
         http.get('/astrology-methods'),
         http.get('/services'),
+        reference.load(),
     ]);
     methods.value = methodResponse.data.data;
     services.value = serviceResponse.data.data;
@@ -187,6 +220,15 @@ function chooseService(previousId) {
     if (!form.data.duration_minutes || form.data.duration_minutes === previous?.duration_minutes) {
         form.data.duration_minutes = selectedService.value.duration_minutes;
     }
+    // The fee follows the service, unless it was typed in.
+    const price = selectedService.value.price;
+    const previousFee = previous?.price
+        ? fromMinorUnits(previous.price.amount, money.decimals(previous.price.currency))
+        : '';
+    if (price && !form.data.no_charge && (!form.data.fee_amount || form.data.fee_amount === previousFee)) {
+        form.data.fee_amount = fromMinorUnits(price.amount, money.decimals(price.currency));
+        form.data.fee_currency = price.currency;
+    }
     if (!form.data.method_ids.length) {
         form.data.method_ids = (selectedService.value.methods ?? []).map((method) => method.id);
     }
@@ -200,14 +242,20 @@ function toggleMethod(methodId, checked) {
 
 async function save() {
     const creating = !id.value;
+    const fee = feePayload(form.data);
+    feeError.value = Number.isNaN(fee) ? t('consultations.form.feeInvalid') : null;
+    if (feeError.value) return;
 
     try {
         const response = await form.submit((data) => {
             const payload = {
                 ...data,
+                fee,
                 duration_minutes: data.duration_minutes || null,
                 starts_at: data.starts_at || null,
             };
+            // The fee travels as money; its form fields stay here.
+            for (const field of ['fee_amount', 'fee_currency', 'no_charge']) delete payload[field];
 
             return creating
                 ? http.post('/consultations', {
@@ -478,6 +526,47 @@ const otherZone = computed(() => {
                             </FormField>
                         </div>
 
+                        <div class="row items-start">
+                            <FormField
+                                v-slot="{ id: fieldId, aria }"
+                                :label="t('consultations.form.fee')"
+                                :error="feeError || form.errors.value['fee.amount'] || form.errors.value.fee"
+                                :hint="t('consultations.form.feeHint')"
+                            >
+                                <input
+                                    :id="fieldId"
+                                    v-model="form.data.fee_amount"
+                                    v-bind="aria"
+                                    class="input font-mono"
+                                    inputmode="decimal"
+                                    autocomplete="off"
+                                    :disabled="form.data.no_charge"
+                                />
+                            </FormField>
+                            <FormField
+                                v-slot="{ id: fieldId, aria }"
+                                :label="t('consultations.form.feeCurrency')"
+                                :error="form.errors.value['fee.currency']"
+                            >
+                                <select :id="fieldId" v-model="form.data.fee_currency" v-bind="aria" class="input">
+                                    <option
+                                        v-for="code in reference.data?.currencies ?? [form.data.fee_currency]"
+                                        :key="code"
+                                        :value="code"
+                                    >
+                                        {{ code }}
+                                    </option>
+                                </select>
+                            </FormField>
+                            <div class="field">
+                                <span class="label" aria-hidden="true">&nbsp;</span>
+                                <label class="flex h-10 items-center gap-2 text-sm">
+                                    <input v-model="form.data.no_charge" type="checkbox" />
+                                    {{ t('consultations.form.noCharge') }}
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="field">
                             <span class="label">{{ t('consultations.form.methods') }}</span>
                             <div class="flex flex-wrap items-center gap-2">
@@ -626,6 +715,8 @@ const otherZone = computed(() => {
                             </div>
                         </div>
                     </section>
+
+                    <BillingCard :consultation="consultation" @changed="reloadBilling" />
 
                     <TasksPanel :client="client" :consultation="{ id, title: heading }" />
 

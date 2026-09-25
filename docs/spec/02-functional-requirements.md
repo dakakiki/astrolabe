@@ -218,7 +218,7 @@ Vremenska linija se čita iz projekcione tabele `activity_events` (dokument 05),
 
 Filteri u interfejsu: `all`, `consultations`, `notes`, `files`, `charts`; API prima i `profile`. `payments` i `tasks` se dodaju sa svojim fazama.
 
-Od Faze 6b postoji i filter `appointments` (termini, pomeranja i otkazivanja), a od Faze 6c `tasks`: zadatak klijenta ima stavku u trenutku dodavanja (naslov, rok, prioritet, a kad je gotov i oznaka „završen“) i, dok je završen, drugu stavku u trenutku završetka. Ponovo otvoren zadatak gubi stavku završetka; obrisan zadatak nestaje sa vremenske linije. Filter `payments` dolazi sa uplatama (Faza 7).
+Od Faze 6b postoji i filter `appointments` (termini, pomeranja i otkazivanja), a od Faze 6c `tasks`: zadatak klijenta ima stavku u trenutku dodavanja (naslov, rok, prioritet, a kad je gotov i oznaka „završen“) i, dok je završen, drugu stavku u trenutku završetka. Ponovo otvoren zadatak gubi stavku završetka; obrisan zadatak nestaje sa vremenske linije. Od Faze 7b postoji i filter `payments`: uplata, avans ili povraćaj na dan kada je novac stigao (samo datum, bez vremena), sa iznosom i referencom; vodi na konsultaciju ili termin za koji je plaćeno. Obrisana uplata nestaje sa vremenske linije.
 
 ## Beleške
 
@@ -337,6 +337,21 @@ Početna verzija evidentira, ali ne mora sama procesirati plaćanje.
 - status: `pending`, `partially_paid`, `paid`, `refunded`, `cancelled`;
 - referenca i napomena.
 
+### Implementirano u Fazi 7b
+
+Model je promenjen (odluka korisnika, 25. 9. 2026): status se ne vodi na uplati, nego se izvodi za konsultaciju.
+
+- **Cena konsultacije** („Fee“): nova konsultacija preuzima cenu usluge; menja se na samoj konsultaciji; „No charge“ je cena 0; bez usluge i bez unosa cena nije postavljena.
+- **Uplata** je primljen novac: klijent, iznos i valuta, dan prijema (ne u budućnosti, po kalendaru astrologa), način (bankovni transfer, kartica, gotovina, PayPal, drugo), referenca, napomena. **Povraćaj** je ista stavka sa oznakom „Refund“ i ne sme biti veći od onoga što je primljeno za istu konsultaciju ili termin. Uplata može biti za konsultaciju, za termin (avans) ili samo od klijenta.
+- **Status** konsultacije se izvodi iz cene i uplata: bez naplate, neplaćeno, delimično plaćeno, plaćeno, vraćeno (sve primljeno je vraćeno). Dugovanje = cena − (uplaćeno − vraćeno).
+- **Duguje se** samo za održanu konsultaciju ili kada klijent nije došao (`completed`, `no_show`); zakazana, nacrt i otkazana imaju status, ali se ne računaju u dugovanja.
+- **Avans:** uplata za termin pre konsultacije; kada se iz termina zabeleži konsultacija, avans prelazi na nju. Uplata za termin koji već ima konsultaciju odmah pripada toj konsultaciji. Usluga sa oznakom „potreban avans“ u detalju termina to kaže dok avans nije zabeležen.
+- **Valute se ne mešaju ni ne preračunavaju:** uplate jedne konsultacije su u valuti njene cene (bez cene — u valuti prve uplate); cena ne može preći u drugu valutu ako uplate postoje; zbirovi se vode po valuti, valuta prakse prva.
+- **Strana Payments** (Business → Payments): primljeno ovog meseca, prošlog meseca i ove godine (uplate minus povraćaji) i ukupno dugovanje; tab „Received“ sa filterima (period, način, vrsta, pretraga po klijentu, referenci i napomeni), zbirom po valuti i izvozom u CSV (povraćaji kao negativni iznosi; tekst koji bi tabela protumačila kao formulu se neutrališe); tab „Waiting on payment“ — konsultacije koje duguju, najstarije prve; beleženje, izmena i uklanjanje uplate.
+- **Konsultacija:** polje cene u detaljima i kartica „Billing“ (cena, primljeno, vraćeno, preostalo, uplate sa izmenom i uklanjanjem, beleženje nove uplate sa predloženim preostalim iznosom). Lista konsultacija ima kolonu statusa naplate.
+- **Profil klijenta:** u pregledu „Received“ (ukupno) i „Outstanding“ (sa brojem konsultacija), sa vezom na njegove uplate.
+- Svi članovi prakse vide i beleže uplate (kao konsultacije); finije dozvole dolaze sa timovima. Klijent ih ne vidi (dokument 09).
+
 Posle MVP-a: avansi, računi, paketi konsultacija i automatske potvrde. Naplata SaaS pretplate ide preko Paddle-a i opisana je u dokumentu 07; ovde je reč isključivo o evidenciji naplate koju astrolog vodi prema svojim klijentima.
 
 ## Zadaci i follow-up
@@ -382,8 +397,12 @@ Dashboard je dan astrologa i nedelja pred njim, u njegovoj zoni, jednim zahtevom
 - „Needs attention“: klijenti čija natalna karta ne može da se izračuna (nema datuma, mesta ili zone, ili vremena kada ono nije označeno kao nepoznato), sa vezom na dopunu podataka;
 - nov workspace (bez klijenata) i dalje vidi korake podešavanja.
 
-Termini i zadaci na dashboardu su lični (dodeljeni onome ko gleda; zadaci i nedodeljeni), a klijenti i fajlovi su cele prakse. Neplaćene konsultacije i prihod dolaze sa uplatama (Faza 7b).
+Termini i zadaci na dashboardu su lični (dodeljeni onome ko gleda; zadaci i nedodeljeni), a klijenti i fajlovi su cele prakse. Neplaćene konsultacije i prihod dolaze sa uplatama (Faza 7b, ispod).
 
 ### Implementirano u Fazi 7a
 
 „Before your next consultations“: klijenti sa zakazanim terminom u narednih 7 dana (najviše šest, redom termina) i najviše tri najbliža spora tranzita za svakog — Jupiter do Pluton u konjunkciji, kvadratu, trigonu ili opoziciji prema Suncu, Mesecu, Merkuru, Veneri, Marsu, ASC ili MC, sa orbom do 1°, izračunato za tekući sat. Uz tranzit stoji orb i najbliži dan kada je tačan, a dugme „Transits“ otvara tab tranzita klijenta u vreme termina. Klijenti bez potpunih podataka rođenja se preskaču; ako engine nije dostupan, kartica to kaže, a ostatak dashboarda radi. Sve je deo istog zahteva `GET /dashboard`, jednim pozivom engine-a za sve klijente.
+
+### Implementirano u Fazi 7b
+
+Dva nova pokazatelja — „Received in {mesec}“ (uplate minus povraćaji od početka meseca, po valuti) i „Outstanding“ (dugovanje i broj konsultacija) — i kartica „Waiting on payment“: do šest konsultacija koje duguju, najstarije prve, sa klijentom, statusom naplate i preostalim iznosom. Novac je cele prakse, kao klijenti i fajlovi.

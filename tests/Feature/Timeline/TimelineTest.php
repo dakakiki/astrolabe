@@ -111,7 +111,7 @@ class TimelineTest extends TestCase
             ->assertJsonCount(2, 'data')
             ->assertJsonPath('meta.total', 4);
 
-        $this->actingAs($this->user)->getJson("/api/v1/clients/{$client}/timeline?type=payments")
+        $this->actingAs($this->user)->getJson("/api/v1/clients/{$client}/timeline?type=invoices")
             ->assertUnprocessable();
     }
 

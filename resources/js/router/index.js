@@ -131,6 +131,12 @@ const routes = [
         meta: { verified: true },
     },
     {
+        path: '/payments',
+        name: 'payments.index',
+        component: () => import('@/pages/payments/PaymentsPage.vue'),
+        meta: { verified: true },
+    },
+    {
         path: '/settings',
         component: () => import('@/pages/settings/SettingsPage.vue'),
         meta: { verified: true },

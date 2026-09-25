@@ -9,6 +9,8 @@ use App\Enums\ClientStatus;
 use App\Enums\ConsultationStatus;
 use App\Enums\HouseSystem;
 use App\Enums\LocationType;
+use App\Enums\PaymentKind;
+use App\Enums\PaymentMethod;
 use App\Enums\RelationshipType;
 use App\Enums\ServiceColor;
 use App\Enums\TimeAccuracy;
@@ -72,6 +74,11 @@ class ReferenceDataController extends Controller
                     'max_duration' => SaveServiceRequest::MAX_DURATION,
                 ],
                 'relationship_types' => array_column(RelationshipType::cases(), 'value'),
+                'payments' => [
+                    'kinds' => array_column(PaymentKind::cases(), 'value'),
+                    'methods' => array_column(PaymentMethod::cases(), 'value'),
+                    'max_amount' => SaveServiceRequest::MAX_AMOUNT,
+                ],
                 'attachments' => [
                     'max_size' => UploadLimit::bytes(),
                     'extensions' => AllowedFileTypes::extensions(),

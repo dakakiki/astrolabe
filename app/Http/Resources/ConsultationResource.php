@@ -53,6 +53,16 @@ class ConsultationResource extends JsonResource
                     'is_system' => $method->isSystem(),
                 ]
             )->values()),
+            'fee' => $this->fee(),
+            // Lists carry it when they asked for it (withBilling); a single consultation always does.
+            'billing' => $this->when(
+                $this->withContent || array_key_exists('billing_paid', $this->resource->getAttributes()),
+                fn () => $this->billing(),
+            ),
+            'payments' => $this->when(
+                $this->withContent && $this->relationLoaded('payments'),
+                fn () => PaymentResource::collection($this->payments)->resolve(),
+            ),
             'has_chart' => $this->chart_calculation_id !== null,
             'internal_notes' => $this->when($this->withContent, $this->internal_notes),
             'client_summary' => $this->when($this->withContent, $this->client_summary),

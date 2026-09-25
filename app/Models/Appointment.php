@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -82,6 +83,17 @@ class Appointment extends Model
     public function consultation(): HasOne
     {
         return $this->hasOne(Consultation::class);
+    }
+
+    /**
+     * Money paid for this appointment: deposits before it, which also belong
+     * to the consultation once it is recorded (Phase 7b).
+     *
+     * @return HasMany<Payment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class)->orderBy('paid_on')->orderBy('id');
     }
 
     public function durationMinutes(): int

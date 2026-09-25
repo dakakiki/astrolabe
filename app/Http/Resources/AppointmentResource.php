@@ -36,7 +36,17 @@ class AppointmentResource extends JsonResource
                 'name' => $this->service->name,
                 'color' => $this->service->color?->value,
                 'is_active' => $this->service->is_active,
+                'price' => $this->service->price_amount === null ? null : [
+                    'amount' => $this->service->price_amount,
+                    'currency' => $this->service->currency,
+                ],
+                'requires_deposit' => $this->service->requires_deposit,
             ] : null),
+            // Deposits and other money paid for it: with a single appointment only.
+            'payments' => $this->when(
+                $this->withNotes && $this->relationLoaded('payments'),
+                fn () => PaymentResource::collection($this->payments)->resolve(),
+            ),
             'assigned_user' => $this->whenLoaded('assignedUser', fn () => $this->assignedUser ? [
                 'id' => $this->assignedUser->id,
                 'name' => $this->assignedUser->name,

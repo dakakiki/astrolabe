@@ -1131,6 +1131,11 @@
         border-color: var(--danger);
     }
 
+    .tl-item.t-payment::before {
+        border-color: var(--ok);
+        background: var(--ok-bg);
+    }
+
     /* ---------------- Tasks ---------------- */
 
     .task-row {

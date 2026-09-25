@@ -9,6 +9,8 @@
  * - to: where the entry leads — a route, or a tab of the client profile
  * - moved / wasAt: moments (UTC) the component formats in the viewer's zone
  * - task: the task's deadline, priority and status, worded by the component
+ * - money / day: a payment's amount (the component formats it into the title
+ *   as `amount`) and the day it arrived, shown instead of a time
  */
 export function describeEvent(event) {
     const meta = event.metadata ?? {};
@@ -60,6 +62,26 @@ export function describeEvent(event) {
                 title: ['timeline.taskCompleted', { title: meta.title ?? event.summary ?? '' }],
                 to: { tab: 'tasks' },
             };
+        case 'payment': {
+            // Paid for an appointment and not yet for its consultation: a deposit.
+            const deposit = meta.appointment_id && !meta.consultation_id;
+
+            return {
+                tone: 'payment',
+                title: [
+                    meta.kind === 'refund' ? 'timeline.refund' : deposit ? 'timeline.deposit' : 'timeline.payment',
+                    {},
+                ],
+                money: { amount: meta.amount, currency: meta.currency },
+                day: meta.paid_on,
+                body: event.summary ?? null,
+                to: meta.consultation_id
+                    ? { name: 'consultations.show', params: { id: meta.consultation_id } }
+                    : meta.appointment_id
+                      ? appointmentRoute(meta.appointment_id)
+                      : null,
+            };
+        }
         case 'note':
             return {
                 tone: 'note',
@@ -106,8 +128,17 @@ export function describeEvent(event) {
     }
 }
 
-/** Filters offered above the timeline (docs/spec/02); payments arrive with their phase. */
-export const TIMELINE_FILTERS = ['all', 'appointments', 'consultations', 'notes', 'files', 'tasks', 'charts'];
+/** Filters offered above the timeline (docs/spec/02). */
+export const TIMELINE_FILTERS = [
+    'all',
+    'appointments',
+    'consultations',
+    'notes',
+    'files',
+    'payments',
+    'tasks',
+    'charts',
+];
 
 /** An appointment opens in the calendar, on its own day, with its details. */
 function appointmentRoute(id) {

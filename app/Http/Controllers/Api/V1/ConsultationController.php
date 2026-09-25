@@ -31,6 +31,8 @@ class ConsultationController extends Controller
             'client_id' => ['nullable', 'integer'],
             'service_id' => ['nullable', 'integer'],
             'status' => ['nullable', Rule::enum(ConsultationStatus::class)],
+            // "owed": held or missed, with part of the fee still to come.
+            'billing' => ['nullable', Rule::in(['owed'])],
             'search' => ['nullable', 'string', 'max:100'],
             'from' => ['nullable', 'date_format:Y-m-d'],
             'to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:from'],
@@ -42,6 +44,8 @@ class ConsultationController extends Controller
 
         $consultations = Consultation::query()
             ->with(['client', 'service', 'astrologyMethods'])
+            ->withBilling()
+            ->when($filters['billing'] ?? null, fn (Builder $query) => $query->owed())
             ->when($filters['client_id'] ?? null, fn (Builder $query, int $id) => $query->where('client_id', $id))
             ->when($filters['service_id'] ?? null, fn (Builder $query, int $id) => $query->where('service_id', $id))
             ->when($filters['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
@@ -68,7 +72,7 @@ class ConsultationController extends Controller
     {
         Gate::authorize('view', $consultation);
 
-        return ConsultationResource::make($consultation->load(['client', 'service', 'appointment', 'astrologyMethods', 'chart']))->withContent();
+        return ConsultationResource::make($consultation->load(Consultation::DETAIL_RELATIONS))->withContent();
     }
 
     public function update(SaveConsultationRequest $request, Consultation $consultation, SaveConsultation $save): ConsultationResource

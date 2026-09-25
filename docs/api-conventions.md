@@ -58,7 +58,7 @@ Linkovi u emailovima vode na SPA stranice (`/verify-email/...`, `/reset-password
 | PUT | `/clients/{id}/birth-details` | samo podaci rođenja |
 | POST / DELETE | `/clients/{id}/archive` | arhiviranje / vraćanje iz arhive |
 | GET | `/clients/{id}/chart` | natalna karta (računa se pri prvom zahtevu, zatim iz keša); `status: incomplete` sa `missing` kada podaci rođenja nisu potpuni. `?house_system=` crta kartu u drugom sistemu kuća, samo za taj prikaz |
-| GET | `/clients/{id}/timeline` | vremenska linija, najnovije prvo; `type` (`all`, `appointments`, `consultations`, `notes`, `files`, `tasks`, `charts`, `profile`), `page`, `per_page` (do 50) |
+| GET | `/clients/{id}/timeline` | vremenska linija, najnovije prvo; `type` (`all`, `appointments`, `consultations`, `notes`, `files`, `payments`, `tasks`, `charts`, `profile`), `page`, `per_page` (do 50) |
 | GET | `/tags` | oznake workspace-a sa brojem klijenata |
 | GET | `/places?q=` | autocomplete mesta rođenja (lokalni GeoNames); mesta u zemlji prakse prva |
 | GET | `/places/nearest?latitude=&longitude=` | najbliže mesto, za predlog zone uz ručne koordinate |
@@ -131,7 +131,7 @@ Pravila:
 - `due_state` postavlja otvoren zadatak na kalendar korisnika koji gleda: `overdue` (rok prošao), `today` (ističe pre kraja njegovog dana), `upcoming`, ili `null` (završen ili bez roka).
 - Zadatak u odgovoru nosi i `client` (`id`, `full_name`, `status`), `consultation` (`id`, `title` — naslov ili usluga, `starts_at`, `status`), `assigned_user`, `created_by`, `completed_at`.
 - Vremenska linija klijenta ima i `type=tasks`: `task` u trenutku dodavanja (`metadata`: `title`, `status`, `priority`, `due_date`, `due_time`, `due_at`, `timezone`, `consultation_id`) i `task_completed` u trenutku završetka, dok je zadatak završen.
-- Pojedinačan klijent (`GET /clients/{id}`) u `stats` nosi i `open_tasks`.
+- Pojedinačan klijent (`GET /clients/{id}`) u `stats` nosi i `open_tasks`, a od Faze 7b `paid` (primljeno minus vraćeno, lista novca po valuti), `outstanding` (dugovanje, lista novca) i `owed_consultations`.
 
 `/dashboard` vraća `today` (dan u zoni korisnika), `timezone`, `appointments.today` (današnji termini korisnika bez otkazanih) i `appointments.upcoming` (zakazani u narednih 7 dana, najviše 8), `tasks.overdue` / `tasks.today` / `tasks.upcoming` (zadaci korisnika i nedodeljeni, rok u narednih 7 dana; najviše 8 po grupi), `recent_clients` (6 poslednje aktivnih, bez arhiviranih), `recent_files` (6 najnovijih koje korisnik sme da vidi, sa `client`), `incomplete_birth_data` (do 5 klijenata čija karta ne može da se izračuna, sa `birth`) i `counts` (`appointments_today`, `appointments_upcoming`, `tasks_open`, `tasks_overdue`, `tasks_today`, `clients_active`, `clients_new_this_month`, `clients_total`, `incomplete_birth_data`).
 
@@ -146,13 +146,34 @@ Odgovor (`status: ready`): `timezone` (zona u kojoj je `at` shvaćen), `moment` 
 
 `/dashboard` od Faze 7a vraća i `transits`: `moment` (tekući sat, UTC) i `clients` — do 6 klijenata sa zakazanim terminom korisnika u narednih 7 dana, redom termina, svaki sa `client` (`id`, `full_name`), `appointment` (`id`, `starts_at`) i do 3 `contacts` (isti oblik kao gore): Jupiter–Pluton, konjunkcija / kvadrat / trigon / opozicija prema Suncu, Mesecu, Merkuru, Veneri, Marsu, ASC ili MC, orb do 1°. Klijenti bez kontakata i bez potpunih podataka rođenja se izostavljaju; `transits: null` kada engine nije dostupan.
 
+### Uplate (Faza 7b)
+
+| Metoda | Putanja | Namena |
+|---|---|---|
+| GET | `/payments` | uplate i povraćaji, najnoviji prvi; `client_id`, `consultation_id`, `appointment_id`, `kind` (`payment`, `refund`), `method`, `currency`, `from` / `to` (dani, `YYYY-MM-DD`), `search` (klijent, referenca, napomena), `page`, `per_page` (do 100). Uz listu ide `totals`: zbir filtriranih po valuti, povraćaji oduzeti |
+| GET | `/payments/export` | isti filteri, CSV fajl (UTF-8 sa BOM): datum, klijent, vrsta, iznos (decimalno, povraćaj negativan), valuta, način, referenca, za šta, napomena |
+| GET | `/payments/summary` | `today`, `this_month` / `last_month` / `this_year` (`from`, `to`, `received` — lista novca) i `outstanding` (`total` — lista novca, `count` — broj konsultacija), po kalendaru korisnika |
+| POST | `/payments` | nova: `client_id` (obavezno bez konsultacije i termina), `consultation_id`, `appointment_id` (avans), `kind` (podrazumevano `payment`), `amount` (ceo broj > 0, najmanja jedinica), `currency`, `paid_on` (`YYYY-MM-DD`, ne posle današnjeg dana korisnika), `method` (`bank_transfer`, `card`, `cash`, `paypal`, `other`), `reference` (do 100), `notes` (do 2000). Zaglavlje `Idempotency-Key` kao kod termina |
+| GET / PATCH / DELETE | `/payments/{id}` | jedna uplata; PATCH menja samo poslata polja; DELETE je soft delete (nestaje iz zbirova i sa vremenske linije) |
+
+Pravila:
+
+- Klijent uplate za konsultaciju ili termin je njihov klijent; drugi klijent je 422. Uplata za termin koji već ima konsultaciju pripada i toj konsultaciji; avans za termin bez nje dobija `consultation_id` kada se iz termina zabeleži konsultacija.
+- Uplate jedne konsultacije su u jednoj valuti: valuti cene, a bez cene — prve uplate (422 na `currency`). Cena ne može preći u drugu valutu dok uplate postoje (422 na `fee.currency`). Povraćaj nije veći od primljenog za istu konsultaciju ili termin (422 na `amount`).
+- Uplata u odgovoru: `kind`, `amount`, `currency`, `paid_on`, `method`, `reference`, `notes`, `client`, `consultation` (`id`, `title` — naslov ili usluga, `starts_at`, `status`), `appointment` (`id`, `starts_at`, `status`), `created_by`.
+- Konsultacija nosi `fee` (novac ili `null`) i `billing`: `status` (`no_charge`, `unpaid`, `partially_paid`, `paid`, `refunded` ili `null` bez cene i bez novca), `paid` (primljeno minus vraćeno), `refunded`, `balance` (cena − primljeno; negativno kad je plaćeno više; `null` bez cene) i `owed` (duguje se sada: održana ili propuštena, sa pozitivnim ostatkom).
+- Pojedinačan termin nosi `payments` (uplate za njega); `service` u terminu nosi i `price` i `requires_deposit`.
+- Vremenska linija: `payment` na dan prijema (`metadata`: `kind`, `amount`, `currency`, `paid_on`, `method`, `consultation_id`, `appointment_id`; `summary` je referenca).
+- `/dashboard` nosi i `payments`: `received_this_month` (lista novca), `outstanding` (`total`, `count`) i `waiting` (do 6 konsultacija koje duguju, najstarije prve, sa `client`, `service`, `fee`, `billing`).
+- `/reference-data` nosi `payments` (`kinds`, `methods`, `max_amount`).
+
 ### Konsultacije, beleške i fajlovi
 
 | Metoda | Putanja | Namena |
 |---|---|---|
-| GET | `/consultations` | lista; `client_id`, `service_id`, `status`, `search` (naslov, usluga, teme, ime klijenta), `from` / `to` (`YYYY-MM-DD`, dani u zoni korisnika), `sort` (`-starts_at`, `starts_at`), `page`, `per_page` |
-| POST | `/consultations` | nova; `client_id` (obavezno, kasnije se ne menja), `service_id` (aktivna usluga; neaktivna ostaje samo ako je već na konsultaciji; bez `duration_minutes` trajanje se uzima iz usluge), `title`, `status` (podrazumevano `draft`), `starts_at` (`YYYY-MM-DDTHH:MM`, lokalno vreme), `timezone` (podrazumevano zona korisnika), `duration_minutes`, `topics`, `internal_notes`, `client_summary`, `next_steps`, `method_ids` |
-| GET / PATCH / DELETE | `/consultations/{id}` | jedna konsultacija sa internim beleškama, sažetkom, zaključcima i snimkom karte; PATCH menja samo poslata polja; DELETE je soft delete zajedno sa prilozima |
+| GET | `/consultations` | lista, svaka sa `fee` i `billing`; `client_id`, `service_id`, `status`, `billing` (`owed` — održane ili propuštene sa neplaćenim delom cene), `search` (naslov, usluga, teme, ime klijenta), `from` / `to` (`YYYY-MM-DD`, dani u zoni korisnika), `sort` (`-starts_at`, `starts_at`), `page`, `per_page` |
+| POST | `/consultations` | nova; `client_id` (obavezno, kasnije se ne menja), `service_id` (aktivna usluga; neaktivna ostaje samo ako je već na konsultaciji; bez `duration_minutes` trajanje se uzima iz usluge), `title`, `status` (podrazumevano `draft`), `starts_at` (`YYYY-MM-DDTHH:MM`, lokalno vreme), `timezone` (podrazumevano zona korisnika), `duration_minutes`, `fee` (novac `{amount, currency}`; 0 = bez naplate, `null` = bez cene; izostavljeno kod nove — cena usluge), `topics`, `internal_notes`, `client_summary`, `next_steps`, `method_ids` |
+| GET / PATCH / DELETE | `/consultations/{id}` | jedna konsultacija sa internim beleškama, sažetkom, zaključcima, snimkom karte i uplatama (`payments`); PATCH menja samo poslata polja; DELETE je soft delete zajedno sa prilozima |
 | POST / DELETE | `/consultations/{id}/chart` | priloži trenutnu kartu kao snimak (opciono `house_system`; inače sistem workspace-a) / ukloni snimak (sam proračun ostaje); 422 sa `missing` kada podaci rođenja nisu potpuni |
 | GET | `/notes` | beleške klijenta (`client_id`) ili konsultacije (`consultation_id`), najnovije prvo; tuđe privatne se ne vraćaju |
 | POST / GET / PATCH / DELETE | `/notes`, `/notes/{id}` | `client_id` (samo pri kreiranju), `consultation_id` (konsultacija istog klijenta), `title`, `content` (obavezno), `visibility` (podrazumevano `private`) |

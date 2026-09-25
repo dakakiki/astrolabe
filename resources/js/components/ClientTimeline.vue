@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 
 import { useLabels } from '@/composables/useLabels';
+import { useMoney } from '@/composables/useMoney';
 import { formatDateTime, isFuture } from '@/lib/datetime';
 import { formatDate, formatTime } from '@/lib/format';
 import http from '@/lib/http';
@@ -19,6 +20,7 @@ const emit = defineEmits(['open-tab']);
 
 const { t, te, locale } = useI18n();
 const labels = useLabels();
+const money = useMoney();
 const auth = useAuthStore();
 
 const filter = ref('all');
@@ -51,6 +53,10 @@ onMounted(() => load());
 defineExpose({ reload: () => load() });
 
 const when = (event) => formatDateTime(event.occurred_at, locale.value, auth.user?.timezone);
+
+// A payment names its amount in the title; everything else passes its own parameters.
+const titleOf = (entry) =>
+    t(entry.title[0], entry.money ? { ...entry.title[1], amount: money.format(entry.money) } : entry.title[1]);
 const moment = (isoTimestamp) => formatDateTime(isoTimestamp, locale.value, auth.user?.timezone);
 
 function fieldList(fields) {
@@ -105,9 +111,9 @@ function taskLine(task) {
             <ol v-if="entries.length" class="timeline" :aria-busy="loading">
                 <li v-for="entry in entries" :key="entry.event.id" class="tl-item" :class="`t-${entry.tone}`">
                     <div class="tl-when">
-                        {{ when(entry.event) }}
+                        {{ entry.day ? formatDate(entry.day, locale, 'medium') : when(entry.event) }}
                         <span
-                            v-if="isFuture(entry.event.occurred_at) && !entry.cancelled"
+                            v-if="isFuture(entry.event.occurred_at) && !entry.cancelled && !entry.day"
                             class="badge b-info b-plain ml-1 normal-case"
                         >
                             {{ t('timeline.upcoming') }}
@@ -118,16 +124,16 @@ function taskLine(task) {
                     </div>
                     <div class="tl-title">
                         <RouterLink v-if="entry.to?.name" :to="entry.to" class="hover:underline">
-                            {{ t(...entry.title) }}<template v-if="entry.titled"> · {{ entry.event.summary }}</template>
+                            {{ titleOf(entry) }}<template v-if="entry.titled"> · {{ entry.event.summary }}</template>
                         </RouterLink>
                         <a
                             v-else-if="entry.to?.tab"
                             href="#"
                             class="hover:underline"
                             @click.prevent="emit('open-tab', entry.to.tab)"
-                            >{{ t(...entry.title) }}</a
+                            >{{ titleOf(entry) }}</a
                         >
-                        <span v-else>{{ t(...entry.title) }}</span>
+                        <span v-else>{{ titleOf(entry) }}</span>
                     </div>
                     <div v-if="entry.body" class="tl-body line-clamp-3 whitespace-pre-line">{{ entry.body }}</div>
                     <div v-if="entry.fields?.length" class="tl-body">

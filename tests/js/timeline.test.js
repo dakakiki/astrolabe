@@ -80,7 +80,37 @@ describe('describeEvent', () => {
         ]);
     });
 
+    it('shows a payment on its day, with its amount, leading to what it paid for', () => {
+        const paid = describeEvent(
+            event(
+                'payment',
+                { kind: 'payment', amount: 5000, currency: 'EUR', paid_on: '2026-10-05', consultation_id: 4 },
+                { summary: 'INV-7' },
+            ),
+        );
+
+        expect(paid).toMatchObject({
+            tone: 'payment',
+            title: ['timeline.payment', {}],
+            money: { amount: 5000, currency: 'EUR' },
+            day: '2026-10-05',
+            body: 'INV-7',
+            to: { name: 'consultations.show', params: { id: 4 } },
+        });
+    });
+
+    it('tells a deposit and a refund apart', () => {
+        const deposit = describeEvent(event('payment', { kind: 'payment', appointment_id: 9, consultation_id: null }));
+        expect(deposit.title).toEqual(['timeline.deposit', {}]);
+        expect(deposit.to).toEqual({ name: 'calendar', query: { appointment: 9 } });
+
+        const refund = describeEvent(event('payment', { kind: 'refund', appointment_id: 9, consultation_id: 4 }));
+        expect(refund.title).toEqual(['timeline.refund', {}]);
+
+        expect(describeEvent(event('payment', { kind: 'payment' })).to).toBeNull();
+    });
+
     it('never fails on an entry type it does not know', () => {
-        expect(describeEvent(event('payment')).title).toEqual(['timeline.unknown', {}]);
+        expect(describeEvent(event('invoice')).title).toEqual(['timeline.unknown', {}]);
     });
 });

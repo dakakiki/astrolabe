@@ -9,6 +9,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\SaveClientRequest;
 use App\Http\Resources\ClientResource;
 use App\Models\Client;
+use App\Models\Consultation;
+use App\Models\Payment;
+use App\Support\Billing\Ledger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -59,9 +62,11 @@ class ClientController extends Controller
         return ClientResource::make($client)->withNotes();
     }
 
-    public function show(Request $request, Client $client): ClientResource
+    public function show(Request $request, Client $client, Ledger $ledger): ClientResource
     {
         Gate::authorize('view', $client);
+
+        $outstanding = $ledger->outstanding(Consultation::query()->where('client_id', $client->id));
 
         return ClientResource::make($client->load(['tags', 'astrologyMethods', 'birthDetails']))
             ->withNotes()
@@ -72,6 +77,10 @@ class ClientController extends Controller
                 'files' => $client->attachments()->visibleTo($request->user())->count(),
                 'related' => $client->relationships()->count() + $client->incomingRelationships()->count(),
                 'open_tasks' => $client->tasks()->open()->count(),
+                // Money: received less refunded, ever, and what held consultations still owe.
+                'paid' => $ledger->received(Payment::query()->where('client_id', $client->id)),
+                'outstanding' => $outstanding['total'],
+                'owed_consultations' => $outstanding['count'],
             ]);
     }
 

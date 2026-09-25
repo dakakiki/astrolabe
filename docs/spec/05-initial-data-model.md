@@ -17,6 +17,8 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 > Faza 6c (implementirano): `tasks` dobija rok kako je unet (`due_date`, `due_time`, `timezone`) uz `due_at` kao UTC rok, i `completed_by`; nove vrste događaja `task` i `task_completed` u `activity_events`.
 >
 > Faza 7a (implementirano): `workspaces.transit_orbs`; tranziti se računaju po zahtevu i ne upisuju se u `chart_calculations` (`chart_type = transit` ostaje nekorišćen); Hiron je u `payload.positions` natalnih karata.
+>
+> Faza 7b (implementirano): `consultations.fee_amount` i `fee_currency`; `payments` bez `status` — status i dugovanje se izvode za konsultaciju; `kind` (`payment` / `refund`), `paid_on` umesto `paid_at`, `method` i `reference` umesto `payment_method` i `external_reference`, `created_by`, soft deletes; nova vrsta događaja `payment` u `activity_events`.
 
 ## Nalozi i workspace
 
@@ -256,6 +258,8 @@ INDEX  (workspace_id, subject_type, subject_id)
 - `starts_at`, nullable — UTC; obavezan za svaki status osim `draft`
 - `timezone`, nullable — IANA zona u kojoj je vreme uneto (dokument 06, „Vremenske zone“)
 - `duration_minutes`, nullable
+- `fee_amount`, nullable — Faza 7b; cena u najmanjoj jedinici valute; 0 je „bez naplate“, `null` znači da cena nije postavljena
+- `fee_currency`, nullable — ISO 4217
 - `status` — `draft`, `scheduled`, `completed`, `cancelled`, `no_show`
 - `topics`, nullable — običan tekst
 - `internal_notes`, nullable — formatiran tekst (sanitizovan HTML)
@@ -364,19 +368,27 @@ Metode za koje je usluga namenjena; bez njih — bilo koja.
 
 ### `payments`
 
+> Faza 7b: uplata je primljen novac (ili povraćaj), bez statusa. Status naplate i dugovanje se izvode za konsultaciju iz njene cene i uplata — ništa od toga se ne čuva.
+
 - `id`
 - `workspace_id`
-- `client_id`
-- `consultation_id`, nullable
-- `appointment_id`, nullable
-- `amount`
-- `currency`
-- `status`
-- `payment_method`, nullable
-- `paid_at`, nullable
-- `external_reference`, nullable
-- `notes`, nullable
+- `client_id` — kod uplate za konsultaciju ili termin, njihov klijent
+- `consultation_id`, nullable — `nullOnDelete`
+- `appointment_id`, nullable — termin za koji je plaćen avans; `nullOnDelete`
+- `created_by`, nullable
+- `kind` — `payment` ili `refund`
+- `amount` — uvek pozitivan, u najmanjoj jedinici valute
+- `currency` — ISO 4217
+- `paid_on` — dan prijema kako je unet (datum, bez vremena)
+- `method`, nullable — `bank_transfer`, `card`, `cash`, `paypal`, `other`
+- `reference`, nullable — npr. broj računa ili poziv na broj
+- `notes`, nullable — običan tekst
 - timestamps
+- soft deletes
+
+Indeksi: `(workspace_id, paid_on)`, `(workspace_id, client_id)`, `(workspace_id, consultation_id)`, `(workspace_id, appointment_id)`.
+
+Pravila: primljeno za konsultaciju = zbir uplata − zbir povraćaja; uplate jedne konsultacije su u jednoj valuti (valuti cene, a bez cene — prve uplate); avans (uplata sa `appointment_id` bez `consultation_id`) dobija `consultation_id` kada se iz termina zabeleži konsultacija. Iznosi se nikada ne preračunavaju između valuta.
 
 ## Zadaci
 

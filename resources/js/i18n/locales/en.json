@@ -39,7 +39,8 @@
         "business": "Business",
         "services": "Services",
         "calendar": "Calendar",
-        "tasks": "Tasks"
+        "tasks": "Tasks",
+        "payments": "Payments"
     },
     "auth": {
         "art": {
@@ -123,7 +124,11 @@
             "tasks": "Open tasks",
             "tasksDetail": "{overdue} overdue · {today} due today",
             "clients": "Clients",
-            "clientsDetail": "none new this month | one new this month | {count} new this month"
+            "clientsDetail": "none new this month | one new this month | {count} new this month",
+            "received": "Received in {month}",
+            "receivedDetail": "payments, less refunds",
+            "outstanding": "Outstanding",
+            "outstandingDetail": "nothing owed | one consultation | {count} consultations"
         },
         "nextUp": {
             "title": "Next up",
@@ -191,6 +196,14 @@
             "contact": "{transit} {aspect} natal {natal}",
             "exact": "exact {date}",
             "wasExact": "was exact {date}"
+        },
+        "waiting": {
+            "title": "Waiting on payment",
+            "all": "All payments",
+            "empty": "Nothing is waiting on payment.",
+            "owes": "owes {amount}",
+            "record": "Record payment",
+            "more": "and {count} more"
         }
     },
     "settings": {
@@ -487,7 +500,11 @@
             "notesCount": "Notes",
             "filesCount": "Files",
             "openTasks": "Open tasks",
-            "allTasks": "All tasks"
+            "allTasks": "All tasks",
+            "paid": "Received",
+            "outstanding": "Outstanding",
+            "outstandingCount": "{amount} · one consultation | {amount} · {count} consultations",
+            "nothingOwed": "Nothing owed"
         },
         "missing": {
             "title": "Before a chart can be calculated:",
@@ -639,7 +656,8 @@
             "topics": "Topics",
             "status": "Status",
             "chart": "Chart",
-            "methods": "Methods"
+            "methods": "Methods",
+            "billing": "Billing"
         },
         "form": {
             "newTitle": "New consultation",
@@ -667,7 +685,12 @@
             "service": "Service",
             "noService": "No service",
             "inactiveService": "{name} (inactive)",
-            "titleWithService": "Optional with a service"
+            "titleWithService": "Optional with a service",
+            "fee": "Fee",
+            "feeHint": "From the service; change it for this consultation only.",
+            "noCharge": "No charge",
+            "feeInvalid": "Enter an amount such as 120 or 120.50.",
+            "feeCurrency": "Fee currency"
         },
         "chart": {
             "title": "Attached chart",
@@ -840,7 +863,10 @@
             "confirmCancel": "Cancel it",
             "keep": "Keep it",
             "edit": "Edit",
-            "close": "Close"
+            "close": "Close",
+            "deposits": "Paid for this appointment",
+            "depositExpected": "This service asks for a deposit; none is recorded yet.",
+            "recordDeposit": "Record deposit"
         },
         "form": {
             "newTitle": "New appointment",
@@ -1015,7 +1041,8 @@
             "notes": "Notes",
             "files": "Files",
             "tasks": "Tasks",
-            "charts": "Charts"
+            "charts": "Charts",
+            "payments": "Payments"
         },
         "empty": "Nothing here yet.",
         "emptyFilter": "Nothing of this kind yet.",
@@ -1076,7 +1103,10 @@
         "wasAt": "It was set for {time}",
         "task": "Task: {title}",
         "taskCompleted": "Task done: {title}",
-        "taskDone": "Done"
+        "taskDone": "Done",
+        "payment": "Payment received: {amount}",
+        "refund": "Refund: {amount}",
+        "deposit": "Deposit received: {amount}"
     },
     "editor": {
         "toolbar": "Formatting",
@@ -1200,5 +1230,124 @@
         "approximateNote": "The birth time is approximate, so transits to the Ascendant and Midheaven and the natal houses are approximate too.",
         "incomplete": "No transits yet",
         "complete": "Complete birth data"
+    },
+    "payments": {
+        "eyebrow": "Business",
+        "title": "Payments",
+        "sub": "A record of what your clients have paid you. Nothing is charged through AstroLabe.",
+        "record": "Record payment",
+        "export": "Export CSV",
+        "tabs": {
+            "received": "Received",
+            "waiting": "Waiting on payment"
+        },
+        "stats": {
+            "thisMonth": "This month",
+            "lastMonth": "Last month",
+            "thisYear": "This year",
+            "outstanding": "Outstanding",
+            "received": "received, less refunds",
+            "owed": "nothing owed | one consultation | {count} consultations"
+        },
+        "filters": {
+            "period": "Period",
+            "method": "Method",
+            "anyMethod": "Any method",
+            "kind": "Type",
+            "anyKind": "Payments and refunds",
+            "search": "Search",
+            "searchPlaceholder": "Client, reference or note"
+        },
+        "periods": {
+            "this_month": "This month",
+            "last_month": "Last month",
+            "last_90_days": "Last 90 days",
+            "this_year": "This year",
+            "all": "All time"
+        },
+        "methods": {
+            "bank_transfer": "Bank transfer",
+            "card": "Card",
+            "cash": "Cash",
+            "paypal": "PayPal",
+            "other": "Other"
+        },
+        "kinds": {
+            "payment": "Payment",
+            "refund": "Refund"
+        },
+        "columns": {
+            "date": "Date",
+            "client": "Client",
+            "for": "For",
+            "amount": "Amount",
+            "method": "Method",
+            "reference": "Reference",
+            "fee": "Fee",
+            "received": "Received",
+            "owes": "Still to pay",
+            "held": "Held"
+        },
+        "total": "Total",
+        "empty": "No payments recorded yet. Record one here, from a consultation or from an appointment.",
+        "emptyFiltered": "No payments match these filters.",
+        "waitingEmpty": "Nothing is waiting on payment.",
+        "waitingHint": "Consultations held or missed whose fee is not paid in full.",
+        "depositFor": "Deposit for {date}",
+        "created": "Payment recorded",
+        "refundCreated": "Refund recorded",
+        "saved": "Payment saved",
+        "deleted": "Payment removed",
+        "confirmDelete": "Remove this payment? It leaves the totals and the client’s timeline.",
+        "edit": "Edit",
+        "delete": "Remove",
+        "csvHint": "The CSV has the payments shown here, refunds as negative amounts.",
+        "form": {
+            "newTitle": "Record payment",
+            "editTitle": "Edit payment",
+            "depositTitle": "Record deposit",
+            "client": "Client",
+            "chooseClient": "Choose a client",
+            "for": "For",
+            "forNothing": "Nothing in particular",
+            "forHint": "One of the client’s consultations, or nothing in particular.",
+            "owes": "{title} · {date} · owes {amount}",
+            "settled": "{title} · {date}",
+            "kind": "Type",
+            "amount": "Amount",
+            "amountInvalid": "Enter an amount such as 120 or 120.50.",
+            "currency": "Currency",
+            "currencyFixed": "In {currency}, like the rest of this consultation.",
+            "paidOn": "Received on",
+            "refundedOn": "Refunded on",
+            "method": "Method",
+            "methodNone": "Not recorded",
+            "reference": "Reference",
+            "referenceHint": "An invoice number or transfer reference.",
+            "notes": "Note",
+            "create": "Record",
+            "save": "Save"
+        }
+    },
+    "billing": {
+        "title": "Billing",
+        "statuses": {
+            "no_charge": "No charge",
+            "unpaid": "Unpaid",
+            "partially_paid": "Part paid",
+            "paid": "Paid",
+            "refunded": "Refunded"
+        },
+        "fee": "Fee",
+        "noFee": "No fee set",
+        "received": "Received",
+        "refunded": "Refunded",
+        "balance": "Still to pay",
+        "overpaid": "Paid {amount} more than the fee.",
+        "notDue": "Not counted as owed while the consultation is {status}.",
+        "payments": "Payments",
+        "noPayments": "Nothing received yet.",
+        "deposit": "deposit",
+        "feeHint": "Set the fee in the details on the left."
     }
 }

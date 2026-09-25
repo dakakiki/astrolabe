@@ -145,6 +145,16 @@ Tranziti. Izmene u dokumentima:
 
 Odluke donete usput: pretraga datuma tačnosti obuhvata godinu pre i posle trenutka u jednom pozivu engine-a (±180 dana je propuštalo spore kontakte Plutona); tranziti se ne čuvaju ni u `chart_calculations` ni u Laravel kešu — isti niz se deli samo unutar jednog zahteva; orbi za tranzite su zaseban skup po workspace-u (2° / 1,5°, bez dodatka za svetla), jer su natalni orbi (6–8°) za tranzite preširoki; kontakti prema ASC i MC postoje samo uz poznato vreme rođenja; trenutak tranzita se bira i prikazuje na satu astrologa, a linkovi iz termina i konsultacije preračunavaju njihovo vreme na taj sat; kartica na dashboardu računa za tekući sat, a dugme vodi na vreme termina; povezana osoba dobija tabove „karta / tranziti“ na svojoj strani.
 
+## Faza 7b — implementirano
+
+Uplate i pokazatelji. **Izmena modela** (odluka korisnika pri planiranju Faze 7, 25. 9. 2026): u verziji 2 uplata je imala status (`pending`, `partially_paid`, `paid`, `refunded`, `cancelled`). Sada konsultacija ima cenu, uplata je samo primljen novac (ili povraćaj), a status i dugovanje se izvode iz cene i uplata. Razlog: „čeka se uplata“ nije novac nego dug, a jedna konsultacija može imati više uplata (avans pa ostatak), što model sa statusom po uplati ne opisuje. Izmene u dokumentima:
+
+- 02: „Implementirano u Fazi 7b“ kod plaćanja (model, avans, valute, strana Payments, Billing, profil) i dashboarda; filter `payments` na vremenskoj liniji.
+- 04: status dela 7b.
+- 05: `consultations.fee_amount` / `fee_currency`; `payments` bez statusa, sa `kind`, `paid_on`, `method`, `reference`, `created_by`, soft deletes i pravilima; vrsta događaja `payment`.
+
+Odluke donete usput: duguju se samo održane konsultacije i nedolasci (zakazane, nacrti i otkazane imaju status naplate, ali ne ulaze u dugovanja); „bez naplate“ je cena 0, a nepostavljena cena je `null`; nova konsultacija preuzima cenu usluge, a postojeće konsultacije iz ranijih faza ostaju bez cene; povraćaj ne može biti veći od primljenog za istu konsultaciju ili termin; dan uplate ne sme biti u budućnosti po kalendaru astrologa; uplate jedne konsultacije su u jednoj valuti i ništa se ne preračunava; svi članovi prakse vide i beleže uplate (do timova); uplata na vremenskoj liniji stoji na svom danu, bez vremena; CSV ima potpisane decimalne iznose, BOM za UTF-8 i neutralisane formule; `Idempotency-Key` i na beleženju uplate.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

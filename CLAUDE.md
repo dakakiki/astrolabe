@@ -158,6 +158,23 @@ before starting a phase. The user communicates in Serbian.
 - Deadline wording lives in `resources/js/lib/tasks.js` (Vitest); the server's `due_state`
   decides overdue / today, the frontend only words it.
 
+## Payments
+
+- A payment is money received (`kind: payment`) or given back (`refund`), always a positive amount;
+  it has no status. A consultation's billing (`Consultation::billing()`) — status, paid, balance,
+  owed — is derived from its fee (`fee_amount`, `fee_currency`; 0 = no charge, null = none) and
+  its payments. Never store a derived billing value.
+- Lists add billing in the same query with `Consultation::scopeWithBilling()`; "owed" is
+  `scopeOwed()` (completed or no-show, balance > 0). Sums over payments use `Payment::NET_SQL`.
+- One currency per consultation (its fee's, else its first payment's); nothing is ever converted.
+  Figures across the practice are lists of money per currency (`Ledger`), the workspace currency first.
+- A payment for an appointment is a deposit; `SavePayment::claimDeposits()` moves it to the
+  consultation recorded from that appointment (called from `SaveConsultation`).
+- A streamed response (CSV export) runs after the `workspace` middleware has cleared the current
+  workspace: read the rows inside `CurrentWorkspace::run()` (see `PaymentsCsv`), or the tenant
+  scope returns nothing.
+- Money on screen goes through `useMoney()` (decimals per currency from reference-data).
+
 ## Database
 
 - MariaDB, connection `mariadb`. Local server: `127.0.0.1:3307`, databases

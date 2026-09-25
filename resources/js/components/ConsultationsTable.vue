@@ -2,8 +2,10 @@
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRouter } from 'vue-router';
 
+import BillingBadge from '@/components/BillingBadge.vue';
 import ConsultationStatusBadge from '@/components/ConsultationStatusBadge.vue';
 import { useLabels } from '@/composables/useLabels';
+import { useMoney } from '@/composables/useMoney';
 import { formatDateTime } from '@/lib/datetime';
 import { initials } from '@/lib/format';
 import { serviceColorClass } from '@/lib/services';
@@ -17,6 +19,7 @@ defineProps({
 
 const { t, locale } = useI18n();
 const labels = useLabels();
+const money = useMoney();
 const router = useRouter();
 const auth = useAuthStore();
 
@@ -35,6 +38,7 @@ const time = (consultation) =>
                 <th v-if="showClient">{{ t('consultations.columns.client') }}</th>
                 <th>{{ t('consultations.columns.consultation') }}</th>
                 <th>{{ t('consultations.columns.status') }}</th>
+                <th>{{ t('consultations.columns.billing') }}</th>
                 <th>{{ t('consultations.columns.methods') }}</th>
                 <th>{{ t('consultations.columns.chart') }}</th>
             </tr>
@@ -83,6 +87,17 @@ const time = (consultation) =>
                     </div>
                 </td>
                 <td><ConsultationStatusBadge :status="consultation.status" /></td>
+                <td class="whitespace-nowrap">
+                    <BillingBadge :status="consultation.billing?.status" />
+                    <div
+                        v-if="consultation.billing?.owed"
+                        class="mt-0.5 font-mono text-xs text-ink-3"
+                        :title="t('billing.balance')"
+                    >
+                        {{ money.format(consultation.billing.balance) }}
+                    </div>
+                    <span v-if="!consultation.billing?.status" class="text-ink-4">—</span>
+                </td>
                 <td>
                     <div class="flex flex-wrap gap-1">
                         <span v-for="method in consultation.methods" :key="method.id" class="method-pill">{{

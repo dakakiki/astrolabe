@@ -15,6 +15,7 @@ import TaskList from '@/components/TaskList.vue';
 import TasksPanel from '@/components/TasksPanel.vue';
 import TransitsPanel from '@/components/TransitsPanel.vue';
 import { useLabels } from '@/composables/useLabels';
+import { useMoney } from '@/composables/useMoney';
 import { formatDate, formatRelative, initials } from '@/lib/format';
 import http from '@/lib/http';
 import { useToastStore } from '@/stores/toast';
@@ -27,6 +28,7 @@ import { useToastStore } from '@/stores/toast';
  */
 const { t, locale } = useI18n();
 const labels = useLabels();
+const money = useMoney();
 const route = useRoute();
 const router = useRouter();
 const toast = useToastStore();
@@ -308,6 +310,28 @@ async function toggleArchive() {
                         <dt>{{ t('clients.profile.filesCount') }}</dt>
                         <dd>
                             <a href="#" @click.prevent="goToTab('files')">{{ client.stats?.files ?? 0 }}</a>
+                        </dd>
+                        <dt>{{ t('clients.profile.paid') }}</dt>
+                        <dd class="font-mono">
+                            <RouterLink
+                                :to="{ name: 'payments.index', query: { client: client.id } }"
+                                class="hover:underline"
+                                >{{ money.formatList(client.stats?.paid) }}</RouterLink
+                            >
+                        </dd>
+                        <dt>{{ t('clients.profile.outstanding') }}</dt>
+                        <dd>
+                            <span v-if="client.stats?.owed_consultations" class="font-mono">{{
+                                t(
+                                    'clients.profile.outstandingCount',
+                                    {
+                                        amount: money.formatList(client.stats.outstanding),
+                                        count: client.stats.owed_consultations,
+                                    },
+                                    client.stats.owed_consultations,
+                                )
+                            }}</span>
+                            <span v-else class="text-ink-3">{{ t('clients.profile.nothingOwed') }}</span>
                         </dd>
                         <dt>{{ t('clients.profile.lastActivity') }}</dt>
                         <dd>{{ formatRelative(client.last_activity_at, locale) }}</dd>

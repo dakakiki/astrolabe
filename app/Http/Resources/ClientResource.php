@@ -61,7 +61,7 @@ class ClientResource extends JsonResource
     }
 
     /**
-     * @param  array<string, int>  $stats
+     * @param  array<string, int|list<array{amount: int, currency: string}>>  $stats  counts, and money lists
      */
     public function withStats(array $stats): static
     {

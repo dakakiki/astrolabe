@@ -2,10 +2,12 @@
 
 namespace App\Actions\Consultations;
 
+use App\Actions\Payments\SavePayment;
 use App\Enums\AppointmentStatus;
 use App\Enums\ConsultationStatus;
 use App\Models\Appointment;
 use App\Models\Consultation;
+use App\Models\Payment;
 use App\Support\RichText;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Arr;
@@ -15,7 +17,9 @@ use Illuminate\Validation\ValidationException;
 /**
  * Creates or updates a consultation with its methods, in one transaction.
  * Only the keys present in the input are changed. A consultation can be
- * recorded from a calendar appointment — at most one per appointment.
+ * recorded from a calendar appointment — at most one per appointment — and
+ * then takes over the deposits paid for it. A new consultation's fee is its
+ * service's price unless one is given.
  */
 class SaveConsultation
 {
@@ -56,6 +60,15 @@ class SaveConsultation
                     $appointment = $this->claimAppointment((int) $input['appointment_id']);
                     $consultation->appointment_id = $appointment->id;
                 }
+
+                if (! array_key_exists('fee', $input)) {
+                    $this->feeFromService($consultation, $appointment);
+                }
+            }
+
+            if (array_key_exists('fee', $input)) {
+                $consultation->fee_amount = $input['fee']['amount'] ?? null;
+                $consultation->fee_currency = $input['fee'] === null ? null : $input['fee']['currency'];
             }
 
             if (array_key_exists('starts_at', $input) || array_key_exists('timezone', $input)) {
@@ -63,6 +76,10 @@ class SaveConsultation
             }
 
             $consultation->save();
+
+            if ($appointment !== null) {
+                SavePayment::claimDeposits($appointment, $consultation);
+            }
 
             // Recording what happened marks a scheduled appointment as held.
             if ($appointment?->status === AppointmentStatus::Scheduled && $consultation->status === ConsultationStatus::Completed) {
@@ -76,8 +93,29 @@ class SaveConsultation
 
             $consultation->client->touchActivity();
 
-            return $consultation->load(['client', 'service', 'appointment', 'astrologyMethods', 'chart']);
+            return $consultation->load(Consultation::DETAIL_RELATIONS);
         });
+    }
+
+    /**
+     * A new consultation costs what its service does — unless deposits for its
+     * appointment were paid in another currency; then the fee is left to be set.
+     */
+    private function feeFromService(Consultation $consultation, ?Appointment $appointment): void
+    {
+        $price = $consultation->service?->price_amount;
+        $currency = $consultation->service?->currency;
+
+        if ($price === null) {
+            return;
+        }
+
+        $deposits = $appointment ? Payment::query()->where('appointment_id', $appointment->id)->value('currency') : null;
+
+        if ($deposits === null || $deposits === $currency) {
+            $consultation->fee_amount = $price;
+            $consultation->fee_currency = $currency;
+        }
     }
 
     /**

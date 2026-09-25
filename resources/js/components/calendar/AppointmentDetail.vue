@@ -5,9 +5,11 @@ import { RouterLink } from 'vue-router';
 
 import AppointmentStatusBadge from '@/components/calendar/AppointmentStatusBadge.vue';
 import NatalChart from '@/components/NatalChart.vue';
+import PaymentForm from '@/components/PaymentForm.vue';
 import { useLabels } from '@/composables/useLabels';
+import { useMoney } from '@/composables/useMoney';
 import { formatDateTime } from '@/lib/datetime';
-import { initials } from '@/lib/format';
+import { formatDate, initials } from '@/lib/format';
 import http from '@/lib/http';
 import { transitsRoute } from '@/lib/transits';
 import { useAuthStore } from '@/stores/auth';
@@ -18,7 +20,8 @@ import { useToastStore } from '@/stores/toast';
  * whom, in the astrologer's zone and the zone it was entered in; its status;
  * and what to do next — record the consultation, open the client, look at
  * the client's chart without leaving the calendar, or open the transits for
- * the appointment's time (Phase 7a).
+ * the appointment's time (Phase 7a). Money paid for it before the session — a
+ * deposit — is recorded here and moves to the consultation later (Phase 7b).
  */
 const props = defineProps({
     appointmentId: { type: Number, required: true },
@@ -29,6 +32,7 @@ const emit = defineEmits(['edit', 'changed', 'close', 'loaded']);
 
 const { t, locale } = useI18n();
 const labels = useLabels();
+const money = useMoney();
 const auth = useAuthStore();
 const toast = useToastStore();
 
@@ -41,6 +45,7 @@ const reasonError = ref(null);
 const statusConflicts = ref([]);
 const chart = ref(null);
 const chartState = ref('idle');
+const depositOpen = ref(false);
 
 async function load() {
     appointment.value = null;
@@ -49,6 +54,7 @@ async function load() {
     statusConflicts.value = [];
     chart.value = null;
     chartState.value = 'idle';
+    depositOpen.value = false;
 
     try {
         const { data } = await http.get(`/appointments/${props.appointmentId}`);
@@ -147,6 +153,21 @@ async function toggleChart() {
 }
 
 const moment = (item) => formatDateTime(item.starts_at, locale.value, zone.value);
+
+// Deposits: what was paid before the session; the service may ask for one.
+const payments = computed(() => appointment.value?.payments ?? []);
+const depositExpected = computed(
+    () =>
+        appointment.value?.service?.requires_deposit &&
+        appointment.value.status === 'scheduled' &&
+        !payments.value.length,
+);
+
+async function depositSaved() {
+    depositOpen.value = false;
+    const { data } = await http.get(`/appointments/${props.appointmentId}`);
+    appointment.value = data.data;
+}
 </script>
 
 <template>
@@ -227,6 +248,27 @@ const moment = (item) => formatDateTime(item.starts_at, locale.value, zone.value
                 <p class="whitespace-pre-line text-ink-2">{{ appointment.notes }}</p>
             </div>
 
+            <div v-if="payments.length || depositExpected">
+                <div class="label">{{ t('appointments.detail.deposits') }}</div>
+                <ul v-if="payments.length" class="text-sm">
+                    <li v-for="payment in payments" :key="payment.id" class="flex flex-wrap gap-x-2">
+                        <span class="font-mono text-xs text-ink-3">{{
+                            formatDate(payment.paid_on, locale, 'medium')
+                        }}</span>
+                        <span class="font-mono">{{
+                            money.format({
+                                amount: payment.kind === 'refund' ? -payment.amount : payment.amount,
+                                currency: payment.currency,
+                            })
+                        }}</span>
+                        <span v-if="payment.method" class="text-xs text-ink-3">{{
+                            t(`payments.methods.${payment.method}`)
+                        }}</span>
+                    </li>
+                </ul>
+                <p v-if="depositExpected" class="notice n-info mt-1">{{ t('appointments.detail.depositExpected') }}</p>
+            </div>
+
             <div v-if="statusConflicts.length" class="notice n-warn" role="alert">
                 <div>
                     <strong>{{ t('appointments.form.overlapTitle') }}</strong>
@@ -266,6 +308,14 @@ const moment = (item) => formatDateTime(item.starts_at, locale.value, zone.value
                     {{
                         chartState === 'idle' ? t('appointments.detail.showChart') : t('appointments.detail.hideChart')
                     }}
+                </button>
+                <button
+                    v-if="appointment.status !== 'cancelled' && !depositOpen"
+                    type="button"
+                    class="btn btn-sm"
+                    @click="depositOpen = true"
+                >
+                    {{ t('appointments.detail.recordDeposit') }}
                 </button>
                 <RouterLink
                     v-if="appointment.client.chart_ready"
@@ -325,6 +375,18 @@ const moment = (item) => formatDateTime(item.starts_at, locale.value, zone.value
                     </button>
                 </div>
             </form>
+
+            <div v-if="depositOpen" class="border-t border-line-soft pt-3">
+                <h3 class="mb-2 text-sm font-semibold">{{ t('payments.form.depositTitle') }}</h3>
+                <PaymentForm
+                    :appointment="{ id: appointment.id, starts_at: appointment.starts_at }"
+                    :client="appointment.client"
+                    compact
+                    closable
+                    @saved="depositSaved"
+                    @cancel="depositOpen = false"
+                />
+            </div>
 
             <template v-if="chartState !== 'idle'">
                 <p v-if="chartState === 'loading'" class="text-ink-3" role="status">{{ t('chart.loading') }}</p>
