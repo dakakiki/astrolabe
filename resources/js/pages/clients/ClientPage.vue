@@ -11,6 +11,8 @@ import NatalChart from '@/components/NatalChart.vue';
 import NotesPanel from '@/components/NotesPanel.vue';
 import RelatedPeoplePanel from '@/components/RelatedPeoplePanel.vue';
 import StatusBadge from '@/components/StatusBadge.vue';
+import TaskList from '@/components/TaskList.vue';
+import TasksPanel from '@/components/TasksPanel.vue';
 import { useLabels } from '@/composables/useLabels';
 import { formatDate, formatRelative, initials } from '@/lib/format';
 import http from '@/lib/http';
@@ -27,13 +29,15 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToastStore();
 
-const TABS = ['overview', 'chart', 'consultations', 'notes', 'files', 'related'];
+const TABS = ['overview', 'chart', 'consultations', 'notes', 'files', 'tasks', 'related'];
 
 const client = ref(null);
 const notFound = ref(false);
 const chart = ref(null);
 const chartState = ref('idle');
 const consultations = ref(null);
+const openTasks = ref(null);
+const timeline = ref(null);
 
 const tab = computed(() => (TABS.includes(route.query.tab) ? route.query.tab : 'overview'));
 
@@ -81,9 +85,23 @@ async function loadConsultations() {
     consultations.value = data.data;
 }
 
+// The overview's short list of what is still open for this client.
+async function loadOpenTasks() {
+    const { data } = await http.get('/tasks', { params: { client_id: client.value.id, status: 'open', per_page: 5 } });
+    openTasks.value = { items: data.data, total: data.meta.total };
+}
+
+async function completeTask(task) {
+    await http.patch(`/tasks/${task.id}`, { status: 'done' });
+    toast.success(t('tasks.done'));
+    await Promise.all([loadOpenTasks(), refreshStats()]);
+    timeline.value?.reload();
+}
+
 // Each tab loads what it shows when it is first opened.
 async function openTab(name) {
     if (!client.value) return;
+    if (name === 'overview') loadOpenTasks();
     if (name === 'chart') loadChart();
     if ((name === 'consultations' || name === 'notes') && consultations.value === null) loadConsultations();
 }
@@ -185,13 +203,16 @@ async function toggleArchive() {
                 }}</span>
                 <span v-if="name === 'notes' && client.stats?.notes" class="count">{{ client.stats.notes }}</span>
                 <span v-if="name === 'files' && client.stats?.files" class="count">{{ client.stats.files }}</span>
+                <span v-if="name === 'tasks' && client.stats?.open_tasks" class="count">{{
+                    client.stats.open_tasks
+                }}</span>
                 <span v-if="name === 'related' && client.stats?.related" class="count">{{ client.stats.related }}</span>
             </RouterLink>
         </nav>
 
         <!-- Overview -->
         <div v-if="tab === 'overview'" class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-            <ClientTimeline :client-id="client.id" @open-tab="goToTab" />
+            <ClientTimeline ref="timeline" :client-id="client.id" @open-tab="goToTab" />
 
             <div class="space-y-4">
                 <section class="card">
@@ -231,6 +252,30 @@ async function toggleArchive() {
                         <dt>{{ t('clients.profile.created') }}</dt>
                         <dd>{{ formatDate(client.created_at?.slice(0, 10), locale, 'medium') }}</dd>
                     </dl>
+                </section>
+
+                <section class="card">
+                    <div class="card-head">
+                        <h2>{{ t('clients.profile.openTasks') }}</h2>
+                        <a href="#" class="right" @click.prevent="goToTab('tasks')">{{
+                            t('clients.profile.allTasks')
+                        }}</a>
+                    </div>
+                    <div class="card-body">
+                        <TaskList
+                            v-if="openTasks?.items.length"
+                            :tasks="openTasks.items"
+                            :show-client="false"
+                            :editable="false"
+                            @toggle="completeTask"
+                        />
+                        <p v-else-if="openTasks" class="text-sm text-ink-3">{{ t('tasks.emptyClient') }}</p>
+                        <p v-if="openTasks?.total > openTasks?.items.length" class="mt-2 text-xs">
+                            <a href="#" @click.prevent="goToTab('tasks')">{{
+                                t('dashboard.tasks.more', { count: openTasks.total - openTasks.items.length })
+                            }}</a>
+                        </p>
+                    </div>
                 </section>
 
                 <section class="card">
@@ -333,6 +378,13 @@ async function toggleArchive() {
                 <AttachmentsPanel :client-id="client.id" @changed="refreshStats" />
             </div>
         </section>
+
+        <!-- Tasks -->
+        <TasksPanel
+            v-else-if="tab === 'tasks'"
+            :client="{ id: client.id, full_name: client.full_name }"
+            @changed="refreshStats"
+        />
 
         <!-- Related people -->
         <RelatedPeoplePanel v-else-if="tab === 'related'" :client-id="client.id" @changed="refreshStats" />

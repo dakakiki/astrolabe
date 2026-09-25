@@ -21,7 +21,13 @@ const navGroups = [
             { to: '/calendar', label: 'nav.calendar', icon: '▦' },
         ],
     },
-    { label: 'nav.business', items: [{ to: '/services', label: 'nav.services', icon: '◇' }] },
+    {
+        label: 'nav.business',
+        items: [
+            { to: '/services', label: 'nav.services', icon: '◇' },
+            { to: '/tasks', label: 'nav.tasks', icon: '✓' },
+        ],
+    },
     { label: 'nav.workspace', items: [{ to: '/settings', label: 'nav.settings', icon: '⚙' }] },
 ];
 

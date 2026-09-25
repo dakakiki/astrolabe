@@ -20,6 +20,10 @@ class AttachmentResource extends JsonResource
         return [
             'id' => $this->id,
             'client_id' => $this->client_id,
+            'client' => $this->whenLoaded('client', fn () => $this->client ? [
+                'id' => $this->client->id,
+                'full_name' => $this->client->fullName(),
+            ] : null),
             'consultation_id' => $this->consultationId(),
             'kind' => $this->kind->value,
             'name' => $this->original_name,

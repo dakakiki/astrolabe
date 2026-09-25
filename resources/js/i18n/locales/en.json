@@ -38,7 +38,8 @@
         "consultations": "Consultations",
         "business": "Business",
         "services": "Services",
-        "calendar": "Calendar"
+        "calendar": "Calendar",
+        "tasks": "Tasks"
     },
     "auth": {
         "art": {
@@ -102,16 +103,73 @@
         }
     },
     "dashboard": {
-        "eyebrow": "Today",
-        "greeting": "Welcome, {name}",
-        "sub": "{workspace} · {date}",
+        "greeting": {
+            "morning": "Good morning, {name}",
+            "afternoon": "Good afternoon, {name}",
+            "evening": "Good evening, {name}"
+        },
+        "sub": {
+            "appointments": "Nothing booked today | One appointment today | {count} appointments today",
+            "overdue": "one task overdue | {count} tasks overdue",
+            "dueToday": "one task due today | {count} tasks due today"
+        },
+        "newAppointment": "New appointment",
+        "addClient": "Add client",
+        "stats": {
+            "today": "Today",
+            "todayDetail": "appointments | appointment | appointments",
+            "week": "Next 7 days",
+            "weekDetail": "appointments booked | appointment booked | appointments booked",
+            "tasks": "Open tasks",
+            "tasksDetail": "{overdue} overdue · {today} due today",
+            "clients": "Clients",
+            "clientsDetail": "none new this month | one new this month | {count} new this month"
+        },
+        "nextUp": {
+            "title": "Next up",
+            "calendar": "Open calendar",
+            "today": "Today",
+            "upcoming": "Next 7 days",
+            "empty": "Nothing booked for today or the next seven days.",
+            "noneToday": "Nothing booked today.",
+            "when": "When",
+            "client": "Client",
+            "service": "Service",
+            "where": "Where",
+            "open": "Open",
+            "record": "Record consultation",
+            "consultation": "Consultation"
+        },
+        "tasks": {
+            "title": "Tasks",
+            "all": "All tasks",
+            "overdue": "Overdue",
+            "today": "Today",
+            "upcoming": "Next 7 days",
+            "empty": "Nothing due in the next seven days.",
+            "more": "and {count} more"
+        },
+        "recent": {
+            "title": "Recently active clients",
+            "all": "All clients",
+            "empty": "Clients you work with appear here."
+        },
+        "files": {
+            "title": "New files",
+            "empty": "Files and links you add to clients appear here."
+        },
+        "attention": {
+            "title": "Needs attention",
+            "birth": "No chart yet: birth data incomplete",
+            "complete": "Complete birth data",
+            "more": "and {count} more"
+        },
         "setup": {
             "title": "Setting up your practice",
             "methods": "Choose the astrological methods you work with",
             "chart": "Check the chart defaults",
             "regional": "Confirm your time zone and currency",
             "clients": "Add your first client",
-            "soon": "Coming next",
             "clientsDone": "Add your first client"
         },
         "practice": {
@@ -402,13 +460,16 @@
                 "consultations": "Consultations",
                 "notes": "Notes",
                 "files": "Files",
+                "tasks": "Tasks",
                 "related": "Related people"
             },
             "summary": "Summary",
             "consultations": "Consultations",
             "consultationsCount": "{total} · {completed} completed",
             "notesCount": "Notes",
-            "filesCount": "Files"
+            "filesCount": "Files",
+            "openTasks": "Open tasks",
+            "allTasks": "All tasks"
         },
         "missing": {
             "title": "Before a chart can be calculated:",
@@ -932,6 +993,7 @@
             "consultations": "Consultations",
             "notes": "Notes",
             "files": "Files",
+            "tasks": "Tasks",
             "charts": "Charts"
         },
         "empty": "Nothing here yet.",
@@ -990,7 +1052,10 @@
         "appointmentMoved": "Appointment moved",
         "appointmentCancelled": "Appointment cancelled",
         "movedFromTo": "From {from} to {to}",
-        "wasAt": "It was set for {time}"
+        "wasAt": "It was set for {time}",
+        "task": "Task: {title}",
+        "taskCompleted": "Task done: {title}",
+        "taskDone": "Done"
     },
     "editor": {
         "toolbar": "Formatting",
@@ -1015,5 +1080,73 @@
         "semisextile": "Semi-sextile",
         "semisquare": "Semi-square",
         "sesquisquare": "Sesquiquadrate"
+    },
+    "tasks": {
+        "eyebrow": "Business",
+        "title": "Tasks",
+        "sub": "Follow-ups that would otherwise live on a sticky note.",
+        "add": "Add task",
+        "views": {
+            "open": "Open",
+            "overdue": "Overdue",
+            "today": "Today",
+            "done": "Done"
+        },
+        "empty": {
+            "open": "Nothing open. Tasks you add appear here, on the dashboard and on the client’s timeline.",
+            "overdue": "Nothing overdue.",
+            "today": "Nothing due today.",
+            "done": "No finished tasks yet."
+        },
+        "emptyClient": "No open tasks for this client.",
+        "markDone": "Mark “{title}” as done",
+        "reopen": "Reopen “{title}”",
+        "done": "Task done",
+        "reopened": "Task reopened",
+        "created": "Task added",
+        "saved": "Task saved",
+        "deleted": "Task deleted",
+        "confirmDelete": "Delete this task? It also leaves the client’s timeline.",
+        "followUps": "Follow-ups",
+        "followUpsHint": "What is still to be done after this consultation. Follow-ups also appear on the dashboard.",
+        "addFollowUp": "Add follow-up",
+        "followUpTitle": "Follow up with {name}",
+        "followUpTo": "Follow-up to {title}",
+        "followUpToUntitled": "Follow-up to a consultation",
+        "assignedTo": "Assigned to {name}",
+        "form": {
+            "newTitle": "New task",
+            "newFollowUp": "New follow-up",
+            "editTitle": "Edit task",
+            "title": "Task",
+            "titlePlaceholder": "Send the transit summary",
+            "client": "Client",
+            "clientHint": "Optional. Tasks about a client also appear on their timeline.",
+            "removeClient": "Remove",
+            "dueDate": "Due",
+            "dueTime": "Time",
+            "dueTimeHint": "Optional; otherwise all day",
+            "otherZone": "Set in {zone}",
+            "priority": "Priority",
+            "description": "Description",
+            "create": "Add task",
+            "save": "Save task"
+        },
+        "priorities": {
+            "high": "High",
+            "normal": "Normal",
+            "low": "Low"
+        },
+        "priority": "{priority} priority",
+        "due": {
+            "today": "Due today",
+            "todayAt": "Due today at {time}",
+            "tomorrow": "Due tomorrow",
+            "tomorrowAt": "Due tomorrow at {time}",
+            "on": "Due {date}",
+            "onAt": "Due {date} at {time}",
+            "overdueSince": "Overdue since {time}",
+            "overdueDays": "Overdue by a day | Overdue by {count} days"
+        }
     }
 }

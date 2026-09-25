@@ -71,6 +71,7 @@ class ClientController extends Controller
                 'notes' => $client->notes()->visibleTo($request->user())->count(),
                 'files' => $client->attachments()->visibleTo($request->user())->count(),
                 'related' => $client->relationships()->count() + $client->incomingRelationships()->count(),
+                'open_tasks' => $client->tasks()->open()->count(),
             ]);
     }
 

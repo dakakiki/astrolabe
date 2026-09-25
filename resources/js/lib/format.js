@@ -30,6 +30,16 @@ export function formatDate(isoDate, locale, style = 'long') {
     );
 }
 
+/** A wall-clock time ("18:00") in the viewer's language ("6:00 PM"), without any time-zone shift. */
+export function formatTime(clock, locale) {
+    if (!clock) return '';
+    const [hours, minutes] = clock.split(':').map(Number);
+
+    return new Intl.DateTimeFormat(locale, { timeStyle: 'short', timeZone: 'UTC' }).format(
+        new Date(Date.UTC(2000, 0, 1, hours, minutes)),
+    );
+}
+
 /** "3 days ago", "in 2 hours" … for an ISO timestamp. */
 export function formatRelative(isoTimestamp, locale, now = new Date()) {
     if (!isoTimestamp) return '';

@@ -111,6 +111,14 @@ class Client extends Model
     }
 
     /**
+     * @return HasMany<Task, $this>
+     */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    /**
      * Links this client made to related people and to other clients.
      *
      * @return HasMany<ClientRelationship, $this>

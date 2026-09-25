@@ -24,12 +24,15 @@ enum ActivityType: string
     case Appointment = 'appointment';
     case AppointmentRescheduled = 'appointment_rescheduled';
     case AppointmentCancelled = 'appointment_cancelled';
+    case Task = 'task';
+    case TaskCompleted = 'task_completed';
 
     /** Mirrors a row elsewhere and is rebuilt from it. */
     public function isProjection(): bool
     {
         return in_array($this, [
             self::ClientCreated, self::ChartCalculated, self::Consultation, self::Note, self::File, self::Appointment,
+            self::Task, self::TaskCompleted,
         ], true);
     }
 
@@ -41,6 +44,7 @@ enum ActivityType: string
             self::Note => 'notes',
             self::File => 'files',
             self::Appointment, self::AppointmentRescheduled, self::AppointmentCancelled => 'appointments',
+            self::Task, self::TaskCompleted => 'tasks',
             self::ChartCalculated, self::BirthDetailsUpdated => 'charts',
             default => 'profile',
         };

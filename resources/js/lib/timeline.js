@@ -8,6 +8,7 @@
  * - fields: changed field names, each translated under timeline.fields.*
  * - to: where the entry leads — a route, or a tab of the client profile
  * - moved / wasAt: moments (UTC) the component formats in the viewer's zone
+ * - task: the task's deadline, priority and status, worded by the component
  */
 export function describeEvent(event) {
     const meta = event.metadata ?? {};
@@ -45,6 +46,19 @@ export function describeEvent(event) {
                 body: meta.reason ?? null,
                 wasAt: meta.starts_at ?? null,
                 to: appointmentRoute(event.subject.id),
+            };
+        case 'task':
+            return {
+                tone: 'task',
+                title: ['timeline.task', { title: meta.title ?? event.summary ?? '' }],
+                task: meta,
+                to: { tab: 'tasks' },
+            };
+        case 'task_completed':
+            return {
+                tone: 'task',
+                title: ['timeline.taskCompleted', { title: meta.title ?? event.summary ?? '' }],
+                to: { tab: 'tasks' },
             };
         case 'note':
             return {
@@ -92,8 +106,8 @@ export function describeEvent(event) {
     }
 }
 
-/** Filters offered above the timeline (docs/spec/02); payments and tasks arrive with their phases. */
-export const TIMELINE_FILTERS = ['all', 'appointments', 'consultations', 'notes', 'files', 'charts'];
+/** Filters offered above the timeline (docs/spec/02); payments arrive with their phase. */
+export const TIMELINE_FILTERS = ['all', 'appointments', 'consultations', 'notes', 'files', 'tasks', 'charts'];
 
 /** An appointment opens in the calendar, on its own day, with its details. */
 function appointmentRoute(id) {

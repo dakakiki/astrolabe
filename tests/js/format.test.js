@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatCoordinate, formatDate, formatRelative, initials } from '../../resources/js/lib/format';
+import { formatCoordinate, formatDate, formatRelative, formatTime, initials } from '../../resources/js/lib/format';
 
 describe('formatCoordinate', () => {
     it('writes degrees and minutes with the hemisphere', () => {
@@ -16,6 +16,14 @@ describe('formatCoordinate', () => {
 
     it('is empty without a value', () => {
         expect(formatCoordinate(null, 'lat')).toBe('');
+    });
+});
+
+describe('formatTime', () => {
+    it('shows a wall-clock time in the viewer’s language, whatever the browser’s zone', () => {
+        expect(formatTime('18:00', 'en-US')).toBe('6:00 PM');
+        expect(formatTime('09:05', 'en-GB')).toBe('09:05');
+        expect(formatTime(null, 'en-US')).toBe('');
     });
 });
 

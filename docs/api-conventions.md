@@ -58,7 +58,7 @@ Linkovi u emailovima vode na SPA stranice (`/verify-email/...`, `/reset-password
 | PUT | `/clients/{id}/birth-details` | samo podaci rođenja |
 | POST / DELETE | `/clients/{id}/archive` | arhiviranje / vraćanje iz arhive |
 | GET | `/clients/{id}/chart` | natalna karta (računa se pri prvom zahtevu, zatim iz keša); `status: incomplete` sa `missing` kada podaci rođenja nisu potpuni. `?house_system=` crta kartu u drugom sistemu kuća, samo za taj prikaz |
-| GET | `/clients/{id}/timeline` | vremenska linija, najnovije prvo; `type` (`all`, `appointments`, `consultations`, `notes`, `files`, `charts`, `profile`), `page`, `per_page` (do 50) |
+| GET | `/clients/{id}/timeline` | vremenska linija, najnovije prvo; `type` (`all`, `appointments`, `consultations`, `notes`, `files`, `tasks`, `charts`, `profile`), `page`, `per_page` (do 50) |
 | GET | `/tags` | oznake workspace-a sa brojem klijenata |
 | GET | `/places?q=` | autocomplete mesta rođenja (lokalni GeoNames); mesta u zemlji prakse prva |
 | GET | `/places/nearest?latitude=&longitude=` | najbliže mesto, za predlog zone uz ručne koordinate |
@@ -115,6 +115,25 @@ Pravila:
 - Termin u odgovoru nosi `starts_at` / `ends_at` (UTC), `timezone`, `starts_at_local`, `duration_minutes`, `status`, `client` (sa `chart_ready`), `service`, `assigned_user`, `consultation` (`id`, `status` ili `null`), `cancellation_reason`, `cancelled_at`. `notes` samo pojedinačan termin.
 - Konsultacija se beleži iz termina sa `appointment_id` pri kreiranju (`POST /consultations`): termin istog klijenta, bez druge konsultacije (422 inače); zakazan termin tada postaje `completed`. Konsultacija u odgovoru nosi `appointment` (`id`, `starts_at`, `status`).
 - Vremenska linija klijenta ima i `type=appointments` (termin na svom vremenu, pomeranje sa `from` / `to`, otkazivanje sa `starts_at` i `reason` u `metadata`).
+
+### Zadaci i dashboard (Faza 6c)
+
+| Metoda | Putanja | Namena |
+|---|---|---|
+| GET | `/tasks` | zadaci; `status` (`open` — podrazumevano, `done`, `all`), `due` (`overdue`, `today`, `upcoming`, `none`; samo otvoreni), `client_id`, `consultation_id`, `assigned_user_id`, `search` (naslov), `page`, `per_page` (do 100). Otvoreni po roku (bez roka na kraju, pa po prioritetu), završeni od poslednjeg. Uz listu ide `counts` (`open`, `overdue`, `today`, `done`) za istog klijenta, konsultaciju ili odgovornog |
+| POST | `/tasks` | novi zadatak (uvek otvoren): `title` (obavezno, do 200), `description` (običan tekst, do 5000), `client_id`, `consultation_id` (follow-up; bez `client_id` klijent se uzima iz konsultacije, sa njim mora biti isti), `priority` (`low`, `normal`, `high`; podrazumevano `normal`), `due_date` (`YYYY-MM-DD`), `due_time` (`HH:MM`, samo uz dan), `timezone` (podrazumevano zona korisnika), `assigned_user_id` (aktivan član; podrazumevano korisnik). Zaglavlje `Idempotency-Key` kao kod termina |
+| GET / PATCH / DELETE | `/tasks/{id}` | jedan zadatak; PATCH menja samo poslata polja, uključujući `status` (`open` / `done`) i klijenta; DELETE je soft delete (nestaje i sa vremenske linije) |
+| GET | `/dashboard` | početni ekran, sve odjednom, po kalendaru korisnika (vidi ispod) |
+
+Pravila:
+
+- **Rok:** `due_date` i `due_time` se vraćaju kako su uneti, uz `timezone`; `due_at` je UTC rok (uneto vreme, ili početak sledećeg dana kada vremena nema). Nov dan bez vremena zadržava ranije vreme; `due_date: null` briše ceo rok.
+- `due_state` postavlja otvoren zadatak na kalendar korisnika koji gleda: `overdue` (rok prošao), `today` (ističe pre kraja njegovog dana), `upcoming`, ili `null` (završen ili bez roka).
+- Zadatak u odgovoru nosi i `client` (`id`, `full_name`, `status`), `consultation` (`id`, `title` — naslov ili usluga, `starts_at`, `status`), `assigned_user`, `created_by`, `completed_at`.
+- Vremenska linija klijenta ima i `type=tasks`: `task` u trenutku dodavanja (`metadata`: `title`, `status`, `priority`, `due_date`, `due_time`, `due_at`, `timezone`, `consultation_id`) i `task_completed` u trenutku završetka, dok je zadatak završen.
+- Pojedinačan klijent (`GET /clients/{id}`) u `stats` nosi i `open_tasks`.
+
+`/dashboard` vraća `today` (dan u zoni korisnika), `timezone`, `appointments.today` (današnji termini korisnika bez otkazanih) i `appointments.upcoming` (zakazani u narednih 7 dana, najviše 8), `tasks.overdue` / `tasks.today` / `tasks.upcoming` (zadaci korisnika i nedodeljeni, rok u narednih 7 dana; najviše 8 po grupi), `recent_clients` (6 poslednje aktivnih, bez arhiviranih), `recent_files` (6 najnovijih koje korisnik sme da vidi, sa `client`), `incomplete_birth_data` (do 5 klijenata čija karta ne može da se izračuna, sa `birth`) i `counts` (`appointments_today`, `appointments_upcoming`, `tasks_open`, `tasks_overdue`, `tasks_today`, `clients_active`, `clients_new_this_month`, `clients_total`, `incomplete_birth_data`).
 
 ### Konsultacije, beleške i fajlovi
 

@@ -126,6 +126,23 @@ before starting a phase. The user communicates in Serbian.
   keep date arithmetic there, pure and covered by Vitest. Generate idempotency keys with
   `idempotencyKey()` from `lib/http.js` (`crypto.randomUUID` needs HTTPS; the local host is HTTP).
 
+## Tasks and the dashboard
+
+- A task's due date is kept as entered (`due_date`, optional `due_time`, `timezone`) plus
+  `due_at`, the UTC deadline from `Task::deadline()` (the time, or the start of the next day).
+  Query deadlines through the `Task` scopes (`overdue`, `dueToday`, `dueLater`, `byDeadline`),
+  always with "now" and the start of tomorrow in the *viewer's* zone.
+- A follow-up is a task with `consultation_id`; its client must be the consultation's client
+  (checked in `SaveTaskRequest::after`, derived in `SaveTask` when left out).
+- A row may keep more than one timeline entry: `ProjectsActivity::projectedActivityTypes()` and
+  `activityProjections()` (a task has `task` and, while done, `task_completed`). Both are rebuilt
+  by `activity:rebuild`, so completion is never an `ActivityLog` entry.
+- `GET /dashboard` (`DashboardController`) is one request for the whole start screen; the
+  viewer's own appointments and tasks, the practice's clients and files. Add a new widget there
+  rather than as a separate call, and keep its lists short (limits in the controller).
+- Deadline wording lives in `resources/js/lib/tasks.js` (Vitest); the server's `due_state`
+  decides overdue / today, the frontend only words it.
+
 ## Database
 
 - MariaDB, connection `mariadb`. Local server: `127.0.0.1:3307`, databases

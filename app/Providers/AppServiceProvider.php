@@ -14,6 +14,7 @@ use App\Models\Client;
 use App\Models\Consultation;
 use App\Models\Note;
 use App\Models\RelatedPerson;
+use App\Models\Task;
 use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -72,6 +73,7 @@ class AppServiceProvider extends ServiceProvider
             'note' => Note::class,
             'attachment' => Attachment::class,
             'chart_calculation' => ChartCalculation::class,
+            'task' => Task::class,
         ]);
     }
 

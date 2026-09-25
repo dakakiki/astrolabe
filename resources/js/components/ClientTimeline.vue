@@ -5,6 +5,7 @@ import { RouterLink } from 'vue-router';
 
 import { useLabels } from '@/composables/useLabels';
 import { formatDateTime, isFuture } from '@/lib/datetime';
+import { formatDate, formatTime } from '@/lib/format';
 import http from '@/lib/http';
 import { describeEvent, TIMELINE_FILTERS } from '@/lib/timeline';
 import { useAuthStore } from '@/stores/auth';
@@ -66,6 +67,22 @@ function chartLine(chart) {
 
     return [zodiac, houses, chart.engine].filter(Boolean).join(' · ');
 }
+
+// The deadline as it was entered, the priority when it is not normal, and whether it is done.
+function taskLine(task) {
+    const due = task.due_date
+        ? t(task.due_time ? 'tasks.due.onAt' : 'tasks.due.on', {
+              date: formatDate(task.due_date, locale.value, 'medium'),
+              time: formatTime(task.due_time, locale.value),
+          })
+        : null;
+    const priority =
+        task.priority && task.priority !== 'normal'
+            ? t('tasks.priority', { priority: t(`tasks.priorities.${task.priority}`) })
+            : null;
+
+    return [due, priority, task.status === 'done' ? t('timeline.taskDone') : null].filter(Boolean).join(' · ');
+}
 </script>
 
 <template>
@@ -117,6 +134,7 @@ function chartLine(chart) {
                         {{ t('timeline.changed', { fields: fieldList(entry.fields) }) }}
                     </div>
                     <div v-if="entry.chart" class="tl-body">{{ chartLine(entry.chart) }}</div>
+                    <div v-if="entry.task && taskLine(entry.task)" class="tl-body">{{ taskLine(entry.task) }}</div>
                     <div v-if="entry.moved" class="tl-body">
                         {{ t('timeline.movedFromTo', { from: moment(entry.moved.from), to: moment(entry.moved.to) }) }}
                     </div>

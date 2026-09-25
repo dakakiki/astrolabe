@@ -125,6 +125,12 @@ const routes = [
         meta: { verified: true },
     },
     {
+        path: '/tasks',
+        name: 'tasks.index',
+        component: () => import('@/pages/tasks/TasksPage.vue'),
+        meta: { verified: true },
+    },
+    {
         path: '/settings',
         component: () => import('@/pages/settings/SettingsPage.vue'),
         meta: { verified: true },

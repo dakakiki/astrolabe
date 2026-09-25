@@ -124,6 +124,16 @@ Kalendar i termini: prikazi dan, nedelja, mesec i agenda, termini sa zonom unosa
 
 Odluke donete usput: provera preklapanja zaključava red članstva astrologa u `workspace_user`, pa se paralelni zahtevi za istog astrologa redom proveravaju; 409 vraća termine koji smetaju, a `allow_overlap: true` čuva; `Idempotency-Key` pamti samo uspešne odgovore (dan dana), pa se odbijeno preklapanje sme potvrditi istim ključem; termin se ne briše, a otkazan može ponovo da se zakaže; kada je iz termina zabeležena konsultacija, termin nema svoju stavku na vremenskoj liniji; zapisi pomeranja i otkazivanja nose vremena i razlog, jer su to podaci o rasporedu, a ne izmene profila; kalendar je u zoni astrologa, nedelja počinje ponedeljkom.
 
+## Faza 6c — implementirano
+
+Zadaci i follow-up, dashboard. Time je Faza 6 završena. Izmene u dokumentima:
+
+- 02: „Implementirano u Fazi 6c“ kod zadataka i dashboarda; filteri vremenske linije (`appointments` iz 6b, `tasks`).
+- 04: status dela 6c i Faze 6.
+- 05: `tasks` — rok kako je unet (`due_date`, `due_time`, `timezone`) i `due_at` kao UTC rok, `completed_by`, vrednosti prioriteta i statusa, indeksi; vrste događaja `task` i `task_completed`.
+
+Odluke donete usput: rok je dan sa opcionim vremenom u zoni unosa, a bez vremena važi do kraja dana; „zakasneo“ i „za danas“ računaju se po kalendaru onoga ko gleda; zadatak klijenta ima dve projekcije na vremenskoj liniji (dodavanje i završetak), obe obnovljive iz reda zadatka, pa ponovno otvaranje uklanja stavku završetka; klijent zadatka sme da se promeni, a follow-up uzima klijenta iz konsultacije; odgovorni je onaj ko dodaje (izbor drugog člana samo u API-ju do timova); opis je običan tekst; dashboard prikazuje lične termine i zadatke, a klijente i fajlove cele prakse; „Needs attention“ (klijenti bez potpunih podataka za kartu) preuzet iz prototipa.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

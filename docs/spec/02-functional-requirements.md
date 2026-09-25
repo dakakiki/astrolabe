@@ -216,6 +216,8 @@ Vremenska linija se čita iz projekcione tabele `activity_events` (dokument 05),
 
 Filteri u interfejsu: `all`, `consultations`, `notes`, `files`, `charts`; API prima i `profile`. `payments` i `tasks` se dodaju sa svojim fazama.
 
+Od Faze 6b postoji i filter `appointments` (termini, pomeranja i otkazivanja), a od Faze 6c `tasks`: zadatak klijenta ima stavku u trenutku dodavanja (naslov, rok, prioritet, a kad je gotov i oznaka „završen“) i, dok je završen, drugu stavku u trenutku završetka. Ponovo otvoren zadatak gubi stavku završetka; obrisan zadatak nestaje sa vremenske linije. Filter `payments` dolazi sa uplatama (Faza 7).
+
 ## Beleške
 
 - rich-text sadržaj;
@@ -344,6 +346,17 @@ Posle MVP-a: avansi, računi, paketi konsultacija i automatske potvrde. Naplata 
 - podsetnik;
 - prikaz na dashboardu i vremenskoj liniji.
 
+### Implementirano u Fazi 6c
+
+- Zadatak ima naslov, opis (običan tekst), prioritet (visok, normalan, nizak; podrazumevano normalan) i status (otvoren ili završen). Klijent je opcion; zadatak bez klijenta je lična obaveza astrologa i nema stavku na vremenskoj liniji. Klijent zadatka može da se promeni.
+- **Follow-up** je zadatak vezan za konsultaciju: na strani konsultacije dugme „Add follow-up“ otvara formu sa naslovom „Follow up with {klijent}“ i rokom za nedelju dana; klijent je klijent konsultacije i ne bira se posebno. Konsultacija i klijent zadatka moraju se slagati.
+- Rok je dan, opciono sa vremenom, u zoni u kojoj je unet (podrazumevano zona astrologa). Bez vremena rok važi do kraja tog dana. Zadatak je **zakasneo** kada je rok prošao, a **za danas** kada ističe pre kraja današnjeg dana — oba se računaju po kalendaru onoga ko gleda. Vreme uneto u drugoj zoni prikazuje se na satu astrologa, a pri izmeni ostaje u svojoj zoni uz napomenu.
+- Završavanje je štikliranje (u listi, na profilu klijenta, na konsultaciji i na dashboardu); pamti se kada i ko ga je završio, a zadatak može ponovo da se otvori. Brisanje je soft delete.
+- Odgovorni je onaj ko je zadatak dodao; API prima i drugog aktivnog člana (`assigned_user_id`), a interfejs to dobija sa timovima. Svi članovi workspace-a vide i menjaju zadatke prakse; zadaci su interni i nikad ne idu klijentu.
+- Strana „Tasks“ (levi meni, Business) sa tabovima Open, Overdue, Today i Done i brojem zadataka na njima; tab „Tasks“ i kartica „Open tasks“ na profilu klijenta; „Follow-ups“ na strani konsultacije.
+- Dvostruki klik ne pravi dva zadatka (`Idempotency-Key`, kao kod termina).
+- Podsetnik za zadatak dolazi sa notifikacijama (Faza 7).
+
 ## Dashboard
 
 - današnji i naredni termini;
@@ -354,3 +367,17 @@ Posle MVP-a: avansi, računi, paketi konsultacija i automatske potvrde. Naplata 
 - novi dokumenti;
 - osnovni mesečni prihod;
 - opciono: značajni tranziti za klijente sa terminom u narednim danima.
+
+### Implementirano u Fazi 6c
+
+Dashboard je dan astrologa i nedelja pred njim, u njegovoj zoni, jednim zahtevom (`GET /dashboard`):
+
+- pozdrav prema dobu dana i kratak zbir (termini danas, zakasneli zadaci, zadaci za danas);
+- četiri pokazatelja: termini danas, termini u narednih 7 dana, otvoreni zadaci (od toga zakasneli i za danas) i aktivni klijenti (od toga novi ovog meseca);
+- „Next up“: današnji termini (bez otkazanih) i zakazani termini narednih 7 dana, sa klijentom, uslugom i mestom; za održan termin bez konsultacije dugme „Record consultation“, za zabeležen veza na konsultaciju;
+- zadaci: zakasneli, za danas i u narednih 7 dana, sa štikliranjem na licu mesta; follow-up je označen vezom na svoju konsultaciju;
+- nedavno aktivni klijenti i novi fajlovi (tuđi privatni se ne vide);
+- „Needs attention“: klijenti čija natalna karta ne može da se izračuna (nema datuma, mesta ili zone, ili vremena kada ono nije označeno kao nepoznato), sa vezom na dopunu podataka;
+- nov workspace (bez klijenata) i dalje vidi korake podešavanja.
+
+Termini i zadaci na dashboardu su lični (dodeljeni onome ko gleda; zadaci i nedodeljeni), a klijenti i fajlovi su cele prakse. Neplaćene konsultacije i prihod dolaze sa uplatama, a tranziti sa Fazom 7.

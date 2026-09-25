@@ -9,6 +9,7 @@ import ConsultationStatusBadge from '@/components/ConsultationStatusBadge.vue';
 import FormField from '@/components/FormField.vue';
 import NatalChart from '@/components/NatalChart.vue';
 import NotesPanel from '@/components/NotesPanel.vue';
+import TasksPanel from '@/components/TasksPanel.vue';
 import VisibilityBadge from '@/components/VisibilityBadge.vue';
 import { useForm } from '@/composables/useForm';
 import { timeZoneOptions, useLabels } from '@/composables/useLabels';
@@ -616,6 +617,8 @@ const otherZone = computed(() => {
                             </div>
                         </div>
                     </section>
+
+                    <TasksPanel :client="client" :consultation="{ id, title: heading }" />
 
                     <section class="card">
                         <div class="card-head">

@@ -6,7 +6,9 @@ const event = (type, metadata = {}, extra = {}) => ({ type, metadata, subject: {
 
 describe('describeEvent', () => {
     it('leads a consultation to its own page, worded by status', () => {
-        const entry = describeEvent(event('consultation', { status: 'completed', title: 'Natal reading', topics: 'Career' }));
+        const entry = describeEvent(
+            event('consultation', { status: 'completed', title: 'Natal reading', topics: 'Career' }),
+        );
 
         expect(entry.tone).toBe('consultation');
         expect(entry.title).toEqual(['timeline.consultation.completed', { title: 'Natal reading' }]);
@@ -15,7 +17,9 @@ describe('describeEvent', () => {
     });
 
     it('names an untitled consultation after its service', () => {
-        const entry = describeEvent(event('consultation', { status: 'completed', title: null, service: 'Solar return' }));
+        const entry = describeEvent(
+            event('consultation', { status: 'completed', title: null, service: 'Solar return' }),
+        );
 
         expect(entry.title).toEqual(['timeline.consultation.completed', { title: 'Solar return' }]);
         expect(entry.titled).toBe(true);
@@ -57,6 +61,23 @@ describe('describeEvent', () => {
             fields: ['time'],
         });
         expect(describeEvent(event('client_updated', { fields: ['email', 'tags'] })).fields).toEqual(['email', 'tags']);
+    });
+
+    it('names a task and its completion, and leads both to the tasks tab', () => {
+        const added = describeEvent(
+            event('task', { title: 'Send the summary', due_date: '2026-10-09', priority: 'high' }),
+        );
+
+        expect(added).toMatchObject({
+            tone: 'task',
+            title: ['timeline.task', { title: 'Send the summary' }],
+            task: { due_date: '2026-10-09', priority: 'high' },
+            to: { tab: 'tasks' },
+        });
+        expect(describeEvent(event('task_completed', {}, { summary: 'Send the summary' })).title).toEqual([
+            'timeline.taskCompleted',
+            { title: 'Send the summary' },
+        ]);
     });
 
     it('never fails on an entry type it does not know', () => {

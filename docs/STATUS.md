@@ -1,6 +1,6 @@
 # Status projekta — AstroLabe
 
-Stanje na dan **24. 9. 2026**, posle dela 6b Faze 6. Ovaj dokument je polazna tačka za svaku novu radnu sesiju: šta je gotovo, gde se šta nalazi, šta je odlučeno i šta sledi.
+Stanje na dan **25. 9. 2026**, posle dela 6c — Faza 6 je završena. Ovaj dokument je polazna tačka za svaku novu radnu sesiju: šta je gotovo, gde se šta nalazi, šta je odlučeno i šta sledi.
 
 ## Gde je šta
 
@@ -16,7 +16,7 @@ Stanje na dan **24. 9. 2026**, posle dela 6b Faze 6. Ovaj dokument je polazna ta
 | GeoNames | `storage/app/private/geonames/` (van Git-a); `countryInfo.txt` je i u `database/data/geonames` |
 | Fajlovi klijenata | `storage/app/private/attachments/` (disk `attachments`, van Git-a); u produkciji privatni S3-kompatibilan bucket (`ATTACHMENTS_DISK`) |
 | Lokalni email | `storage/logs/laravel.log` (`MAIL_MAILER=log`) |
-| Test nalog | `mila.e2e@example.com` (samo lokalna baza; lozinka nije u repou — po potrebi se resetuje preko „Forgot password“, link je u `laravel.log`). Klijenti: „Ana Marković“ (konsultacija „Natal reading“ sa snimkom karte iz Faze 4 — prikazuje se kao stari snimak, samo pozicije), „Test Tromsø (Faza 5)“ (69,6°N, za Porphyry zamenu; konsultacija „Test snimka (Faza 5)“ sa novim snimkom) i „Test Nepoznato vreme (Faza 5)“. Iz Faze 6a: usluge „Natal reading“, „Horary question“ i neaktivna „Old workshop“ (JPY); povezana osoba „Marko Petrović“ (partner Ane, sa kartom); Ana ↔ „Test Nepoznato vreme“ (brat/sestra); klijent „Luka Test (Faza 6a)“ nastao pretvaranjem povezane osobe; konsultacija „Horary question“ kod Ane. Iz Faze 6b: termin Ane 25. 9. u 10:00 (održan, iz njega zabeležena konsultacija „Natal reading“) i termin „Test Tromsø“ (otkazan pa ponovo zakazan i pomeren na 2. 10. u 11:00) |
+| Test nalog | `mila.e2e@example.com` (samo lokalna baza; lozinka nije u repou — po potrebi se resetuje preko „Forgot password“, link je u `laravel.log`). Klijenti: „Ana Marković“ (konsultacija „Natal reading“ sa snimkom karte iz Faze 4 — prikazuje se kao stari snimak, samo pozicije), „Test Tromsø (Faza 5)“ (69,6°N, za Porphyry zamenu; konsultacija „Test snimka (Faza 5)“ sa novim snimkom) i „Test Nepoznato vreme (Faza 5)“. Iz Faze 6a: usluge „Natal reading“, „Horary question“ i neaktivna „Old workshop“ (JPY); povezana osoba „Marko Petrović“ (partner Ane, sa kartom); Ana ↔ „Test Nepoznato vreme“ (brat/sestra); klijent „Luka Test (Faza 6a)“ nastao pretvaranjem povezane osobe; konsultacija „Horary question“ kod Ane. Iz Faze 6b: termin Ane 25. 9. u 10:00 (održan, iz njega zabeležena konsultacija „Natal reading“) i termin „Test Tromsø“ (otkazan pa ponovo zakazan i pomeren na 2. 10. u 11:00). Iz Faze 6c: zadaci — kod Ane završen „Send Ana the Saturn transit summary“ (rok 24. 9. u 16:30, visok prioritet) i otvoren follow-up „Follow up with Ana Marković“ uz konsultaciju iz termina (rok 2. 10.); „Ask Tromsø client for a birth certificate scan“ (završen); „Renew the ephemeris licence quote“ (bez klijenta, nizak, 26. 9.); „Prepare the solar return for Luka“ (1. 10. u 09:00 po New York-u) |
 
 ## Urađeno
 
@@ -30,9 +30,10 @@ Stanje na dan **24. 9. 2026**, posle dela 6b Faze 6. Ovaj dokument je polazna ta
 | 4 | `8e7692e` | Konsultacije, beleške sa vidljivošću, fajlovi i linkovi u privatnom storage-u, vremenska linija (`activity_events`), snimak karte na konsultaciji, profil klijenta sa tabovima |
 | 5 | `50c0fc6` | Uglovi i kuće (10 sistema, izbor na ekranu karte), Porphyry umesto Placidusa/Koch-a iznad polarnog kruga, aspekti sa orbima po workspace-u (`aspect_orbs`, Settings → Chart & methods), SVG točak, tabele kuspida i aspekata, snimak sa svim tim na konsultaciji |
 | 6a | `97a703f` | Usluge (cena u najmanjoj jedinici valute, boja iz tokena, online/uživo, avans kao oznaka, metode; brisanje samo neiskorišćenih), usluga na konsultaciji (trajanje i metode iz usluge, naziv na listi i vremenskoj liniji); povezane osobe sa podacima rođenja i sopstvenom kartom, veze između klijenata vidljive sa obe strane, „Make a client“ bez ponovnog unosa |
-| 6b | „Phase 6b: appointments and the calendar“ | Kalendar (dan, nedelja, mesec, agenda; agenda na telefonu), termini u UTC sa zonom unosa, kreiranje iz praznog polja, pomeranje i otkazivanje uz razlog bez brisanja, preklapanje kao upozorenje uz svesno čuvanje (409 + `allow_overlap`), `Idempotency-Key`, konsultacija iz termina, karta klijenta iz detalja termina, termini na vremenskoj liniji |
+| 6b | `4881d15` | Kalendar (dan, nedelja, mesec, agenda; agenda na telefonu), termini u UTC sa zonom unosa, kreiranje iz praznog polja, pomeranje i otkazivanje uz razlog bez brisanja, preklapanje kao upozorenje uz svesno čuvanje (409 + `allow_overlap`), `Idempotency-Key`, konsultacija iz termina, karta klijenta iz detalja termina, termini na vremenskoj liniji |
+| 6c | „Phase 6c: tasks and the dashboard“ | Zadaci (klijent opcion, prioritet, rok kao dan ili dan i vreme u zoni unosa, štikliranje uz zapis ko i kada, ponovno otvaranje, soft delete), strana Tasks (otvoreni / zakasneli / danas / završeni), tab i kartica na profilu klijenta, follow-up sa konsultacije, zadaci na vremenskoj liniji (dodavanje i završetak); dashboard (termini danas i narednih 7 dana, zadaci, nedavno aktivni klijenti, novi fajlovi, klijenti bez potpunih podataka za kartu) |
 
-Testovi posle dela 6b: **267 PHP** (2034 provere; od toga 12 referentnih testova pozicija prema NASA JPL Horizons i 29 testova uglova i kuća prema nezavisnim formulama — oba skupa se izvršavaju samo gde postoji `swetest`) i **86 Vitest**; CI: GitHub Actions (Pint, Prettier, Vitest, build, PHPUnit na MariaDB 11.8).
+Testovi posle dela 6c: **290 PHP** (2224 provere; od toga 12 referentnih testova pozicija prema NASA JPL Horizons i 29 testova uglova i kuća prema nezavisnim formulama — oba skupa se izvršavaju samo gde postoji `swetest`) i **97 Vitest**; CI: GitHub Actions (Pint, Prettier, Vitest, build, PHPUnit na MariaDB 11.8).
 
 ## Ključne odluke
 
@@ -65,6 +66,12 @@ Testovi posle dela 6b: **267 PHP** (2034 provere; od toga 12 referentnih testova
   - `Idempotency-Key` na kreiranju (middleware `idempotent`, keš dan dana, samo uspešni odgovori);
   - bez brisanja termina; otkazivanje uz obavezan razlog, otkazan može ponovo da se zakaže (uz proveru preklapanja); pomeranje menja isti red i beleži „pomeren sa X na Y“;
   - konsultacija iz termina (najviše jedna, provera pod zaključavanjem), termin tada postaje „održan“ i ustupa mesto konsultaciji na vremenskoj liniji.
+- **Zadaci i dashboard (Faza 6c):**
+  - rok je dan sa opcionim vremenom u zoni unosa (`due_date`, `due_time`, `timezone`) i UTC rok `due_at` (vreme, ili početak sledećeg dana); „zakasneo“ i „za danas“ se računaju po kalendaru onoga ko gleda; vreme iz druge zone se prikazuje na satu astrologa, a menja u svojoj zoni;
+  - klijent zadatka je opcion i sme da se promeni; follow-up je zadatak sa `consultation_id` i uzima klijenta iz konsultacije;
+  - vremenska linija: zadatak ima dve projekcije (`task` pri dodavanju, `task_completed` pri završetku dok je završen) — `ProjectsActivity` sada podržava više stavki po redu; ponovno otvaranje uklanja stavku završetka, sve se obnavlja iz reda;
+  - odgovorni je onaj ko dodaje; drugi član samo kroz API do timova; svi članovi vide zadatke prakse; opis je običan tekst; `Idempotency-Key` i na kreiranju zadatka;
+  - dashboard je jedan zahtev (`GET /dashboard`): lični termini i zadaci (i nedodeljeni), klijenti i fajlovi cele prakse; „Needs attention“ = klijenti čija karta ne može da se izračuna.
 
 ## Otvoreno — čeka odluku ili akciju
 
@@ -78,21 +85,27 @@ Testovi posle dela 6b: **267 PHP** (2034 provere; od toga 12 referentnih testova
 8. Odloženo iz Faze 5: izvoz karte u PDF (Faza 9); izbor sistema kuća pri prilaganju snimka postoji u API-ju (`house_system`), ali ne i u interfejsu konsultacije.
 9. Odloženo iz Faze 6b: prevlačenje termina mišem; filter po astrologu (kad dođu timovi); podsetnici (Faza 7); tranziti za datum termina (Faza 7); ponavljajući termini (kasnije, dokument 10).
 10. Odloženo iz Faze 6a: sinastrija i poređenje karata („Compare charts“ u prototipu) — „Kasnije“ u dokumentu 02; avans je samo oznaka dok ne dođu uplate (Faza 7); nema stavke na vremenskoj liniji za dodatu povezanu osobu.
-11. Lokalno: stara baza `astrolabe.online__10.2026` (sa tačkom) može da se obriše; test workspace je podešen na **sidereal/Lahiri i Whole Sign** (iz testa u Fazi 1) — menja se u Settings → Chart & methods. Tri test klijenta iz Faze 5 mogu da se arhiviraju.
+11. Odloženo iz Faze 6c: podsetnik za zadatak i „Remind me“ iz prototipa (Faza 7, notifikacije); izbor odgovornog u interfejsu i filter „moji zadaci“ (timovi); fajlovi na zadatku (dokument 02 ih pominje; `attachments` je polimorfna, pa je to mala dopuna kad zatreba); broj zadataka u levom meniju; neplaćene konsultacije, prihod i tranziti na dashboardu (Faza 7).
+12. Lokalno: stara baza `astrolabe.online__10.2026` (sa tačkom) može da se obriše; test workspace je podešen na **sidereal/Lahiri i Whole Sign** (iz testa u Fazi 1) — menja se u Settings → Chart & methods. Tri test klijenta iz Faze 5 mogu da se arhiviraju.
 
 ## Sledeće
 
-Faze 0–5 i delovi 6a i 6b su završeni. Sledi **6c — zadaci i dashboard** (tačke 5 i 6 obima ispod).
+Faze 0–6 su završene (Faza 6 u tri dela: 6a, 6b, 6c). Po dokumentu 04 sledi **Faza 7 — tranziti i finansije**. Pre nje ima smisla pokazati Fazu 6 astrolozima iz validacione grupe (dokument 01): Faza 6 je građena kao predlog, a razgovori mogu promeniti redosled i podrazumevane vrednosti.
 
-Za 6c, nacrt koji treba potvrditi u kodu: tabela `tasks` po dokumentu 05 (`priority`: `low` / `normal` / `high`; `status`: `open` / `done`, uz `completed_at`); zadatak opciono vezan za klijenta i konsultaciju (iste klijente), rok kao datum ili datum i vreme u zoni korisnika; strana Zadaci (otvoreni, zakasneli, danas, završeni), tab „Tasks“ na profilu klijenta, „Follow-up“ dugme na konsultaciji koje pravi zadatak sa rokom; stavka na vremenskoj liniji (projekcija zadatka i zapis završetka). Dashboard: današnji i naredni termini (iz 6b), zakasneli i današnji zadaci, nedavno aktivni klijenti, novi fajlovi; neplaćene konsultacije i prihod čekaju Fazu 7, tranziti takođe. Podsetnik za zadatak dolazi sa notifikacijama (Faza 7).
+Obim Faze 7 (dokumenti 04, 11, 02 „Plaćanja“ i „Dashboard“, 10 „Notifikacije“, 05 `payments`):
 
-Put po dokumentu 04 (za kasnije odluke): Faza 6 se gradi kao predlog; posle 6c ima smisla pokazati je astrolozima iz validacione grupe.
+- tranziti prema natalnoj karti, sa izborom datuma; prikaz pred konsultaciju (i iz termina) i „značajni tranziti“ na dashboardu; računaju se po zahtevu, bez dugoročnog keša (dokument 11);
+- evidencija uplata (`payments`: iznos u najmanjoj jedinici + valuta, datum, način, status `pending` / `partially_paid` / `paid` / `refunded` / `cancelled`, veza sa konsultacijom ili terminom, referenca), dugovanja po klijentu, filter `payments` na vremenskoj liniji;
+- email notifikacije i podsetnici (termin, zadatak — „Remind me“ iz prototipa), uz podešavanja;
+- osnovni pokazatelji na dashboardu: prihod meseca, neplaćeno.
 
-Specifikacija za Fazu 6: 02 (Usluge, Kalendar i termini, Povezane osobe, Zadaci, Dashboard), 05 (`services`, `appointments`, `related_people`, `client_relationships`, `tasks`), 10 (kalendar), prototip: `calendar.html`, `services.html`, `tasks.html`, `dashboard.html`, tab „Related“ u `client.html`.
+Predlog podele (za potvrdu): **7a** tranziti, **7b** uplate i pokazatelji, **7c** notifikacije i podsetnici — svaki sa commit-om, zelenim CI-jem i tačkom za pauzu.
 
-### Plan Faze 6 (prihvaćen 24. 9. 2026)
+Pitanja pre Faze 7: orbi za tranzite (isti kao natalni ili uži — prototip za dashboard uzima spore planete, glavne aspekte i orb do 1,6°); da li je avans (oznaka na usluzi) deo 7b; mail provajder za produkciju i vreme slanja podsetnika.
 
-Procena iz dokumenta 04: 5–8 nedelja, najveća faza. Urađeno: 6a (tačke 1 i 4) i 6b (tačke 2 i 3). Ostaje: 6c (tačke 5 i 6).
+### Plan Faze 6 (prihvaćen 24. 9. 2026, završen 25. 9. 2026)
+
+Procena iz dokumenta 04: 5–8 nedelja, najveća faza. Urađeno: 6a (tačke 1 i 4), 6b (tačke 2 i 3) i 6c (tačke 5 i 6).
 
 **Obim:**
 

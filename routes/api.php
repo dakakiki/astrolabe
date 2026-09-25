@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\ClientRelationshipController;
 use App\Http\Controllers\Api\V1\ClientTimelineController;
 use App\Http\Controllers\Api\V1\ConsultationChartController;
 use App\Http\Controllers\Api\V1\ConsultationController;
+use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\NoteController;
 use App\Http\Controllers\Api\V1\PlaceController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\Api\V1\RelatedPersonConversionController;
 use App\Http\Controllers\Api\V1\ServiceController;
 use App\Http\Controllers\Api\V1\StatusController;
 use App\Http\Controllers\Api\V1\TagController;
+use App\Http\Controllers\Api\V1\TaskController;
 use App\Http\Controllers\Api\V1\WorkspaceAstrologyMethodController;
 use App\Http\Controllers\Api\V1\WorkspaceController;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +43,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
         Route::middleware('verified')->group(function () {
             Route::get('/reference-data', ReferenceDataController::class)->name('reference-data');
+            Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
             Route::get('/workspace', [WorkspaceController::class, 'show'])->name('workspace.show');
             Route::patch('/workspace', [WorkspaceController::class, 'update'])->name('workspace.update');
@@ -94,6 +97,10 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 ->name('consultations.chart.destroy');
 
             Route::apiResource('notes', NoteController::class);
+
+            // Tasks and follow-ups (docs/spec/02, "Zadaci i follow-up").
+            Route::post('/tasks', [TaskController::class, 'store'])->middleware('idempotent')->name('tasks.store');
+            Route::apiResource('tasks', TaskController::class)->except('store');
 
             Route::get('/attachments', [AttachmentController::class, 'index'])->name('attachments.index');
             Route::post('/attachments', [AttachmentController::class, 'store'])

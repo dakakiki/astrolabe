@@ -13,6 +13,8 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 > Faza 6a (implementirano): `services` sa pivot tabelom `service_astrology_method`; `consultations.service_id`; `related_people` bez podataka rođenja u sebi — oni su u zasebnoj tabeli `related_person_birth_details` iste strukture kao `client_birth_details`; `related_people.converted_client_id`; `client_relationships` sa jedinstvenim parovima; `chart_calculations.subject_type` dobija vrednost `related_person`.
 >
 > Faza 6b (implementirano): `appointments` sa `created_by`, `cancellation_reason`, `cancelled_at`; `consultations.appointment_id`; nove vrste događaja u `activity_events`.
+>
+> Faza 6c (implementirano): `tasks` dobija rok kako je unet (`due_date`, `due_time`, `timezone`) uz `due_at` kao UTC rok, i `completed_by`; nove vrste događaja `task` i `task_completed` u `activity_events`.
 
 ## Nalozi i workspace
 
@@ -389,6 +391,8 @@ Metode za koje je usluga namenjena; bez njih — bilo koja.
 - `completed_at`, nullable
 - timestamps
 - soft deletes
+
+> Faza 6c (implementirano): rok se čuva kako je unet — `due_date` (dan), `due_time` (nullable, lokalno vreme) i `timezone` (IANA zona unosa) — a `due_at` je izveden UTC rok: uneto vreme, ili početak sledećeg dana kada vremena nema, pa je „zakasneo“ jedno poređenje (`due_at <= now`). Dodat `completed_by` (nullable). `priority` — `low`, `normal`, `high`; `status` — `open`, `done`. `created_by` i `assigned_user_id` su nullable sa `nullOnDelete`; `client_id` briše zadatak sa klijentom, `consultation_id` se prazni. Indeksi: `(workspace_id, status, due_at)`, `(workspace_id, client_id, status)`, `(workspace_id, consultation_id)`. Na vremenskoj liniji zadatak klijenta ima projekcije `task` (u trenutku dodavanja) i `task_completed` (u trenutku završetka, dok je završen); obe se grade iz reda zadatka.
 
 ## Vremenska linija
 
