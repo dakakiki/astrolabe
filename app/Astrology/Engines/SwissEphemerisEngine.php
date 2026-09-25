@@ -46,26 +46,13 @@ class SwissEphemerisEngine implements EphemerisEngine
 
     public function calculate(ChartRequest $request): ChartResult
     {
-        $arguments = [
-            '-bj'.sprintf('%.8f', $request->julianDayUt),
-            '-ut',
-            '-p'.implode('', array_map(fn (CelestialBody $body) => $body->swetestLetter(), $request->bodies)),
-            // Name, number, longitude, speed: the name tells house lines from planets.
-            '-fPpls',
-            '-g|',
-            '-head',
-            '-eswe',
-            '-edir'.$this->ephemerisPath,
-        ];
+        // Name, number, longitude, speed: the name tells house lines from planets.
+        $arguments = $this->arguments($request, '-fPpls');
 
         $houses = $request->wantsHouses();
 
         if ($houses) {
             $arguments[] = sprintf('-house%.6f,%.6f,%s', $request->longitude, $request->latitude, $request->houseSystem->swissEphemerisCode());
-        }
-
-        if ($request->zodiacMode === ZodiacMode::Sidereal && $request->ayanamsa !== null) {
-            $arguments[] = '-sid'.$request->ayanamsa->swissEphemerisMode();
         }
 
         $rows = $this->rows($this->run($arguments));
@@ -77,6 +64,72 @@ class SwissEphemerisEngine implements EphemerisEngine
             ephemerisVersion: $this->ephemerisVersion(),
             houses: $houses ? $this->parseHouses($rows, $request->houseSystem) : null,
         );
+    }
+
+    /**
+     * One swetest run with `-n` steps of `-s` days; each line starts with its
+     * Julian day ("2461309.00|Saturn|6|12.0059044|-0.0768925").
+     */
+    public function series(ChartRequest $request, int $steps, float $stepDays = 1.0): array
+    {
+        $arguments = [
+            ...$this->arguments($request, '-fJPpls'),
+            '-n'.$steps,
+            '-s'.rtrim(rtrim(sprintf('%.6F', $stepDays), '0'), '.'),
+        ];
+
+        $output = $this->run($arguments);
+        $moments = [];
+
+        foreach (preg_split('/\R/', trim($output)) as $line) {
+            $columns = array_map('trim', explode('|', $line));
+
+            if (count($columns) < 5 || ! is_numeric($columns[0]) || ! is_numeric($columns[2])) {
+                continue;
+            }
+
+            $body = CelestialBody::fromSwissEphemerisNumber((int) $columns[2]);
+
+            if ($body !== null) {
+                $moments[$columns[0]][$body->value] = new PlanetPosition($body, (float) $columns[3], (float) $columns[4]);
+            }
+        }
+
+        if (count($moments) !== $steps) {
+            throw new EphemerisException(sprintf('swetest returned %d of %d moments.', count($moments), $steps));
+        }
+
+        return array_values(array_map(fn (array $positions) => array_map(
+            fn (CelestialBody $body) => $positions[$body->value]
+                ?? throw new EphemerisException("swetest returned no position for {$body->value}."),
+            $request->bodies,
+        ), $moments));
+    }
+
+    /**
+     * What every run shares: the moment, the bodies, the output format and the
+     * zodiac. Houses are added by calculate() alone.
+     *
+     * @return list<string>
+     */
+    private function arguments(ChartRequest $request, string $format): array
+    {
+        $arguments = [
+            '-bj'.sprintf('%.8f', $request->julianDayUt),
+            '-ut',
+            '-p'.implode('', array_map(fn (CelestialBody $body) => $body->swetestLetter(), $request->bodies)),
+            $format,
+            '-g|',
+            '-head',
+            '-eswe',
+            '-edir'.$this->ephemerisPath,
+        ];
+
+        if ($request->zodiacMode === ZodiacMode::Sidereal && $request->ayanamsa !== null) {
+            $arguments[] = '-sid'.$request->ayanamsa->swissEphemerisMode();
+        }
+
+        return $arguments;
     }
 
     public function version(): string

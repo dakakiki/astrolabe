@@ -23,7 +23,6 @@ class AspectCalculator
      */
     public function between(array $points, AspectSettings $settings): array
     {
-        $types = $settings->enabledTypes();
         $aspects = [];
 
         foreach ($points as $i => $first) {
@@ -33,36 +32,73 @@ class AspectCalculator
                     continue;
                 }
 
-                $delta = self::signedDistance($first['longitude'], $second['longitude']);
-                $distance = abs($delta);
-                $luminary = $first['luminary'] || $second['luminary'];
-                $found = null;
-
-                foreach ($types as $type) {
-                    $orb = abs($distance - $type->angle());
-
-                    if ($orb <= $settings->orbFor($type, $luminary) && ($found === null || $orb < $found[1])) {
-                        $found = [$type, $orb];
-                    }
+                if ($aspect = $this->closest($first, $second, $settings)) {
+                    $aspects[] = $aspect;
                 }
-
-                if ($found === null) {
-                    continue;
-                }
-
-                [$type, $orb] = $found;
-
-                $aspects[] = new Aspect(
-                    first: $first['key'],
-                    second: $second['key'],
-                    type: $type,
-                    orb: $orb,
-                    applying: self::applying($delta, $type->angle(), $first['speed'], $second['speed']),
-                );
             }
         }
 
         return $aspects;
+    }
+
+    /**
+     * Transits to a natal chart (Phase 7a): every transiting point against
+     * every natal one, the transit first. The natal chart stands still, so a
+     * transit applies or separates by the transiting point's motion alone.
+     *
+     * @param  list<array{key: string, longitude: float, speed: float|null, luminary: bool, angle: bool}>  $transits
+     * @param  list<array{key: string, longitude: float, speed: float|null, luminary: bool, angle: bool}>  $natal
+     * @return list<Aspect>
+     */
+    public function across(array $transits, array $natal, AspectSettings $settings): array
+    {
+        $aspects = [];
+
+        foreach ($transits as $transit) {
+            foreach ($natal as $point) {
+                if ($aspect = $this->closest($transit, ['speed' => 0.0] + $point, $settings)) {
+                    $aspects[] = $aspect;
+                }
+            }
+        }
+
+        return $aspects;
+    }
+
+    /**
+     * The closest enabled aspect between two points within its orb, if any.
+     *
+     * @param  array{key: string, longitude: float, speed: float|null, luminary: bool, angle: bool}  $first
+     * @param  array{key: string, longitude: float, speed: float|null, luminary: bool, angle: bool}  $second
+     */
+    private function closest(array $first, array $second, AspectSettings $settings): ?Aspect
+    {
+        $delta = self::signedDistance($first['longitude'], $second['longitude']);
+        $distance = abs($delta);
+        $luminary = $first['luminary'] || $second['luminary'];
+        $found = null;
+
+        foreach ($settings->enabledTypes() as $type) {
+            $orb = abs($distance - $type->angle());
+
+            if ($orb <= $settings->orbFor($type, $luminary) && ($found === null || $orb < $found[1])) {
+                $found = [$type, $orb];
+            }
+        }
+
+        if ($found === null) {
+            return null;
+        }
+
+        [$type, $orb] = $found;
+
+        return new Aspect(
+            first: $first['key'],
+            second: $second['key'],
+            type: $type,
+            orb: $orb,
+            applying: self::applying($delta, $type->angle(), $first['speed'], $second['speed']),
+        );
     }
 
     /**

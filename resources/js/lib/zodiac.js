@@ -33,6 +33,7 @@ export const BODY_GLYPHS = Object.fromEntries(
         uranus: '♅',
         neptune: '♆',
         pluto: '♇',
+        chiron: '⚷',
         true_node: '☊',
         mean_node: '☊',
     }).map(([body, glyph]) => [body, glyph + TEXT]),

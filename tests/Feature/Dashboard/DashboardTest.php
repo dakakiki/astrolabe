@@ -2,7 +2,10 @@
 
 namespace Tests\Feature\Dashboard;
 
+use App\Astrology\Contracts\EphemerisEngine;
+use App\Astrology\Support\JulianDay;
 use App\Enums\AppointmentStatus;
+use App\Enums\CelestialBody;
 use App\Enums\ClientStatus;
 use App\Models\Appointment;
 use App\Models\Client;
@@ -158,6 +161,45 @@ class DashboardTest extends TestCase
         $response->assertJsonPath('data.counts.incomplete_birth_data', 2);
     }
 
+    public function test_slow_transits_for_the_clients_seen_this_week(): void
+    {
+        $withChart = Client::withoutGlobalScopes()->findOrFail($this->actingAs($this->user)->postJson('/api/v1/clients', [
+            'first_name' => 'Vera',
+            'birth' => [
+                'birth_date' => '1985-07-15', 'birth_time' => '14:30', 'time_accuracy' => 'exact',
+                'birth_place' => 'Novi Sad', 'birth_country_code' => 'RS',
+                'latitude' => 45.25167, 'longitude' => 19.83694, 'birth_timezone' => 'Europe/Belgrade',
+            ],
+        ])->json('data.id'));
+        $sun = collect($this->actingAs($this->user)->getJson("/api/v1/clients/{$withChart->id}/chart")->json('data.positions'))
+            ->firstWhere('body', 'sun')['longitude'];
+
+        $appointment = Appointment::factory()->forClient($withChart, $this->user)->at('2026-10-08 09:00')->create();
+        Appointment::factory()->forClient($withChart, $this->user)->at('2026-10-09 09:00')->create();
+        // Ana has no birth data; a colleague's client is not on this dashboard.
+        $this->appointment('2026-10-07 09:00');
+        Appointment::factory()->forClient($withChart, $this->memberOf($this->user))->at('2026-10-07 11:00')->create();
+
+        // Saturn 0.4° from squaring the natal Sun, Jupiter 1.5° from a trine (too wide here),
+        // Mars exactly conjunct (too fast to matter here).
+        $now = JulianDay::fromMoment(CarbonImmutable::parse('2026-10-05 10:00', 'UTC'));
+        app(EphemerisEngine::class)
+            ->fix(CelestialBody::Saturn, $sun + 90.4, -0.03, $now)
+            ->fix(CelestialBody::Jupiter, $sun + 121.5, 0.1, $now)
+            ->fix(CelestialBody::Mars, $sun, 0.6, $now);
+
+        $response = $this->actingAs($this->user)->getJson('/api/v1/dashboard')->assertOk()
+            ->assertJsonPath('data.transits.moment', '2026-10-05T10:00:00Z')
+            ->assertJsonCount(1, 'data.transits.clients')
+            ->assertJsonPath('data.transits.clients.0.client.full_name', $withChart->fullName())
+            ->assertJsonPath('data.transits.clients.0.appointment.id', $appointment->id);
+
+        $contacts = collect($response->json('data.transits.clients.0.contacts'));
+        $this->assertSame(['saturn:square:sun'], $contacts->map(fn ($c) => "{$c['transit']}:{$c['type']}:{$c['natal']}")->all());
+        $this->assertTrue($contacts[0]['applying']);
+        $this->assertNotEmpty($contacts[0]['exact']);
+    }
+
     public function test_a_new_practice_gets_an_empty_dashboard(): void
     {
         $fresh = User::factory()->withWorkspace()->create();
@@ -167,6 +209,7 @@ class DashboardTest extends TestCase
             ->assertJsonPath('data.appointments.today', [])
             ->assertJsonPath('data.recent_files', [])
             ->assertJsonPath('data.incomplete_birth_data', [])
+            ->assertJsonPath('data.transits.clients', [])
             ->assertJsonPath('data.counts.clients_total', 0);
     }
 }

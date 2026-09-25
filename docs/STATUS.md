@@ -1,6 +1,6 @@
 # Status projekta — AstroLabe
 
-Stanje na dan **25. 9. 2026**, posle dela 6c — Faza 6 je završena. Ovaj dokument je polazna tačka za svaku novu radnu sesiju: šta je gotovo, gde se šta nalazi, šta je odlučeno i šta sledi.
+Stanje na dan **25. 9. 2026**: Faza 6 je završena, Faza 7a je u radu (prvi deo commit-ovan, vidi „Sledeće“). Ovaj dokument je polazna tačka za svaku novu radnu sesiju: šta je gotovo, gde se šta nalazi, šta je odlučeno i šta sledi.
 
 ## Gde je šta
 
@@ -12,7 +12,7 @@ Stanje na dan **25. 9. 2026**, posle dela 6c — Faza 6 je završena. Ovaj dokum
 | Specifikacija (izvor istine) | `docs/spec` u repou; original u `C:\dev\astrology-practice-saas\doc\V2 Claude` (izmene se rade u originalu pa kopiraju u repo) |
 | Klikabilni prototip (dizajn) | `C:\dev\astrology-practice-saas\prototype\v1\prototype` — nije u repou |
 | Baza | MariaDB 10.6.5, `127.0.0.1:3307`, `root` bez lozinke; `astrolabe_online__10_2026` i test baza `astrolabe_online__10_2026_test` |
-| Swiss Ephemeris | `storage/app/private/swisseph/swetest64.exe` + `ephe/sepl_18.se1`, `ephe/semo_18.se1` (van Git-a) |
+| Swiss Ephemeris | `storage/app/private/swisseph/swetest64.exe` + `ephe/sepl_18.se1`, `ephe/semo_18.se1`, `ephe/seas_18.se1` (Hiron, od Faze 7a; van Git-a — na produkciji isti fajlovi) |
 | GeoNames | `storage/app/private/geonames/` (van Git-a); `countryInfo.txt` je i u `database/data/geonames` |
 | Fajlovi klijenata | `storage/app/private/attachments/` (disk `attachments`, van Git-a); u produkciji privatni S3-kompatibilan bucket (`ATTACHMENTS_DISK`) |
 | Lokalni email | `storage/logs/laravel.log` (`MAIL_MAILER=log`) |
@@ -31,9 +31,9 @@ Stanje na dan **25. 9. 2026**, posle dela 6c — Faza 6 je završena. Ovaj dokum
 | 5 | `50c0fc6` | Uglovi i kuće (10 sistema, izbor na ekranu karte), Porphyry umesto Placidusa/Koch-a iznad polarnog kruga, aspekti sa orbima po workspace-u (`aspect_orbs`, Settings → Chart & methods), SVG točak, tabele kuspida i aspekata, snimak sa svim tim na konsultaciji |
 | 6a | `97a703f` | Usluge (cena u najmanjoj jedinici valute, boja iz tokena, online/uživo, avans kao oznaka, metode; brisanje samo neiskorišćenih), usluga na konsultaciji (trajanje i metode iz usluge, naziv na listi i vremenskoj liniji); povezane osobe sa podacima rođenja i sopstvenom kartom, veze između klijenata vidljive sa obe strane, „Make a client“ bez ponovnog unosa |
 | 6b | `4881d15` | Kalendar (dan, nedelja, mesec, agenda; agenda na telefonu), termini u UTC sa zonom unosa, kreiranje iz praznog polja, pomeranje i otkazivanje uz razlog bez brisanja, preklapanje kao upozorenje uz svesno čuvanje (409 + `allow_overlap`), `Idempotency-Key`, konsultacija iz termina, karta klijenta iz detalja termina, termini na vremenskoj liniji |
-| 6c | „Phase 6c: tasks and the dashboard“ | Zadaci (klijent opcion, prioritet, rok kao dan ili dan i vreme u zoni unosa, štikliranje uz zapis ko i kada, ponovno otvaranje, soft delete), strana Tasks (otvoreni / zakasneli / danas / završeni), tab i kartica na profilu klijenta, follow-up sa konsultacije, zadaci na vremenskoj liniji (dodavanje i završetak); dashboard (termini danas i narednih 7 dana, zadaci, nedavno aktivni klijenti, novi fajlovi, klijenti bez potpunih podataka za kartu) |
+| 6c | `3a48e27` | Zadaci (klijent opcion, prioritet, rok kao dan ili dan i vreme u zoni unosa, štikliranje uz zapis ko i kada, ponovno otvaranje, soft delete), strana Tasks (otvoreni / zakasneli / danas / završeni), tab i kartica na profilu klijenta, follow-up sa konsultacije, zadaci na vremenskoj liniji (dodavanje i završetak); dashboard (termini danas i narednih 7 dana, zadaci, nedavno aktivni klijenti, novi fajlovi, klijenti bez potpunih podataka za kartu) |
 
-Testovi posle dela 6c: **290 PHP** (2224 provere; od toga 12 referentnih testova pozicija prema NASA JPL Horizons i 29 testova uglova i kuća prema nezavisnim formulama — oba skupa se izvršavaju samo gde postoji `swetest`) i **97 Vitest**; CI: GitHub Actions (Pint, Prettier, Vitest, build, PHPUnit na MariaDB 11.8).
+Testovi posle prvog dela 7a: **310 PHP** (2397 provera; od toga referentni testovi pozicija prema NASA JPL Horizons, sada i za Hiron, i 29 testova uglova i kuća prema nezavisnim formulama — oba skupa se izvršavaju samo gde postoji `swetest`) i **103 Vitest**; CI: GitHub Actions (Pint, Prettier, Vitest, build, PHPUnit na MariaDB 11.8).
 
 ## Ključne odluke
 
@@ -90,18 +90,32 @@ Testovi posle dela 6c: **290 PHP** (2224 provere; od toga 12 referentnih testova
 
 ## Sledeće
 
-Faze 0–6 su završene (Faza 6 u tri dela: 6a, 6b, 6c). Po dokumentu 04 sledi **Faza 7 — tranziti i finansije**. Pre nje ima smisla pokazati Fazu 6 astrolozima iz validacione grupe (dokument 01): Faza 6 je građena kao predlog, a razgovori mogu promeniti redosled i podrazumevane vrednosti.
+Faze 0–6 su završene (Faza 6 u tri dela: 6a, 6b, 6c). Sledi **Faza 7 — tranziti i finansije**, u tri dela: **7a** tranziti (u radu), **7b** uplate i pokazatelji, **7c** obaveštenja i podsetnici — svaki sa commit-om, zelenim CI-jem i tačkom za pauzu. Korisnik je odlučio da se ide odmah, pre validacionih razgovora.
 
-Obim Faze 7 (dokumenti 04, 11, 02 „Plaćanja“ i „Dashboard“, 10 „Notifikacije“, 05 `payments`):
+### Plan Faze 7 (prihvaćen 25. 9. 2026)
 
-- tranziti prema natalnoj karti, sa izborom datuma; prikaz pred konsultaciju (i iz termina) i „značajni tranziti“ na dashboardu; računaju se po zahtevu, bez dugoročnog keša (dokument 11);
-- evidencija uplata (`payments`: iznos u najmanjoj jedinici + valuta, datum, način, status `pending` / `partially_paid` / `paid` / `refunded` / `cancelled`, veza sa konsultacijom ili terminom, referenca), dugovanja po klijentu, filter `payments` na vremenskoj liniji;
-- email notifikacije i podsetnici (termin, zadatak — „Remind me“ iz prototipa), uz podešavanja;
-- osnovni pokazatelji na dashboardu: prihod meseca, neplaćeno.
+Izvor: dokumenti 04, 11, 02 („Karte i proračun“ — P1 tranziti, „Plaćanja“, „Dashboard“), 05 (`payments`), 06, 09 (Notifications), 10 („Notifikacije“); prototip: tab „Transits“ u `client.html`, „Transits for this date“ u `calendar.html`, kartica „Before your next consultations“ u `dashboard.html`, `payments.html`, „Billing“ u `consultation.html`, „Notifications“ u `settings.html`. „Sky calendar“ (`sky.html`) i sinastrija nisu u dokumentu 04 — ostaju za kasnije.
 
-Predlog podele (za potvrdu): **7a** tranziti, **7b** uplate i pokazatelji, **7c** notifikacije i podsetnici — svaki sa commit-om, zelenim CI-jem i tačkom za pauzu.
+**Merenje (25. 9. 2026):** sam `swetest` za jedan trenutak traje ~17 ms, a 90 dana za 10 tela u jednom pozivu (`-n90 -s1`) isto toliko; kroz Symfony Process na lokalnom Windows-u jedan poziv traje ~210 ms (pokretanje procesa, ne proračun). Linux nije meren. Zato: tranzitne pozicije za jedan trenutak su iste za sve klijente (jedan poziv po zahtevu), a pretraga „tačno na dan“ ide jednim višednevnim pozivom.
 
-Pitanja pre Faze 7: orbi za tranzite (isti kao natalni ili uži — prototip za dashboard uzima spore planete, glavne aspekte i orb do 1,6°); da li je avans (oznaka na usluzi) deo 7b; mail provajder za produkciju i vreme slanja podsetnika.
+**7a — tranziti:**
+
+1. Tranzitne pozicije za izabrani trenutak (podrazumevano sada; iz termina i konsultacije njihovo vreme), u zodijaku workspace-a, geocentrično; tranzitne planete se smeštaju u natalne kuće. Računaju se po zahtevu, ne upisuju se u `chart_calculations`.
+2. Aspekti tranzit → natal (tela i, uz poznato vreme, ASC i MC; bez Meseca kod nepoznatog vremena), uz oznaku približavanja; natalne tačke miruju.
+3. **Orbi za tranzite su zaseban skup po workspace-u** (`transit_orbs`, isti oblik kao `aspect_orbs`), izmenljiv u Settings → Chart & methods (vlasnik), sa vraćanjem na podrazumevano. Početne vrednosti (privremene, do razgovora): 2° za konjunkciju, opoziciju, kvadrat i trigon, 1,5° za sekstil, manji aspekti isključeni (1°), bez dodatka za Sunce i Mesec.
+4. **Dan kada je tranzit tačan** za spore planete (Jupiter, Saturn, Uran, Neptun, Pluton, Hiron): pretraga oko izabranog trenutka jednim višednevnim pozivom engine-a; retrogradni prolazi daju više datuma.
+5. **Hiron** (fajl `seas_18.se1`, preuzet uz odobrenje 25. 9. 2026) ulazi u natalnu kartu i u tranzite; natalne karte se zbog toga jednom ponovo računaju. Referentne vrednosti iz JPL Horizons dodaju se u test tačnosti (razlika ~1″).
+6. Interfejs: tab „Transits“ na profilu klijenta (datum i vreme, „Now“, dvostruki točak — natal unutra, tranziti spolja, tabela kontakata po orbu sa datumom tačnosti, tranzitne pozicije sa natalnom kućom); „Transits for this date“ iz detalja termina i sa konsultacije; isto za povezane osobe (API). Dashboard: „Before your next consultations“ — klijenti sa terminom u narednih 7 dana, spore planete u glavnim aspektima prema ličnim tačkama i uglovima, orb do 1°, jedan proračun.
+
+**Stanje 7a (pauza 25. 9. 2026, međucommit „Phase 7a, part 1“):**
+
+- *Urađeno i testirano:* Hiron (`CelestialBody::Chiron`, `seas_18.se1`, referentne vrednosti JPL Horizons u fixture-u — razlika ~1″); `EphemerisEngine::series()` (jedan `swetest -n -s` poziv; FakeEngine i Swiss adapter); `AspectCalculator::across()`; `TransitService` (niz od ±365 dana oko trenutka, sredina je trenutak; kontakti po orbu; datumi tačnosti za spore planete — `exactDays()` preko promene znaka potpisane razdaljine); `workspaces.transit_orbs` + `AspectSettings::transitsFromArray()` + validacija i `reference-data.aspects.transit_defaults`; `GET /clients/{id}/transits` i `GET /related-people/{id}/transits` (`at` + `timezone`, podrazumevano sada; `status: incomplete`; 503); dashboard `transits` (klijenti sa terminom u 7 dana, Jupiter–Pluton, konj./kvadrat/trigon/opozicija prema ličnim tačkama i uglovima, orb ≤ 1°). Frontend: `OrbSettingsCard.vue` (Settings → Chart & methods ima i „Transit orbs“, provereno u Chrome-u), `ChartWheel` ume spoljni prsten tranzita (`transits`, `contacts` props — još nije upotrebljen), `lib/transits.js` (Vitest), i18n ključevi (`transits.*`, `dashboard.transits.*`, `bodies.chiron`, `clients.profile.tabs.transits`), glif ⚷.
+- *Izmereno na Aninoj karti (pravi engine):* 14 kontakata, npr. Jupiter konjunkcija MC tačna 26. 9. 2026, 9. 3. 2027. i 17. 5. 2027; prvi poziv ~450 ms lokalno (Windows), drugi klijent u istom zahtevu ~6 ms.
+- *Ostaje za 7a:* `TransitsPanel.vue` (izbor trenutka + „Now“, dvostruki točak sa `contactLines`, tabela kontakata sa orbom, približavanjem i datumom tačnosti — `nearestExact`, tabela pozicija sa natalnom kućom, napomena o engine-u i orbima); tab „transits“ na profilu klijenta (ključ taba već postoji u i18n; `?tab=transits&at=`); tranziti na strani povezane osobe; „Transits for this date“ u `AppointmentDetail.vue` i „Transits on this date“ na konsultaciji (`transitsRoute`); kartica „Before your next consultations“ na dashboardu (podaci već stižu u `data.transits`); provera u Chrome-u (i telefon); dokumentacija — spec 02 (P1 tranziti „Implementirano u Fazi 7a“), 05 (`workspaces.transit_orbs`, tranziti se ne upisuju u `chart_calculations`, Hiron u pozicijama), 11 (status 7a, merenje 17 ms / 210 ms, Hiron), 04, changelog, `api-conventions.md`, CLAUDE.md (pravila za tranzite i `series`); zatim commit „Phase 7a: transits“, CI, izveštaj.
+
+**7b — uplate i pokazatelji:** konsultacija dobija cenu (iz usluge, izmenljiva, može „bez naplate“); uplata je primljen novac (iznos u najmanjoj jedinici + valuta, datum, način, referenca, napomena; i povraćaj). Dugovanje = cena − uplaćeno; „neplaćeno / delimično / plaćeno / bez naplate“ se izvodi. Uplata vezana za termin je avans i prelazi na konsultaciju zabeleženu iz termina. Iznosi po valuti, bez konverzije. Strana Payments (pokazatelji, filteri, CSV), kartica Billing na konsultaciji, filter `payments` na vremenskoj liniji, na dashboardu „Waiting on payment“, prihod meseca i dugovanja. Ovo menja model iz dokumenta 05 (status po uplati) — izmena se beleži u changelog.
+
+**7c — obaveštenja i podsetnici:** samo astrologu (klijentima tek sa portalom i brendingom, Faza 9); email je opšti — vreme i link, bez imena klijenta i ličnih podataka (dokument 10). Settings → Notifications (podsetnik pred termin sa izborom vremena, jutarnji pregled zadataka, tihi sati); Laravel Notifications kroz queue i scheduler, bez dvostrukog slanja (dokument 06). Lokalno mail ostaje u logu, provera uz `schedule:work` i `queue:work`; cron i worker na produkciji dolaze sa izborom servera.
 
 ### Plan Faze 6 (prihvaćen 24. 9. 2026, završen 25. 9. 2026)
 

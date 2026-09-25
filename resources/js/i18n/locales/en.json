@@ -179,6 +179,14 @@
             "chart": "Chart defaults",
             "timezone": "Time zone",
             "currency": "Currency"
+        },
+        "transits": {
+            "title": "Before your next consultations",
+            "hint": "Jupiter to Pluto within 1° of a conjunction, square, trine or opposition to a personal planet or an angle, now.",
+            "empty": "No close slow transits for the clients you see this week.",
+            "unavailable": "Transits cannot be calculated right now.",
+            "open": "Transits",
+            "next": "Next: {when}"
         }
     },
     "settings": {
@@ -262,6 +270,11 @@
             "luminaryBonusHint": "Added when either of them takes part.",
             "reset": "Restore defaults",
             "saved": "Aspects and orbs saved"
+        },
+        "transitOrbs": {
+            "title": "Transit orbs",
+            "intro": "How close to exact a transit to the natal chart must be to count — much tighter than between natal points. Transits are calculated each time they are opened, so a change applies at once.",
+            "saved": "Transit orbs saved"
         }
     },
     "roles": {
@@ -457,6 +470,7 @@
             "tabs": {
                 "overview": "Overview",
                 "chart": "Birth data & chart",
+                "transits": "Transits",
                 "consultations": "Consultations",
                 "notes": "Notes",
                 "files": "Files",
@@ -497,6 +511,7 @@
         "uranus": "Uranus",
         "neptune": "Neptune",
         "pluto": "Pluto",
+        "chiron": "Chiron",
         "true_node": "North Node (true)",
         "mean_node": "North Node (mean)"
     },
@@ -576,7 +591,9 @@
         },
         "wheel": {
             "title": "Chart wheel of {name}",
-            "titleNoName": "Chart wheel"
+            "titleNoName": "Chart wheel",
+            "transitsTitle": "Transits to the chart of {name}",
+            "transitsTitleNoName": "Transits to the natal chart"
         },
         "describe": {
             "house": "house {house}",
@@ -1148,5 +1165,33 @@
             "overdueSince": "Overdue since {time}",
             "overdueDays": "Overdue by a day | Overdue by {count} days"
         }
+    },
+    "transits": {
+        "title": "Transits",
+        "at": "Moment",
+        "now": "Now",
+        "inZone": "Your time, {zone}",
+        "loading": "Calculating…",
+        "wheelNote": "Outer ring: the planets at the chosen moment. Inner: the natal chart. Lines join transits to natal points.",
+        "engineNote": "Calculated on request, not stored",
+        "orbsHint": "Transit orbs are set in Settings → Chart & methods.",
+        "contacts": {
+            "title": "Transits to the natal chart",
+            "count": "none within orb | one within orb | {count} within orb",
+            "none": "No transit is within its orb at this moment.",
+            "transit": "Transit",
+            "natal": "Natal",
+            "orb": "Orb",
+            "exact": "Exact",
+            "exactNone": "not within a year",
+            "exactHint": "Dates a slow planet (Jupiter to Pluto, Chiron) is exact, within a year either side; a retrograde loop gives more than one."
+        },
+        "positions": {
+            "title": "Planets at this moment",
+            "house": "Natal house"
+        },
+        "forDate": "Transits for this date",
+        "onDate": "Transits on this date",
+        "describe": "{transit} {aspect} natal {natal}, orb {orb}"
     }
 }

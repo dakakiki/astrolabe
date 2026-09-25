@@ -2,6 +2,7 @@
 
 namespace App\Astrology\Support;
 
+use Carbon\CarbonImmutable;
 use DateTimeInterface;
 
 final class JulianDay
@@ -18,5 +19,11 @@ final class JulianDay
         $seconds = $moment->getTimestamp() + ((int) $moment->format('u')) / 1_000_000;
 
         return self::UNIX_EPOCH + $seconds / 86400;
+    }
+
+    /** The moment (UTC, to the second) of a Julian Day (UT). */
+    public static function toMoment(float $julianDay): CarbonImmutable
+    {
+        return CarbonImmutable::createFromTimestampUTC((int) round(($julianDay - self::UNIX_EPOCH) * 86400));
     }
 }

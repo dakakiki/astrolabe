@@ -17,17 +17,34 @@ enum CelestialBody: string
     case Uranus = 'uranus';
     case Neptune = 'neptune';
     case Pluto = 'pluto';
+    case Chiron = 'chiron';
     case TrueNode = 'true_node';
     case MeanNode = 'mean_node';
 
-    /** The set shown in a natal chart, in the traditional order. */
+    /**
+     * The set shown in a natal chart, in the traditional order. Chiron needs
+     * the asteroid file seas_18.se1 (from Phase 7a).
+     *
+     * @return list<self>
+     */
     public static function natal(): array
     {
         return [
             self::Sun, self::Moon, self::Mercury, self::Venus, self::Mars,
             self::Jupiter, self::Saturn, self::Uranus, self::Neptune, self::Pluto,
-            self::TrueNode, self::MeanNode,
+            self::Chiron, self::TrueNode, self::MeanNode,
         ];
+    }
+
+    /**
+     * The slow movers: their transits last weeks to months, so the dates they
+     * are exact are worth looking up (docs/spec/11, Phase 7a).
+     *
+     * @return list<self>
+     */
+    public static function slow(): array
+    {
+        return [self::Jupiter, self::Saturn, self::Uranus, self::Neptune, self::Pluto, self::Chiron];
     }
 
     /** The Sun and Moon, which get a wider orb. */
@@ -45,10 +62,11 @@ enum CelestialBody: string
         return $this !== self::MeanNode;
     }
 
-    /** SE_SUN … SE_PLUTO, SE_MEAN_NODE (10), SE_TRUE_NODE (11). */
+    /** SE_SUN … SE_PLUTO, SE_MEAN_NODE (10), SE_TRUE_NODE (11), SE_CHIRON (15). */
     public function swissEphemerisNumber(): int
     {
         return match ($this) {
+            self::Chiron => 15,
             self::Sun => 0,
             self::Moon => 1,
             self::Mercury => 2,
@@ -70,6 +88,7 @@ enum CelestialBody: string
         return match ($this) {
             self::MeanNode => 'm',
             self::TrueNode => 't',
+            self::Chiron => 'D',
             default => (string) $this->swissEphemerisNumber(),
         };
     }

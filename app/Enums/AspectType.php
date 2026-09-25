@@ -54,4 +54,18 @@ enum AspectType: string
             self::Semisextile, self::Semisquare, self::Sesquisquare => 2.0,
         };
     }
+
+    /**
+     * Default orb for a transit to the natal chart — much tighter than between
+     * natal points (Phase 7a, temporary until the validation interviews; every
+     * workspace can change it).
+     */
+    public function defaultTransitOrb(): float
+    {
+        return match ($this) {
+            self::Conjunction, self::Opposition, self::Square, self::Trine => 2.0,
+            self::Sextile => 1.5,
+            self::Quincunx, self::Semisextile, self::Semisquare, self::Sesquisquare => 1.0,
+        };
+    }
 }

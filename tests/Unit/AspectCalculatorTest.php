@@ -188,4 +188,27 @@ class AspectCalculatorTest extends TestCase
             AspectSettings::defaults()->enabledTypes(),
         );
     }
+
+    public function test_transits_are_measured_against_a_natal_chart_that_stands_still(): void
+    {
+        $settings = AspectSettings::transitDefaults();
+        $natal = [self::point('sun', 10, 0.98), self::point('asc', 200, null, angle: true)];
+
+        // Saturn 90.5° ahead of the natal Sun and moving on: a square, separating.
+        $separating = (new AspectCalculator)->across([self::point('saturn', 100.5, 0.05)], $natal, $settings);
+        $this->assertCount(1, $separating);
+        $this->assertSame(['saturn', 'sun', AspectType::Square], [$separating[0]->first, $separating[0]->second, $separating[0]->type]);
+        $this->assertEqualsWithDelta(0.5, $separating[0]->orb, 1e-9);
+        $this->assertFalse($separating[0]->applying, 'the natal Sun’s own motion must not count');
+
+        // Retrograde, the same square closes in; an angle takes transits too.
+        $applying = (new AspectCalculator)->across([self::point('saturn', 100.5, -0.05), self::point('jupiter', 201.8, 0.1)], $natal, $settings);
+        $this->assertTrue($applying[0]->applying);
+        $this->assertSame(['jupiter', 'asc', AspectType::Conjunction, false], [$applying[1]->first, $applying[1]->second, $applying[1]->type, $applying[1]->applying]);
+
+        // Transit orbs are tight: 2.5° from exact is nothing, and there is no wider orb for the Sun.
+        $this->assertSame([], (new AspectCalculator)->across([self::point('mars', 102.5, 0.6)], $natal, $settings));
+        $this->assertSame(0.0, $settings->luminaryBonus);
+        $this->assertSame(1.5, $settings->aspects['sextile']['orb']);
+    }
 }

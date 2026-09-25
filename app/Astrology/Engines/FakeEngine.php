@@ -34,6 +34,7 @@ class FakeEngine implements EphemerisEngine
         'uranus' => [314.055, 0.011733],
         'neptune' => [304.349, 0.006000],
         'pluto' => [238.929, 0.003964],
+        'chiron' => [251.618, 0.019440],
         'true_node' => [125.045, -0.052954],
         'mean_node' => [125.045, -0.052954],
     ];
@@ -45,7 +46,7 @@ class FakeEngine implements EphemerisEngine
     /** A fixed ayanamsa, so sidereal charts differ from tropical ones in tests. */
     public const AYANAMSA = 24.0;
 
-    /** @var array<string, array{0: float, 1: float}> body => [longitude, speed] */
+    /** @var array<string, array{0: float, 1: float, 2: float|null}> body => [longitude, speed, moving from] */
     private array $fixed = [];
 
     /** @var array{0: float, 1: float}|null [ascendant, midheaven], tropical */
@@ -70,10 +71,12 @@ class FakeEngine implements EphemerisEngine
 
     /**
      * Pin a body to a longitude and speed for every following calculation.
+     * With `$from` (a Julian day) the body is at that longitude then and moves
+     * on at that speed, so a series of moments sees it travel.
      */
-    public function fix(CelestialBody $body, float $longitude, float $speed): static
+    public function fix(CelestialBody $body, float $longitude, float $speed, ?float $from = null): static
     {
-        $this->fixed[$body->value] = [$longitude, $speed];
+        $this->fixed[$body->value] = [$longitude, $speed, $from];
 
         return $this;
     }
@@ -94,22 +97,44 @@ class FakeEngine implements EphemerisEngine
         $days = $request->julianDayUt - self::J2000;
         $shift = $request->zodiacMode === ZodiacMode::Sidereal ? self::AYANAMSA : 0.0;
 
-        $positions = array_map(function (CelestialBody $body) use ($days, $shift) {
-            [$longitude, $speed] = $this->fixed[$body->value] ?? [
-                self::MEAN_MOTION[$body->value][0] + self::MEAN_MOTION[$body->value][1] * $days,
-                self::MEAN_MOTION[$body->value][1],
-            ];
-
-            return new PlanetPosition($body, self::normalize($longitude - $shift), $speed);
-        }, $request->bodies);
-
         return new ChartResult(
-            $positions,
+            $this->positions($request, $request->julianDayUt),
             $this->name(),
             $this->version(),
             null,
             $request->wantsHouses() ? $this->houses($request, $days, $shift) : null,
         );
+    }
+
+    public function series(ChartRequest $request, int $steps, float $stepDays = 1.0): array
+    {
+        $this->calls++;
+
+        return array_map(
+            fn (int $step) => $this->positions($request, $request->julianDayUt + $step * $stepDays),
+            range(0, $steps - 1),
+        );
+    }
+
+    /**
+     * @return list<PlanetPosition>
+     */
+    private function positions(ChartRequest $request, float $julianDay): array
+    {
+        $days = $julianDay - self::J2000;
+        $shift = $request->zodiacMode === ZodiacMode::Sidereal ? self::AYANAMSA : 0.0;
+
+        return array_map(function (CelestialBody $body) use ($days, $julianDay, $shift) {
+            if (isset($this->fixed[$body->value])) {
+                [$longitude, $speed, $from] = $this->fixed[$body->value];
+                $longitude += $from === null ? 0.0 : $speed * ($julianDay - $from);
+            } else {
+                [$start, $speed] = self::MEAN_MOTION[$body->value];
+                $longitude = $start + $speed * $days;
+            }
+
+            return new PlanetPosition($body, self::normalize($longitude - $shift), $speed);
+        }, $request->bodies);
     }
 
     private function houses(ChartRequest $request, float $days, float $shift): Houses

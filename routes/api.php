@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\ClientChartController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\ClientRelationshipController;
 use App\Http\Controllers\Api\V1\ClientTimelineController;
+use App\Http\Controllers\Api\V1\ClientTransitController;
 use App\Http\Controllers\Api\V1\ConsultationChartController;
 use App\Http\Controllers\Api\V1\ConsultationController;
 use App\Http\Controllers\Api\V1\DashboardController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\Api\V1\ReferenceDataController;
 use App\Http\Controllers\Api\V1\RelatedPersonChartController;
 use App\Http\Controllers\Api\V1\RelatedPersonController;
 use App\Http\Controllers\Api\V1\RelatedPersonConversionController;
+use App\Http\Controllers\Api\V1\RelatedPersonTransitController;
 use App\Http\Controllers\Api\V1\ServiceController;
 use App\Http\Controllers\Api\V1\StatusController;
 use App\Http\Controllers\Api\V1\TagController;
@@ -56,6 +58,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::put('/clients/{client}/birth-details', [ClientBirthDetailsController::class, 'update'])
                 ->name('clients.birth-details.update');
             Route::get('/clients/{client}/chart', [ClientChartController::class, 'show'])->name('clients.chart');
+            Route::get('/clients/{client}/transits', [ClientTransitController::class, 'show'])->name('clients.transits');
             Route::post('/clients/{client}/archive', [ClientArchiveController::class, 'store'])->name('clients.archive');
             Route::delete('/clients/{client}/archive', [ClientArchiveController::class, 'destroy'])->name('clients.restore');
 
@@ -75,6 +78,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 ->parameters(['related-people' => 'relatedPerson']);
             Route::get('/related-people/{relatedPerson}/chart', [RelatedPersonChartController::class, 'show'])
                 ->name('related-people.chart');
+            Route::get('/related-people/{relatedPerson}/transits', [RelatedPersonTransitController::class, 'show'])
+                ->name('related-people.transits');
             Route::post('/related-people/{relatedPerson}/convert', [RelatedPersonConversionController::class, 'store'])
                 ->name('related-people.convert');
 

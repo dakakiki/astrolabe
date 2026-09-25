@@ -118,6 +118,39 @@ class WorkspaceSettingsTest extends TestCase
         ])->assertUnprocessable()->assertJsonValidationErrors('aspect_orbs.aspects');
     }
 
+    public function test_transit_orbs_are_a_tighter_set_of_their_own_that_the_owner_can_change(): void
+    {
+        $owner = User::factory()->withWorkspace()->create();
+
+        $this->actingAs($owner)->getJson('/api/v1/workspace')
+            ->assertJsonPath('data.transit_orbs.luminary_bonus', 0)
+            ->assertJsonPath('data.transit_orbs.aspects.conjunction', ['enabled' => true, 'orb' => 2])
+            ->assertJsonPath('data.transit_orbs.aspects.sextile', ['enabled' => true, 'orb' => 1.5])
+            ->assertJsonPath('data.transit_orbs.aspects.quincunx', ['enabled' => false, 'orb' => 1]);
+
+        $this->actingAs($owner)->getJson('/api/v1/reference-data')
+            ->assertJsonPath('data.aspects.transit_defaults.aspects.square', ['enabled' => true, 'orb' => 2]);
+
+        $this->actingAs($owner)->patchJson('/api/v1/workspace', [
+            'transit_orbs' => [
+                'aspects' => ['square' => ['enabled' => true, 'orb' => 1.25], 'sextile' => ['enabled' => false, 'orb' => 1]],
+                'luminary_bonus' => 0.5,
+            ],
+        ])->assertOk()
+            ->assertJsonPath('data.transit_orbs.aspects.square', ['enabled' => true, 'orb' => 1.25])
+            ->assertJsonPath('data.transit_orbs.aspects.sextile', ['enabled' => false, 'orb' => 1])
+            ->assertJsonPath('data.transit_orbs.aspects.trine', ['enabled' => true, 'orb' => 2])
+            ->assertJsonPath('data.transit_orbs.luminary_bonus', 0.5)
+            // The natal orbs are a separate set and stay as they were.
+            ->assertJsonPath('data.aspect_orbs.aspects.square', ['enabled' => true, 'orb' => 6]);
+
+        $this->assertCount(9, $owner->currentWorkspace->fresh()->transit_orbs['aspects']);
+
+        $this->actingAs($owner)->patchJson('/api/v1/workspace', [
+            'transit_orbs' => ['aspects' => ['trine' => ['enabled' => true, 'orb' => 0]], 'luminary_bonus' => 9],
+        ])->assertUnprocessable()->assertJsonValidationErrors(['transit_orbs.aspects.trine.orb', 'transit_orbs.luminary_bonus']);
+    }
+
     public function test_a_member_who_is_not_the_owner_cannot_change_settings(): void
     {
         $owner = User::factory()->withWorkspace()->create();
@@ -132,6 +165,9 @@ class WorkspaceSettingsTest extends TestCase
             ->assertJsonPath('data.role', 'member');
 
         $this->actingAs($member)->patchJson('/api/v1/workspace', ['name' => 'Taken over'])->assertForbidden();
+        $this->actingAs($member)->patchJson('/api/v1/workspace', [
+            'transit_orbs' => ['aspects' => ['square' => ['enabled' => true, 'orb' => 5]], 'luminary_bonus' => 0],
+        ])->assertForbidden();
     }
 
     public function test_reference_data_lists_the_allowed_values(): void

@@ -4,7 +4,9 @@ namespace Tests\Feature\Astrology;
 
 use App\Astrology\Engines\SwissEphemerisEngine;
 use App\Astrology\Exceptions\EphemerisException;
+use App\Astrology\Services\TransitService;
 use App\Astrology\ValueObjects\ChartRequest;
+use App\Enums\AspectType;
 use App\Enums\Ayanamsa;
 use App\Enums\CelestialBody;
 use App\Enums\ZodiacMode;
@@ -94,5 +96,46 @@ class SwissEphemerisReferenceTest extends TestCase
 
         $this->engine(sys_get_temp_dir().'/no-ephemeris-here')
             ->calculate(new ChartRequest(2451545.0, null, null, null, ZodiacMode::Tropical, null, [CelestialBody::Sun]));
+    }
+
+    public function test_a_series_matches_single_calculations_day_by_day(): void
+    {
+        $engine = $this->engine();
+        $bodies = [CelestialBody::Moon, CelestialBody::Saturn, CelestialBody::Chiron];
+        $request = fn (float $julianDay) => new ChartRequest($julianDay, null, null, null, ZodiacMode::Sidereal, Ayanamsa::Lahiri, $bodies);
+
+        $series = $engine->series($request(2461308.75), 5);
+
+        $this->assertCount(5, $series);
+        foreach ([0, 4] as $day) {
+            $single = $engine->calculate($request(2461308.75 + $day))->positions;
+
+            foreach ($bodies as $i => $body) {
+                $this->assertSame($body, $series[$day][$i]->body);
+                $this->assertEqualsWithDelta($single[$i]->longitude, $series[$day][$i]->longitude, 1e-6);
+                $this->assertEqualsWithDelta($single[$i]->speed, $series[$day][$i]->speed, 1e-6);
+            }
+        }
+    }
+
+    public function test_the_day_a_transit_is_exact_is_found_to_within_minutes(): void
+    {
+        $engine = $this->engine();
+        $moment = 2461308.9166667;
+        $saturn = fn (float $julianDay) => $engine->calculate(
+            new ChartRequest($julianDay, null, null, null, ZodiacMode::Tropical, null, [CelestialBody::Saturn]),
+        )->positions[0]->longitude;
+
+        // A natal point where Saturn stands 3.4 days after the moment, and one 90° from it.
+        $target = $saturn($moment + 3.4);
+        $days = $engine->series(new ChartRequest($moment - 10, null, null, null, ZodiacMode::Tropical, null, [CelestialBody::Saturn]), 21);
+        $longitudes = array_map(fn (array $positions) => $positions[0]->longitude, $days);
+
+        $conjunction = TransitService::exactDays($longitudes, $target, AspectType::Conjunction, $moment - 10);
+        $square = TransitService::exactDays($longitudes, $target - 90, AspectType::Square, $moment - 10);
+
+        $this->assertCount(1, $conjunction);
+        $this->assertEqualsWithDelta($moment + 3.4, $conjunction[0], 10 / 1440, 'within ten minutes');
+        $this->assertEqualsWithDelta($moment + 3.4, $square[0], 10 / 1440);
     }
 }

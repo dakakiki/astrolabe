@@ -41,10 +41,21 @@ final readonly class Houses
      */
     public function houseOf(float $longitude): int
     {
+        return self::numberFor($this->cusps, $longitude);
+    }
+
+    /**
+     * The same for cusps read back from a stored chart, e.g. where a transiting
+     * planet stands in the natal houses.
+     *
+     * @param  list<float>  $cusps  twelve longitudes, house 1 first
+     */
+    public static function numberFor(array $cusps, float $longitude): int
+    {
         $longitude = self::normalize($longitude);
 
-        foreach ($this->cusps as $index => $cusp) {
-            $next = $this->cusps[($index + 1) % 12];
+        foreach ($cusps as $index => $cusp) {
+            $next = $cusps[($index + 1) % 12];
             $span = self::normalize($next - $cusp);
 
             if (self::normalize($longitude - $cusp) < $span) {

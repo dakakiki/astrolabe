@@ -1406,6 +1406,21 @@
         stroke: var(--line);
     }
 
+    /* Transits (Phase 7a): an outer ring, the planets in the link colour. */
+    .wheel .transit-band {
+        fill: var(--surface);
+        stroke: var(--line);
+        stroke-dasharray: 3 3;
+    }
+
+    .wheel .transit .planet-glyph {
+        fill: var(--link);
+    }
+
+    .wheel .transit .marker {
+        stroke: var(--link);
+    }
+
     .wheel .ring {
         fill: none;
         stroke: var(--line);

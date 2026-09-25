@@ -23,10 +23,11 @@ use Throwable;
  * @property ZodiacMode $default_zodiac_mode
  * @property Ayanamsa|null $default_ayanamsa
  * @property array<string, mixed>|null $aspect_orbs
+ * @property array<string, mixed>|null $transit_orbs
  */
 #[Fillable([
     'name', 'default_locale', 'timezone', 'default_currency',
-    'default_house_system', 'default_zodiac_mode', 'default_ayanamsa', 'aspect_orbs',
+    'default_house_system', 'default_zodiac_mode', 'default_ayanamsa', 'aspect_orbs', 'transit_orbs',
 ])]
 class Workspace extends Model
 {
@@ -47,6 +48,7 @@ class Workspace extends Model
             'default_zodiac_mode' => ZodiacMode::class,
             'default_ayanamsa' => Ayanamsa::class,
             'aspect_orbs' => 'array',
+            'transit_orbs' => 'array',
         ];
     }
 
@@ -54,6 +56,12 @@ class Workspace extends Model
     public function aspectSettings(): AspectSettings
     {
         return AspectSettings::fromArray($this->aspect_orbs);
+    }
+
+    /** The aspects and orbs it reads transits to a natal chart with. */
+    public function transitSettings(): AspectSettings
+    {
+        return AspectSettings::transitsFromArray($this->transit_orbs);
     }
 
     /**

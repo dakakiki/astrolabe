@@ -21,6 +21,9 @@ class UpdateWorkspaceRequest extends FormRequest
 
     public const MAX_LUMINARY_BONUS = 5;
 
+    /** The two orb sets a workspace keeps: between natal points, and for transits. */
+    private const ORB_SETS = ['aspect_orbs', 'transit_orbs'];
+
     public function authorize(): bool
     {
         return $this->user()->can('update', app(CurrentWorkspace::class)->get());
@@ -40,28 +43,39 @@ class UpdateWorkspaceRequest extends FormRequest
             $rules += $this->chartParameterRules('default_house_system', 'default_zodiac_mode', 'default_ayanamsa', required: true);
         }
 
-        if ($this->has('aspect_orbs')) {
-            $types = implode(',', array_column(AspectType::cases(), 'value'));
-
-            $rules += [
-                'aspect_orbs' => ['required', 'array:aspects,luminary_bonus'],
-                'aspect_orbs.aspects' => ['required', 'array:'.$types],
-                'aspect_orbs.aspects.*' => ['required', 'array:enabled,orb'],
-                'aspect_orbs.aspects.*.enabled' => ['required', 'boolean'],
-                'aspect_orbs.aspects.*.orb' => ['required', 'numeric', 'gt:0', 'max:'.self::MAX_ORB],
-                'aspect_orbs.luminary_bonus' => ['required', 'numeric', 'min:0', 'max:'.self::MAX_LUMINARY_BONUS],
-            ];
+        // Natal and transit orbs share one shape (AspectSettings).
+        foreach (self::ORB_SETS as $key) {
+            if ($this->has($key)) {
+                $rules += $this->orbRules($key);
+            }
         }
 
         return $rules;
     }
 
+    /**
+     * @return array<string, list<string>>
+     */
+    private function orbRules(string $key): array
+    {
+        $types = implode(',', array_column(AspectType::cases(), 'value'));
+
+        return [
+            $key => ['required', 'array:aspects,luminary_bonus'],
+            "{$key}.aspects" => ['required', 'array:'.$types],
+            "{$key}.aspects.*" => ['required', 'array:enabled,orb'],
+            "{$key}.aspects.*.enabled" => ['required', 'boolean'],
+            "{$key}.aspects.*.orb" => ['required', 'numeric', 'gt:0', 'max:'.self::MAX_ORB],
+            "{$key}.luminary_bonus" => ['required', 'numeric', 'min:0', 'max:'.self::MAX_LUMINARY_BONUS],
+        ];
+    }
+
     public function attributes(): array
     {
-        return [
-            'aspect_orbs.aspects.*.orb' => __('workspaces.orb'),
-            'aspect_orbs.luminary_bonus' => __('workspaces.luminary_bonus'),
-        ];
+        return collect(self::ORB_SETS)->flatMap(fn (string $key) => [
+            "{$key}.aspects.*.orb" => __('workspaces.orb'),
+            "{$key}.luminary_bonus" => __('workspaces.luminary_bonus'),
+        ])->all();
     }
 
     /**
@@ -74,6 +88,10 @@ class UpdateWorkspaceRequest extends FormRequest
         // Stored complete and normalised; aspects left out keep their defaults.
         if (isset($attributes['aspect_orbs'])) {
             $attributes['aspect_orbs'] = AspectSettings::fromArray($attributes['aspect_orbs'])->toArray();
+        }
+
+        if (isset($attributes['transit_orbs'])) {
+            $attributes['transit_orbs'] = AspectSettings::transitsFromArray($attributes['transit_orbs'])->toArray();
         }
 
         return $attributes;

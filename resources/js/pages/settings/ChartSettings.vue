@@ -3,9 +3,9 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import FormField from '@/components/FormField.vue';
+import OrbSettingsCard from '@/components/OrbSettingsCard.vue';
 import { useForm } from '@/composables/useForm';
 import { useLabels } from '@/composables/useLabels';
-import { ASPECT_GLYPHS } from '@/lib/chart';
 import http from '@/lib/http';
 import { useAuthStore } from '@/stores/auth';
 import { useReferenceStore } from '@/stores/reference';
@@ -40,36 +40,6 @@ async function saveDefaults() {
             const response = await http.patch('/workspace', data);
             auth.workspace = response.data.data;
             toast.success(t('settings.chart.saved'));
-        })
-        .catch(() => {});
-}
-
-/* ---------------- Aspects and orbs ---------------- */
-
-// Store values are reactive proxies, which structuredClone refuses; plain data survives JSON.
-const copy = (value) => JSON.parse(JSON.stringify(value));
-
-const orbs = useForm(copy(auth.workspace.aspect_orbs));
-
-const aspectGroups = computed(() => {
-    const types = reference.data?.aspects.types ?? [];
-
-    return [
-        ['major', types.filter((type) => type.major)],
-        ['minor', types.filter((type) => !type.major)],
-    ];
-});
-
-function restoreOrbs() {
-    Object.assign(orbs.data, copy(reference.data.aspects.defaults));
-}
-
-async function saveOrbs() {
-    await orbs
-        .submit(async (data) => {
-            const response = await http.patch('/workspace', { aspect_orbs: data });
-            auth.workspace = response.data.data;
-            toast.success(t('settings.orbs.saved'));
         })
         .catch(() => {});
 }
@@ -212,104 +182,19 @@ async function deleteMethod(method) {
         </form>
     </section>
 
-    <section class="card">
-        <div class="card-head">
-            <h2>{{ t('settings.orbs.title') }}</h2>
-        </div>
-        <form class="card-body" novalidate @submit.prevent="saveOrbs">
-            <fieldset :disabled="!auth.isOwner">
-                <p class="mb-4 text-ink-3">{{ t('settings.orbs.intro') }}</p>
+    <OrbSettingsCard
+        field="aspect_orbs"
+        :title="t('settings.orbs.title')"
+        :intro="t('settings.orbs.intro')"
+        :saved="t('settings.orbs.saved')"
+    />
 
-                <div class="mb-4 grid gap-x-8 gap-y-4 md:grid-cols-2">
-                    <table v-for="[group, types] in aspectGroups" :key="group" class="data">
-                        <caption class="pb-1 text-left text-xs font-semibold text-ink-2">
-                            {{
-                                t(`settings.orbs.${group}`)
-                            }}
-                        </caption>
-                        <thead>
-                            <tr>
-                                <th scope="col">{{ t('settings.orbs.aspect') }}</th>
-                                <th scope="col" class="text-center">{{ t('settings.orbs.shown') }}</th>
-                                <th scope="col">{{ t('settings.orbs.orb') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="aspect in types" :key="aspect.type" class="cursor-default!">
-                                <th scope="row" :class="`asp-${aspect.type}`">
-                                    <span
-                                        class="aspect-glyph mr-1.5 inline-block w-4 text-center text-base"
-                                        aria-hidden="true"
-                                        >{{ ASPECT_GLYPHS[aspect.type] }}</span
-                                    >
-                                    {{ t(`aspectTypes.${aspect.type}`) }}
-                                    <span class="ml-1 font-mono text-xs text-ink-4">{{ aspect.angle }}°</span>
-                                </th>
-                                <td class="text-center">
-                                    <input
-                                        v-model="orbs.data.aspects[aspect.type].enabled"
-                                        type="checkbox"
-                                        :aria-label="`${t(`aspectTypes.${aspect.type}`)}: ${t('settings.orbs.shown')}`"
-                                    />
-                                </td>
-                                <td>
-                                    <input
-                                        v-model.number="orbs.data.aspects[aspect.type].orb"
-                                        type="number"
-                                        class="input w-20! py-1!"
-                                        step="0.5"
-                                        min="0.5"
-                                        :max="reference.data?.aspects.max_orb"
-                                        :aria-label="`${t(`aspectTypes.${aspect.type}`)}: ${t('settings.orbs.orb')}`"
-                                        :aria-invalid="
-                                            orbs.errors.value[`aspect_orbs.aspects.${aspect.type}.orb`]
-                                                ? 'true'
-                                                : undefined
-                                        "
-                                    />
-                                    <div
-                                        v-if="orbs.errors.value[`aspect_orbs.aspects.${aspect.type}.orb`]"
-                                        class="mt-1 text-xs text-danger"
-                                    >
-                                        {{ orbs.errors.value[`aspect_orbs.aspects.${aspect.type}.orb`] }}
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="max-w-sm">
-                    <FormField
-                        v-slot="{ id, aria }"
-                        :label="t('settings.orbs.luminaryBonus')"
-                        :hint="t('settings.orbs.luminaryBonusHint')"
-                        :error="orbs.errors.value['aspect_orbs.luminary_bonus']"
-                    >
-                        <input
-                            :id="id"
-                            v-model.number="orbs.data.luminary_bonus"
-                            v-bind="aria"
-                            type="number"
-                            class="input w-24!"
-                            step="0.5"
-                            min="0"
-                            :max="reference.data?.aspects.max_luminary_bonus"
-                        />
-                    </FormField>
-                </div>
-
-                <div class="flex flex-wrap gap-2">
-                    <button class="btn btn-primary" type="submit" :disabled="orbs.processing.value">
-                        {{ t('common.save') }}
-                    </button>
-                    <button class="btn btn-ghost" type="button" :disabled="!reference.data" @click="restoreOrbs">
-                        {{ t('settings.orbs.reset') }}
-                    </button>
-                </div>
-            </fieldset>
-        </form>
-    </section>
+    <OrbSettingsCard
+        field="transit_orbs"
+        :title="t('settings.transitOrbs.title')"
+        :intro="t('settings.transitOrbs.intro')"
+        :saved="t('settings.transitOrbs.saved')"
+    />
 
     <section class="card">
         <div class="card-head">

@@ -7,6 +7,7 @@ use App\Astrology\Engines\FakeEngine;
 use App\Astrology\Exceptions\EphemerisException;
 use App\Astrology\ValueObjects\ChartRequest;
 use App\Astrology\ValueObjects\ChartResult;
+use App\Enums\CelestialBody;
 use App\Models\ChartCalculation;
 use App\Models\Consultation;
 use App\Models\User;
@@ -68,7 +69,7 @@ class ConsultationChartTest extends TestCase
             ->assertJsonPath('data.has_chart', true)
             ->assertJsonPath('data.chart.status', 'ready')
             ->assertJsonPath('data.chart.engine.name', 'Fake engine')
-            ->assertJsonCount(12, 'data.chart.positions')
+            ->assertJsonCount(count(CelestialBody::natal()), 'data.chart.positions')
             ->assertJsonPath('data.chart.version', 2)
             ->assertJsonPath('data.chart.houses.system', 'placidus')
             ->assertJsonCount(12, 'data.chart.houses.cusps')

@@ -27,6 +27,7 @@ class WorkspaceResource extends JsonResource
             'default_ayanamsa' => $this->default_ayanamsa?->value,
             // Always complete: stored values laid over the defaults.
             'aspect_orbs' => $this->aspectSettings()->toArray(),
+            'transit_orbs' => $this->transitSettings()->toArray(),
             'role' => $request->user()?->roleIn($this->resource)?->value,
         ];
     }

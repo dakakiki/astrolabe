@@ -2,7 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Astrology\Exceptions\EphemerisException;
+use App\Astrology\Exceptions\IncompleteBirthData;
+use App\Astrology\Services\TransitService;
 use App\Enums\AppointmentStatus;
+use App\Enums\AspectType;
+use App\Enums\CelestialBody;
 use App\Enums\ClientStatus;
 use App\Enums\TimeAccuracy;
 use App\Http\Controllers\Controller;
@@ -14,18 +19,20 @@ use App\Models\Appointment;
 use App\Models\Attachment;
 use App\Models\Client;
 use App\Models\Task;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 
 /**
  * The start screen (docs/spec/02, "Dashboard") in one request, on the viewer's
  * own calendar: their appointments today and in the next seven days, their
  * overdue, today's and upcoming tasks, the recently active clients, new files,
- * and clients whose chart cannot be drawn yet. Payments, revenue and transits
- * join with their phases (7).
+ * clients whose chart cannot be drawn yet, and the slow transits on the charts
+ * of the clients they see this week. Payments and revenue join in Phase 7b.
  */
 class DashboardController extends Controller
 {
@@ -34,7 +41,15 @@ class DashboardController extends Controller
 
     private const LIMIT = 8;
 
-    public function __invoke(Request $request): JsonResponse
+    /** "Before your next consultations": how many clients, and how many transits each. */
+    private const TRANSIT_CLIENTS = 6;
+
+    private const TRANSITS_EACH = 3;
+
+    /** Only transits this close to exact make the dashboard (degrees). */
+    public const TRANSIT_ORB = 1.0;
+
+    public function __invoke(Request $request, TransitService $transits): JsonResponse
     {
         Gate::authorize('viewAny', Client::class);
 
@@ -101,6 +116,7 @@ class DashboardController extends Controller
             'incomplete_birth_data' => ClientResource::collection(
                 (clone $incomplete)->with('birthDetails')->orderByDesc('last_activity_at')->orderByDesc('id')->limit(5)->get(),
             )->resolve($request),
+            'transits' => $this->transits($user, $now, $horizon, $transits),
             'counts' => [
                 'appointments_today' => $todays->count(),
                 'appointments_upcoming' => $upcoming->count(),
@@ -113,6 +129,75 @@ class DashboardController extends Controller
                 'incomplete_birth_data' => $incomplete->count(),
             ],
         ]]);
+    }
+
+    /**
+     * "Before your next consultations" (Phase 7a): the clients the viewer sees
+     * in the coming week and the slow transits closest to exact on their
+     * charts now — Jupiter to Pluto in a conjunction, square, trine or
+     * opposition to a personal planet or an angle, within a degree. The sky
+     * is the same for all of them, so it is one engine run. A client without
+     * complete birth data is left out; an engine failure leaves the rest of
+     * the dashboard as it is (`null`).
+     *
+     * @return array{moment: string, clients: list<array<string, mixed>>}|null
+     */
+    private function transits(User $user, CarbonImmutable $now, CarbonImmutable $horizon, TransitService $transits): ?array
+    {
+        $moment = $now->utc()->startOfHour();
+        $appointments = Appointment::query()
+            ->with(['client.birthDetails', 'client.workspace'])
+            ->where('assigned_user_id', $user->getKey())
+            ->where('status', AppointmentStatus::Scheduled->value)
+            ->where('starts_at', '>=', $now->utc())
+            ->where('starts_at', '<', $horizon->utc())
+            ->orderBy('starts_at')
+            ->get()
+            ->unique('client_id')
+            ->take(self::TRANSIT_CLIENTS);
+
+        $clients = [];
+
+        try {
+            foreach ($appointments as $appointment) {
+                try {
+                    $report = $transits->transits($appointment->client, $moment);
+                } catch (IncompleteBirthData) {
+                    continue;
+                }
+
+                $contacts = array_values(array_filter($report['contacts'], self::significant(...)));
+
+                if ($contacts !== []) {
+                    $clients[] = [
+                        'client' => ['id' => $appointment->client->id, 'full_name' => $appointment->client->fullName()],
+                        'appointment' => ['id' => $appointment->id, 'starts_at' => $appointment->starts_at->toIso8601ZuluString()],
+                        'contacts' => array_slice($contacts, 0, self::TRANSITS_EACH),
+                    ];
+                }
+            }
+        } catch (EphemerisException $failure) {
+            Log::error('Dashboard transits failed', ['error' => $failure->getMessage()]);
+
+            return null;
+        }
+
+        return ['moment' => $moment->toIso8601ZuluString(), 'clients' => $clients];
+    }
+
+    /**
+     * @param  array{transit: string, natal: string, type: string, orb: float}  $contact
+     */
+    private static function significant(array $contact): bool
+    {
+        $slow = [CelestialBody::Jupiter, CelestialBody::Saturn, CelestialBody::Uranus, CelestialBody::Neptune, CelestialBody::Pluto];
+        $types = [AspectType::Conjunction, AspectType::Square, AspectType::Trine, AspectType::Opposition];
+        $personal = ['sun', 'moon', 'mercury', 'venus', 'mars', 'asc', 'mc'];
+
+        return in_array($contact['transit'], array_column($slow, 'value'), true)
+            && in_array($contact['type'], array_column($types, 'value'), true)
+            && in_array($contact['natal'], $personal, true)
+            && $contact['orb'] <= self::TRANSIT_ORB;
     }
 
     /**

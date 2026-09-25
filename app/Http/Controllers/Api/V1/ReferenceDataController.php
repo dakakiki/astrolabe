@@ -49,6 +49,7 @@ class ReferenceDataController extends Controller
                         'major' => $type->isMajor(),
                     ], AspectType::cases()),
                     'defaults' => AspectSettings::defaults()->toArray(),
+                    'transit_defaults' => AspectSettings::transitDefaults()->toArray(),
                     'max_orb' => UpdateWorkspaceRequest::MAX_ORB,
                     'max_luminary_bonus' => UpdateWorkspaceRequest::MAX_LUMINARY_BONUS,
                 ],
