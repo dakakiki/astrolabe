@@ -121,6 +121,8 @@ Detaljna specifikacija: `11-astrology-calculation-module.md`.
 - izbor proizvoljnog datuma;
 - prikaz na profilu klijenta i pre konsultacije.
 
+> Implementirano u Fazi 7a (25. 9. 2026): tab „Transits“ na profilu klijenta i na strani povezane osobe — trenutak se bira na satu astrologa („Now“ vraća na sada) i ostaje u adresi strane; dvostruki točak (natalna karta unutra, tranzitne planete na spoljnom prstenu, linije kontakata po tipu aspekta); tabela kontakata tranzit → natal po orbu, sa aplikujućim/separirajućim i datumima kada je spora planeta (Jupiter–Pluton, Hiron) tačna u godini pre i posle izabranog trenutka; tranzitne pozicije sa natalnom kućom. Tranziti se mere prema natalnim telima i, uz poznato vreme rođenja, prema ASC i MC; kod nepoznatog vremena bez natalnog Meseca, kuća i uglova. Orbi za tranzite su zaseban, uži skup po workspace-u (Settings → Chart & methods). „Pre konsultacije“: iz detalja termina „Transits for this date“, sa konsultacije „Transits on this date“ (tab se otvara u vreme termina ili konsultacije), i kartica „Before your next consultations“ na dashboardu. Hiron je od 7a i u natalnoj karti. Tranziti se računaju po zahtevu i ne keširaju se.
+
 ### Kasnije
 
 - sinastrija i kompozit;
@@ -311,7 +313,7 @@ Vidljivost:
 - Statusi: zakazan, održan, otkazan, klijent nije došao. Otkazivanje traži razlog i ne briše termin; otkazan termin može ponovo da se zakaže. Brisanje termina ne postoji.
 - Pomeranje menja isti termin, a vremenska linija klijenta beleži „pomeren sa X na Y“; otkazivanje beleži vreme i razlog.
 - Preklapanje (odluka korisnika, 24. 9. 2026): server u transakciji pronalazi termine istog astrologa u isto vreme i vraća ih; astrolog vidi šta se preklapa i može svesno da sačuva. U kalendaru je preklapanje označeno sa ⚠ i tekstom. Otkazani termini ne zauzimaju vreme.
-- Iz detalja termina: „Zabeleži konsultaciju“ otvara formu konsultacije popunjenu klijentom, uslugom i vremenom; konsultacija se vezuje za termin (najviše jedna po terminu), a termin postaje održan. Na vremenskoj liniji tada konsultacija zamenjuje termin. Iz detalja se otvara i klijent i njegova natalna karta, bez napuštanja kalendara; tranziti za datum termina dolaze u Fazi 7.
+- Iz detalja termina: „Zabeleži konsultaciju“ otvara formu konsultacije popunjenu klijentom, uslugom i vremenom; konsultacija se vezuje za termin (najviše jedna po terminu), a termin postaje održan. Na vremenskoj liniji tada konsultacija zamenjuje termin. Iz detalja se otvara i klijent i njegova natalna karta, bez napuštanja kalendara, a od Faze 7a i tranziti za vreme termina („Transits for this date“).
 - Podsetnici astrologu dolaze u Fazi 7 (sa email notifikacijama); prevlačenje termina mišem kasnije.
 
 ### Posle MVP-a
@@ -380,4 +382,8 @@ Dashboard je dan astrologa i nedelja pred njim, u njegovoj zoni, jednim zahtevom
 - „Needs attention“: klijenti čija natalna karta ne može da se izračuna (nema datuma, mesta ili zone, ili vremena kada ono nije označeno kao nepoznato), sa vezom na dopunu podataka;
 - nov workspace (bez klijenata) i dalje vidi korake podešavanja.
 
-Termini i zadaci na dashboardu su lični (dodeljeni onome ko gleda; zadaci i nedodeljeni), a klijenti i fajlovi su cele prakse. Neplaćene konsultacije i prihod dolaze sa uplatama, a tranziti sa Fazom 7.
+Termini i zadaci na dashboardu su lični (dodeljeni onome ko gleda; zadaci i nedodeljeni), a klijenti i fajlovi su cele prakse. Neplaćene konsultacije i prihod dolaze sa uplatama (Faza 7b).
+
+### Implementirano u Fazi 7a
+
+„Before your next consultations“: klijenti sa zakazanim terminom u narednih 7 dana (najviše šest, redom termina) i najviše tri najbliža spora tranzita za svakog — Jupiter do Pluton u konjunkciji, kvadratu, trigonu ili opoziciji prema Suncu, Mesecu, Merkuru, Veneri, Marsu, ASC ili MC, sa orbom do 1°, izračunato za tekući sat. Uz tranzit stoji orb i najbliži dan kada je tačan, a dugme „Transits“ otvara tab tranzita klijenta u vreme termina. Klijenti bez potpunih podataka rođenja se preskaču; ako engine nije dostupan, kartica to kaže, a ostatak dashboarda radi. Sve je deo istog zahteva `GET /dashboard`, jednim pozivom engine-a za sve klijente.

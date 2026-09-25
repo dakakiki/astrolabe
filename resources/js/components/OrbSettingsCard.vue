@@ -69,59 +69,64 @@ async function save() {
             <h2>{{ title }}</h2>
         </div>
         <form class="card-body" novalidate @submit.prevent="save">
-            <fieldset :disabled="!auth.isOwner">
+            <fieldset class="min-w-0" :disabled="!auth.isOwner">
                 <p class="mb-4 text-ink-3">{{ intro }}</p>
 
-                <div class="mb-4 grid gap-x-8 gap-y-4 md:grid-cols-2">
-                    <table v-for="[group, types] in aspectGroups" :key="group" class="data">
-                        <caption class="pb-1 text-left text-xs font-semibold text-ink-2">
-                            {{
-                                t(`settings.orbs.${group}`)
-                            }}
-                        </caption>
-                        <thead>
-                            <tr>
-                                <th scope="col">{{ t('settings.orbs.aspect') }}</th>
-                                <th scope="col" class="text-center">{{ t('settings.orbs.shown') }}</th>
-                                <th scope="col">{{ t('settings.orbs.orb') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="aspect in types" :key="aspect.type" class="cursor-default!">
-                                <th scope="row" :class="`asp-${aspect.type}`">
-                                    <span
-                                        class="aspect-glyph mr-1.5 inline-block w-4 text-center text-base"
-                                        aria-hidden="true"
-                                        >{{ ASPECT_GLYPHS[aspect.type] }}</span
-                                    >
-                                    {{ t(`aspectTypes.${aspect.type}`) }}
-                                    <span class="ml-1 font-mono text-xs text-ink-4">{{ aspect.angle }}°</span>
-                                </th>
-                                <td class="text-center">
-                                    <input
-                                        v-model="orbs.data.aspects[aspect.type].enabled"
-                                        type="checkbox"
-                                        :aria-label="`${t(`aspectTypes.${aspect.type}`)}: ${t('settings.orbs.shown')}`"
-                                    />
-                                </td>
-                                <td>
-                                    <input
-                                        v-model.number="orbs.data.aspects[aspect.type].orb"
-                                        type="number"
-                                        class="input w-20! py-1!"
-                                        step="0.25"
-                                        min="0.25"
-                                        :max="reference.data?.aspects.max_orb"
-                                        :aria-label="`${t(`aspectTypes.${aspect.type}`)}: ${t('settings.orbs.orb')}`"
-                                        :aria-invalid="error(`aspects.${aspect.type}.orb`) ? 'true' : undefined"
-                                    />
-                                    <div v-if="error(`aspects.${aspect.type}.orb`)" class="mt-1 text-xs text-danger">
-                                        {{ error(`aspects.${aspect.type}.orb`) }}
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="mb-4 grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2">
+                    <div v-for="[group, types] in aspectGroups" :key="group" class="overflow-x-auto">
+                        <table class="data">
+                            <caption class="pb-1 text-left text-xs font-semibold text-ink-2">
+                                {{
+                                    t(`settings.orbs.${group}`)
+                                }}
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">{{ t('settings.orbs.aspect') }}</th>
+                                    <th scope="col" class="text-center">{{ t('settings.orbs.shown') }}</th>
+                                    <th scope="col">{{ t('settings.orbs.orb') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="aspect in types" :key="aspect.type" class="cursor-default!">
+                                    <th scope="row" :class="`asp-${aspect.type}`">
+                                        <span
+                                            class="aspect-glyph mr-1.5 inline-block w-4 text-center text-base"
+                                            aria-hidden="true"
+                                            >{{ ASPECT_GLYPHS[aspect.type] }}</span
+                                        >
+                                        {{ t(`aspectTypes.${aspect.type}`) }}
+                                        <span class="ml-1 font-mono text-xs text-ink-4">{{ aspect.angle }}°</span>
+                                    </th>
+                                    <td class="text-center">
+                                        <input
+                                            v-model="orbs.data.aspects[aspect.type].enabled"
+                                            type="checkbox"
+                                            :aria-label="`${t(`aspectTypes.${aspect.type}`)}: ${t('settings.orbs.shown')}`"
+                                        />
+                                    </td>
+                                    <td>
+                                        <input
+                                            v-model.number="orbs.data.aspects[aspect.type].orb"
+                                            type="number"
+                                            class="input w-20! py-1!"
+                                            step="0.25"
+                                            min="0.25"
+                                            :max="reference.data?.aspects.max_orb"
+                                            :aria-label="`${t(`aspectTypes.${aspect.type}`)}: ${t('settings.orbs.orb')}`"
+                                            :aria-invalid="error(`aspects.${aspect.type}.orb`) ? 'true' : undefined"
+                                        />
+                                        <div
+                                            v-if="error(`aspects.${aspect.type}.orb`)"
+                                            class="mt-1 text-xs text-danger"
+                                        >
+                                            {{ error(`aspects.${aspect.type}.orb`) }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="max-w-sm">

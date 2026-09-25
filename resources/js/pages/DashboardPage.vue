@@ -7,19 +7,23 @@ import AppointmentStatusBadge from '@/components/calendar/AppointmentStatusBadge
 import TaskList from '@/components/TaskList.vue';
 import { useLabels } from '@/composables/useLabels';
 import { wallClock } from '@/lib/calendar';
+import { ASPECT_GLYPHS, formatOrb } from '@/lib/chart';
 import { formatDateTime, isFuture } from '@/lib/datetime';
 import { fileKind } from '@/lib/files';
 import { formatRelative, initials } from '@/lib/format';
 import http from '@/lib/http';
 import { serviceColorClass } from '@/lib/services';
+import { nearestExact, transitsRoute } from '@/lib/transits';
+import { BODY_GLYPHS } from '@/lib/zodiac';
 import { useAuthStore } from '@/stores/auth';
 import { useToastStore } from '@/stores/toast';
 
 /**
  * The start screen (docs/spec/02, "Dashboard"): the astrologer's day and the
  * week ahead — appointments, tasks that are due, the clients and files worked
- * on lately, and clients whose chart cannot be drawn yet. A new practice sees
- * its setup steps first. Payments and transits join in Phase 7.
+ * on lately, clients whose chart cannot be drawn yet, and the slow transits on
+ * the charts of the clients coming this week. A new practice sees its setup
+ * steps first. Payments join in Phase 7b.
  */
 const { t, locale } = useI18n();
 const labels = useLabels();
@@ -196,6 +200,28 @@ const chartDefaults = computed(() => {
     return parts.join(' · ');
 });
 
+// "Before your next consultations": slow transits within a degree, now.
+const transitsAsOf = computed(() =>
+    board.value?.transits
+        ? formatDateTime(board.value.transits.moment, locale.value, zone.value, { timeStyle: 'short' })
+        : '',
+);
+const pointGlyph = (key) => BODY_GLYPHS[key] ?? t(`chart.angleAbbr.${key}`);
+const contactText = (contact) =>
+    t('dashboard.transits.contact', {
+        transit: labels.point(contact.transit),
+        aspect: t(`aspectTypes.${contact.type}`).toLowerCase(),
+        natal: labels.point(contact.natal),
+    });
+
+function exactText(contact) {
+    const nearest = nearestExact(contact.exact, board.value.transits.moment);
+    if (!nearest) return '';
+    const date = formatDateTime(nearest.date, locale.value, zone.value, { day: 'numeric', month: 'short' });
+
+    return t(nearest.past ? 'dashboard.transits.wasExact' : 'dashboard.transits.exact', { date });
+}
+
 const steps = computed(() => [
     { label: t('dashboard.setup.methods'), to: { name: 'settings.chart' }, done: (methods.value?.length ?? 0) > 0 },
     { label: t('dashboard.setup.chart'), to: { name: 'settings.chart' } },
@@ -237,7 +263,7 @@ const steps = computed(() => [
             </RouterLink>
         </div>
 
-        <div class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_368px]">
+        <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_368px]">
             <div class="min-w-0 space-y-4">
                 <!-- A new practice: what to set up first -->
                 <section v-if="counts.clients_total === 0" class="card">
@@ -347,6 +373,73 @@ const steps = computed(() => [
                             </tbody>
                         </table>
                     </div>
+                </section>
+
+                <!-- Slow transits on the charts of this week's clients -->
+                <section v-if="counts.clients_total > 0" class="card">
+                    <div class="card-head">
+                        <h2>{{ t('dashboard.transits.title') }}</h2>
+                        <span v-if="transitsAsOf" class="right text-xs text-ink-3">{{
+                            t('dashboard.transits.asOf', { time: transitsAsOf })
+                        }}</span>
+                    </div>
+                    <div v-if="!board.transits" class="card-body">
+                        <p class="notice n-warn" role="status">{{ t('dashboard.transits.unavailable') }}</p>
+                    </div>
+                    <p v-else-if="!board.transits.clients.length" class="empty">
+                        {{ t('dashboard.transits.empty') }}
+                    </p>
+                    <div v-else class="overflow-x-auto">
+                        <table class="data">
+                            <caption class="sr-only">
+                                {{
+                                    t('dashboard.transits.title')
+                                }}
+                            </caption>
+                            <tbody v-for="entry in board.transits.clients" :key="entry.client.id">
+                                <tr>
+                                    <th colspan="3" class="bg-surface-2">
+                                        <span class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                            <RouterLink
+                                                :to="{ name: 'clients.show', params: { id: entry.client.id } }"
+                                                class="hover:underline"
+                                                >{{ entry.client.full_name }}</RouterLink
+                                            >
+                                            <span class="text-xs font-normal text-ink-3">{{
+                                                t('dashboard.transits.next', { when: when(entry.appointment, false) })
+                                            }}</span>
+                                            <RouterLink
+                                                :to="transitsRoute(entry.client.id, entry.appointment.starts_at, zone)"
+                                                class="btn btn-sm ml-auto"
+                                                >{{ t('dashboard.transits.open') }}</RouterLink
+                                            >
+                                        </span>
+                                    </th>
+                                </tr>
+                                <tr
+                                    v-for="contact in entry.contacts"
+                                    :key="`${contact.transit}-${contact.natal}-${contact.type}`"
+                                    class="cursor-default!"
+                                >
+                                    <td>
+                                        <span class="mr-2 whitespace-nowrap" aria-hidden="true">
+                                            <span class="text-base text-link">{{ pointGlyph(contact.transit) }}</span>
+                                            <span class="aspect-glyph mx-1 text-base" :class="`asp-${contact.type}`">{{
+                                                ASPECT_GLYPHS[contact.type]
+                                            }}</span>
+                                            <span class="text-ink-2">{{ pointGlyph(contact.natal) }}</span>
+                                        </span>
+                                        {{ contactText(contact) }}
+                                    </td>
+                                    <td class="text-right font-mono whitespace-nowrap">{{ formatOrb(contact.orb) }}</td>
+                                    <td class="text-right text-xs whitespace-nowrap text-ink-3">
+                                        {{ exactText(contact) }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="engine-note font-sans!">{{ t('dashboard.transits.hint') }}</p>
                 </section>
 
                 <!-- New files -->

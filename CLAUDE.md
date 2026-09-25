@@ -73,6 +73,21 @@ before starting a phase. The user communicates in Serbian.
 - `HouseAccuracyTest` checks angles and houses against textbook formulas (Meeus); keep reference
   values independent of the engine and never from sources the licence contract forbids naming.
 
+## Transits
+
+- Transits (`TransitService`) are calculated on every request and never stored — not in
+  `chart_calculations`, not in the Laravel cache. Only the natal chart underneath is cached.
+- Starting `swetest` costs far more than calculating (~210 ms vs ~17 ms on local Windows). Never
+  call the engine per day or per client: `EphemerisEngine::series()` returns a daily series in one
+  run, and the sky is the same for every client, so a request reuses one series (`TransitService::days`).
+- The series runs `SEARCH_DAYS` (365) either side of the moment; its middle entry is the moment.
+  Exact dates come from sign changes of the signed distance (`TransitService::exactDates`).
+- Transit orbs are their own set (`workspaces.transit_orbs`, `AspectSettings::transitsFromArray`),
+  never the natal `aspect_orbs`. Transits touch the ASC and MC only with a known birth time, and
+  never the natal Moon when the time is unknown (`TransitService::natalPoints`).
+- The UI takes the moment as wall-clock time on the viewer's clock (`at` + `timezone`); links to
+  a date go through `transitsRoute()` in `resources/js/lib/transits.js`.
+
 ## Consultations, notes, files, timeline
 
 - `internal_notes`, `client_summary` and `next_steps` are separate fields; lists never return them.

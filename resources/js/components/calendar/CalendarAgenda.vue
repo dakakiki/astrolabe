@@ -84,7 +84,8 @@ function span(appointment) {
                                 </span>
                             </div>
                         </td>
-                        <td class="text-xs text-ink-3">
+                        <!-- On a phone the detail says where; the row keeps to the screen. -->
+                        <td class="hidden text-xs text-ink-3 sm:table-cell">
                             {{ labels.locationType(appointment.location_type) }}
                             <div v-if="appointment.timezone !== timeZone" class="font-mono">
                                 {{ appointment.timezone }}

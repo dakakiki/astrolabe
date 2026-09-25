@@ -203,7 +203,7 @@ const aspectCount = computed(() => props.chart.aspects?.length ?? 0);
         </template>
 
         <!-- Client profile: positions and cusps beside the aspects -->
-        <div v-else class="grid items-start gap-4 lg:grid-cols-2">
+        <div v-else class="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
             <div class="space-y-4">
                 <section class="card">
                     <div class="card-head">

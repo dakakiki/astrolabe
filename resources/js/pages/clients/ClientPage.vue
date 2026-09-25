@@ -13,6 +13,7 @@ import RelatedPeoplePanel from '@/components/RelatedPeoplePanel.vue';
 import StatusBadge from '@/components/StatusBadge.vue';
 import TaskList from '@/components/TaskList.vue';
 import TasksPanel from '@/components/TasksPanel.vue';
+import TransitsPanel from '@/components/TransitsPanel.vue';
 import { useLabels } from '@/composables/useLabels';
 import { formatDate, formatRelative, initials } from '@/lib/format';
 import http from '@/lib/http';
@@ -20,8 +21,9 @@ import { useToastStore } from '@/stores/toast';
 
 /**
  * The client profile, the core screen (docs/spec/01): an overview with the
- * timeline, then birth data and chart, consultations, notes and files. The
- * open tab lives in the URL, so links can point straight at it.
+ * timeline, then birth data and chart, transits, consultations, notes and
+ * files. The open tab lives in the URL, so links can point straight at it —
+ * transits with their moment (`?tab=transits&at=`).
  */
 const { t, locale } = useI18n();
 const labels = useLabels();
@@ -29,7 +31,7 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToastStore();
 
-const TABS = ['overview', 'chart', 'consultations', 'notes', 'files', 'tasks', 'related'];
+const TABS = ['overview', 'chart', 'transits', 'consultations', 'notes', 'files', 'tasks', 'related'];
 
 const client = ref(null);
 const notFound = ref(false);
@@ -113,7 +115,14 @@ onMounted(async () => {
 });
 
 function goToTab(name) {
-    router.replace({ query: { ...route.query, tab: name === 'overview' ? undefined : name } });
+    router.replace({ query: { ...route.query, at: undefined, tab: name === 'overview' ? undefined : name } });
+}
+
+// The transit moment stays in the URL, so the page can be reloaded or shared as it is.
+const transitMoment = computed(() => (typeof route.query.at === 'string' ? route.query.at : ''));
+
+function setTransitMoment(at) {
+    router.replace({ query: { ...route.query, at: at || undefined } });
 }
 
 // Counts on the summary card follow what is added in the other tabs.
@@ -193,7 +202,7 @@ async function toggleArchive() {
             <RouterLink
                 v-for="name in TABS"
                 :key="name"
-                :to="{ query: { ...route.query, tab: name === 'overview' ? undefined : name } }"
+                :to="{ query: { ...route.query, at: undefined, tab: name === 'overview' ? undefined : name } }"
                 :aria-current="tab === name ? 'page' : undefined"
                 replace
             >
@@ -211,7 +220,7 @@ async function toggleArchive() {
         </nav>
 
         <!-- Overview -->
-        <div v-if="tab === 'overview'" class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div v-if="tab === 'overview'" class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
             <ClientTimeline ref="timeline" :client-id="client.id" @open-tab="goToTab" />
 
             <div class="space-y-4">
@@ -343,6 +352,16 @@ async function toggleArchive() {
                 </div>
             </section>
         </div>
+
+        <!-- Transits -->
+        <TransitsPanel
+            v-else-if="tab === 'transits'"
+            :endpoint="`/clients/${client.id}/transits`"
+            :name="client.full_name"
+            :at="transitMoment"
+            :edit-to="{ name: 'clients.edit', params: { id: client.id } }"
+            @update:at="setTransitMoment"
+        />
 
         <!-- Consultations -->
         <section v-else-if="tab === 'consultations'" class="card">

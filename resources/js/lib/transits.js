@@ -36,6 +36,31 @@ export function nearestExact(exact, momentIso) {
 }
 
 /**
+ * Every date a slow transit is exact, each marked as gone or to come, with
+ * the one nearestExact picks singled out. Empty for a fast planet.
+ */
+export function exactDates(exact, momentIso) {
+    const nearest = nearestExact(exact, momentIso);
+    const moment = new Date(momentIso).getTime();
+
+    return (exact ?? []).map((date) => ({
+        date,
+        past: new Date(date).getTime() < moment,
+        nearest: date === nearest?.date,
+    }));
+}
+
+/**
+ * The shown moment as the value of a datetime-local field: the one asked for,
+ * else the server's "now" on the viewer's clock.
+ */
+export function momentInput(requested, momentIso, timeZone) {
+    if (requested) return requested;
+
+    return momentIso ? toLocalInput(new Date(momentIso), timeZone) : '';
+}
+
+/**
  * Longitudes of the points the contacts join, for drawing: transiting bodies
  * from the transit positions, natal ones from the chart (bodies and angles).
  */

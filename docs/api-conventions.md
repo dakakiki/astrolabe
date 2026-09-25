@@ -42,11 +42,11 @@ Linkovi u emailovima vode na SPA stranice (`/verify-email/...`, `/reset-password
 |---|---|---|
 | GET | `/me` | korisnik + trenutni workspace i uloga (radi i pre verifikacije emaila) |
 | GET | `/reference-data` | dozvoljene vrednosti za forme (jezici, valute, sistemi kuća, tipovi aspekata sa podrazumevanim orbima …) |
-| GET / PATCH | `/workspace` | trenutni workspace; nema `{workspace}` parametra. PATCH menja samo poslata polja, uključujući `aspect_orbs` |
+| GET / PATCH | `/workspace` | trenutni workspace; nema `{workspace}` parametra. PATCH menja samo poslata polja, uključujući `aspect_orbs` i `transit_orbs` |
 | PUT | `/workspace/astrology-methods` | izbor metoda i podrazumevana metoda |
 | GET / POST / PATCH / DELETE | `/astrology-methods` | ugrađene + sopstvene metode |
 
-`aspect_orbs`: `{"aspects": {"conjunction": {"enabled": true, "orb": 8}, …}, "luminary_bonus": 1.5}` — tipovi iz `reference-data.aspects.types`. PATCH prima i samo deo aspekata; izostavljeni dobijaju podrazumevane vrednosti, a čuva se ceo objekat. Orb je veći od 0 i najviše 15, `luminary_bonus` od 0 do 5. `GET` uvek vraća ceo objekat.
+`aspect_orbs`: `{"aspects": {"conjunction": {"enabled": true, "orb": 8}, …}, "luminary_bonus": 1.5}` — tipovi iz `reference-data.aspects.types`. PATCH prima i samo deo aspekata; izostavljeni dobijaju podrazumevane vrednosti, a čuva se ceo objekat. Orb je veći od 0 i najviše 15, `luminary_bonus` od 0 do 5. `GET` uvek vraća ceo objekat. `transit_orbs` (Faza 7a) ima isti oblik i ista pravila, a izostavljeni aspekti dobijaju podrazumevane vrednosti za tranzite (`reference-data.aspects.transit_defaults`).
 
 ### Klijenti i mesta
 
@@ -134,6 +134,17 @@ Pravila:
 - Pojedinačan klijent (`GET /clients/{id}`) u `stats` nosi i `open_tasks`.
 
 `/dashboard` vraća `today` (dan u zoni korisnika), `timezone`, `appointments.today` (današnji termini korisnika bez otkazanih) i `appointments.upcoming` (zakazani u narednih 7 dana, najviše 8), `tasks.overdue` / `tasks.today` / `tasks.upcoming` (zadaci korisnika i nedodeljeni, rok u narednih 7 dana; najviše 8 po grupi), `recent_clients` (6 poslednje aktivnih, bez arhiviranih), `recent_files` (6 najnovijih koje korisnik sme da vidi, sa `client`), `incomplete_birth_data` (do 5 klijenata čija karta ne može da se izračuna, sa `birth`) i `counts` (`appointments_today`, `appointments_upcoming`, `tasks_open`, `tasks_overdue`, `tasks_today`, `clients_active`, `clients_new_this_month`, `clients_total`, `incomplete_birth_data`).
+
+### Tranziti (Faza 7a)
+
+| Metoda | Putanja | Namena |
+|---|---|---|
+| GET | `/clients/{id}/transits` | tranziti prema natalnoj karti klijenta u trenutku: `at` (lokalno vreme, `YYYY-MM-DDTHH:MM`, od 1801. do 2398.) u zoni `timezone` (podrazumevano zona korisnika); bez `at` — sada, na minut. `status: incomplete` sa `missing` kao kod karte; 503 kada engine nije dostupan |
+| GET | `/related-people/{id}/transits` | isto za povezanu osobu |
+
+Odgovor (`status: ready`): `timezone` (zona u kojoj je `at` shvaćen), `moment` (UTC), `julian_day_ut`, `zodiac_mode`, `ayanamsa`, `positions` (tranzitna tela: `body`, `longitude`, `speed`, `retrograde`, `house` — natalna kuća, `null` bez vremena rođenja), `contacts` (od najužeg orba: `transit`, `natal` — telo ili `asc` / `mc`, `type`, `orb`, `applying`, `exact` — UTC trenuci kada je spora planeta tačna u `search_days` dana pre i posle trenutka, najranije prvo; `null` za brze planete), `orbs` (orbi za tranzite sa kojima je računato), `search_days` (365), `engine` i `natal` (natalna karta, isti oblik kao `/clients/{id}/chart`). Tranziti se računaju pri svakom zahtevu i ne čuvaju se.
+
+`/dashboard` od Faze 7a vraća i `transits`: `moment` (tekući sat, UTC) i `clients` — do 6 klijenata sa zakazanim terminom korisnika u narednih 7 dana, redom termina, svaki sa `client` (`id`, `full_name`), `appointment` (`id`, `starts_at`) i do 3 `contacts` (isti oblik kao gore): Jupiter–Pluton, konjunkcija / kvadrat / trigon / opozicija prema Suncu, Mesecu, Merkuru, Veneri, Marsu, ASC ili MC, orb do 1°. Klijenti bez kontakata i bez potpunih podataka rođenja se izostavljaju; `transits: null` kada engine nije dostupan.
 
 ### Konsultacije, beleške i fajlovi
 

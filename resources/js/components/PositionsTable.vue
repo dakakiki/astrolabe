@@ -9,11 +9,17 @@ import { BODY_GLYPHS, formatDegrees, splitLongitude } from '@/lib/zodiac';
  * The natal positions as a table — the readable alternative to the chart wheel
  * for phones and screen readers (docs/spec/11): each body with its sign,
  * degree, house and motion, then the Ascendant and Midheaven.
+ *
+ * Transits (Phase 7a) reuse it: `chart` then carries the transiting
+ * positions, each with the natal house it falls in, and the natal houses.
  */
 const props = defineProps({
     chart: { type: Object, required: true },
     // Narrow columns: sign names are left to screen readers, the glyph shows the sign.
     compact: { type: Boolean, default: false },
+    caption: { type: String, default: '' },
+    /** What the house column means, when it is not the chart's own house. */
+    houseTitle: { type: String, default: '' },
 });
 
 const { t } = useI18n();
@@ -49,7 +55,7 @@ function signCell(longitude) {
     <table class="data" :class="{ dense: compact }">
         <caption class="sr-only">
             {{
-                t('chart.positionsTitle')
+                caption || t('chart.positionsTitle')
             }}
         </caption>
         <thead>
@@ -58,7 +64,9 @@ function signCell(longitude) {
                 <th scope="col">{{ t('chart.sign') }}</th>
                 <th scope="col">{{ t('chart.position') }}</th>
                 <th v-if="hasHouses" scope="col" class="text-right">
-                    <abbr :title="t('chart.house')" class="no-underline">{{ t('chart.houseShort') }}</abbr>
+                    <abbr :title="houseTitle || t('chart.house')" class="no-underline">{{
+                        t('chart.houseShort')
+                    }}</abbr>
                 </th>
                 <th scope="col">
                     <span class="sr-only">{{ t('chart.motion') }}</span>

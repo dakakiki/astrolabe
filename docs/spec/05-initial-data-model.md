@@ -15,6 +15,8 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 > Faza 6b (implementirano): `appointments` sa `created_by`, `cancellation_reason`, `cancelled_at`; `consultations.appointment_id`; nove vrste događaja u `activity_events`.
 >
 > Faza 6c (implementirano): `tasks` dobija rok kako je unet (`due_date`, `due_time`, `timezone`) uz `due_at` kao UTC rok, i `completed_by`; nove vrste događaja `task` i `task_completed` u `activity_events`.
+>
+> Faza 7a (implementirano): `workspaces.transit_orbs`; tranziti se računaju po zahtevu i ne upisuju se u `chart_calculations` (`chart_type = transit` ostaje nekorišćen); Hiron je u `payload.positions` natalnih karata.
 
 ## Nalozi i workspace
 
@@ -43,6 +45,7 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 - `default_zodiac_mode` — `tropical` ili `sidereal`
 - `default_ayanamsa`, nullable — npr. `lahiri`; obavezno samo za `sidereal`
 - `aspect_orbs`, JSON, nullable — koji aspekti se prikazuju i sa kojim orbom (Faza 5): `{"aspects": {"conjunction": {"enabled": true, "orb": 8}, …}, "luminary_bonus": 1.5}`; `null` znači podrazumevane vrednosti iz dokumenta 11. Čuva se ceo i normalizovan, pa kasnija promena podrazumevanih vrednosti ne pomera već sačuvana podešavanja
+- `transit_orbs`, JSON, nullable — isti oblik kao `aspect_orbs`, zaseban skup za tranzite (Faza 7a); `null` znači podrazumevane vrednosti za tranzite iz dokumenta 11 (uži orbi, bez dodatka za Sunce i Mesec). Ne ulazi u `input_hash` natalne karte, jer se tranziti ne keširaju
 - timestamps
 
 `slug` je jedinstven, generisan jednom pri kreiranju i ne menja se sa nazivom, jer će se koristiti u javnim booking URL-ovima.
@@ -204,7 +207,7 @@ Povezana osoba sa kompletnim podacima rođenja može imati sopstvenu izračunatu
 - `workspace_id`
 - `subject_type` — polimorfno: `client` ili `related_person`
 - `subject_id`
-- `chart_type` — `natal`, `transit`, kasnije `synastry`, `solar_return`
+- `chart_type` — `natal`; kasnije `synastry`, `solar_return`. Vrednost `transit` je predviđena, ali se ne koristi: tranziti se od Faze 7a računaju po zahtevu i ne čuvaju (vidi ispod)
 - `input_hash` — sha256 normalizovanog ulaza
 - `julian_day_ut` — decimal, visoke preciznosti
 - `house_system` — traženi sistem; `null` kada nema vremena rođenja. Stvarno upotrebljeni sistem je u `payload.houses.system` (razlikuju se iznad polarnog kruga)
@@ -233,6 +236,8 @@ INDEX  (workspace_id, subject_type, subject_id)
 `input_hash` obuhvata sve što ulazi u proračun: julijanski dan, koordinate, sistem kuća, zodijak, ayanamsu i listu tela, a od Faze 3 i `time_accuracy` i „otisak“ engine-a (naziv, verzija i kontrolne sume fajlova efemerida), tako da nova verzija engine-a ili novi fajlovi daju novi proračun umesto tihe zamene. Kada se bilo šta od toga promeni, hash se ne poklapa i pokreće se novi proračun. Stari zapis ostaje, što je korisno pri rektifikaciji vremena kada astrolog upoređuje varijante.
 
 `engine_version`, `ephemeris_version` i `tzdata_version` se čuvaju jer promena bilo koje od njih može promeniti rezultat. Bez tog podatka nije moguće objasniti zašto se stara i nova karta razlikuju.
+
+**Tranziti (Faza 7a) se ne upisuju ovde.** Nebo u jednom trenutku je isto za sve klijente, a pogled na drugi datum je jeftin (jedan poziv engine-a za godinu dana pre i posle trenutka), pa bi keš po klijentu i trenutku rastao bez koristi. Kešira se samo natalna karta ispod tranzita. Hiron (od Faze 7a) je deo liste tela, pa se svaka natalna karta jednom ponovo izračunala i dobila novi red; stari redovi i snimci na konsultacijama ostaju bez Hirona.
 
 ## Konsultacije i beleške
 

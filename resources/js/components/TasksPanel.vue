@@ -181,7 +181,7 @@ const emptyText = computed(() => {
     </div>
 
     <!-- All tasks, or one client's -->
-    <div v-else class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">
+    <div v-else class="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">
         <section class="card">
             <div class="card-head flex-wrap">
                 <div class="seg" role="group" :aria-label="t('tasks.title')">

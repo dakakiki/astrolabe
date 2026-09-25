@@ -109,7 +109,7 @@ const consultationLabel = (consultation) =>
 </script>
 
 <template>
-    <div class="grid gap-4" :class="compact ? '' : 'lg:grid-cols-[minmax(0,1fr)_380px]'">
+    <div class="grid grid-cols-1 gap-4" :class="compact ? '' : 'lg:grid-cols-[minmax(0,1fr)_380px]'">
         <div class="space-y-3">
             <article v-for="note in notes" :key="note.id" class="card">
                 <div class="card-head">

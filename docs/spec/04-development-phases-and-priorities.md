@@ -202,6 +202,10 @@ Procena za tranzitni deo: 1–2 nedelje.
 
 Kriterijum završetka: zatvoren je tok od klijenta i termina do završene i evidentirane konsultacije, a astrolog pred svaku konsultaciju na jednom ekranu vidi istoriju klijenta i trenutne tranzite.
 
+Izvođenje (dogovoreno 25. 9. 2026): tri dela sa commit-om, zelenim CI-jem i tačkom za pauzu posle svakog — **7a** tranziti, **7b** uplate i pokazatelji, **7c** obaveštenja i podsetnici.
+
+> Status 7a: završeno 25. 9. 2026. Tranziti prema natalnoj karti klijenta i povezane osobe za izabrani trenutak (tab „Transits“, dvostruki točak, kontakti po orbu sa datumima tačnosti sporih planeta, tranzitne pozicije u natalnim kućama), zaseban skup orba za tranzite po workspace-u, Hiron u karti i tranzitima (proveren prema JPL Horizons), tranziti iz detalja termina i sa konsultacije, i kartica „Before your next consultations“ na dashboardu. Tranziti se računaju po zahtevu, jednim pozivom engine-a za godinu pre i posle trenutka, i ne keširaju se.
+
 ## Faza 8 — zatvorena beta
 
 - nekoliko testnih astrologa;

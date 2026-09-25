@@ -274,7 +274,7 @@ onBeforeUnmount(() => clearInterval(clock));
         <span v-if="loading" class="text-xs text-ink-3" role="status">{{ t('calendar.loading') }}</span>
     </div>
 
-    <div class="grid gap-4" :class="{ 'lg:grid-cols-[minmax(0,1fr)_380px]': formFor || selectedId }">
+    <div class="grid grid-cols-1 gap-4" :class="{ 'lg:grid-cols-[minmax(0,1fr)_380px]': formFor || selectedId }">
         <div ref="panel" class="order-first min-w-0 lg:order-last" :class="{ hidden: !formFor && !selectedId }">
             <AppointmentForm
                 v-if="formFor"

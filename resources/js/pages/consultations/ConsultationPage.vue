@@ -16,6 +16,7 @@ import { timeZoneOptions, useLabels } from '@/composables/useLabels';
 import { formatDateTime, localInputNow } from '@/lib/datetime';
 import http from '@/lib/http';
 import { serviceColorClass } from '@/lib/services';
+import { transitsRoute } from '@/lib/transits';
 import { useAuthStore } from '@/stores/auth';
 import { useToastStore } from '@/stores/toast';
 
@@ -24,7 +25,8 @@ const RichTextEditor = defineAsyncComponent(() => import('@/components/RichTextE
 /**
  * One consultation: the record of a session (docs/spec/02). Internal notes and
  * the summary for the client are separate fields, each with its own editor.
- * Files and the chart snapshot can be attached once the record exists.
+ * Files and the chart snapshot can be attached once the record exists, and
+ * the client's transits open at the consultation's time.
  */
 const { t, locale } = useI18n();
 const labels = useLabels();
@@ -366,7 +368,7 @@ const otherZone = computed(() => {
             </div>
         </div>
 
-        <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">
             <form class="space-y-4" novalidate @submit.prevent="save">
                 <section class="card">
                     <div class="card-head">
@@ -614,6 +616,13 @@ const otherZone = computed(() => {
                                 >
                                     {{ t('consultations.chart.attach') }}
                                 </button>
+                            </div>
+                            <div v-if="consultation.starts_at && client" class="border-t border-line-soft pt-3">
+                                <RouterLink
+                                    :to="transitsRoute(client.id, consultation.starts_at, auth.user?.timezone)"
+                                    class="btn btn-sm"
+                                    >{{ t('transits.onDate') }}</RouterLink
+                                >
                             </div>
                         </div>
                     </section>

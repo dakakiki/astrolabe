@@ -47,11 +47,10 @@ const { t } = useI18n();
 const id = useId();
 
 // The outer transit ring needs room around the natal wheel.
-const size = computed(() => (props.transits ? 760 : 640));
+const size = computed(() => (props.transits ? 800 : 640));
 const C = computed(() => size.value / 2);
 const R = {
-    transitOut: 352,
-    transitDeg: 336,
+    transitOut: 366,
     transitGlyph: 314,
     out: 292,
     sign: 254,
@@ -70,6 +69,13 @@ function degreeRadius(longitude) {
     const theta = ((180 + longitude - rotation.value) * Math.PI) / 180;
 
     return R.glyph - 17 - 13 * Math.abs(Math.cos(theta));
+}
+
+/** A transit's degree label sits outside its glyph, with the same extra room at the sides. */
+function transitDegreeRadius(longitude) {
+    const theta = ((180 + longitude - rotation.value) * Math.PI) / 180;
+
+    return R.transitGlyph + 18 + 13 * Math.abs(Math.cos(theta));
 }
 
 /** Degrees kept between neighbouring glyphs. */
@@ -205,7 +211,7 @@ const transitBodies = computed(() => {
     return shown.map((position) => {
         const where = display[position.body];
         const [gx, gy] = at(where, R.transitGlyph);
-        const [dx, dy] = at(where, R.transitDeg);
+        const [dx, dy] = at(where, transitDegreeRadius(where));
 
         return {
             ...position,
@@ -266,7 +272,7 @@ const description = computed(() => describeChart(props.chart, t));
 <template>
     <svg
         class="wheel"
-        :class="{ 'is-compact': compact }"
+        :class="{ 'is-compact': compact, 'has-transits': transits }"
         :viewBox="`0 0 ${size} ${size}`"
         role="img"
         :aria-labelledby="`${id}-title ${id}-desc`"

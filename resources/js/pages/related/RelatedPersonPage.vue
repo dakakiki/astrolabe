@@ -1,10 +1,11 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
 import BirthDetailsCard from '@/components/BirthDetailsCard.vue';
 import NatalChart from '@/components/NatalChart.vue';
+import TransitsPanel from '@/components/TransitsPanel.vue';
 import { useLabels } from '@/composables/useLabels';
 import { initials } from '@/lib/format';
 import http from '@/lib/http';
@@ -12,8 +13,9 @@ import { useToastStore } from '@/stores/toast';
 
 /**
  * A related person (docs/spec/02, "Povezane osobe"): who they are to which
- * clients, their birth data and their own natal chart. From here the person
- * can become a client of their own, with nothing entered again.
+ * clients, their birth data and their own natal chart, and the transits to
+ * it. From here the person can become a client of their own, with nothing
+ * entered again.
  */
 const { t } = useI18n();
 const labels = useLabels();
@@ -27,6 +29,14 @@ const chart = ref(null);
 const chartState = ref('idle');
 const switchingHouses = ref(false);
 const busy = ref(false);
+
+const TABS = ['chart', 'transits'];
+const tab = computed(() => (route.query.tab === 'transits' ? 'transits' : 'chart'));
+const transitMoment = computed(() => (typeof route.query.at === 'string' ? route.query.at : ''));
+
+function setTransitMoment(at) {
+    router.replace({ query: { ...route.query, at: at || undefined } });
+}
 
 async function load() {
     person.value = null;
@@ -141,8 +151,30 @@ async function remove() {
             </div>
         </div>
 
-        <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-            <div class="min-w-0 space-y-4">
+        <nav class="tabs" :aria-label="person.full_name">
+            <RouterLink
+                v-for="name in TABS"
+                :key="name"
+                :to="{ query: { tab: name === 'chart' ? undefined : name } }"
+                :aria-current="tab === name ? 'page' : undefined"
+                replace
+            >
+                {{ t(`clients.profile.tabs.${name}`) }}
+            </RouterLink>
+        </nav>
+
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+            <TransitsPanel
+                v-if="tab === 'transits'"
+                class="min-w-0"
+                :endpoint="`/related-people/${person.id}/transits`"
+                :name="person.full_name"
+                :at="transitMoment"
+                :edit-to="{ name: 'related-people.edit', params: { id: person.id } }"
+                @update:at="setTransitMoment"
+            />
+
+            <div v-else class="min-w-0 space-y-4">
                 <BirthDetailsCard
                     :birth="person.birth"
                     :edit-to="{ name: 'related-people.edit', params: { id: person.id } }"

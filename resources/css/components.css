@@ -608,7 +608,12 @@
 
     /* ---------------- Tables ---------------- */
 
+    /*
+     * Relative, so a screen-reader-only header (absolutely positioned) stays
+     * inside the table's scrolling wrapper instead of widening the page on a phone.
+     */
     table.data {
+        position: relative;
         width: 100%;
         border-collapse: collapse;
         font-size: 13px;
@@ -1394,6 +1399,11 @@
         height: auto;
         margin: 0 auto;
         font-family: var(--sans);
+    }
+
+    /* The transit ring takes room from the natal wheel; let the whole grow a little. */
+    .wheel.has-transits {
+        max-width: 720px;
     }
 
     .wheel .band {

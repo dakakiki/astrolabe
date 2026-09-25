@@ -9,14 +9,16 @@ import { useLabels } from '@/composables/useLabels';
 import { formatDateTime } from '@/lib/datetime';
 import { initials } from '@/lib/format';
 import http from '@/lib/http';
+import { transitsRoute } from '@/lib/transits';
 import { useAuthStore } from '@/stores/auth';
 import { useToastStore } from '@/stores/toast';
 
 /**
  * One appointment beside the calendar (docs/spec/10): when, where and with
  * whom, in the astrologer's zone and the zone it was entered in; its status;
- * and what to do next — record the consultation, open the client, or look at
- * the client's chart without leaving the calendar.
+ * and what to do next — record the consultation, open the client, look at
+ * the client's chart without leaving the calendar, or open the transits for
+ * the appointment's time (Phase 7a).
  */
 const props = defineProps({
     appointmentId: { type: Number, required: true },
@@ -265,6 +267,12 @@ const moment = (item) => formatDateTime(item.starts_at, locale.value, zone.value
                         chartState === 'idle' ? t('appointments.detail.showChart') : t('appointments.detail.hideChart')
                     }}
                 </button>
+                <RouterLink
+                    v-if="appointment.client.chart_ready"
+                    :to="transitsRoute(appointment.client.id, appointment.starts_at, zone)"
+                    class="btn btn-sm"
+                    >{{ t('transits.forDate') }}</RouterLink
+                >
             </div>
 
             <div class="flex flex-wrap gap-2 border-t border-line-soft pt-3">

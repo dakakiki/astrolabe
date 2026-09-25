@@ -186,7 +186,11 @@
             "empty": "No close slow transits for the clients you see this week.",
             "unavailable": "Transits cannot be calculated right now.",
             "open": "Transits",
-            "next": "Next: {when}"
+            "next": "Next: {when}",
+            "asOf": "As of {time}",
+            "contact": "{transit} {aspect} natal {natal}",
+            "exact": "exact {date}",
+            "wasExact": "was exact {date}"
         }
     },
     "settings": {
@@ -1192,6 +1196,9 @@
         },
         "forDate": "Transits for this date",
         "onDate": "Transits on this date",
-        "describe": "{transit} {aspect} natal {natal}, orb {orb}"
+        "noTimeNote": "The birth time is unknown: there are no natal houses or angles, and the natal Moon is left out of the contacts.",
+        "approximateNote": "The birth time is approximate, so transits to the Ascendant and Midheaven and the natal houses are approximate too.",
+        "incomplete": "No transits yet",
+        "complete": "Complete birth data"
     }
 }

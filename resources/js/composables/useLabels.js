@@ -60,6 +60,8 @@ export function useLabels() {
         locationType: (value) => fromKey('locationTypes', value),
         serviceColor: (value) => fromKey('serviceColors', value),
         relationship: (value) => fromKey('relationshipTypes', value),
+        /** A chart point: a body, or an angle (asc, mc …). */
+        point: (key) => (te(`chart.angles.${key}`) ? t(`chart.angles.${key}`) : fromKey('bodies', key)),
     };
 }
 

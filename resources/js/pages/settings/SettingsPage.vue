@@ -14,7 +14,7 @@ const sections = ['profile', 'practice', 'chart', 'regional', 'security'];
         <div class="sub">{{ t('settings.sub') }}</div>
     </div>
 
-    <div class="grid gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
         <div>
             <nav class="card subnav p-2" :aria-label="t('settings.title')">
                 <RouterLink v-for="section in sections" :key="section" :to="{ name: `settings.${section}` }">

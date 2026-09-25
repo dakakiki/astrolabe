@@ -134,6 +134,17 @@ Zadaci i follow-up, dashboard. Time je Faza 6 završena. Izmene u dokumentima:
 
 Odluke donete usput: rok je dan sa opcionim vremenom u zoni unosa, a bez vremena važi do kraja dana; „zakasneo“ i „za danas“ računaju se po kalendaru onoga ko gleda; zadatak klijenta ima dve projekcije na vremenskoj liniji (dodavanje i završetak), obe obnovljive iz reda zadatka, pa ponovno otvaranje uklanja stavku završetka; klijent zadatka sme da se promeni, a follow-up uzima klijenta iz konsultacije; odgovorni je onaj ko dodaje (izbor drugog člana samo u API-ju do timova); opis je običan tekst; dashboard prikazuje lične termine i zadatke, a klijente i fajlove cele prakse; „Needs attention“ (klijenti bez potpunih podataka za kartu) preuzet iz prototipa.
 
+## Faza 7a — implementirano
+
+Tranziti. Izmene u dokumentima:
+
+- 02: „Implementirano u Fazi 7a“ kod tranzita (P1) i dashboarda; iz detalja termina se otvaraju i tranziti za njegovo vreme.
+- 04: podela Faze 7 na 7a / 7b / 7c i status dela 7a.
+- 05: `workspaces.transit_orbs`; tranziti se ne upisuju u `chart_calculations` (vrednost `chart_type = transit` ostaje nekorišćena); Hiron u pozicijama natalne karte.
+- 11: `EphemerisEngine::series()`, orbi za tranzite, „Stanje posle Faze 7a“ (proračun, dan tačnosti, Hiron, prikaz, merenje, testovi), dopuna otvorenog pitanja 4.
+
+Odluke donete usput: pretraga datuma tačnosti obuhvata godinu pre i posle trenutka u jednom pozivu engine-a (±180 dana je propuštalo spore kontakte Plutona); tranziti se ne čuvaju ni u `chart_calculations` ni u Laravel kešu — isti niz se deli samo unutar jednog zahteva; orbi za tranzite su zaseban skup po workspace-u (2° / 1,5°, bez dodatka za svetla), jer su natalni orbi (6–8°) za tranzite preširoki; kontakti prema ASC i MC postoje samo uz poznato vreme rođenja; trenutak tranzita se bira i prikazuje na satu astrologa, a linkovi iz termina i konsultacije preračunavaju njihovo vreme na taj sat; kartica na dashboardu računa za tekući sat, a dugme vodi na vreme termina; povezana osoba dobija tabove „karta / tranziti“ na svojoj strani.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

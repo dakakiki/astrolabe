@@ -107,6 +107,8 @@ interface EphemerisEngine
 
 `ChartResult` sadrži pozicije, uglove, kuspide i metapodatke o engine-u, efemeridama i tzdata verziji.
 
+Od Faze 7a interfejs ima i `series(ChartRequest $request, int $days): array` — pozicije za `$days` uzastopnih dana od `julianDayUt`, jednim pozivom (`swetest -n<N> -s1`). Tranziti ga koriste da bi iz jednog pokretanja dobili i trenutak i datume tačnosti.
+
 **Pravilo:** nijedan kontroler, model ni Vue komponenta ne sme direktno pozvati ephemeris biblioteku. Sav pristup ide kroz `EphemerisEngine`.
 
 `FakeEngine` vraća unapred definisane vrednosti i koristi se u CI-ju, tako da testovi ne zavise od binarnog fajla ni od licence.
@@ -182,7 +184,8 @@ Računaju se serverski, iz pozicija.
 - opciono: kvinkunks, polusekstil, poluvadrat, seskvikvadrat;
 - **orbi su podesivi po workspace-u** (`workspaces.aspect_orbs`);
 - orb može zavisiti od tela — Sunce i Mesec obično dobijaju širi orb;
-- aplikujući i separirajući aspekt se razlikuju.
+- aplikujući i separirajući aspekt se razlikuju;
+- tranziti imaju sopstveni, uži skup orba (`workspaces.transit_orbs`, od Faze 7a).
 
 Astrolozi se oko orba spore. Ovo je jeftina personalizacija koja mnogo znači i signalizira da proizvod razume struku.
 
@@ -223,7 +226,7 @@ Uglovi, kuće, aspekti, SVG točak. Karta se prilaže konsultaciji kao snimak st
 
 ### Faza 7 — tranziti (1–2 nedelje)
 
-Trenutne pozicije prema natalnoj karti, sa izborom proizvoljnog datuma.
+Trenutne pozicije prema natalnoj karti, sa izborom proizvoljnog datuma. Implementirano u Fazi 7a — vidi „Stanje posle Faze 7a“.
 
 Ovo je najveća operativna vrednost modula: pred konsultaciju astrolog na jednom ekranu vidi istoriju klijenta **i** šta se trenutno dešava na njegovoj karti. Nijedan generički CRM to ne može.
 
@@ -236,7 +239,7 @@ Sinastrija, kompozit, solarni povratak i sekundarne progresije koriste isti engi
 Proračun traje jedinice do desetine milisekundi. **Ne ide kroz queue** — to bi dodalo složenost bez koristi.
 
 - natalna karta se kešira po `input_hash`;
-- tranziti se računaju po zahtevu, bez dugoročnog keša;
+- tranziti se računaju po zahtevu, bez keša, jednim višednevnim pozivom engine-a (merenje u „Stanje posle Faze 7a“);
 - SVG se renderuje na klijentu, ne generiše se na serveru.
 
 ## Testovi tačnosti
@@ -275,6 +278,18 @@ Referentne karte treba pribaviti iz nezavisnog izvora i zapisati očekivane vred
 - **Prikaz:** SVG točak kao Vue komponenta, bez biblioteke, sa bojama iz design tokena (i dnevna tema i budući brend); bliske planete se razmiču uz liniju do pravog stepena; linije aspekata po tipu i jačini; ASC i MC istaknuti; tekstualni opis za čitače ekrana. Uz točak: tabela pozicija sa kućama i uglovima, tabela kuspida i tabela aspekata od najužeg orba. Na konsultaciji je isti prikaz u jednoj koloni.
 - **Testovi tačnosti** (`HouseAccuracyTest`, tamo gde postoji `swetest`): ASC, MC i ARMC prema zvezdanom vremenu, nagibu ekliptike i nutaciji iz formula J. Meeus-a (*Astronomical Algorithms*, gl. 12 i 22); Equal, Whole Sign i Porphyry iz uglova; Placidus po definiciji — kuspide 11, 12, 2 i 3 dele polulukove na trećine, rešeno iteracijom. Sedam trenutaka od 1900. do 2039, obe hemisfere, od ekvatora do 64°N; izmereno odstupanje oko 0,3″, granica 1′. Iznad polarnog kruga (Tromsø, Longyearbyen, McMurdo i 66,6°N) Placidus i Koch uvek daju Porphyry, nikad grešku. Sideralni uglovi su pomereni za istu ayanamsu kao planete. Dan promene sata i dvosmisleno vreme pri vraćanju sata pokriveni su testovima kroz API, sa `FakeEngine`-om.
 
+### Stanje posle Faze 7a
+
+- **Tranziti** (`TransitService`): pozicije u izabranom trenutku (podrazumevano sada; iz termina i konsultacije njihovo vreme), geocentrično, u zodijaku workspace-a; svaka tranzitna planeta dobija natalnu kuću. API: `GET /clients/{id}/transits` i `GET /related-people/{id}/transits` sa `at` (lokalno vreme, npr. `2026-10-05T15:00`) i `timezone`; bez `at` — sada. Rezultat se ne upisuje u `chart_calculations`; kešira se samo natalna karta ispod.
+- **Jedan poziv engine-a:** `series()` daje dnevni niz od 365 dana pre do 365 dana posle trenutka (731 dan), a srednji dan je sam trenutak. Nebo je isto za sve klijente, pa dashboard jednim nizom pokriva sve klijente nedelje. Prozor od ±180 dana propuštao je kontakte sporog Plutona, zato je ±365.
+- **Kontakti:** tranzitna tela (Sunce–Pluton, Hiron, pravi čvor) prema natalnim telima i, uz poznato vreme, ASC i MC; bez srednjeg čvora, a kod nepoznatog vremena bez natalnog Meseca. Natalne tačke miruju, pa aplikujući ili separirajući zavisi samo od kretanja tranzita (i prema uglovima).
+- **Dan tačnosti** za spore planete (Jupiter, Saturn, Uran, Neptun, Pluton, Hiron): gde potpisana razdaljina tranzita od natalne tačke prelazi ugao aspekta (sa obe strane, osim kod konjunkcije i opozicije), linearno između dnevnih uzoraka. Retrogradna petlja daje do tri datuma; ekran naglašava prvi sledeći, a ako ga nema, poslednji protekli.
+- **Orbi za tranzite** (`workspaces.transit_orbs`, Settings → Chart & methods, menja vlasnik): 2° za konjunkciju, opoziciju, kvadrat i trigon, 1,5° za sekstil, manji aspekti isključeni (1° kad se uključe), bez dodatka za Sunce i Mesec. Privremene vrednosti, do validacionih razgovora.
+- **Hiron** (fajl `seas_18.se1`, 0,2 MB) je u natalnoj karti i u tranzitima. Referentne vrednosti iz JPL Horizons dodate su u isti fixture, za istih devet trenutaka; odstupanje oko 1″. Natalne karte su se zbog nove liste tela jednom ponovo izračunale.
+- **Prikaz:** tab „Transits“ na profilu klijenta i na strani povezane osobe — izbor trenutka i „Now“, trenutak u adresi strane (`?tab=transits&at=`); dvostruki točak (natalna karta unutra, tranziti na spoljnom prstenu, linije kontakata po tipu); tabela kontakata po orbu sa datumima tačnosti; tranzitne pozicije sa natalnom kućom. Iz detalja termina i sa konsultacije isti tab se otvara u njihovo vreme. Dashboard: „Before your next consultations“ (dokument 02).
+- **Merenje (25. 9. 2026, lokalni Windows):** sam `swetest` za jedan trenutak traje ~17 ms, a 90 dana za 10 tela u jednom pozivu isto toliko; kroz Symfony Process jedan poziv traje ~210 ms (pokretanje procesa, ne proračun). Zahtev za tranzite jednog klijenta sa nizom od 731 dan: ~450 ms; drugi klijent u istom zahtevu ~6 ms. Linux nije meren.
+- **Testovi:** `TransitsTest` (API sa `FakeEngine`-om), `TransitSearchTest` (datumi tačnosti, retrogradna petlja, prelaz preko 0° Ovna), Hiron u `SwissEphemerisReferenceTest`; na frontendu `lib/transits.js` u Vitest-u.
+
 ## Rezime obima
 
 | Stavka | Procena |
@@ -291,7 +306,7 @@ Za taj trošak proizvod prestaje da bude još jedan CRM.
 1. ~~Koja je aktuelna cena i uslovi komercijalne licence Swiss Ephemeris-a?~~ Rešeno 24. 9. 2026 — vidi „Detalji odluke“.
 2. ~~Koji provajder geokodiranja daje i koordinate i IANA zonu po prihvatljivoj ceni?~~ Rešeno 24. 9. 2026 — lokalna kopija GeoNames.
 3. Koji sistem kuća je podrazumevan po metodi, i da li astrolozi iz validacione grupe to potvrđuju? — *Privremeno, od Faze 5:* podrazumevani sistem je sa workspace-a, metode ga predlažu (zapadna Placidus, vedska i helenistička Whole Sign), a na ekranu karte može se izabrati drugi. Potvrđuje se u razgovorima.
-4. Da li astrolozi žele mogućnost da menjaju orbe, ili je to nepotrebna složenost u prvoj verziji? — *Privremeno, od Faze 5:* orbi su podesivi od početka, sa podrazumevanim vrednostima iz „Stanja posle Faze 5“. Razgovori mogu promeniti podrazumevane vrednosti, ne mehanizam.
+4. Da li astrolozi žele mogućnost da menjaju orbe, ili je to nepotrebna složenost u prvoj verziji? — *Privremeno, od Faze 5:* orbi su podesivi od početka, sa podrazumevanim vrednostima iz „Stanja posle Faze 5“; od Faze 7a tranziti imaju svoj, uži skup („Stanje posle Faze 7a“). Razgovori mogu promeniti podrazumevane vrednosti, ne mehanizam.
 5. Koliko je izvoz karte u PDF važan u odnosu na prikaz u aplikaciji?
 
 Pitanja 3, 4 i 5 idu u validacione razgovore iz Faze 0.
