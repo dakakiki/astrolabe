@@ -157,7 +157,7 @@ class FakeEngine implements EphemerisEngine
         $cusps = match ($system) {
             HouseSystem::Equal => array_map(fn (int $i) => self::normalize($ascendant + 30 * $i), range(0, 11)),
             HouseSystem::WholeSign => array_map(fn (int $i) => self::normalize(floor($ascendant / 30) * 30 + 30 * $i), range(0, 11)),
-            default => self::porphyry($ascendant, $midheaven),
+            default => Houses::porphyry($ascendant, $midheaven),
         };
 
         return new Houses(
@@ -180,26 +180,6 @@ class FakeEngine implements EphemerisEngine
             cos($theta),
             -(sin($theta) * cos($obliquity) + tan(deg2rad($latitude)) * sin($obliquity)),
         )));
-    }
-
-    /**
-     * Each quadrant between the angles divided into three equal parts.
-     *
-     * @return list<float>
-     */
-    private static function porphyry(float $ascendant, float $midheaven): array
-    {
-        $ic = self::normalize($midheaven + 180);
-        $descendant = self::normalize($ascendant + 180);
-        $third = fn (float $from, float $to) => self::normalize($to - $from) / 3;
-
-        $cusps = [];
-        foreach ([[$ascendant, $ic], [$ic, $descendant], [$descendant, $midheaven], [$midheaven, $ascendant]] as [$from, $to]) {
-            $step = $third($from, $to);
-            array_push($cusps, $from, self::normalize($from + $step), self::normalize($from + 2 * $step));
-        }
-
-        return $cusps;
     }
 
     private static function normalize(float $degrees): float

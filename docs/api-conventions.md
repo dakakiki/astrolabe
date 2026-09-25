@@ -194,6 +194,21 @@ Pravila:
 - `positions`: Sunce, Mesec, Merkur–Pluton, Hiron (`body`, `longitude`, `speed`, `retrograde`) u trenutku `positions_at` — sada, kada je u periodu, inače na početku perioda.
 - Kvar engine-a je **503** sa opštom porukom, kao kod karte.
 
+### Sinastrija i kompozit (Faza 7e)
+
+| Metoda | Putanja | Namena |
+|---|---|---|
+| GET | `/clients/{id}/synastry` | natalna karta klijenta poređena sa kartom povezane osobe (`with_person`) ili drugog klijenta (`with_client`) — tačno jedno od dva; isti klijent je 422, osoba ili klijent iz drugog workspace-a 404 |
+
+Pravila:
+
+- Odgovor (`status: ready`): `client` i `other` (`kind`: `client` / `person`, `id`, `full_name`, `chart` — natalna karta, isti oblik kao `/clients/{id}/chart`), `contacts`, `overlays`, `composite`, `orbs` (natalni orbi prakse sa kojima je računato), `zodiac_mode`, `ayanamsa`.
+- `contacts`: od najužeg orba, `a` — tačka druge osobe, `b` — tačka klijenta (telo ili `asc` / `mc`), `type`, `orb`. Nema `applying`: obe karte miruju. Uglovi učestvuju samo uz poznato vreme rođenja te osobe, a Mesec osobe bez vremena se izostavlja; dva ugla dve karte (ASC na ASC) jesu kontakt.
+- `overlays`: `other_in_client` i `client_in_other` — tačka (tela i `asc` / `mc`) → kuća druge karte (1–12); `null` kada druga karta nema kuće (nepoznato vreme). Mesec osobe bez vremena nema kuću.
+- `composite`: `time_accuracy` (manje sigurno od dva vremena: `unknown`, pa `approximate`, inače `exact`), `positions` (`body`, `longitude`, `speed: null`, `retrograde: false`, `house`), `moon_range` (bez oba vremena), `angles` (`asc`, `mc`, `dsc`, `ic` ili `null`), `houses` (`system`, `requested_system`, `cusps`, `method`: `midpoint_cusps`, `whole_signs` ili `porphyry_from_angles`) i `aspects` (isti oblik kao u karti, `applying: null`).
+- Nepotpuni podaci rođenja: `status: incomplete`, `side` (`client` ili `other`), `missing`, uz `client` i `other` bez karte. Kvar engine-a je **503**, kao kod karte.
+- Ništa se ne čuva: poređenje se računa iz dve keširane natalne karte pri svakom zahtevu, bez sopstvenog poziva engine-a.
+
 ### Konsultacije, beleške i fajlovi
 
 | Metoda | Putanja | Namena |

@@ -232,9 +232,11 @@ Ovo je najveća operativna vrednost modula: pred konsultaciju astrolog na jednom
 
 Uz tranzite, u Fazi 7d: **kalendar neba** — aspekti između planeta na nebu sa tačnim minutom, stanice, ulasci u znak, mlad i pun Mesec. Vidi „Stanje posle Faze 7d“.
 
+U Fazi 7e, pre zatvorene bete: **sinastrija i kompozit** — dve natalne karte poređene jedna sa drugom i kompozitna karta para. Vidi „Stanje posle Faze 7e“.
+
 ### Kasnije
 
-Sinastrija, kompozit, solarni povratak i sekundarne progresije koriste isti engine i isti `ChartRequest`. Nisu deo MVP-a.
+Solarni povratak i sekundarne progresije koriste isti engine i isti `ChartRequest`. Nisu deo MVP-a.
 
 ## Performanse
 
@@ -243,6 +245,7 @@ Proračun traje jedinice do desetine milisekundi. **Ne ide kroz queue** — to b
 - natalna karta se kešira po `input_hash`;
 - tranziti se računaju po zahtevu, bez keša, jednim višednevnim pozivom engine-a (merenje u „Stanje posle Faze 7a“);
 - kalendar neba se računa po zahtevu, bez keša, sa dva poziva engine-a (merenje u „Stanje posle Faze 7d“);
+- sinastrija i kompozit se računaju po zahtevu iz dve keširane natalne karte, bez sopstvenog poziva engine-a (merenje u „Stanje posle Faze 7e“);
 - SVG se renderuje na klijentu, ne generiše se na serveru.
 
 ## Testovi tačnosti
@@ -303,6 +306,22 @@ Referentne karte treba pribaviti iz nezavisnog izvora i zapisati očekivane vred
 - **Mesec** je samo u menama; njegovih aspekata bilo bi ~130 mesečno (izmereno). Pravi čvor nije u kalendaru.
 - **Merenje (25. 9. 2026, lokalni Windows, PHP sa Xdebug-om):** godina po satu iz `swetest`-a ~260 ms; ceo zahtev za 30 dana ~0,9 s, za godinu ~1,2 s iz komandne linije i ~2,5 s kroz lokalni Apache; od toga sama pretraga ~125 ms, ostalo su dva pokretanja `swetest`-a i čitanje izlaza. Memorija za godinu ~60 MB (pozicije kao liste brojeva po telu). Godina od 18. 10. 2026: 275 aspekata, 51 ulazak, 21 stanica, 25 mena, 26 lukova.
 - **Testovi:** `SkyCalendarSearchTest` (izmišljeno nebo: aspekt između dve pokretne planete, konjunkcija, stanice, ulasci preko 0° Ovna, mene, samo period, luk naspram običnog ponovnog susreta), `SkyCalendarTest` (API sa `FakeEngine`-om: sat astrologa, podrazumevano danas, periodi, zodijak prakse, 503), `SkyCalendarAccuracyTest` i godina po satu u `SwissEphemerisReferenceTest` (samo gde postoji `swetest`); na frontendu `lib/sky.js` u Vitest-u.
+
+### Stanje posle Faze 7e
+
+- **Sinastrija** (`SynastryService`): natalna karta klijenta i karta povezane osobe ili drugog klijenta, obe iz `ChartService::natal` (keš `chart_calculations`, sistem kuća prakse). API: `GET /clients/{id}/synastry` sa `with_person` ili `with_client`. Poređenje se ne upisuje nigde.
+- **Kontakti** (`AspectCalculator::betweenCharts`): svaka tačka druge osobe prema svakoj tački klijenta, tačka druge osobe prva. Tačke su iste kao za tranzite (`AspectCalculator::storedPoints`): tela bez srednjeg čvora, bez Meseca kod nepoznatog vremena, i ASC i MC uz poznato vreme. Za razliku od aspekata unutar jedne karte, par ASC–MC dve karte jeste kontakt. Obe karte miruju, pa `applying` ne postoji. Orbi su natalni orbi prakse (`aspect_orbs`), sa dodatkom za Sunce i Mesec (odluka korisnika, 25. 9. 2026).
+- **Kuće:** planete i uglovi svake osobe u kućama druge (`Houses::numberFor` nad kuspidima druge karte); bez kuća druge karte kod nepoznatog vremena; Mesec osobe bez vremena nema kuću.
+- **Kompozit** (`CompositeChart`, čist kod nad dve sačuvane karte):
+  - tačka = sredina kraćeg luka (`midpoint`); tačno suprotne tačke imaju dve sredine, uzima se ona 90° posle prve;
+  - ASC = sredina ascendenata; MC = ASC + polovina zbira udaljenosti MC-a od ASC-a u svakoj karti — tako MC ostaje iznad kompozitnog horizonta i kada bi sama sredina MC-ova pala 180° dalje (izmišljen primer u testu: ASC 0° / 170°, MC 270° / 100° → ASC 85°, MC 5°, a ne 185°);
+  - kuće: kuspida *i* = sredina prvih kuspida + polovina zbira udaljenosti kuspide *i* od prve kuspide u svakoj karti, pa su kuće uvek u redu; kod kvadrantnih sistema to je sredina odgovarajućih kuspida, osim kada bi ona pala na suprotnu stranu. Whole Sign: znakovi od znaka kompozitnog ASC-a (sredina dve granice znaka nije granica). Različiti sistemi u dve karte (Porphyry iznad polarnog kruga): Porphyry iz kompozitnih uglova (`Houses::porphyry`, sada zajednički sa `FakeEngine`-om);
+  - nepoznato vreme bilo koje osobe: bez uglova i kuća; Mesec je opseg — sredina je sredina dva Meseca (sredina opsega kod nepoznatog vremena), širina pola zbira oba opsega — i ne ulazi u aspekte;
+  - tačnost vremena kompozita je manje sigurna od dve (`unknown`, pa `approximate`); tačke nemaju brzinu ni retrogradnost;
+  - aspekti unutar kompozita: `AspectCalculator::between` po natalnim orbima, bez `applying`.
+- **Merenje (25. 9. 2026, lokalni Windows, Apache sa Xdebug-om):** Ana i Marko (obe karte u kešu) — 57 kontakata po natalnim orbima, 18 aspekata u kompozitu; zahtev ~340 ms, od čega čitanje keširane karte ~290 ms (isto kao `GET /clients/{id}/chart`), samo poređenje ~50 ms. Od tih ~290 ms, ~218 ms je `swetest -h` za verziju engine-a u `fingerprint()` (deo `input_hash`), jednom po PHP procesu — postojeći trošak svakog čitanja karte, zabeležen za Fazu 8 (performanse).
+- **Prikaz:** tab „Synastry“ (`SynastryPanel`): izbor osobe, „Synastry / Composite“, dvostruki točak (`ChartWheel` sa `outer` — isti prsten kao za tranzite, sada i sa ASC/MC druge osobe i Mesecom kao opsegom), lični kontakti, svi kontakti (prvih 20), pozicije svake osobe u kućama druge; kompozit sa točkom, pozicijama, kuspidima i aspektima i napomenom kako su kuće dobijene.
+- **Testovi:** `CompositeChartTest` (izmišljene karte: sredina preko 0° Ovna i kod suprotnih tačaka, MC iznad horizonta i kuće u redu, Whole Sign, različiti sistemi, nepoznato vreme, tačke za aspekte), `SynastryTest` (API sa `FakeEngine`-om: osoba i drugi klijent, redosled i orbi, nepoznato vreme, nepotpuni podaci sa strane, natalni orbi odlučuju, bez poziva engine-a za keširane karte, 503, izolacija workspace-a), `betweenCharts` u `AspectCalculatorTest`; na frontendu `lib/synastry.js` u Vitest-u.
 
 ## Rezime obima
 

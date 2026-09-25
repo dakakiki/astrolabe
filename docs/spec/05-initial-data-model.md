@@ -213,7 +213,7 @@ Povezana osoba sa kompletnim podacima rođenja može imati sopstvenu izračunatu
 - `workspace_id`
 - `subject_type` — polimorfno: `client` ili `related_person`
 - `subject_id`
-- `chart_type` — `natal`; kasnije `synastry`, `solar_return`. Vrednost `transit` je predviđena, ali se ne koristi: tranziti se od Faze 7a računaju po zahtevu i ne čuvaju (vidi ispod)
+- `chart_type` — `natal`; kasnije `solar_return`. Vrednosti `transit` i `synastry` su predviđene, ali se ne koriste: tranziti (Faza 7a) i sinastrija sa kompozitom (Faza 7e) se računaju po zahtevu i ne čuvaju (vidi ispod)
 - `input_hash` — sha256 normalizovanog ulaza
 - `julian_day_ut` — decimal, visoke preciznosti
 - `house_system` — traženi sistem; `null` kada nema vremena rođenja. Stvarno upotrebljeni sistem je u `payload.houses.system` (razlikuju se iznad polarnog kruga)

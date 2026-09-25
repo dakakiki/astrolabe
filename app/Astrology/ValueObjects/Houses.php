@@ -68,6 +68,26 @@ final readonly class Houses
     }
 
     /**
+     * Porphyry cusps, which need nothing but the angles: each quadrant
+     * between them divided into three equal parts.
+     *
+     * @return list<float> twelve longitudes, house 1 first
+     */
+    public static function porphyry(float $ascendant, float $midheaven): array
+    {
+        $ic = self::normalize($midheaven + 180);
+        $descendant = self::normalize($ascendant + 180);
+        $cusps = [];
+
+        foreach ([[$ascendant, $ic], [$ic, $descendant], [$descendant, $midheaven], [$midheaven, $ascendant]] as [$from, $to]) {
+            $step = self::normalize($to - $from) / 3;
+            array_push($cusps, $from, self::normalize($from + $step), self::normalize($from + 2 * $step));
+        }
+
+        return $cusps;
+    }
+
+    /**
      * @return array{houses: array{system: string, requested_system: string, cusps: list<float>}, angles: array<string, float>}
      */
     public function toArray(): array

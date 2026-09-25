@@ -511,6 +511,7 @@
                 "overview": "Overview",
                 "chart": "Birth data & chart",
                 "transits": "Transits",
+                "synastry": "Synastry",
                 "consultations": "Consultations",
                 "notes": "Notes",
                 "files": "Files",
@@ -971,7 +972,8 @@
             "deleted": "Person deleted",
             "makeClient": "Make a client",
             "confirmMakeClient": "Make {name} a client of their own? Their details and birth data are copied as they are, and every link moves to the new client.",
-            "converted": "{name} is now a client"
+            "converted": "{name} is now a client",
+            "compareWith": "Compare with {name}"
         },
         "form": {
             "newTitle": "Add a person",
@@ -985,7 +987,8 @@
             "cancel": "Cancel",
             "created": "Person added",
             "saved": "Person saved"
-        }
+        },
+        "compare": "Compare charts"
     },
     "visibility": {
         "label": "Visibility",
@@ -1265,6 +1268,71 @@
         "approximateNote": "The birth time is approximate, so transits to the Ascendant and Midheaven and the natal houses are approximate too.",
         "incomplete": "No transits yet",
         "complete": "Complete birth data"
+    },
+    "synastry": {
+        "tab": "Synastry",
+        "title": "{client} and {other}",
+        "compareWith": "Compare with",
+        "choose": "Choose someone",
+        "anotherClient": "Another client…",
+        "pickClient": "Compare with another client",
+        "notSelf": "A chart cannot be compared with itself; choose someone else.",
+        "cancel": "Cancel",
+        "noChart": "no chart",
+        "kinds": {
+            "client": "Client"
+        },
+        "viewLabel": "View",
+        "views": {
+            "synastry": "Synastry",
+            "composite": "Composite"
+        },
+        "loading": "Comparing…",
+        "invalid": "This person cannot be compared any more; they may have been removed. Choose someone else.",
+        "incomplete": "The birth data of {name} is incomplete",
+        "complete": "Complete birth data",
+        "nobodyTitle": "Nobody to compare with yet",
+        "nobodyText": "Add a partner or another person with complete birth data on the Related people tab, and their chart can be laid over this one — or compare with another client.",
+        "addPerson": "Add a person",
+        "wheelTitle": "Synastry of {client} and {other}",
+        "wheelNote": "Outer ring: {other}. Inner: {client}’s natal chart. Lines show contacts between the two.",
+        "engineNote": "Compared on request, not stored",
+        "noTimeNote": "The birth time of {name} is unknown: their angles and houses are missing, and their Moon is left out of the contacts.",
+        "approximateNote": "The birth time of {name} is approximate, so contacts to their angles, and their houses, are approximate too.",
+        "personal": {
+            "title": "Personal planet contacts",
+            "none": "No contacts between the Sun, Moon, Venus or Mars within orb.",
+            "hint": "{other}’s planet first, {client}’s second. Sun, Moon, Venus and Mars with each other."
+        },
+        "contacts": {
+            "title": "All contacts",
+            "count": "none within orb | one within orb | {count} within orb",
+            "none": "No contacts within orb.",
+            "orb": "Orb",
+            "showAll": "Show all {count}",
+            "showFewer": "Show the closest only",
+            "orbsHint": "The practice’s natal orbs apply (Settings → Chart & methods)."
+        },
+        "overlay": {
+            "inHouses": "In {name}’s houses",
+            "houseTitle": "House in the chart of {name}",
+            "caption": "{name} in the houses of {host}",
+            "noHouses": "The birth time of {name} is unknown, so there are no houses to place these in."
+        },
+        "composite": {
+            "wheelTitle": "Composite chart of {client} and {other}",
+            "wheelNote": "Each point halfway between the same point in both charts, on the shorter arc.",
+            "positions": "Composite positions",
+            "aspects": "Aspects in the composite",
+            "method": "Midpoints on the shorter arc. A midpoint has no motion of its own, so nothing is retrograde.",
+            "noTimeNote": "Without both birth times the composite has no angles or houses, and its Moon is a span, left out of the aspects.",
+            "approximateNote": "A birth time is approximate, so the composite angles and houses are approximate too.",
+            "houses": {
+                "midpoint_cusps": "Each cusp halfway between the matching cusps of the two charts ({system}).",
+                "whole_signs": "Whole Sign houses, counted from the sign of the composite Ascendant.",
+                "porphyry_from_angles": "The two charts were drawn in different house systems ({requested} cannot be drawn at one of the birth latitudes), so the composite houses are Porphyry from its own angles."
+            }
+        }
     },
     "payments": {
         "eyebrow": "Business",

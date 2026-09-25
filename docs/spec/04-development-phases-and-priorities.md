@@ -53,7 +53,7 @@
 - timski workspace;
 - Google Calendar integracija;
 - napredniji izveštaji;
-- sinastrija i solarni povratak.
+- solarni povratak (sinastrija i kompozit su urađeni pre zatvorene bete, u 7e).
 
 ### P3 — budućnost
 
@@ -193,6 +193,7 @@ Kriterijum završetka: dnevni rad astrologa može se organizovati unutar aplikac
 - izbor proizvoljnog datuma;
 - prikaz tranzita pred konsultaciju i na dashboardu;
 - kalendar neba (Sky calendar iz prototipa; dodato 25. 9. 2026);
+- sinastrija i kompozit (tab „Synastry“ iz prototipa; dodato 25. 9. 2026);
 - evidencija uplata;
 - dugovanja i statusi;
 - email notifikacije;
@@ -203,7 +204,7 @@ Procena za tranzitni deo: 1–2 nedelje.
 
 Kriterijum završetka: zatvoren je tok od klijenta i termina do završene i evidentirane konsultacije, a astrolog pred svaku konsultaciju na jednom ekranu vidi istoriju klijenta i trenutne tranzite.
 
-Izvođenje (dogovoreno 25. 9. 2026): tri dela sa commit-om, zelenim CI-jem i tačkom za pauzu posle svakog — **7a** tranziti, **7b** uplate i pokazatelji, **7c** obaveštenja i podsetnici. Pre zatvorene bete dodat je **7d** kalendar neba: strana je bila u prototipu, a nedostajala je u specifikaciji (korisnik, 25. 9. 2026).
+Izvođenje (dogovoreno 25. 9. 2026): tri dela sa commit-om, zelenim CI-jem i tačkom za pauzu posle svakog — **7a** tranziti, **7b** uplate i pokazatelji, **7c** obaveštenja i podsetnici. Pre zatvorene bete dodat je **7d** kalendar neba: strana je bila u prototipu, a nedostajala je u specifikaciji (korisnik, 25. 9. 2026). Posle njega, takođe pre bete, **7e** sinastrija i kompozit (korisnik, 25. 9. 2026; bili su u P2).
 
 > Status 7a: završeno 25. 9. 2026. Tranziti prema natalnoj karti klijenta i povezane osobe za izabrani trenutak (tab „Transits“, dvostruki točak, kontakti po orbu sa datumima tačnosti sporih planeta, tranzitne pozicije u natalnim kućama), zaseban skup orba za tranzite po workspace-u, Hiron u karti i tranzitima (proveren prema JPL Horizons), tranziti iz detalja termina i sa konsultacije, i kartica „Before your next consultations“ na dashboardu. Tranziti se računaju po zahtevu, jednim pozivom engine-a za godinu pre i posle trenutka, i ne keširaju se.
 
@@ -211,7 +212,9 @@ Izvođenje (dogovoreno 25. 9. 2026): tri dela sa commit-om, zelenim CI-jem i ta�
 
 > Status 7c: završeno 25. 9. 2026. Email obaveštenja astrologu: podsetnik pred termin (podrazumevano 24 sata ranije, drugo vreme ili bez podsetnika po terminu; pomera se sa terminom, otkazan termin ga ne šalje), jutarnji mejl sa brojem zadataka dospelih tog dana („Remind me“ na zadatku), tihi sati, Settings → Notifications i probni mejl. Mejlovi su opšti (vreme i link, bez imena klijenta), idu kroz queue, a scheduler ih šalje jednom. Lokalno mail ide u log; pravo slanje (lokalni SMTP) proverava se na produkcionom serveru.
 
-> Status 7d: završeno 25. 9. 2026. Kalendar neba (strana Sky calendar): aspekti između planeta sa tačnim minutom, stanice, ulasci u znak, mlad i pun Mesec, retrogradni prolazi kao lukovi i trenutne pozicije, za 7, 30, 90 ili 365 dana od izabranog dana, na satu astrologa i u zodijaku prakse. Dva poziva engine-a po zahtevu (pozicije po satu kroz period i po danu godinu pre i posle), bez keša. Time je Faza 7 završena.
+> Status 7d: završeno 25. 9. 2026. Kalendar neba (strana Sky calendar): aspekti između planeta sa tačnim minutom, stanice, ulasci u znak, mlad i pun Mesec, retrogradni prolazi kao lukovi i trenutne pozicije, za 7, 30, 90 ili 365 dana od izabranog dana, na satu astrologa i u zodijaku prakse. Dva poziva engine-a po zahtevu (pozicije po satu kroz period i po danu godinu pre i posle), bez keša.
+
+> Status 7e: završeno 25. 9. 2026. Tab „Synastry“ na profilu klijenta: poređenje sa povezanom osobom ili drugim klijentom (dvostruki točak, kontakti po natalnim orbima sa izdvojenim ličnim planetama, planete i uglovi svake osobe u kućama druge) i kompozitna karta para (središnje tačke, kuće, aspekti); „Compare charts“ iz povezanih osoba. Računa se po zahtevu iz dve keširane natalne karte, bez sopstvenog poziva engine-a, i ne čuva se. Time je Faza 7 završena.
 
 ## Faza 8 — zatvorena beta
 

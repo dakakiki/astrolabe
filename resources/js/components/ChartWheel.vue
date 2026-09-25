@@ -28,26 +28,35 @@ import { BODY_GLYPHS, SIGNS, formatDegrees } from '@/lib/zodiac';
  * carries the same information in reading order; the SVG also describes
  * itself for screen readers.
  *
- * With `transits` (Phase 7a) the planets of another moment ride on an outer
- * ring, and the lines join them to the natal points they aspect instead of
- * showing the natal aspects.
+ * With `outer` another set of positions rides on an outer ring — the planets
+ * of another moment (transits, Phase 7a) or another person's chart (synastry,
+ * Phase 7e) — and the lines join them to the natal points they aspect instead
+ * of showing the natal aspects.
  */
 const props = defineProps({
     chart: { type: Object, required: true },
     name: { type: String, default: '' },
     // Drawn small: degree labels would be unreadable, the table beside it has them.
     compact: { type: Boolean, default: false },
-    /** Transiting positions for the outer ring: [{ body, longitude, retrograde }]. */
-    transits: { type: Array, default: null },
-    /** Transit contacts drawn as lines: [{ transit, natal, type, orb, from, to }] (contactLines in lib/transits). */
+    /**
+     * Positions for the outer ring: [{ body, longitude, retrograde }]. Another
+     * person's Ascendant and Midheaven come as body 'asc' / 'mc'; a Moon with
+     * `range` ({ from, to }) is a span without a birth time.
+     */
+    outer: { type: Array, default: null },
+    /** Whose positions the outer ring holds ("Transits", a name), for their tooltips. */
+    outerLabel: { type: String, default: '' },
+    /** Contacts drawn as lines: [{ a, b, type, orb, from, to }] (contactLines in lib/transits, synastryLines in lib/synastry). */
     contacts: { type: Array, default: null },
+    /** The wheel's title for screen readers, where the default one does not fit. */
+    heading: { type: String, default: '' },
 });
 
 const { t } = useI18n();
 const id = useId();
 
-// The outer transit ring needs room around the natal wheel.
-const size = computed(() => (props.transits ? 800 : 640));
+// The outer ring needs room around the natal wheel.
+const size = computed(() => (props.outer ? 800 : 640));
 const C = computed(() => size.value / 2);
 const R = {
     transitOut: 366,
@@ -123,7 +132,7 @@ const angles = computed(() => {
     if (!values) return [];
 
     return ANGLES.map((key) => {
-        const edge = props.transits ? R.transitOut : R.out;
+        const edge = props.outer ? R.transitOut : R.out;
         const [x, y] = at(values[key], edge + 18);
 
         // Inside the sign ring, then a short pointer outside it, so the sign glyphs stay clear.
@@ -198,11 +207,11 @@ const bodies = computed(() => {
     });
 });
 
-// The planets of the other moment, spread along the outer ring like the natal ones.
-const transitBodies = computed(() => {
-    if (!props.transits) return [];
+// The outer positions, spread along the outer ring like the natal ones.
+const outerBodies = computed(() => {
+    if (!props.outer) return [];
 
-    const shown = props.transits.filter((position) => position.body !== 'mean_node');
+    const shown = props.outer.filter((position) => position.body !== 'mean_node');
     const display = spread(
         shown.map((position) => ({ key: position.body, longitude: position.longitude })),
         MIN_GAP,
@@ -212,22 +221,31 @@ const transitBodies = computed(() => {
         const where = display[position.body];
         const [gx, gy] = at(where, R.transitGlyph);
         const [dx, dy] = at(where, transitDegreeRadius(where));
+        const isAngle = !BODY_GLYPHS[position.body];
+        const name = isAngle ? t(`chart.angles.${position.body}`) : t(`bodies.${position.body}`);
+        const place = position.range
+            ? t('chart.describe.range', {
+                  from: longitudeText(position.range.from, t),
+                  to: longitudeText(position.range.to, t),
+              })
+            : longitudeText(position.longitude, t);
 
         return {
             ...position,
-            glyph: BODY_GLYPHS[position.body],
+            isAngle,
+            glyph: isAngle ? t(`chart.angleAbbr.${position.body}`) : BODY_GLYPHS[position.body],
             gx: f(gx),
             gy: f(gy),
             dx: f(dx),
             dy: f(dy),
-            degree: formatDegrees(position.longitude),
+            degree: position.range ? '≈' : formatDegrees(position.longitude),
             marker: segment(position.longitude, R.out, R.out + 7),
             leader:
                 Math.abs(normalize(where - position.longitude + 180) - 180) > 0.5
                     ? segment(position.longitude, R.out + 7, R.transitGlyph - 11, where)
                     : null,
             label: [
-                `${t('transits.title')}: ${t(`bodies.${position.body}`)} ${longitudeText(position.longitude, t)}`,
+                `${props.outerLabel ? `${props.outerLabel}: ` : ''}${name} ${place}`,
                 position.retrograde ? t('chart.retrograde') : null,
             ]
                 .filter(Boolean)
@@ -239,8 +257,8 @@ const transitBodies = computed(() => {
 const aspectLines = computed(() => {
     if (props.contacts) {
         return props.contacts.map((contact) => ({
-            a: contact.transit,
-            b: contact.natal,
+            a: contact.a ?? contact.transit,
+            b: contact.b ?? contact.natal,
             type: contact.type,
             weight: aspectWeight(contact.orb),
             ...segment(contact.from, R.inner, R.inner, contact.to),
@@ -260,7 +278,9 @@ const aspectLines = computed(() => {
 });
 
 const title = computed(() => {
-    if (props.transits) {
+    if (props.heading) return props.heading;
+
+    if (props.outer) {
         return props.name ? t('chart.wheel.transitsTitle', { name: props.name }) : t('chart.wheel.transitsTitleNoName');
     }
 
@@ -272,7 +292,7 @@ const description = computed(() => describeChart(props.chart, t));
 <template>
     <svg
         class="wheel"
-        :class="{ 'is-compact': compact, 'has-transits': transits }"
+        :class="{ 'is-compact': compact, 'has-outer': outer }"
         :viewBox="`0 0 ${size} ${size}`"
         role="img"
         :aria-labelledby="`${id}-title ${id}-desc`"
@@ -282,7 +302,7 @@ const description = computed(() => describeChart(props.chart, t));
         <desc :id="`${id}-desc`">{{ description }}</desc>
 
         <!-- Rings -->
-        <circle v-if="transits" :cx="C" :cy="C" :r="R.transitOut" class="transit-band" />
+        <circle v-if="outer" :cx="C" :cy="C" :r="R.transitOut" class="outer-band" />
         <circle :cx="C" :cy="C" :r="R.out" class="band" />
         <circle :cx="C" :cy="C" :r="R.sign" class="face" />
         <circle v-if="houses.length" :cx="C" :cy="C" :r="R.house" class="ring" />
@@ -345,12 +365,14 @@ const description = computed(() => describeChart(props.chart, t));
             </text>
         </g>
 
-        <!-- The planets of the other moment -->
-        <g v-for="body in transitBodies" :key="`transit-${body.body}`" class="body transit">
+        <!-- The planets of the other moment, or of the other person -->
+        <g v-for="body in outerBodies" :key="`outer-${body.body}`" class="body outer">
             <title>{{ body.label }}</title>
             <line v-bind="body.marker" class="marker" />
             <line v-if="body.leader" v-bind="body.leader" class="leader" />
-            <text :x="body.gx" :y="body.gy" class="planet-glyph">{{ body.glyph }}</text>
+            <text :x="body.gx" :y="body.gy" class="planet-glyph" :class="{ 'is-angle': body.isAngle }">
+                {{ body.glyph }}
+            </text>
             <text v-if="!compact" :x="body.dx" :y="body.dy" class="planet-deg">
                 {{ body.degree }}
                 <tspan v-if="body.retrograde" class="planet-retro">℞</tspan>

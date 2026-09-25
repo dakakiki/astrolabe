@@ -147,9 +147,27 @@ Dodato 25. 9. 2026: strana je postojala u prototipu (`sky.html`, levi meni *Prac
 > - Period i filteri su u adresi strane (`/sky?days=90&body=mars&type=aspect`).
 > - Proračun je na serveru, po zahtevu, bez keša (kao tranziti); tačan minut je proveren nezavisnim proračunom u tom trenutku (dokument 11, „Stanje posle Faze 7d“).
 
+### P1 — sinastrija i kompozit
+
+Dodato 25. 9. 2026: prototip je imao tab „Synastry“ na profilu klijenta i „Compare charts“ kod povezane osobe, označene kao „nije u prvom izdanju“; korisnik je odlučio da se sinastrija uradi pre zatvorene bete, a uz nju i kompozit (prototip ga nije imao).
+
+- poređenje natalne karte klijenta sa kartom povezane osobe ili drugog klijenta;
+- dvostruki točak: klijent unutra, druga osoba na spoljnom prstenu, linije kontakata;
+- kontakti između dve karte po orbu, sa izdvojenim kontaktima ličnih planeta (Sunce, Mesec, Venera, Mars);
+- planete i uglovi svake osobe u kućama druge;
+- kompozitna karta para (središnje tačke) sa kućama i aspektima.
+
+> Implementirano u Fazi 7e (25. 9. 2026):
+>
+> - Tab „Synastry“ na profilu klijenta, posle „Transits“. Bira se povezana osoba ili povezani klijent sa kartom (prvi takav je podrazumevan), ili bilo koji drugi klijent preko pretrage („Another client…“). Ko se poredi i koji je prikaz otvoren stoji u adresi (`?tab=synastry&with=person-5&view=composite`). „Compare charts“ u tabu „Related people“ i „Compare with …“ na strani povezane osobe otvaraju isti tab.
+> - Kontakti: svaka tačka druge osobe prema svakoj tački klijenta — tela bez srednjeg čvora i, uz poznato vreme rođenja te osobe, ASC i MC; dva ugla (npr. ASC na ASC) jesu kontakt. Tačka druge osobe je prva („Markova Venera trigon Anin Mars“), kao u prototipu. Obe karte miruju, pa nema približavanja i razilaženja. Orbi su natalni orbi prakse (odluka korisnika; poseban skup se dodaje ako ga validacioni razgovori traže). Lični kontakti (Sunce, Mesec, Venera, Mars međusobno) su izdvojeni i prikazani svi; u listi svih kontakata prvih 20, ostali na klik.
+> - Kuće: planete i uglovi druge osobe u kućama klijenta i obrnuto (prototip je imao samo pozicije druge osobe).
+> - Kompozit: svaka tačka na sredini kraćeg luka između iste tačke u dve karte. Kuće su sredine odgovarajućih kuspida (mere se od prve kuće svake karte, pa ostaju u redu), kod Whole Sign-a znakovi od kompozitnog ascendenta, a kada su karte nacrtane u različitim sistemima (jedna iznad polarnog kruga) — Porphyry iz kompozitnih uglova. MC je na strani koja ostaje iznad kompozitnog horizonta. Aspekti unutar kompozita po natalnim orbima.
+> - Nepoznato vreme jedne osobe: bez njenih uglova i kuća, njen Mesec je izostavljen iz kontakata i nacrtan kao opseg; kompozit tada nema uglove ni kuće, a Mesec mu je opseg (pola zbira oba opsega).
+> - Računa se na serveru pri svakom zahtevu iz dve keširane natalne karte, bez sopstvenog poziva engine-a, i ne čuva se; nema stavke na vremenskoj liniji. Izvoz u PDF i prilaganje poređenja konsultaciji su kasnije (Faza 9).
+
 ### Kasnije
 
-- sinastrija i kompozit;
 - solarni povratak;
 - sekundarne progresije;
 - fiksne zvezde i asteroidi;
@@ -178,7 +196,7 @@ Povezana osoba može imati sopstvene lične i podatke rođenja, bez posebnog kor
 - Podaci rođenja povezane osobe imaju istu strukturu i ista pravila kao kod klijenta (izbor mesta iz liste se zamrzava, ručne koordinate, `time_accuracy`, upozorenja o promeni sata), a karta se računa i kešira isto, sa izborom sistema kuća. Karta povezane osobe ne ide na vremensku liniju klijenta.
 - Povezane osobe nemaju sopstvenu listu: dolaze preko taba „Povezane osobe“ na profilu klijenta. Uklanjanje poslednje veze uklanja i osobu (soft delete).
 - „Napravi klijenta“: lični podaci i podaci rođenja se kopiraju kakvi jesu (mesto se ne traži ponovo, pa karta ostaje ista), sve veze prelaze na novog klijenta, a povezana osoba se uklanja uz zapis u kog klijenta je prešla.
-- Sinastrija („Uporedi karte“ u prototipu) nije deo Faze 6; ostaje u „Kasnije“ iz sekcije o kartama.
+- Sinastrija („Uporedi karte“ u prototipu) nije bila deo Faze 6; urađena je u Fazi 7e (vidi „P1 — sinastrija i kompozit“).
 
 ## Astrološke metode
 

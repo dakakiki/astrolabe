@@ -96,6 +96,7 @@ Za proračun karata:
 - rezultat se kešira po `input_hash`;
 - tranziti se računaju po zahtevu i ne keširaju se dugoročno;
 - kalendar neba se računa po zahtevu (dva poziva engine-a), bez keša;
+- sinastrija i kompozit se računaju po zahtevu iz dve keširane natalne karte, bez sopstvenog poziva engine-a;
 - SVG točak se renderuje na klijentu iz JSON odgovora, ne generiše se na serveru.
 
 ## Pouzdanost

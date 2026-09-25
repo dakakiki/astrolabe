@@ -71,7 +71,7 @@ class TransitService
         $sky = $days[self::SEARCH_DAYS];
         $cusps = $natal->payload['houses']['cusps'] ?? null;
 
-        $contacts = $this->aspects->across(self::points($sky), self::natalPoints($natal), $settings);
+        $contacts = $this->aspects->across(self::points($sky), AspectCalculator::storedPoints($natal), $settings);
         usort($contacts, fn (Aspect $a, Aspect $b) => $a->orb <=> $b->orb);
 
         return [
@@ -199,46 +199,9 @@ class TransitService
         ], array_filter($positions, fn (PlanetPosition $position) => $position->body->takesAspects())));
     }
 
-    /**
-     * The natal points transits are measured against, as the natal chart's own
-     * aspects use them: the bodies without the mean node — and without the Moon
-     * when the birth time is unknown — then the Ascendant and Midheaven.
-     *
-     * @return list<array{key: string, longitude: float, speed: float|null, luminary: bool, angle: bool}>
-     */
-    public static function natalPoints(ChartCalculation $natal): array
-    {
-        $timeKnown = $natal->time_accuracy->hasTime();
-        $points = [];
-
-        foreach ($natal->payload['positions'] as $position) {
-            $body = CelestialBody::tryFrom($position['body']);
-
-            if ($body === null || ! $body->takesAspects() || (! $timeKnown && $body === CelestialBody::Moon)) {
-                continue;
-            }
-
-            $points[] = [
-                'key' => $body->value,
-                'longitude' => (float) $position['longitude'],
-                'speed' => (float) $position['speed'],
-                'luminary' => $body->isLuminary(),
-                'angle' => false,
-            ];
-        }
-
-        foreach (['asc', 'mc'] as $angle) {
-            if (isset($natal->payload['angles'][$angle])) {
-                $points[] = ['key' => $angle, 'longitude' => (float) $natal->payload['angles'][$angle], 'speed' => null, 'luminary' => false, 'angle' => true];
-            }
-        }
-
-        return $points;
-    }
-
     private static function natalLongitude(ChartCalculation $natal, string $key): float
     {
-        foreach (self::natalPoints($natal) as $point) {
+        foreach (AspectCalculator::storedPoints($natal) as $point) {
             if ($point['key'] === $key) {
                 return $point['longitude'];
             }

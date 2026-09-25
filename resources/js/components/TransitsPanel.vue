@@ -192,7 +192,13 @@ const dateOf = (iso) => formatDateTime(iso, locale.value, report.value.timezone,
                     </div>
 
                     <div class="wheel-wrap" :class="{ 'opacity-60': busy }">
-                        <ChartWheel :chart="natal" :name="name" :transits="report.positions" :contacts="lines" />
+                        <ChartWheel
+                            :chart="natal"
+                            :name="name"
+                            :outer="report.positions"
+                            :outer-label="t('transits.title')"
+                            :contacts="lines"
+                        />
                     </div>
 
                     <div

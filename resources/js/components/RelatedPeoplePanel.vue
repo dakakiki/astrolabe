@@ -9,6 +9,7 @@ import { useForm } from '@/composables/useForm';
 import { useLabels } from '@/composables/useLabels';
 import { formatDate } from '@/lib/format';
 import http from '@/lib/http';
+import { synastryRoute } from '@/lib/synastry';
 import { useReferenceStore } from '@/stores/reference';
 import { useToastStore } from '@/stores/toast';
 
@@ -17,6 +18,7 @@ import { useToastStore } from '@/stores/toast';
  * partner, children, parents … with their own birth data, and other clients
  * linked to this one. A link another client made shows here the other way
  * round (their "child" is this client's "parent") and is edited from here too.
+ * Anyone with a chart can be compared with this client (the Synastry tab).
  */
 const props = defineProps({
     clientId: { type: Number, required: true },
@@ -247,6 +249,13 @@ const birthLine = (birth) =>
                                 </button>
                             </template>
                             <template v-else>
+                                <RouterLink
+                                    v-if="link.party.birth?.chart_ready"
+                                    :to="synastryRoute(clientId, link.kind, link.party.id)"
+                                    class="btn btn-sm"
+                                    replace
+                                    >{{ t('related.compare') }}</RouterLink
+                                >
                                 <button type="button" class="btn btn-sm" @click="startEditing(link)">
                                     {{ t('related.edit') }}
                                 </button>

@@ -11,6 +11,7 @@ import NatalChart from '@/components/NatalChart.vue';
 import NotesPanel from '@/components/NotesPanel.vue';
 import RelatedPeoplePanel from '@/components/RelatedPeoplePanel.vue';
 import StatusBadge from '@/components/StatusBadge.vue';
+import SynastryPanel from '@/components/SynastryPanel.vue';
 import TaskList from '@/components/TaskList.vue';
 import TasksPanel from '@/components/TasksPanel.vue';
 import TransitsPanel from '@/components/TransitsPanel.vue';
@@ -22,9 +23,10 @@ import { useToastStore } from '@/stores/toast';
 
 /**
  * The client profile, the core screen (docs/spec/01): an overview with the
- * timeline, then birth data and chart, transits, consultations, notes and
- * files. The open tab lives in the URL, so links can point straight at it —
- * transits with their moment (`?tab=transits&at=`).
+ * timeline, then birth data and chart, transits, synastry, consultations,
+ * notes and files. The open tab lives in the URL, so links can point straight
+ * at it — transits with their moment (`?tab=transits&at=`), synastry with
+ * the person compared (`?tab=synastry&with=person-5&view=composite`).
  */
 const { t, locale } = useI18n();
 const labels = useLabels();
@@ -33,7 +35,7 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToastStore();
 
-const TABS = ['overview', 'chart', 'transits', 'consultations', 'notes', 'files', 'tasks', 'related'];
+const TABS = ['overview', 'chart', 'transits', 'synastry', 'consultations', 'notes', 'files', 'tasks', 'related'];
 
 const client = ref(null);
 const notFound = ref(false);
@@ -116,8 +118,19 @@ onMounted(async () => {
     openTab(tab.value);
 });
 
+// What one tab keeps in the URL means nothing to another.
+function tabQuery(name) {
+    return {
+        ...route.query,
+        at: undefined,
+        with: undefined,
+        view: undefined,
+        tab: name === 'overview' ? undefined : name,
+    };
+}
+
 function goToTab(name) {
-    router.replace({ query: { ...route.query, at: undefined, tab: name === 'overview' ? undefined : name } });
+    router.replace({ query: tabQuery(name) });
 }
 
 // The transit moment stays in the URL, so the page can be reloaded or shared as it is.
@@ -125,6 +138,14 @@ const transitMoment = computed(() => (typeof route.query.at === 'string' ? route
 
 function setTransitMoment(at) {
     router.replace({ query: { ...route.query, at: at || undefined } });
+}
+
+// So do the person compared and the synastry view.
+const synastryWith = computed(() => (typeof route.query.with === 'string' ? route.query.with : ''));
+const synastryView = computed(() => (route.query.view === 'composite' ? 'composite' : 'synastry'));
+
+function setSynastry(change) {
+    router.replace({ query: { ...route.query, ...change } });
 }
 
 // Counts on the summary card follow what is added in the other tabs.
@@ -204,7 +225,7 @@ async function toggleArchive() {
             <RouterLink
                 v-for="name in TABS"
                 :key="name"
-                :to="{ query: { ...route.query, at: undefined, tab: name === 'overview' ? undefined : name } }"
+                :to="{ query: tabQuery(name) }"
                 :aria-current="tab === name ? 'page' : undefined"
                 replace
             >
@@ -385,6 +406,18 @@ async function toggleArchive() {
             :at="transitMoment"
             :edit-to="{ name: 'clients.edit', params: { id: client.id } }"
             @update:at="setTransitMoment"
+        />
+
+        <!-- Synastry and the composite -->
+        <SynastryPanel
+            v-else-if="tab === 'synastry'"
+            :key="client.id"
+            :client="{ id: client.id, full_name: client.full_name }"
+            :other="synastryWith"
+            :view="synastryView"
+            @update:other="(value) => setSynastry({ with: value })"
+            @update:view="(value) => setSynastry({ view: value === 'composite' ? value : undefined })"
+            @open-tab="goToTab"
         />
 
         <!-- Consultations -->

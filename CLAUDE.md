@@ -104,6 +104,26 @@ before starting a phase. The user communicates in Serbian.
 - Times go out as UTC minutes; the page groups them by day on the viewer's clock
   (`resources/js/lib/sky.js`). Signs follow the workspace's zodiac; aspects do not depend on it.
 
+## Synastry and the composite
+
+- `GET /clients/{id}/synastry?with_person=|with_client=` compares two cached natal charts
+  (`SynastryService`, `CompositeChart`) on every request. It never runs the engine itself and
+  nothing is stored — no `chart_calculations` row, no cache, no timeline entry.
+- Points come from `AspectCalculator::storedPoints()` (shared with transits). Contacts use
+  `AspectCalculator::betweenCharts()`: the other person's point first (`a`), the client's second
+  (`b`), no `applying`, and angle–angle pairs count. Orbs are the practice's *natal* orbs.
+- The composite is pure static code on two payloads, tested on made-up charts in
+  `CompositeChartTest`: midpoints on the shorter arc; cusps measured from each chart's first cusp so
+  they stay in order; Whole Sign from the composite ASC; Porphyry from the composite angles when
+  the two charts used different systems; the MC kept above the composite horizon. Keep it free of
+  the database and the engine.
+- `ChartWheel` draws another set of positions on its outer ring through `outer` (+ `outerLabel`);
+  transits and synastry share it. Angles ride along as bodies `asc` / `mc`, an unknown-time Moon
+  carries `range`. Contact lines take `{ a, b, type, orb, from, to }` (transit lines still name
+  their points `transit` / `natal`).
+- The UI keeps who is compared in the URL (`?tab=synastry&with=person-5&view=composite`); links go
+  through `synastryRoute()` in `resources/js/lib/synastry.js`.
+
 ## Consultations, notes, files, timeline
 
 - `internal_notes`, `client_summary` and `next_steps` are separate fields; lists never return them.

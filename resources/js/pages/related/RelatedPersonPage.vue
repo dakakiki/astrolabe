@@ -9,13 +9,15 @@ import TransitsPanel from '@/components/TransitsPanel.vue';
 import { useLabels } from '@/composables/useLabels';
 import { initials } from '@/lib/format';
 import http from '@/lib/http';
+import { synastryRoute } from '@/lib/synastry';
 import { useToastStore } from '@/stores/toast';
 
 /**
  * A related person (docs/spec/02, "Povezane osobe"): who they are to which
  * clients, their birth data and their own natal chart, and the transits to
- * it. From here the person can become a client of their own, with nothing
- * entered again.
+ * it; their chart compared with each client's opens on that client's
+ * Synastry tab. From here the person can become a client of their own, with
+ * nothing entered again.
  */
 const { t } = useI18n();
 const labels = useLabels();
@@ -240,6 +242,12 @@ async function remove() {
                             >
                             <span class="tag ml-2">{{ labels.relationship(link.relationship_type) }}</span>
                             <p v-if="link.notes" class="text-xs text-ink-3">{{ link.notes }}</p>
+                            <RouterLink
+                                v-if="person.birth?.chart.ready"
+                                :to="synastryRoute(link.client.id, 'person', person.id)"
+                                class="btn btn-sm mt-1.5"
+                                >{{ t('related.person.compareWith', { name: link.client.full_name }) }}</RouterLink
+                            >
                         </li>
                     </ul>
                 </section>

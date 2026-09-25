@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\ClientBirthDetailsController;
 use App\Http\Controllers\Api\V1\ClientChartController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\ClientRelationshipController;
+use App\Http\Controllers\Api\V1\ClientSynastryController;
 use App\Http\Controllers\Api\V1\ClientTimelineController;
 use App\Http\Controllers\Api\V1\ClientTransitController;
 use App\Http\Controllers\Api\V1\ConsultationChartController;
@@ -69,6 +70,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 ->name('clients.birth-details.update');
             Route::get('/clients/{client}/chart', [ClientChartController::class, 'show'])->name('clients.chart');
             Route::get('/clients/{client}/transits', [ClientTransitController::class, 'show'])->name('clients.transits');
+            // Another person's chart laid over the client's, with the composite (Phase 7e).
+            Route::get('/clients/{client}/synastry', [ClientSynastryController::class, 'show'])->name('clients.synastry');
             Route::post('/clients/{client}/archive', [ClientArchiveController::class, 'store'])->name('clients.archive');
             Route::delete('/clients/{client}/archive', [ClientArchiveController::class, 'destroy'])->name('clients.restore');
 

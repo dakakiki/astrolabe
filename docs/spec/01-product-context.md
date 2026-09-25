@@ -142,7 +142,7 @@ MVP ne uključuje:
 
 - automatska tumačenja i generisane tekstove;
 - AI funkcije;
-- progresije, direkcije, solarni povratak, sinastriju i kompozit;
+- progresije, direkcije i solarni povratak (sinastrija i kompozit su ipak urađeni pre zatvorene bete, kao deo 7e — odluka korisnika 25. 9. 2026);
 - fiksne zvezde, asteroide i arapske tačke;
 - horarnu i elekcionu specijalizovanu logiku;
 - marketplace astrologa;

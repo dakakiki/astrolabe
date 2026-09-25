@@ -1466,8 +1466,8 @@
         font-family: var(--sans);
     }
 
-    /* The transit ring takes room from the natal wheel; let the whole grow a little. */
-    .wheel.has-transits {
+    /* The outer ring (transits, synastry) takes room from the natal wheel; let the whole grow a little. */
+    .wheel.has-outer {
         max-width: 720px;
     }
 
@@ -1481,19 +1481,26 @@
         stroke: var(--line);
     }
 
-    /* Transits (Phase 7a): an outer ring, the planets in the link colour. */
-    .wheel .transit-band {
+    /* Transits (Phase 7a) and another person (Phase 7e): an outer ring, the planets in the link colour. */
+    .wheel .outer-band {
         fill: var(--surface);
         stroke: var(--line);
         stroke-dasharray: 3 3;
     }
 
-    .wheel .transit .planet-glyph {
+    .wheel .outer .planet-glyph {
         fill: var(--link);
     }
 
-    .wheel .transit .marker {
+    .wheel .outer .marker {
         stroke: var(--link);
+    }
+
+    /* Another person's Ascendant and Midheaven on the outer ring. */
+    .wheel .outer .planet-glyph.is-angle {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 600;
     }
 
     .wheel .ring {

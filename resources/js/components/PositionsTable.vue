@@ -12,6 +12,8 @@ import { BODY_GLYPHS, formatDegrees, splitLongitude } from '@/lib/zodiac';
  *
  * Transits (Phase 7a) reuse it: `chart` then carries the transiting
  * positions, each with the natal house it falls in, and the natal houses.
+ * So does synastry (Phase 7e): one person's positions and angles in the
+ * other's houses, or no house column when the other has no birth time.
  */
 const props = defineProps({
     chart: { type: Object, required: true },
@@ -38,7 +40,7 @@ const angleRows = computed(() =>
         ? ['asc', 'mc'].map((key) => ({
               key,
               longitude: props.chart.angles[key],
-              house: houseOf(props.chart.angles[key], props.chart.houses.cusps),
+              house: props.chart.houses ? houseOf(props.chart.angles[key], props.chart.houses.cusps) : null,
           }))
         : [],
 );
@@ -143,7 +145,7 @@ function signCell(longitude) {
                     <span :class="{ 'sr-only': compact }">{{ signCell(row.longitude).name }}</span>
                 </td>
                 <td class="font-mono whitespace-nowrap">{{ formatDegrees(row.longitude) }}</td>
-                <td class="text-right font-mono text-ink-2">{{ row.house }}</td>
+                <td v-if="hasHouses" class="text-right font-mono text-ink-2">{{ row.house }}</td>
                 <td></td>
             </tr>
         </tbody>

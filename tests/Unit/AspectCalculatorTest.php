@@ -211,4 +211,24 @@ class AspectCalculatorTest extends TestCase
         $this->assertSame(0.0, $settings->luminaryBonus);
         $this->assertSame(1.5, $settings->aspects['sextile']['orb']);
     }
+
+    public function test_two_charts_are_compared_point_by_point_without_motion(): void
+    {
+        $settings = AspectSettings::defaults();
+        $other = [self::point('venus', 100, 1.2), self::point('asc', 10, null, angle: true)];
+        $client = [self::point('mars', 220.5, 0.6), self::point('asc', 12, null, angle: true), self::point('mc', 280, null, angle: true)];
+
+        $contacts = (new AspectCalculator)->betweenCharts($other, $client, $settings);
+
+        // The first chart's point comes first; both charts stand still, so nothing applies or separates.
+        $this->assertSame(['venus', 'mars', AspectType::Trine], [$contacts[0]->first, $contacts[0]->second, $contacts[0]->type]);
+        $this->assertEqualsWithDelta(0.5, $contacts[0]->orb, 1e-9);
+        $this->assertNull($contacts[0]->applying);
+
+        // Angles of two different charts do make contacts: ASC on ASC, ASC square MC.
+        $pairs = array_map(fn (Aspect $aspect) => [$aspect->first, $aspect->second, $aspect->type], $contacts);
+        $this->assertContains(['asc', 'asc', AspectType::Conjunction], $pairs);
+        $this->assertContains(['asc', 'mc', AspectType::Square], $pairs);
+        $this->assertTrue(collect($contacts)->every(fn (Aspect $aspect) => $aspect->applying === null));
+    }
 }

@@ -179,6 +179,19 @@ Kalendar neba. Korisnik je 25. 9. 2026 primetio da strana „Sky calendar“ iz 
 
 Odluke donete usput: vremena su na satu astrologa, ne u UTC-u kao u prototipu; periodi 7, 30, 90 i 365 dana (ograničenje prototipa od 90 dana bilo je samo zbog približnih pozicija); Mesec samo u menama, jer bi njegovih aspekata bilo ~130 mesečno; Hiron uključen kao u tranzitima, pravi čvor ne; aspekti kao u prototipu (pet glavnih + kvinkunks); znakovi i ulasci u zodijaku prakse; retrogradni luk traži i isto mesto na nebu (obe planete unutar 30° od prvog prolaza), jer sama razdaljina spaja sve susrete Sunca i Merkura; prolazi se traže godinu dana pre i posle perioda; bez keša; pomračenja kasnije.
 
+## Faza 7e — implementirano
+
+Sinastrija i kompozit. Prototip je imao tab „Synastry“ (bez kompozita) označen kao „nije u prvom izdanju“, a specifikacija ih je držala u „Kasnije“ (02, 11) i P2 (04). Korisnik je 25. 9. 2026 odlučio da se sinastrija uradi pre zatvorene bete, uz kompozit, sa natalnim orbima prakse. Izmene u dokumentima:
+
+- 01: sinastrija i kompozit izlaze sa liste onoga što MVP ne uključuje.
+- 02: nova sekcija „P1 — sinastrija i kompozit“ sa „Implementirano u Fazi 7e“; napomena kod povezanih osoba.
+- 04: sinastrija izlazi iz P2, dodata u Fazu 7, status dela 7e; Faza 7 završena posle 7e.
+- 05: `chart_type` `synastry` se ne koristi — poređenje se ne čuva.
+- 06: sinastrija i kompozit se računaju po zahtevu.
+- 11: „Stanje posle Faze 7e“ (kontakti, kuće, pravila kompozita, merenje, testovi).
+
+Odluke donete usput: tačka druge osobe je prva u kontaktu (kao u prototipu); dva ugla dve karte jesu kontakt; bez približavanja i razilaženja; kuće u oba smera (prototip nije imao); lični kontakti prikazani svi, ne do šest; u listi svih kontakata prvih 20, ostali na klik; izbor je povezana osoba ili povezani klijent, a svaki drugi klijent preko pretrage (prototip je nudio sve klijente u jednoj listi); kompozit po sredinama kraćeg luka, kuće kao sredine kuspida merene od prve kuće (pa ostaju u redu), Whole Sign od kompozitnog ascendenta, Porphyry iz kompozitnih uglova kada se sistemi dve karte razlikuju, MC iznad kompozitnog horizonta; bez PDF-a, snimka na konsultaciji i stavke na vremenskoj liniji.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.
