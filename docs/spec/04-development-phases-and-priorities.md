@@ -192,6 +192,7 @@ Kriterijum završetka: dnevni rad astrologa može se organizovati unutar aplikac
 - tranziti u odnosu na natalnu kartu;
 - izbor proizvoljnog datuma;
 - prikaz tranzita pred konsultaciju i na dashboardu;
+- kalendar neba (Sky calendar iz prototipa; dodato 25. 9. 2026);
 - evidencija uplata;
 - dugovanja i statusi;
 - email notifikacije;
@@ -202,13 +203,15 @@ Procena za tranzitni deo: 1–2 nedelje.
 
 Kriterijum završetka: zatvoren je tok od klijenta i termina do završene i evidentirane konsultacije, a astrolog pred svaku konsultaciju na jednom ekranu vidi istoriju klijenta i trenutne tranzite.
 
-Izvođenje (dogovoreno 25. 9. 2026): tri dela sa commit-om, zelenim CI-jem i tačkom za pauzu posle svakog — **7a** tranziti, **7b** uplate i pokazatelji, **7c** obaveštenja i podsetnici.
+Izvođenje (dogovoreno 25. 9. 2026): tri dela sa commit-om, zelenim CI-jem i tačkom za pauzu posle svakog — **7a** tranziti, **7b** uplate i pokazatelji, **7c** obaveštenja i podsetnici. Pre zatvorene bete dodat je **7d** kalendar neba: strana je bila u prototipu, a nedostajala je u specifikaciji (korisnik, 25. 9. 2026).
 
 > Status 7a: završeno 25. 9. 2026. Tranziti prema natalnoj karti klijenta i povezane osobe za izabrani trenutak (tab „Transits“, dvostruki točak, kontakti po orbu sa datumima tačnosti sporih planeta, tranzitne pozicije u natalnim kućama), zaseban skup orba za tranzite po workspace-u, Hiron u karti i tranzitima (proveren prema JPL Horizons), tranziti iz detalja termina i sa konsultacije, i kartica „Before your next consultations“ na dashboardu. Tranziti se računaju po zahtevu, jednim pozivom engine-a za godinu pre i posle trenutka, i ne keširaju se.
 
 > Status 7b: završeno 25. 9. 2026. Cena na konsultaciji (iz usluge, izmenljiva, „bez naplate“), uplate i povraćaji kao primljen novac, avans za termin koji prelazi na konsultaciju zabeleženu iz njega, izveden status naplate i dugovanje (duguju održane konsultacije i nedolasci), strana Payments sa pokazateljima, filterima, zbirovima po valuti i CSV izvozom, kartica Billing na konsultaciji, uplate na vremenskoj liniji, na profilu klijenta i na dashboardu. Model iz dokumenta 05 (status po uplati) promenjen je uz zapis u changelog-u.
 
-> Status 7c: završeno 25. 9. 2026. Email obaveštenja astrologu: podsetnik pred termin (podrazumevano 24 sata ranije, drugo vreme ili bez podsetnika po terminu; pomera se sa terminom, otkazan termin ga ne šalje), jutarnji mejl sa brojem zadataka dospelih tog dana („Remind me“ na zadatku), tihi sati, Settings → Notifications i probni mejl. Mejlovi su opšti (vreme i link, bez imena klijenta), idu kroz queue, a scheduler ih šalje jednom. Lokalno mail ide u log; pravo slanje (lokalni SMTP) proverava se na produkcionom serveru. Time je Faza 7 završena.
+> Status 7c: završeno 25. 9. 2026. Email obaveštenja astrologu: podsetnik pred termin (podrazumevano 24 sata ranije, drugo vreme ili bez podsetnika po terminu; pomera se sa terminom, otkazan termin ga ne šalje), jutarnji mejl sa brojem zadataka dospelih tog dana („Remind me“ na zadatku), tihi sati, Settings → Notifications i probni mejl. Mejlovi su opšti (vreme i link, bez imena klijenta), idu kroz queue, a scheduler ih šalje jednom. Lokalno mail ide u log; pravo slanje (lokalni SMTP) proverava se na produkcionom serveru.
+
+> Status 7d: završeno 25. 9. 2026. Kalendar neba (strana Sky calendar): aspekti između planeta sa tačnim minutom, stanice, ulasci u znak, mlad i pun Mesec, retrogradni prolazi kao lukovi i trenutne pozicije, za 7, 30, 90 ili 365 dana od izabranog dana, na satu astrologa i u zodijaku prakse. Dva poziva engine-a po zahtevu (pozicije po satu kroz period i po danu godinu pre i posle), bez keša. Time je Faza 7 završena.
 
 ## Faza 8 — zatvorena beta
 

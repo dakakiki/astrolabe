@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\V1\RelatedPersonController;
 use App\Http\Controllers\Api\V1\RelatedPersonConversionController;
 use App\Http\Controllers\Api\V1\RelatedPersonTransitController;
 use App\Http\Controllers\Api\V1\ServiceController;
+use App\Http\Controllers\Api\V1\SkyController;
 use App\Http\Controllers\Api\V1\StatusController;
 use App\Http\Controllers\Api\V1\TagController;
 use App\Http\Controllers\Api\V1\TaskController;
@@ -91,6 +92,9 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 ->name('related-people.transits');
             Route::post('/related-people/{relatedPerson}/convert', [RelatedPersonConversionController::class, 'store'])
                 ->name('related-people.convert');
+
+            // The sky itself, nobody's chart (Phase 7d).
+            Route::get('/sky', SkyController::class)->name('sky');
 
             Route::apiResource('services', ServiceController::class);
 

@@ -125,6 +125,12 @@ const routes = [
         meta: { verified: true },
     },
     {
+        path: '/sky',
+        name: 'sky',
+        component: () => import('@/pages/sky/SkyCalendarPage.vue'),
+        meta: { verified: true },
+    },
+    {
         path: '/tasks',
         name: 'tasks.index',
         component: () => import('@/pages/tasks/TasksPage.vue'),

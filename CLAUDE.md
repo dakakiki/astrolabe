@@ -88,6 +88,22 @@ before starting a phase. The user communicates in Serbian.
 - The UI takes the moment as wall-clock time on the viewer's clock (`at` + `timezone`); links to
   a date go through `transitsRoute()` in `resources/js/lib/transits.js`.
 
+## Sky calendar
+
+- `SkyCalendar` lists what the sky does in a period (aspects between planets to the minute,
+  stations, ingresses, new and full moons, retrograde arcs). Calculated on request, never stored.
+- Two engine runs per request: hourly positions through the period and daily ones a year either
+  side (arcs). Never call the engine per event. `series()` prints one line per moment (`-hor`)
+  because swetest stops at 36,525 lines; keep steps under a day in whole minutes (`-s60m`).
+- Work on series as lists of numbers per body (`[body => [longitudes, speeds]]`), not objects: a
+  year of hours is ~100,000 positions. The search is pure static code (`events()`, `arcs()`),
+  tested on made-up skies in `SkyCalendarSearchTest`; keep it that way.
+- Crossings use the *signed* separation minus the target, scanned by day and interpolated within
+  the hour; a jump from +180° to −180° is not a crossing. An arc needs the same lap *and* both
+  planets within 30° of the first pass (the Sun and Mercury never lap).
+- Times go out as UTC minutes; the page groups them by day on the viewer's clock
+  (`resources/js/lib/sky.js`). Signs follow the workspace's zodiac; aspects do not depend on it.
+
 ## Consultations, notes, files, timeline
 
 - `internal_notes`, `client_summary` and `next_steps` are separate fields; lists never return them.

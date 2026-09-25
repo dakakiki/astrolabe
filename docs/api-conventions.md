@@ -180,6 +180,20 @@ Pravila:
 - Termin prima `reminder_minutes` (5–10080 ili `null` = bez podsetnika; izostavljeno kod novog — uobičajeno vreme astrologa koji vodi termin) i vraća `reminder_minutes`, `remind_at` (UTC trenutak slanja ili `null`: bez podsetnika, nije zakazan, podsetnici isključeni ili je vreme prošlo) i `reminder_sent_at`.
 - Zadatak prima i vraća `remind` (bool, podrazumevano `true`): ulazi u jutarnji mejl na dan roka.
 
+### Kalendar neba (Faza 7d)
+
+| Metoda | Putanja | Namena |
+|---|---|---|
+| GET | `/sky` | šta radi nebo u periodu: `from` (`YYYY-MM-DD`, podrazumevano danas u zoni korisnika), `days` (7, 30 — podrazumevano, 90, 365), `timezone` (podrazumevano zona korisnika); period su celi dani na tom satu |
+
+Pravila:
+
+- Odgovor: `from`, `days`, `timezone`, `start` / `end` (UTC granice perioda), `zodiac_mode`, `ayanamsa`, `events`, `arcs`, `positions_at`, `positions`, `arc_days` (365), `engine` (`name`, `version`).
+- `events` su poređani po vremenu, svaki sa `at` (UTC, na minut) i `type`: `aspect` (`aspect`, `bodies` — dva tela, brže prvo, sa `longitude` i `retrograde`), `station` (`body`, `direction`: `retrograde` / `direct`, `longitude`), `ingress` (`body`, `sign` — ključ znaka u koji ulazi, `retrograde` kada se vraća u prethodni), `lunation` (`phase`: `new` / `full`, `longitude` Meseca). Dužine su u zodijaku prakse.
+- `arcs`: aspekti koji se zbog retrogradnosti ostvaruju više puta — `bodies` (par), `aspect`, `passes` (`at`, `in_period`); prolazi se traže godinu dana pre i posle perioda.
+- `positions`: Sunce, Mesec, Merkur–Pluton, Hiron (`body`, `longitude`, `speed`, `retrograde`) u trenutku `positions_at` — sada, kada je u periodu, inače na početku perioda.
+- Kvar engine-a je **503** sa opštom porukom, kao kod karte.
+
 ### Konsultacije, beleške i fajlovi
 
 | Metoda | Putanja | Namena |

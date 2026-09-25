@@ -168,6 +168,17 @@ Obaveštenja i podsetnici. Odgovori korisnika pri planiranju (25. 9. 2026): mail
 
 Odluke donete usput: podešavanja obaveštenja su lična (po korisniku), ne po workspace-u; vreme podsetnika se čuva na terminu (promena uobičajenog vremena ne menja već zakazane), a isključeni podsetnici važe i za već zakazane; tihi sati pomeraju podsetnik na svoj kraj, a ako termin počinje pre toga — na minut pre svog početka; podsetnik čije je vreme prošlo u trenutku zakazivanja se ne šalje; jutarnji mejl ne može biti u tihim satima, šalje se samo kada nešto dospeva tog dana i broji i zakasnele; mejlovi nemaju ime klijenta ni naslove zadataka; „Remind me“ je podrazumevano uključen i za postojeće zadatke; nema Notification Center-a, push-a ni kategorija „Payment recorded“ i „Weekly summary“ iz prototipa; dodat probni mejl za proveru slanja na serveru.
 
+## Faza 7d — implementirano
+
+Kalendar neba. Korisnik je 25. 9. 2026 primetio da strana „Sky calendar“ iz prototipa (`sky.html`) nije ušla u specifikaciju i odlučio da se uradi pre zatvorene bete, sa obimom: prototip (aspekti između planeta sa tačnim minutom, retrogradni prolazi, pozicije) + stanice, ulasci u znak i mlad / pun Mesec. Izmene u dokumentima:
+
+- 02: nova sekcija „P1 — nebo (Sky calendar)“ sa „Implementirano u Fazi 7d“.
+- 04: kalendar neba u Fazi 7 i status dela 7d; Faza 7 završena posle 7d.
+- 06: kalendar neba se računa po zahtevu.
+- 11: „Stanje posle Faze 7d“ (dva poziva engine-a, `series()` sa jednim redom po trenutku, pretraga tačnog minuta, pravilo za retrogradni luk, merenja, testovi).
+
+Odluke donete usput: vremena su na satu astrologa, ne u UTC-u kao u prototipu; periodi 7, 30, 90 i 365 dana (ograničenje prototipa od 90 dana bilo je samo zbog približnih pozicija); Mesec samo u menama, jer bi njegovih aspekata bilo ~130 mesečno; Hiron uključen kao u tranzitima, pravi čvor ne; aspekti kao u prototipu (pet glavnih + kvinkunks); znakovi i ulasci u zodijaku prakse; retrogradni luk traži i isto mesto na nebu (obe planete unutar 30° od prvog prolaza), jer sama razdaljina spaja sve susrete Sunca i Merkura; prolazi se traže godinu dana pre i posle perioda; bez keša; pomračenja kasnije.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

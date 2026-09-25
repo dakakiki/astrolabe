@@ -118,6 +118,25 @@ class SwissEphemerisReferenceTest extends TestCase
         }
     }
 
+    public function test_an_hourly_year_comes_in_one_run_without_drifting(): void
+    {
+        $engine = $this->engine();
+        $bodies = [CelestialBody::Sun, CelestialBody::Moon, CelestialBody::Mercury, CelestialBody::Chiron];
+        $request = fn (float $julianDay) => new ChartRequest($julianDay, null, null, null, ZodiacMode::Tropical, null, $bodies);
+        $steps = 365 * 24 + 1;
+
+        // More lines than swetest prints one body per line (36,525), hence one line per moment.
+        $series = $engine->series($request(2461308.5), $steps, 1 / 24);
+
+        $this->assertCount($steps, $series);
+        $last = $engine->calculate($request(2461308.5 + 365))->positions;
+
+        foreach ($bodies as $i => $body) {
+            $this->assertSame($body, $series[$steps - 1][$i]->body);
+            $this->assertEqualsWithDelta($last[$i]->longitude, $series[$steps - 1][$i]->longitude, 1e-6);
+        }
+    }
+
     public function test_the_day_a_transit_is_exact_is_found_to_within_minutes(): void
     {
         $engine = $this->engine();

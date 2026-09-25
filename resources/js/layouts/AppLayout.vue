@@ -19,6 +19,7 @@ const navGroups = [
             { to: '/clients', label: 'nav.clients', icon: '◉' },
             { to: '/consultations', label: 'nav.consultations', icon: '☉' },
             { to: '/calendar', label: 'nav.calendar', icon: '▦' },
+            { to: '/sky', label: 'nav.sky', icon: '✷' },
         ],
     },
     {

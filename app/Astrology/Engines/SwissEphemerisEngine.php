@@ -67,43 +67,66 @@ class SwissEphemerisEngine implements EphemerisEngine
     }
 
     /**
-     * One swetest run with `-n` steps of `-s` days; each line starts with its
-     * Julian day ("2461309.00|Saturn|6|12.0059044|-0.0768925").
+     * One swetest run with `-n` steps, one line per moment (`-hor`), so long
+     * series stay clear of swetest's limit on output lines (36,525): the Julian
+     * day, then name, number, longitude and speed for each body
+     * ("2461309.00|Sun |0|182.9|0.979|Moon |1|…"). A step shorter than a day
+     * goes in whole minutes (`-s60m`), so an hourly year does not drift.
      */
     public function series(ChartRequest $request, int $steps, float $stepDays = 1.0): array
     {
         $arguments = [
             ...$this->arguments($request, '-fJPpls'),
+            '-hor',
             '-n'.$steps,
-            '-s'.rtrim(rtrim(sprintf('%.6F', $stepDays), '0'), '.'),
+            '-s'.self::step($stepDays),
         ];
 
-        $output = $this->run($arguments);
         $moments = [];
 
-        foreach (preg_split('/\R/', trim($output)) as $line) {
+        foreach (preg_split('/\R/', trim($this->run($arguments))) as $line) {
             $columns = array_map('trim', explode('|', $line));
 
-            if (count($columns) < 5 || ! is_numeric($columns[0]) || ! is_numeric($columns[2])) {
+            if (count($columns) < 5 || ! is_numeric($columns[0])) {
                 continue;
             }
 
-            $body = CelestialBody::fromSwissEphemerisNumber((int) $columns[2]);
+            $positions = [];
 
-            if ($body !== null) {
-                $moments[$columns[0]][$body->value] = new PlanetPosition($body, (float) $columns[3], (float) $columns[4]);
+            foreach (array_chunk(array_slice($columns, 1), 4) as $group) {
+                $body = count($group) === 4 && is_numeric($group[1])
+                    ? CelestialBody::fromSwissEphemerisNumber((int) $group[1])
+                    : null;
+
+                if ($body !== null) {
+                    $positions[$body->value] = new PlanetPosition($body, (float) $group[2], (float) $group[3]);
+                }
             }
+
+            $moments[] = array_map(
+                fn (CelestialBody $body) => $positions[$body->value]
+                    ?? throw new EphemerisException("swetest returned no position for {$body->value}."),
+                $request->bodies,
+            );
         }
 
         if (count($moments) !== $steps) {
             throw new EphemerisException(sprintf('swetest returned %d of %d moments.', count($moments), $steps));
         }
 
-        return array_values(array_map(fn (array $positions) => array_map(
-            fn (CelestialBody $body) => $positions[$body->value]
-                ?? throw new EphemerisException("swetest returned no position for {$body->value}."),
-            $request->bodies,
-        ), $moments));
+        return $moments;
+    }
+
+    /** "1", "0.5" — or whole minutes, "60m", for steps shorter than a day. */
+    private static function step(float $stepDays): string
+    {
+        $minutes = $stepDays * 1440;
+
+        if ($stepDays < 1 && abs($minutes - round($minutes)) < 1e-6) {
+            return (int) round($minutes).'m';
+        }
+
+        return rtrim(rtrim(sprintf('%.6F', $stepDays), '0'), '.');
     }
 
     /**

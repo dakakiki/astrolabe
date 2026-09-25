@@ -230,6 +230,8 @@ Trenutne pozicije prema natalnoj karti, sa izborom proizvoljnog datuma. Implemen
 
 Ovo je najveća operativna vrednost modula: pred konsultaciju astrolog na jednom ekranu vidi istoriju klijenta **i** šta se trenutno dešava na njegovoj karti. Nijedan generički CRM to ne može.
 
+Uz tranzite, u Fazi 7d: **kalendar neba** — aspekti između planeta na nebu sa tačnim minutom, stanice, ulasci u znak, mlad i pun Mesec. Vidi „Stanje posle Faze 7d“.
+
 ### Kasnije
 
 Sinastrija, kompozit, solarni povratak i sekundarne progresije koriste isti engine i isti `ChartRequest`. Nisu deo MVP-a.
@@ -240,6 +242,7 @@ Proračun traje jedinice do desetine milisekundi. **Ne ide kroz queue** — to b
 
 - natalna karta se kešira po `input_hash`;
 - tranziti se računaju po zahtevu, bez keša, jednim višednevnim pozivom engine-a (merenje u „Stanje posle Faze 7a“);
+- kalendar neba se računa po zahtevu, bez keša, sa dva poziva engine-a (merenje u „Stanje posle Faze 7d“);
 - SVG se renderuje na klijentu, ne generiše se na serveru.
 
 ## Testovi tačnosti
@@ -289,6 +292,17 @@ Referentne karte treba pribaviti iz nezavisnog izvora i zapisati očekivane vred
 - **Prikaz:** tab „Transits“ na profilu klijenta i na strani povezane osobe — izbor trenutka i „Now“, trenutak u adresi strane (`?tab=transits&at=`); dvostruki točak (natalna karta unutra, tranziti na spoljnom prstenu, linije kontakata po tipu); tabela kontakata po orbu sa datumima tačnosti; tranzitne pozicije sa natalnom kućom. Iz detalja termina i sa konsultacije isti tab se otvara u njihovo vreme. Dashboard: „Before your next consultations“ (dokument 02).
 - **Merenje (25. 9. 2026, lokalni Windows):** sam `swetest` za jedan trenutak traje ~17 ms, a 90 dana za 10 tela u jednom pozivu isto toliko; kroz Symfony Process jedan poziv traje ~210 ms (pokretanje procesa, ne proračun). Zahtev za tranzite jednog klijenta sa nizom od 731 dan: ~450 ms; drugi klijent u istom zahtevu ~6 ms. Linux nije meren.
 - **Testovi:** `TransitsTest` (API sa `FakeEngine`-om), `TransitSearchTest` (datumi tačnosti, retrogradna petlja, prelaz preko 0° Ovna), Hiron u `SwissEphemerisReferenceTest`; na frontendu `lib/transits.js` u Vitest-u.
+
+### Stanje posle Faze 7d
+
+- **Kalendar neba** (`SkyCalendar`): za period od izabranog dana (7, 30, 90 ili 365 dana, celi dani na satu astrologa) — aspekti između dve planete (Sunce–Pluton, Hiron; konjunkcija, sekstil, kvadrat, trigon, kvinkunks, opozicija), stanice, ulasci u znak, mlad i pun Mesec, i retrogradni lukovi. API: `GET /sky` sa `from` (`YYYY-MM-DD`), `days` i `timezone`. Ne upisuje se nigde.
+- **Dva poziva engine-a:** pozicije **po satu** kroz ceo period (godina = 8.761 trenutak) i **po danu** od godinu dana pre do godinu dana posle perioda (za retrogradne lukove). `series()` od 7d piše jedan red po trenutku (`swetest -hor`), jer `swetest` ne ispisuje više od 36.525 redova, a godina po satu u redu po telu bila bi ~96.000; korak kraći od dana zadaje se u minutima (`-s60m`), pa se niz ne pomera (godina po satu se u poslednjem trenutku slaže sa pojedinačnim proračunom na 10⁻⁶°).
+- **Tačan trenutak:** oba tela se kreću, pa je aspekt trenutak koji se traži, ne stanje koje se proverava. Prati se *potpisana* razdaljina (lonA − lonB) umanjena za ugao aspekta — apsolutna razdaljina kod konjunkcije samo dodirne nulu i odbije se. Dani se pregledaju na promenu znaka, a u satu u kome se desila trenutak se interpolira linearno. Isto važi za stanice (brzina prelazi nulu), ulaske (dužina prelazi 30·k°) i mene (Mesec − Sunce prelazi 0° ili 180°). Skok razdaljine sa +180° na −180° nije prolaz. Dvostruki prolaz unutar jednog dana (planeta stane tačno na aspektu) se ne vidi; to je i dalje stanica na listi.
+- **Provera tačnosti:** interpolacija po satu daje isti trenutak kao pretraga minut po minut (razlika ispod 0,01 min na pet aspekata). `SkyCalendarAccuracyTest` za mesec sa retrogradnim Merkurom i Venerom u trenutku svakog nađenog događaja ponovo računa pozicije i traži ugao aspekta, stanicu (|brzina| < 0,001°/dan), ulazak i menu unutar jedne lučne minute.
+- **Retrogradni luk:** prolazi istog aspekta istog para pripadaju jednom luku kada su obe planete ostale unutar 30° od mesta prvog prolaza (retrogradna petlja je najviše ~20°) i razdaljina se vratila na aspekt, a ne obišla pun krug. Samo razdaljina nije dovoljna: Merkur se nikad ne udalji od Sunca, pa bi svi njihovi susreti bili „jedan luk“ (izmereno — 19 prolaza), a prvobitno pravilo prototipa (120 dana, 8°) propušta duge lukove sporih planeta (Uran–Pluton trigon 2026–2028 ima pet prolaza). Prolazi u periodu nose tačan minut, ostali dan iz dnevnog niza.
+- **Mesec** je samo u menama; njegovih aspekata bilo bi ~130 mesečno (izmereno). Pravi čvor nije u kalendaru.
+- **Merenje (25. 9. 2026, lokalni Windows, PHP sa Xdebug-om):** godina po satu iz `swetest`-a ~260 ms; ceo zahtev za 30 dana ~0,9 s, za godinu ~1,2 s iz komandne linije i ~2,5 s kroz lokalni Apache; od toga sama pretraga ~125 ms, ostalo su dva pokretanja `swetest`-a i čitanje izlaza. Memorija za godinu ~60 MB (pozicije kao liste brojeva po telu). Godina od 18. 10. 2026: 275 aspekata, 51 ulazak, 21 stanica, 25 mena, 26 lukova.
+- **Testovi:** `SkyCalendarSearchTest` (izmišljeno nebo: aspekt između dve pokretne planete, konjunkcija, stanice, ulasci preko 0° Ovna, mene, samo period, luk naspram običnog ponovnog susreta), `SkyCalendarTest` (API sa `FakeEngine`-om: sat astrologa, podrazumevano danas, periodi, zodijak prakse, 503), `SkyCalendarAccuracyTest` i godina po satu u `SwissEphemerisReferenceTest` (samo gde postoji `swetest`); na frontendu `lib/sky.js` u Vitest-u.
 
 ## Rezime obima
 

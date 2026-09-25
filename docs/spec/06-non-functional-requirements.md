@@ -95,6 +95,7 @@ Za proračun karata:
 - pojedinačan proračun traje jedinice do desetine milisekundi i **ne ide kroz queue**;
 - rezultat se kešira po `input_hash`;
 - tranziti se računaju po zahtevu i ne keširaju se dugoročno;
+- kalendar neba se računa po zahtevu (dva poziva engine-a), bez keša;
 - SVG točak se renderuje na klijentu iz JSON odgovora, ne generiše se na serveru.
 
 ## Pouzdanost

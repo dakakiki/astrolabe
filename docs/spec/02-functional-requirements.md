@@ -123,6 +123,30 @@ Detaljna specifikacija: `11-astrology-calculation-module.md`.
 
 > Implementirano u Fazi 7a (25. 9. 2026): tab „Transits“ na profilu klijenta i na strani povezane osobe — trenutak se bira na satu astrologa („Now“ vraća na sada) i ostaje u adresi strane; dvostruki točak (natalna karta unutra, tranzitne planete na spoljnom prstenu, linije kontakata po tipu aspekta); tabela kontakata tranzit → natal po orbu, sa aplikujućim/separirajućim i datumima kada je spora planeta (Jupiter–Pluton, Hiron) tačna u godini pre i posle izabranog trenutka; tranzitne pozicije sa natalnom kućom. Tranziti se mere prema natalnim telima i, uz poznato vreme rođenja, prema ASC i MC; kod nepoznatog vremena bez natalnog Meseca, kuća i uglova. Orbi za tranzite su zaseban, uži skup po workspace-u (Settings → Chart & methods). „Pre konsultacije“: iz detalja termina „Transits for this date“, sa konsultacije „Transits on this date“ (tab se otvara u vreme termina ili konsultacije), i kartica „Before your next consultations“ na dashboardu. Hiron je od 7a i u natalnoj karti. Tranziti se računaju po zahtevu i ne keširaju se.
 
+### P1 — nebo (Sky calendar)
+
+Dodato 25. 9. 2026: strana je postojala u prototipu (`sky.html`, levi meni *Practice* → „Sky calendar“), ali nije bila u specifikaciji. Odgovara na drugo pitanje od tranzita: šta radi samo nebo, bez ičije karte.
+
+- aspekti između dve planete na nebu (npr. Mars kvadrat Saturn) sa tačnim minutom kada se ostvaruju;
+- stanice: planeta staje i kreće retrogradno ili direktno;
+- ulazak planete u znak (i povratak u prethodni dok je retrogradna);
+- mlad i pun Mesec;
+- retrogradni prolazi: isti aspekt koji se zbog retrogradnosti ostvari dva ili tri puta nad približno istim stepenom, prikazan kao jedan luk;
+- trenutne pozicije planeta sa brzinom i oznakom ℞;
+- izbor perioda i filteri po planeti, vrsti događaja i aspektu.
+
+> Implementirano u Fazi 7d (25. 9. 2026), obim po odluci korisnika: prototip + stanice, ulasci u znak i mlad / pun Mesec.
+>
+> - Tela: Sunce–Pluton i Hiron. Mesec samo u mladom i punom Mesecu — njegovih aspekata bilo bi oko 130 mesečno. Aspekti: konjunkcija, sekstil, kvadrat, trigon, kvinkunks, opozicija. Pomračenja nisu uključena (traže posebne proračune; kasnije).
+> - Period počinje izabranim danom (podrazumevano danas) i traje 7, 30, 90 dana ili godinu dana; ograničenje prototipa od 90 dana otpada, jer je prototip imao samo približne pozicije. Prethodni / sledeći period i „Today“.
+> - Vremena su na satu astrologa, sa nazivom zone (prototip je bio u UTC-u, aplikacija svuda koristi sat astrologa); događaji su grupisani po danima tog sata.
+> - Znakovi i ulasci su u zodijaku prakse (kod sideričnog zodijaka strana to kaže); aspekti, stanice i mene su isti u oba zodijaka.
+> - Aspekt se ispisuje sa bržom planetom prvom („Mars kvadrat Saturn“), uz stepen i znak obe planete i ℞; tvrdi aspekti (kvadrat, opozicija) su upozoravajuće boje, ostali informativne — kao u prototipu.
+> - Retrogradni prolazi se traže godinu dana pre i posle perioda; prolazi van perioda su prikazani bleđe.
+> - Pozicije: „sada“ kada je današnji trenutak u periodu, inače na početku perioda.
+> - Period i filteri su u adresi strane (`/sky?days=90&body=mars&type=aspect`).
+> - Proračun je na serveru, po zahtevu, bez keša (kao tranziti); tačan minut je proveren nezavisnim proračunom u tom trenutku (dokument 11, „Stanje posle Faze 7d“).
+
 ### Kasnije
 
 - sinastrija i kompozit;
