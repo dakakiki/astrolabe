@@ -401,7 +401,7 @@ Model je promenjen (odluka korisnika, 25. 9. 2026): status se ne vodi na uplati,
 - **Profil klijenta:** u pregledu „Received“ (ukupno) i „Outstanding“ (sa brojem konsultacija), sa vezom na njegove uplate.
 - Svi članovi prakse vide i beleže uplate (kao konsultacije); finije dozvole dolaze sa timovima. Klijent ih ne vidi (dokument 09).
 
-Posle MVP-a: avansi, računi, paketi konsultacija i automatske potvrde. Naplata SaaS pretplate ide preko Paddle-a i opisana je u dokumentu 07; ovde je reč isključivo o evidenciji naplate koju astrolog vodi prema svojim klijentima.
+Posle MVP-a: avansi, računi, paketi konsultacija i automatske potvrde. Naplata SaaS pretplate ide preko Freemius-a (do 25. 9. 2026 Paddle) i opisana je u dokumentu 07; ovde je reč isključivo o evidenciji naplate koju astrolog vodi prema svojim klijentima.
 
 ## Zadaci i follow-up
 

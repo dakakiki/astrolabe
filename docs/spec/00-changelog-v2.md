@@ -40,7 +40,7 @@ Laravel sa `SESSION_DRIVER=database` koristi sopstvenu `sessions` tabelu. Sudar 
 | 04 — Faze i prioriteti | **veliki** | Kompletno prerađen redosled, procene trajanja, nova tabela obrazloženja |
 | 05 — Model podataka | srednji | `chart_calculations`; preimenovanje; `activity_events` kao verovatna potreba |
 | 06 — Nefunkcionalni zahtevi | srednji | Sekcije o tačnosti proračuna i licencnoj usaglašenosti; prošireni testovi |
-| 07 — Paddle billing | mali | Pomeren na Fazu 9; predlog razdvajanja paketa; rizik Studio paketa |
+| 07 — Prodaja i billing (Paddle, od 25. 9. 2026 Freemius) | mali | Pomeren na Fazu 9; predlog razdvajanja paketa; rizik Studio paketa |
 | 09 — Settings i portal | mali | Fazni raspored; realan obim portal autentifikacije; brend na karti |
 | 10 — Kalendar | mali | Fazni raspored; terminologija; veza sa kartom iz termina |
 | **11 — Proračunski modul** | **nov** | Licenca, arhitektura, ulaz, skladištenje, aspekti, prikaz, testovi |
@@ -195,6 +195,13 @@ Odluke donete usput: tačka druge osobe je prva u kontaktu (kao u prototipu); dv
 ## Performanse — verzija engine-a u kešu (25. 9. 2026)
 
 Primećeno pri merenju sinastrije: svaki zahtev koji samo čita keširanu kartu pokretao je `swetest -h` da sazna verziju engine-a za `input_hash` (~218 ms lokalno, od ~290 ms zahteva). Verzija i kontrolni zbirovi fajlova efemerida sada se pamte u kešu aplikacije po veličini i vremenu izmene fajlova; `/chart` je ~90 ms. Izmena u dokumentu 11 („Performanse“, „Stanje posle Faze 7e“).
+
+## Freemius umesto Paddle-a (25. 9. 2026)
+
+Odluka korisnika: SaaS pretplata se naplaćuje preko Freemius-a, koji radnja već koristi za drugi proizvod — nalog i isplate su na jednom mestu, a integracija (checkout, webhook-i, projekcija pretplate) preuzima se iz tog projekta. Postavka ostaje ista (Merchant of Record, lokalna projekcija pretplate potvrđena događajima, Faza 9). Poređenje troškova (Freemius 4,7% + ~3,5% obrada; Paddle 5% + 0,50 USD — pri ovim cenama nešto jeftiniji) je u dokumentu 07. Izmene:
+
+- 07: preimenovan u `07-sales-and-billing.md`, Freemius kao jedini provajder, sekcije „Troškovi“ i „Otvorene provere“ (SaaS proizvod u postojećem nalogu, trial bez kartice, provera webhook-a), koraci pre lansiranja.
+- 02, 04, 09: Paddle zamenjen Freemius-om.
 
 ## Nedostaje dokument 08
 

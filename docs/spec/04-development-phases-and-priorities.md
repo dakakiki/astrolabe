@@ -10,7 +10,7 @@
 | Nova Faza 3 — planetarne pozicije, odmah posle klijenata | Najjeftinija funkcionalnost koja menja percepciju proizvoda; koristi podatke koji već postoje |
 | Tranziti pomereni ispred finansija | Najveća operativna vrednost pred konsultaciju; nijedan generički CRM to ne može |
 | Faza 0 dobila licencu i tržišnu validaciju kao blokirajuće stavke | Licenca ephemeris biblioteke određuje da li je proizvod uopšte moguć u zatvorenom obliku |
-| Paddle billing pomeren na sam kraj | Naplata je besmislena pre nego što se potvrdi da neko želi da plati |
+| Billing (Paddle, od 25. 9. 2026 Freemius) pomeren na sam kraj | Naplata je besmislena pre nego što se potvrdi da neko želi da plati |
 | Klijentski portal i booking ostaju P2 | Dokumenti 09 i 10 su detaljno specificirani, ali ta detaljnost trenutno ne sme povlačiti razvojni redosled |
 | `Sessions` → `Consultations` | Sudar sa Laravel `sessions` tabelom i pojmovna zbrka |
 
@@ -49,7 +49,7 @@
 - izvoz karte u PDF i deljenje sa klijentom;
 - javna booking stranica;
 - klijentski portal;
-- **Paddle subscription billing**;
+- **Freemius subscription billing** (do 25. 9. 2026 Paddle);
 - timski workspace;
 - Google Calendar integracija;
 - napredniji izveštaji;
@@ -231,7 +231,7 @@ Kriterijum završetka: proizvod je stabilan za ograničeni broj pravih korisnika
 
 ## Faza 9 — komercijalizacija i lansiranje
 
-- Paddle subscription billing prema dokumentu 07;
+- Freemius subscription billing prema dokumentu 07, uz integraciju preuzetu iz drugog projekta korisnika;
 - onboarding;
 - izvoz karte u PDF;
 - klijentski portal prema dokumentu 09;

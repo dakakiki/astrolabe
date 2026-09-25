@@ -37,7 +37,7 @@ Klijentski portal je zaštićen, invite-only prostor. Ne pretvara svaki klijents
 | Regional | Jezik, vremenska zona, format datuma/vremena i valuta |
 | Notifications | Email/push kanali, kategorije, podsetnici, quiet hours i uređaji |
 | Team & Access | Članovi, uloge i pozivnice kada timski rad bude dostupan |
-| Billing | Paddle paket, status pretplate i Customer Portal |
+| Billing | paket (Freemius), status pretplate i Customer Portal |
 | Security & Data | Lozinka, aktivne sesije (prijave na drugim uređajima), izvoz, retencija i brisanje |
 
 Poslovna polja su opciona. Svako polje namenjeno klijentu ima eksplicitnu vidljivost, na primer `internal`, `client_visible` ili `public_booking_visible`.
