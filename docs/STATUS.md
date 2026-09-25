@@ -38,7 +38,7 @@ Stanje na dan **25. 9. 2026**, posle dela 7e — Faza 7 (tranziti, uplate, obave
 | 7e | `2c243e6` | Sinastrija i kompozit (tab „Synastry“ iz prototipa, pre bete): poređenje sa povezanom osobom ili drugim klijentom — dvostruki točak (druga osoba spolja, sa ASC/MC), kontakti po natalnim orbima sa izdvojenim ličnim planetama, planete i uglovi svake osobe u kućama druge; kompozitna karta para (središnje tačke, kuće, aspekti); „Compare charts“ iz povezanih osoba i sa strane povezane osobe; po zahtevu iz keširanih karata, bez poziva engine-a |
 | 7b | `9ecf4f3` | Cena na konsultaciji (iz usluge, izmenljiva, „bez naplate“), uplate i povraćaji kao primljen novac, avans za termin koji prelazi na konsultaciju, izveden status naplate i dugovanje, strana Payments (pokazatelji, filteri, zbir po valuti, CSV, „Waiting on payment“), kartica Billing na konsultaciji, kolona naplate u listi konsultacija, uplate na vremenskoj liniji i profilu klijenta, novac na dashboardu |
 
-Testovi posle Faze 7e: **403 PHP** (3017 provera; od toga referentni testovi pozicija prema NASA JPL Horizons, i za Hiron, i 29 testova uglova i kuća prema nezavisnim formulama — oba skupa se izvršavaju samo gde postoji `swetest`) i **143 Vitest**; CI: GitHub Actions (Pint, Prettier, Vitest, build, PHPUnit na MariaDB 11.8).
+Testovi posle Faze 7e: **407 PHP** (3029 provera; od toga referentni testovi pozicija prema NASA JPL Horizons, i za Hiron, i 29 testova uglova i kuća prema nezavisnim formulama — oba skupa se izvršavaju samo gde postoji `swetest`) i **143 Vitest**; CI: GitHub Actions (Pint, Prettier, Vitest, build, PHPUnit na MariaDB 11.8).
 
 ## Ključne odluke
 
@@ -118,7 +118,7 @@ Testovi posle Faze 7e: **403 PHP** (3017 provera; od toga referentni testovi poz
   - kuće u oba smera (planete i uglovi druge osobe u kućama klijenta i obrnuto) — prototip je imao samo pozicije;
   - kompozit: sredina kraćeg luka; kuće = sredine kuspida merene od prve kuće svake karte (uvek u redu), Whole Sign od kompozitnog ASC-a, Porphyry iz kompozitnih uglova kada su karte u različitim sistemima (polarni krug); MC iznad kompozitnog horizonta; bez vremena jedne osobe nema uglova ni kuća, a Mesec je opseg;
   - izbor: povezane osobe i povezani klijenti sa kartom (prvi je podrazumevan), svaki drugi klijent preko pretrage; osoba i prikaz u adresi (`?tab=synastry&with=person-5&view=composite`);
-  - merenje: Ana i Marko — 57 kontakata, 18 aspekata u kompozitu; zahtev ~340 ms lokalno, od čega ~290 ms čitanje keširane karte (isto kao `/chart`), samo poređenje ~50 ms.
+  - merenje: Ana i Marko — 57 kontakata, 18 aspekata u kompozitu; zahtev ~340 ms lokalno, od čega ~290 ms čitanje keširane karte (isto kao `/chart`), samo poređenje ~50 ms; posle keša verzije engine-a (tačka 17) ceo zahtev ~110 ms.
 
 ## Otvoreno — čeka odluku ili akciju
 
@@ -138,7 +138,7 @@ Testovi posle Faze 7e: **403 PHP** (3017 provera; od toga referentni testovi poz
 14. Odloženo iz Faze 7d: pomračenja Sunca i Meseca (posebni proračuni u engine-u i nov referentni test); aspekti Meseca i Mesec „bez kursa“; kartica „ove nedelje na nebu“ na dashboardu; veza sa tranzitima klijenata (koji klijent ima kontakt sa događajem). Za validacione razgovore: da li astrolozi koriste kalendar neba, koje događaje i koliko unapred.
 15. Odloženo iz Faze 7c: Notification Center (zvonce, tabela `notifications`), push i uređaji (PWA); kategorije „Payment recorded“ i „Weekly summary“ iz prototipa; obaveštenja o pomeranju, otkazivanju i promeni lokacije (kada termine budu menjali drugi — timovi, portal); podsetnik za zadatak u određeno vreme (sada samo jutarnji mejl); link iz mejla uvek otvara trenutni workspace korisnika (bitno tek sa više workspace-a). Za validacione razgovore: koliko ranije astrolozi žele podsetnik i da li im treba jutarnji pregled.
 16. Odloženo iz Faze 7e: izvoz poređenja u PDF (Faza 9); prilaganje poređenja konsultaciji kao snimka (dve `chart_calculation_id`); poseban skup orba za sinastriju (ako ga razgovori traže); poređenje dve povezane osobe bez klijenta; Davison karta; sinastrija u tranzitima („tranzit na kompozit“). Za validacione razgovore: da li astrolozi u sinastriji koriste natalne orbe, i koji način kuća u kompozitu očekuju.
-17. **Performanse (za Fazu 8):** svako čitanje keširane karte (karta, tranziti, sinastrija, dashboard) pokreće `swetest -h` samo da sazna verziju engine-a za `fingerprint()` (deo `input_hash`) — izmereno ~218 ms lokalno, jednom po PHP procesu, dakle na svakom zahtevu. Verziju treba keširati (npr. u Laravel kešu po putanji i vremenu izmene binarnog fajla). Primećeno pri merenju u 7e.
+17. **Performanse:** rešeno 25. 9. 2026 — svako čitanje keširane karte pokretalo je `swetest -h` za verziju engine-a u `fingerprint()` (~218 ms lokalno). Verzija i kontrolni zbirovi fajlova efemerida sada su u kešu aplikacije (`CACHE_STORE`), po veličini i vremenu izmene fajlova: `/chart` ~290 → ~90 ms, sinastrija ~340 → ~110 ms. Na produkciji: nov `swetest` ili fajl efemerida dobija nov ključ sam od sebe; queue worker posle deploy-a ionako ide na `php artisan queue:restart`.
 18. Lokalno: stara baza `astrolabe.online__10.2026` (sa tačkom) može da se obriše; test workspace je podešen na **sidereal/Lahiri i Whole Sign** (iz testa u Fazi 1) — menja se u Settings → Chart & methods. Tri test klijenta iz Faze 5 mogu da se arhiviraju.
 
 ## Sledeće

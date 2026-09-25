@@ -243,6 +243,7 @@ Solarni povratak i sekundarne progresije koriste isti engine i isti `ChartReques
 Proračun traje jedinice do desetine milisekundi. **Ne ide kroz queue** — to bi dodalo složenost bez koristi.
 
 - natalna karta se kešira po `input_hash`;
+- verzija engine-a i kontrolni zbirovi fajlova efemerida (deo `input_hash`) pamte se u kešu aplikacije, po veličini i vremenu izmene fajlova, pa čitanje keširane karte ne pokreće `swetest`; zamenjen program ili fajl efemerida dobija nov ključ sam od sebe (od 25. 9. 2026 — ranije je svaki zahtev pokretao `swetest -h`, ~218 ms lokalno);
 - tranziti se računaju po zahtevu, bez keša, jednim višednevnim pozivom engine-a (merenje u „Stanje posle Faze 7a“);
 - kalendar neba se računa po zahtevu, bez keša, sa dva poziva engine-a (merenje u „Stanje posle Faze 7d“);
 - sinastrija i kompozit se računaju po zahtevu iz dve keširane natalne karte, bez sopstvenog poziva engine-a (merenje u „Stanje posle Faze 7e“);
@@ -319,7 +320,7 @@ Referentne karte treba pribaviti iz nezavisnog izvora i zapisati očekivane vred
   - nepoznato vreme bilo koje osobe: bez uglova i kuća; Mesec je opseg — sredina je sredina dva Meseca (sredina opsega kod nepoznatog vremena), širina pola zbira oba opsega — i ne ulazi u aspekte;
   - tačnost vremena kompozita je manje sigurna od dve (`unknown`, pa `approximate`); tačke nemaju brzinu ni retrogradnost;
   - aspekti unutar kompozita: `AspectCalculator::between` po natalnim orbima, bez `applying`.
-- **Merenje (25. 9. 2026, lokalni Windows, Apache sa Xdebug-om):** Ana i Marko (obe karte u kešu) — 57 kontakata po natalnim orbima, 18 aspekata u kompozitu; zahtev ~340 ms, od čega čitanje keširane karte ~290 ms (isto kao `GET /clients/{id}/chart`), samo poređenje ~50 ms. Od tih ~290 ms, ~218 ms je `swetest -h` za verziju engine-a u `fingerprint()` (deo `input_hash`), jednom po PHP procesu — postojeći trošak svakog čitanja karte, zabeležen za Fazu 8 (performanse).
+- **Merenje (25. 9. 2026, lokalni Windows, Apache sa Xdebug-om):** Ana i Marko (obe karte u kešu) — 57 kontakata po natalnim orbima, 18 aspekata u kompozitu; zahtev ~340 ms, od čega čitanje keširane karte ~290 ms (isto kao `GET /clients/{id}/chart`), samo poređenje ~50 ms. Od tih ~290 ms, ~218 ms bio je `swetest -h` za verziju engine-a u `fingerprint()` (deo `input_hash`), na svakom zahtevu. Popravljeno istog dana: verzija i kontrolni zbirovi se pamte u kešu aplikacije, pa je `/chart` sada ~90 ms, a sinastrija ~110 ms (lokalno, sa Xdebug-om).
 - **Prikaz:** tab „Synastry“ (`SynastryPanel`): izbor osobe, „Synastry / Composite“, dvostruki točak (`ChartWheel` sa `outer` — isti prsten kao za tranzite, sada i sa ASC/MC druge osobe i Mesecom kao opsegom), lični kontakti, svi kontakti (prvih 20), pozicije svake osobe u kućama druge; kompozit sa točkom, pozicijama, kuspidima i aspektima i napomenom kako su kuće dobijene.
 - **Testovi:** `CompositeChartTest` (izmišljene karte: sredina preko 0° Ovna i kod suprotnih tačaka, MC iznad horizonta i kuće u redu, Whole Sign, različiti sistemi, nepoznato vreme, tačke za aspekte), `SynastryTest` (API sa `FakeEngine`-om: osoba i drugi klijent, redosled i orbi, nepoznato vreme, nepotpuni podaci sa strane, natalni orbi odlučuju, bez poziva engine-a za keširane karte, 503, izolacija workspace-a), `betweenCharts` u `AspectCalculatorTest`; na frontendu `lib/synastry.js` u Vitest-u.
 

@@ -38,12 +38,14 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(Geocoder::class, LocalGeoNamesGeocoder::class);
 
         // One engine per process; the fake one keeps the positions tests pin on it.
-        $this->app->singleton(EphemerisEngine::class, fn () => match (config('astrolabe.ephemeris.engine')) {
+        // The real one keeps its version in the cache, so reading a chart starts no process.
+        $this->app->singleton(EphemerisEngine::class, fn ($app) => match (config('astrolabe.ephemeris.engine')) {
             'fake' => new FakeEngine,
             default => new SwissEphemerisEngine(
                 config('astrolabe.ephemeris.swetest'),
                 config('astrolabe.ephemeris.path'),
                 config('astrolabe.ephemeris.timeout'),
+                $app->make('cache.store'),
             ),
         });
     }

@@ -192,6 +192,10 @@ Sinastrija i kompozit. Prototip je imao tab „Synastry“ (bez kompozita) ozna�
 
 Odluke donete usput: tačka druge osobe je prva u kontaktu (kao u prototipu); dva ugla dve karte jesu kontakt; bez približavanja i razilaženja; kuće u oba smera (prototip nije imao); lični kontakti prikazani svi, ne do šest; u listi svih kontakata prvih 20, ostali na klik; izbor je povezana osoba ili povezani klijent, a svaki drugi klijent preko pretrage (prototip je nudio sve klijente u jednoj listi); kompozit po sredinama kraćeg luka, kuće kao sredine kuspida merene od prve kuće (pa ostaju u redu), Whole Sign od kompozitnog ascendenta, Porphyry iz kompozitnih uglova kada se sistemi dve karte razlikuju, MC iznad kompozitnog horizonta; bez PDF-a, snimka na konsultaciji i stavke na vremenskoj liniji.
 
+## Performanse — verzija engine-a u kešu (25. 9. 2026)
+
+Primećeno pri merenju sinastrije: svaki zahtev koji samo čita keširanu kartu pokretao je `swetest -h` da sazna verziju engine-a za `input_hash` (~218 ms lokalno, od ~290 ms zahteva). Verzija i kontrolni zbirovi fajlova efemerida sada se pamte u kešu aplikacije po veličini i vremenu izmene fajlova; `/chart` je ~90 ms. Izmena u dokumentu 11 („Performanse“, „Stanje posle Faze 7e“).
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

@@ -65,6 +65,9 @@ before starting a phase. The user communicates in Serbian.
   Inside the polar circles swetest replaces Placidus/Koch with Porphyry and prints
   `error: House method … failed, Porphyry calculated instead`; the adapter tolerates exactly that
   line and records both `requested_system` and `system`. Any other error or warning still fails.
+- The engine's `fingerprint()` (version + data-file checksums) is part of `input_hash`. The real
+  engine remembers both in the app cache, keyed by the files' size and mtime, so reading a cached
+  chart starts no process; never add a per-request `swetest` call just to describe the engine.
 - `ChartService::PAYLOAD_VERSION` and the workspace's aspect orbs are part of `input_hash`. Bump
   the version whenever the payload shape changes; `ChartResource` must keep reading older rows
   (consultation snapshots from before Phase 5 have positions only).

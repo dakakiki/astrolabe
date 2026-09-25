@@ -11,6 +11,7 @@ use App\Astrology\ValueObjects\PlanetPosition;
 use App\Enums\CelestialBody;
 use App\Enums\HouseSystem;
 use App\Enums\ZodiacMode;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 
@@ -29,14 +30,20 @@ class SwissEphemerisEngine implements EphemerisEngine
      */
     private const HOUSE_FALLBACK = '/^error: House method (.+?) failed, (.+?) calculated instead\.?\s*$/mi';
 
-    private static ?string $version = null;
+    private ?string $version = null;
 
-    private static ?string $ephemerisVersion = null;
+    private ?string $ephemerisVersion = null;
 
+    /**
+     * `$cache` keeps the version and the data-file checksums between requests:
+     * they are part of every chart's input hash, so without it each request
+     * that only reads a cached chart would start swetest to learn its version.
+     */
     public function __construct(
         private readonly string $binary,
         private readonly string $ephemerisPath,
         private readonly int $timeout = 10,
+        private readonly ?CacheRepository $cache = null,
     ) {}
 
     public function name(): string
@@ -155,14 +162,33 @@ class SwissEphemerisEngine implements EphemerisEngine
         return $arguments;
     }
 
+    /**
+     * The version swetest reports ("2.10.03"). Asking means starting it, so the
+     * answer is remembered for this binary — its path, size and modification
+     * time — and a replaced binary is asked again. A version that cannot be
+     * read is not remembered.
+     */
     public function version(): string
     {
-        if (self::$version === null) {
-            preg_match('/Version:\s*([\d.]+)/', $this->run(['-h'], allowWarnings: true), $match);
-            self::$version = $match[1] ?? 'unknown';
+        if ($this->version !== null) {
+            return $this->version;
         }
 
-        return self::$version;
+        $key = 'swisseph:version:'.sha1(implode('|', [$this->binary, ...self::identity($this->binary)]));
+
+        if (is_string($known = $this->cache?->get($key))) {
+            return $this->version = $known;
+        }
+
+        preg_match('/Version:\s*([\d.]+)/', $this->run(['-h'], allowWarnings: true), $match);
+
+        if (! isset($match[1])) {
+            return $this->version = 'unknown';
+        }
+
+        $this->cache?->forever($key, $match[1]);
+
+        return $this->version = $match[1];
     }
 
     public function fingerprint(): string
@@ -172,27 +198,53 @@ class SwissEphemerisEngine implements EphemerisEngine
 
     /**
      * The ephemeris files in use with a checksum each, e.g.
-     * "semo_18.se1:1f2e3d4c,sepl_18.se1:9a8b7c6d". Replacing a file changes it.
+     * "semo_18.se1:1f2e3d4c,sepl_18.se1:9a8b7c6d". Replacing a file changes it;
+     * the checksums are remembered for the files' sizes and modification times.
      */
     public function ephemerisVersion(): string
     {
-        if (self::$ephemerisVersion === null) {
-            $files = glob(rtrim($this->ephemerisPath, '/\\').DIRECTORY_SEPARATOR.'*.se1') ?: [];
-            sort($files);
-
-            self::$ephemerisVersion = implode(',', array_map(
-                fn (string $file) => basename($file).':'.hash_file('crc32b', $file),
-                $files,
-            )) ?: 'none';
+        if ($this->ephemerisVersion !== null) {
+            return $this->ephemerisVersion;
         }
 
-        return self::$ephemerisVersion;
+        $files = glob(rtrim($this->ephemerisPath, '/\\').DIRECTORY_SEPARATOR.'*.se1') ?: [];
+        sort($files);
+
+        $key = 'swisseph:files:'.sha1(implode(',', array_map(
+            fn (string $file) => implode('|', [basename($file), ...self::identity($file)]),
+            $files,
+        )));
+
+        if (is_string($known = $this->cache?->get($key))) {
+            return $this->ephemerisVersion = $known;
+        }
+
+        $checksums = implode(',', array_map(
+            fn (string $file) => basename($file).':'.hash_file('crc32b', $file),
+            $files,
+        )) ?: 'none';
+
+        $this->cache?->forever($key, $checksums);
+
+        return $this->ephemerisVersion = $checksums;
+    }
+
+    /**
+     * What tells one copy of a file from another without reading it.
+     *
+     * @return array{0: int|false, 1: int|false}
+     */
+    private static function identity(string $file): array
+    {
+        clearstatcache(true, $file);
+
+        return [@filesize($file), @filemtime($file)];
     }
 
     /**
      * @param  list<string>  $arguments
      */
-    private function run(array $arguments, bool $allowWarnings = false): string
+    protected function run(array $arguments, bool $allowWarnings = false): string
     {
         if (! is_file($this->binary)) {
             throw new EphemerisException("swetest not found at {$this->binary}.");
