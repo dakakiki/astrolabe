@@ -1,6 +1,6 @@
 # Status projekta — AstroLabe
 
-Stanje na dan **25. 9. 2026**, posle dela 7d — Faza 7 (tranziti, uplate, obaveštenja, kalendar neba) je završena. Ovaj dokument je polazna tačka za svaku novu radnu sesiju: šta je gotovo, gde se šta nalazi, šta je odlučeno i šta sledi.
+Stanje na dan **25. 9. 2026**, posle dela 7d — Faza 7 (tranziti, uplate, obaveštenja, kalendar neba) je završena; sledi **sinastrija**, pre zatvorene bete. Ovaj dokument je polazna tačka za svaku novu radnu sesiju: šta je gotovo, gde se šta nalazi, šta je odlučeno i šta sledi.
 
 ## Gde je šta
 
@@ -132,6 +132,15 @@ Testovi posle Faze 7d: **386 PHP** (2836 provera; od toga referentni testovi poz
 ## Sledeće
 
 Faze 0–7 su završene (Faza 6 u tri dela: 6a, 6b, 6c; Faza 7 u četiri dela: 7a tranziti, 7b uplate, 7c obaveštenja, 7d kalendar neba). Po dokumentu 04 sledi **Faza 8 — zatvorena beta** (nekoliko testnih astrologa, povratne informacije, ispravke UX-a, sigurnosna provera, backup i restore, audit log, performanse, politika privatnosti i uslovi). Za nju su potrebni produkcioni server (Hetzner, cron, queue worker, SMTP), Linux `swetest`, Swiss Ephemeris Professional License i validacioni razgovori — o redosledu odlučuje korisnik.
+
+**Sledeće (odluka korisnika, 25. 9. 2026): sinastrija, pre zatvorene bete** — kao kod kalendara neba (7d): prvo pregled prototipa i specifikacije, predlog obima sa podrazumevanim odlukama i pitanja samo za ono što je stvarno korisnikova odluka, pa gradnja (radni naziv **7e**) sa testovima, dokumentacijom, proverom u Chrome-u, commit-om i zelenim CI-jem.
+
+### Polazna tačka za sinastriju
+
+- **Prototip:** `client.html`, tab „Synastry“ (`PANES.synastry`, oko linija 377–480) i dugme „Compare charts“ kod povezane osobe na tabu „Related people“ (otvara sinastriju sa tom osobom). Prikazuje: izbor s kim se poredi (povezana osoba sa kartom ili drugi klijent), dvostruki točak (spolja druga osoba, unutra klijent, linije kontakata), „Personal planet contacts“ (Sunce, Mesec, Venera, Mars međusobno, do šest), „All contacts“ po orbu (planeta druge osobe prva), pozicije druge osobe; napomenu da sinastrija nije u prvom izdanju; „Export PDF“ (samo demo — PDF je Faza 9); „compared on request, not cached“. Kompozit prototip nema.
+- **Specifikacija:** dokument 02, „Karte i proračun → Kasnije“ (sinastrija i kompozit) i dokument 11, „Faziranje → Kasnije“ (isti engine i isti `ChartRequest`); dokument 04 je nema. Pri gradnji: nova sekcija u 02 i 11, 7e u 04, changelog.
+- **Šta već postoji:** karte povezanih osoba (6a — `ChartService` za klijenta i povezanu osobu, `related_person_birth_details`), aspekti između dve karte (`AspectCalculator::across()`, 7a), dvostruki točak (`ChartWheel` sa spoljnim prstenom i linijama kontakata, 7a), natalni orbi po workspace-u (`aspect_orbs`), `TransitsPanel` kao uzor za panel, veze klijent ↔ klijent i klijent ↔ povezana osoba (6a).
+- **Za predlog korisniku:** obim (sinastrija kao u prototipu; kompozit da ili kasnije); orbi (natalni skup prakse ili zaseban, kao za tranzite); uglovi i kuće (ASC/MC druge osobe u aspektima, planete druge osobe u kućama klijenta); nepoznato vreme rođenja jedne ili obe osobe (bez uglova i kuća, Mesec kao opseg — pravila iz Faze 5); gde se otvara (tab na klijentu, na strani povezane osobe, „Compare charts“ iz veza); da li se poređenje prilaže konsultaciji kao snimak; poredak (čija planeta prva) i „lični kontakti“ (Sunce, Mesec, Venera, Mars — i ASC?).
 
 ### Plan Faze 7 (prihvaćen 25. 9. 2026)
 
