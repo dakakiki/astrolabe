@@ -9,7 +9,8 @@ Plan dogovoren **6. 10. 2026**. Ovo je spisak za dan kada se aplikacija prvi put
 | Šta | Gde | Zašto |
 |---|---|---|
 | Aplikacija AstroLabe — `app.astrolabe.online` | **Hetzner Cloud CX33** (4 vCPU, 8 GB RAM, 80 GB NVMe; ~8,49 EUR mesečno bez PDV-a, plus 20% za Backups) | Aplikacija mora da pokreće `swetest` iz PHP-a, da ima stalno pokrenut queue worker, MariaDB 11.8 i bazu od ~1,9 GB — deljeni hosting to ne garantuje |
-| Prezentacioni sajt (WordPress) — `astrolabe.online`, i drugi WP sajtovi | **Hetzner Webhosting** — **S** za jedan sajt (1 baza, 1 cron), **M** za više sajtova (5 baza) | Napravljen za WordPress; Hetzner održava server |
+| Prezentacioni sajt (WordPress) — `astrolabe.online`, i drugi WP sajtovi | **Hetzner Webhosting M** (5 baza, 5 cron poslova, 50 GB) — biće više WordPress sajtova | Napravljen za WordPress; Hetzner održava server |
+| Fajlovi klijenata | na CX33, privatni disk `attachments` (`storage/app/private/attachments`) | Odluka 6. 10. 2026: za betu i prve korisnike dovoljno mesta, bez promene koda |
 | Mejl na domenu (sandučići i pošiljalac mejlova aplikacije) | isti Webhosting | Sandučići su uključeni; aplikacija šalje preko porta 587 |
 
 Odluke i razlozi (korisnik, 6. 10. 2026):
@@ -26,7 +27,6 @@ Odluke i razlozi (korisnik, 6. 10. 2026):
 - [ ] **Hetzner nalog:** Cloud projekat, Webhosting paket, potpisan AVV / DPA.
 - [ ] **Domen:** pristup DNS zapisima za `astrolabe.online`.
 - [ ] **Izvorni kod `swetest`-a** za Linux build (preuzimanje uz odobrenje korisnika, kao i do sada) i fajlovi efemerida `sepl_18.se1`, `semo_18.se1`, `seas_18.se1` sa lokalne mašine (`storage/app/private/swisseph/ephe`, nisu u Git-u).
-- [ ] **Fajlovi klijenata:** odlučiti gde su za betu — lokalni privatni disk servera (disk `attachments`, ulazi u backup) ili S3-kompatibilan bucket (npr. Hetzner Object Storage) preko `ATTACHMENTS_DISK`. Predlog: lokalni disk za betu, bucket kada broj korisnika poraste.
 
 ## Server (CX33)
 
@@ -62,7 +62,7 @@ Samo nazivi i vrednosti koje nisu tajne; lozinke se unose na serveru.
 | `EPHEMERIS_ENGINE` | `swiss` |
 | `SWETEST_PATH` / `EPHEMERIS_PATH` | putanje do Linux `swetest`-a i direktorijuma sa `.se1` fajlovima |
 | `PLACES_SOURCE` | `all` |
-| `ATTACHMENTS_DISK` / `ATTACHMENTS_MAX_MB` | `attachments` (lokalni disk) ili bucket / `100` |
+| `ATTACHMENTS_DISK` / `ATTACHMENTS_MAX_MB` | `attachments` (lokalni disk servera) / `100` |
 
 ## Prvo podizanje — redosled
 
@@ -91,7 +91,7 @@ Samo nazivi i vrednosti koje nisu tajne; lozinke se unose na serveru.
 
 - **Hetzner Backups:** dnevna slika celog servera (čuva se 7). Slika nije pouzdan backup baze koja radi, pa uz nju:
 - **Baza:** svake noći `mariadb-dump --single-transaction` bez tabela `places` i `place_names` (mogu se ponovo uvesti), šifrovan (dokument 06: enkriptovani backup) i kopiran **van servera** (npr. Hetzner Storage Box ili Object Storage), sa definisanim čuvanjem.
-- **Fajlovi klijenata:** ako su na lokalnom disku — isto, šifrovano van servera; ako su u bucket-u — verzionisanje bucket-a.
+- **Fajlovi klijenata** (na disku servera): u dnevnoj slici servera, plus svake noći šifrovana kopija van servera, kao baza.
 - **Probni restore** pre bete (stavka Faze 8 „backup i restore procedura“): nova mašina iz backup-a, aplikacija radi.
 
 ## Svaka sledeća verzija
@@ -109,7 +109,7 @@ Pre deploy-a: zelen CI na tom commit-u; posle promene `swetest`-a ili fajlova ef
 
 ## Webhosting (WordPress)
 
-- Paket **S** ako je jedan sajt, **M** ako ih je više (S ima samo jednu bazu).
+- Paket **M** (odluka 6. 10. 2026): više WordPress sajtova, svaki sa svojom bazom (5 baza, 5 cron poslova, 50 GB).
 - WordPress za `astrolabe.online`, automatska ažuriranja jezgra i dodataka, što manje dodataka.
 - Sajt nema nikakvu vezu sa bazom ni serverom aplikacije — samo linkove ka `https://app.astrolabe.online`.
 
@@ -119,4 +119,4 @@ Pre deploy-a: zelen CI na tom commit-u; posle promene `swetest`-a ili fajlova ef
 - rotacija logova, pregled `failed_jobs`;
 - merenje na Linux-u: niz od 731 dan za tranzite, godina kalendara neba (lokalno na Windows-u ~210 ms po pokretanju `swetest`-a);
 - sigurnosna provera, politika privatnosti i uslovi korišćenja, audit log (dokument 04, Faza 8);
-- kada broj korisnika poraste: veći server (rescale), fajlovi u bucket, po potrebi baza na posebnom serveru.
+- kada broj korisnika poraste: veći server (rescale **samo CPU i RAM** — proširen disk se ne može vratiti na manji), za fajlove Hetzner Volume montiran na `storage/app/private/attachments` (bez promene koda) ili kasnije bucket preko `ATTACHMENTS_DISK`, po potrebi baza na posebnom serveru.
