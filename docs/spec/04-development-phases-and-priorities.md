@@ -218,6 +218,7 @@ Izvođenje (dogovoreno 25. 9. 2026): tri dela sa commit-om, zelenim CI-jem i ta�
 
 ## Faza 8 — zatvorena beta
 
+- podizanje produkcije prema `docs/deployment.md` (Hetzner Cloud CX33 za aplikaciju, Webhosting za prezentacioni WordPress sajt i mejl — odluka 6. 10. 2026);
 - nekoliko testnih astrologa;
 - prikupljanje strukturiranih povratnih informacija;
 - ispravke kritičnih UX problema;

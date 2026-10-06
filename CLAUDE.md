@@ -257,6 +257,14 @@ npm run format
 npm run build
 ```
 
+## Production
+
+- The plan is `docs/deployment.md`: the app alone on a Hetzner Cloud server (`app.astrolabe.online`),
+  WordPress and the domain's mail on Hetzner Webhosting. Never put server addresses, passwords or
+  `.env` contents into the repo.
+- `SESSION_DOMAIN` stays the app's own host, never the parent domain (the WordPress site lives there).
+- Mail goes through a Webhosting mailbox on port 587; the cloud server cannot send on 25 or 465.
+
 ## API
 
 See `docs/api-conventions.md`: everything under `/api/v1`, responses wrapped in `data`,

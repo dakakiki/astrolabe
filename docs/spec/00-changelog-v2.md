@@ -203,6 +203,14 @@ Odluka korisnika: SaaS pretplata se naplaćuje preko Freemius-a, koji radnja ve�
 - 07: preimenovan u `07-sales-and-billing.md`, Freemius kao jedini provajder, sekcije „Troškovi“ i „Otvorene provere“ (SaaS proizvod u postojećem nalogu, trial bez kartice, provera webhook-a), koraci pre lansiranja.
 - 02, 04, 09: Paddle zamenjen Freemius-om.
 
+## Hosting (6. 10. 2026)
+
+Odluka korisnika: aplikacija na Hetzner Cloud CX33, prezentacioni WordPress sajt i mejl domena na Hetzner Webhosting-u, odvojeno — WordPress ne deli server sa podacima klijenata. Webhosting L/XL za samu aplikaciju je razmatran i odbačen (pokretanje `swetest`-a iz PHP-a, stalni worker, MariaDB 11.8 i baza od ~1,84 GB nisu potvrđeni). Mejl aplikacije ide preko sandučića na Webhosting-u, port 587, umesto lokalnog SMTP-a iz Faze 7c (Hetzner Cloud prvih mesec dana blokira portove 25 i 465). Plan podizanja je u `docs/deployment.md` u repou. Izmene:
+
+- 03: produkcioni server i izvor MariaDB 11.8.
+- 04: podizanje produkcije kao prva stavka Faze 8.
+- 06: mejl na produkciji preko porta 587.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.
