@@ -80,6 +80,35 @@ describe('resolveNavigation', () => {
             });
         });
     });
+
+    describe('the operator’s admin', () => {
+        const admin = { user: { email_verified: true, is_admin: true, two_factor_enabled: true }, workspace: null };
+        const newAdmin = { user: { email_verified: true, is_admin: true, two_factor_enabled: false }, workspace: null };
+
+        it('sends the admin from practice screens and sign-in to the admin', () => {
+            expect(resolveNavigation(route('dashboard', { verified: true }, '/'), admin)).toEqual({ name: 'admin.astrologers' });
+            expect(resolveNavigation(route('clients.index', { verified: true }), admin)).toEqual({ name: 'admin.astrologers' });
+            expect(resolveNavigation(route('login', { guest: true }), admin)).toEqual({ name: 'admin.astrologers' });
+            expect(resolveNavigation(route('verify-email', { auth: true }), admin)).toEqual({ name: 'admin.astrologers' });
+        });
+
+        it('opens the admin screens', () => {
+            expect(resolveNavigation(route('admin.system', { admin: true }), admin)).toBe(true);
+        });
+
+        it('opens only the security screen until two-factor sign-in is on', () => {
+            expect(resolveNavigation(route('admin.astrologers', { admin: true }), newAdmin)).toEqual({ name: 'admin.security' });
+            expect(resolveNavigation(route('admin.security', { admin: true }), newAdmin)).toBe(true);
+        });
+
+        it('keeps astrologers and guests out of the admin', () => {
+            expect(resolveNavigation(route('admin.astrologers', { admin: true }), verified)).toEqual({ name: 'dashboard' });
+            expect(resolveNavigation(route('admin.astrologers', { admin: true }, '/admin/astrologers'), guest)).toEqual({
+                name: 'login',
+                query: { redirect: '/admin/astrologers' },
+            });
+        });
+    });
 });
 
 describe('safeRedirect', () => {

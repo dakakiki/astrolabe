@@ -12,18 +12,35 @@ use Symfony\Component\HttpFoundation\Response;
  * Determines the workspace an authenticated request acts in. The client never
  * names it: the user's stored current workspace is used when they are still an
  * active member of it, otherwise their first active membership.
+ *
+ * `workspace:optional` (only `/me`) lets an account without a practice through
+ * with none — the operator's admin, which never has one (Phase 8c). Every
+ * practice route uses the strict form, so the admin gets 403 there. A suspended
+ * account gets 403 everywhere.
  */
 class ResolveCurrentWorkspace
 {
+    public const SUSPENDED = 'account_suspended';
+
     public function __construct(private readonly CurrentWorkspace $current) {}
 
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, ?string $mode = null): Response
     {
         /** @var User $user */
         $user = $request->user();
 
-        $workspace = $user->activeWorkspaces()->whereKey($user->current_workspace_id)->first()
-            ?? $user->activeWorkspaces()->oldest('workspace_user.created_at')->first();
+        if ($user->isSuspended()) {
+            return response()->json(['message' => __('admin.suspended'), 'code' => self::SUSPENDED], Response::HTTP_FORBIDDEN);
+        }
+
+        $workspace = $user->isAdmin() ? null : (
+            $user->activeWorkspaces()->whereKey($user->current_workspace_id)->first()
+                ?? $user->activeWorkspaces()->oldest('workspace_user.created_at')->first()
+        );
+
+        if ($workspace === null && $mode === 'optional') {
+            return $next($request);
+        }
 
         abort_if($workspace === null, Response::HTTP_FORBIDDEN, __('workspaces.none'));
 

@@ -46,28 +46,29 @@ enum AuditEvent: string
     case RetentionApplied = 'retention_applied';
     case BackupRestored = 'backup_restored';
 
+    // The operator's admin (Phase 8c): what the admin looked at and did.
+    case AdminCreated = 'admin_created';
+    case AdminViewed = 'admin_viewed';
+    case AdminTwoFactorReset = 'admin_two_factor_reset';
+    case AdminVerificationResent = 'admin_verification_resent';
+    case AccountSuspended = 'account_suspended';
+    case AccountRestored = 'account_restored';
+    case AdminJobRetried = 'admin_job_retried';
+    case AdminJobDeleted = 'admin_job_deleted';
+    case FeedbackSent = 'feedback_sent';
+
     /**
-     * Events about the account, shown to its owner ("Recent security activity").
+     * Events that may mean someone else is trying an account; the admin's audit
+     * log shows them on their own and highlights them (Phase 8c).
      *
      * @return list<self>
      */
-    public static function account(): array
+    public static function warnings(): array
     {
         return [
-            self::Login,
             self::LoginFailed,
             self::Lockout,
-            self::Logout,
-            self::Registered,
-            self::EmailVerified,
-            self::EmailChanged,
-            self::PasswordChanged,
-            self::PasswordReset,
-            self::OtherSessionsSignedOut,
-            self::TwoFactorEnabled,
-            self::TwoFactorDisabled,
             self::TwoFactorFailed,
-            self::RecoveryCodesRegenerated,
             self::RecoveryCodeUsed,
         ];
     }

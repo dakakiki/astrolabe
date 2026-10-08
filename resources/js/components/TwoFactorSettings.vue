@@ -15,7 +15,7 @@ import { useToastStore } from '@/stores/toast';
  * turning it on needs one code from the app, so a mistyped key never locks
  * anyone out. Recovery codes are shown only on request.
  */
-// After a change that the audit log records (the activity list reloads).
+// After a change that the audit log records, for a parent that wants to know.
 const emit = defineEmits(['changed']);
 
 const { t } = useI18n();

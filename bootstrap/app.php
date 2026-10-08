@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureIdempotency;
 use App\Http\Middleware\EnsurePracticeIsActive;
 use App\Http\Middleware\ResolveCurrentWorkspace;
@@ -36,6 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'workspace' => ResolveCurrentWorkspace::class,
             'practice.active' => EnsurePracticeIsActive::class,
+            'admin' => EnsureAdmin::class,
             'idempotent' => EnsureIdempotency::class,
         ]);
 

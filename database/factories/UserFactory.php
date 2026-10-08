@@ -49,6 +49,21 @@ class UserFactory extends Factory
     }
 
     /**
+     * The operator's admin (Phase 8c): no practice, two-factor sign-in on —
+     * as `admin:create` makes it and the admin requires. `twoFactor: false`
+     * leaves it as it is right after `admin:create`.
+     */
+    public function admin(bool $twoFactor = true): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_admin' => true,
+            'two_factor_secret' => $twoFactor ? encrypt('JBSWY3DPEHPK3PXP') : null,
+            'two_factor_recovery_codes' => $twoFactor ? encrypt(json_encode(['recovery-one', 'recovery-two'])) : null,
+            'two_factor_confirmed_at' => $twoFactor ? now() : null,
+        ]);
+    }
+
+    /**
      * Indicate that the model's email address should be unverified.
      */
     public function unverified(): static

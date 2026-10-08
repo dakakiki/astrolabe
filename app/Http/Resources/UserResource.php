@@ -21,6 +21,8 @@ class UserResource extends JsonResource
             'locale' => $this->locale,
             'timezone' => $this->timezone,
             'two_factor_enabled' => $this->hasTwoFactorEnabled(),
+            // The operator's admin (Phase 8c): the SPA shows only the admin then.
+            'is_admin' => $this->isAdmin(),
             // Always complete: stored values laid over the defaults.
             'notification_preferences' => $this->notificationPreferences()->toArray(),
         ];

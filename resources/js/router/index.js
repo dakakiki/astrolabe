@@ -186,6 +186,54 @@ const routes = [
         ],
     },
 
+    // The operator's admin (Phase 8c): only for the admin account, which has no practice.
+    {
+        path: '/admin',
+        redirect: { name: 'admin.astrologers' },
+    },
+    {
+        path: '/admin/astrologers',
+        name: 'admin.astrologers',
+        component: () => import('@/pages/admin/AdminAstrologersPage.vue'),
+        meta: { admin: true },
+    },
+    {
+        path: '/admin/astrologers/:id(\\d+)',
+        name: 'admin.astrologer',
+        component: () => import('@/pages/admin/AdminAstrologerPage.vue'),
+        meta: { admin: true },
+    },
+    {
+        path: '/admin/audit-log',
+        name: 'admin.audit',
+        component: () => import('@/pages/admin/AdminAuditLogPage.vue'),
+        meta: { admin: true },
+    },
+    {
+        path: '/admin/invitations',
+        name: 'admin.invitations',
+        component: () => import('@/pages/admin/AdminInvitationsPage.vue'),
+        meta: { admin: true },
+    },
+    {
+        path: '/admin/feedback',
+        name: 'admin.feedback',
+        component: () => import('@/pages/admin/AdminFeedbackPage.vue'),
+        meta: { admin: true },
+    },
+    {
+        path: '/admin/system',
+        name: 'admin.system',
+        component: () => import('@/pages/admin/AdminSystemPage.vue'),
+        meta: { admin: true },
+    },
+    {
+        path: '/admin/security',
+        name: 'admin.security',
+        component: () => import('@/pages/admin/AdminSecurityPage.vue'),
+        meta: { admin: true },
+    },
+
     // A practice scheduled for deletion shows only this (Phase 8b).
     {
         path: '/practice-deletion',

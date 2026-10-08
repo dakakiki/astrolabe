@@ -35,6 +35,12 @@ class RouteProtectionTest extends TestCase
         ));
     }
 
+    /** The operator's admin (Phase 8c): its own guard instead of a practice. */
+    private function isAdminRoute(Route $route): bool
+    {
+        return str_starts_with($route->uri(), 'api/v1/admin/');
+    }
+
     public function test_every_practice_route_needs_a_verified_member_of_the_workspace(): void
     {
         foreach ($this->apiRoutes() as $route) {
@@ -47,10 +53,36 @@ class RouteProtectionTest extends TestCase
             }
 
             $this->assertContains('auth:sanctum', $middleware, "{$route->uri()} must require sign-in");
-            $this->assertContains('workspace', $middleware, "{$route->uri()} must resolve the workspace");
+
+            if ($this->isAdminRoute($route)) {
+                continue;
+            }
+
+            // `/me` alone lets an account without a practice through: the admin's.
+            $this->assertContains($route->uri() === 'api/v1/me' ? 'workspace:optional' : 'workspace', $middleware, "{$route->uri()} must resolve the workspace");
 
             if (! in_array($route->uri(), self::UNVERIFIED, true)) {
                 $this->assertContains('verified', $middleware, "{$route->uri()} must require a verified email");
+            }
+        }
+    }
+
+    public function test_every_admin_route_needs_the_admin_and_never_a_practice(): void
+    {
+        $admin = array_filter($this->apiRoutes(), fn (Route $route) => $this->isAdminRoute($route));
+        $this->assertNotEmpty($admin);
+
+        foreach ($admin as $route) {
+            $middleware = $route->gatherMiddleware();
+            $name = $route->uri().' '.implode('|', $route->methods());
+
+            $this->assertContains('admin', $middleware, "{$name} must require the admin");
+            $this->assertContains('verified', $middleware, $name);
+            $this->assertEmpty(array_filter($middleware, fn ($entry) => is_string($entry) && str_starts_with($entry, 'workspace')), "{$name} must not resolve a practice");
+
+            // Changing an astrologer's account asks for the password again.
+            if (str_contains($route->uri(), '/astrologers/{user}/') && ! in_array('GET', $route->methods(), true)) {
+                $this->assertNotEmpty(array_filter($middleware, fn ($entry) => is_string($entry) && str_starts_with($entry, 'password.confirm')), "{$name} must confirm the password");
             }
         }
     }
@@ -70,7 +102,7 @@ class RouteProtectionTest extends TestCase
     public function test_a_practice_scheduled_for_deletion_is_closed_everywhere_else(): void
     {
         foreach ($this->apiRoutes() as $route) {
-            if (in_array($route->uri(), self::PUBLIC, true)) {
+            if (in_array($route->uri(), self::PUBLIC, true) || $this->isAdminRoute($route)) {
                 continue;
             }
 

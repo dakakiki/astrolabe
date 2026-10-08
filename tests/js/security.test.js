@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { describeDevice, groupSecret, isWarning, normaliseCode } from '@/lib/security';
+import { describeDevice, groupSecret, normaliseCode } from '@/lib/security';
 
 describe('describeDevice', () => {
     it('recognises the common browsers and systems', () => {
@@ -32,17 +32,6 @@ describe('describeDevice', () => {
     it('says nothing about what it does not know', () => {
         expect(describeDevice(null)).toEqual({ browser: null, system: null });
         expect(describeDevice('curl/8.4.0')).toEqual({ browser: null, system: null });
-    });
-});
-
-describe('isWarning', () => {
-    it('flags what may be someone else trying the account', () => {
-        expect(isWarning('login_failed')).toBe(true);
-        expect(isWarning('lockout')).toBe(true);
-        expect(isWarning('two_factor_failed')).toBe(true);
-        expect(isWarning('recovery_code_used')).toBe(true);
-        expect(isWarning('login')).toBe(false);
-        expect(isWarning('password_changed')).toBe(false);
     });
 });
 

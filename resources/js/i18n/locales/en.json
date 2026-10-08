@@ -41,7 +41,16 @@
         "calendar": "Calendar",
         "sky": "Sky calendar",
         "tasks": "Tasks",
-        "payments": "Payments"
+        "payments": "Payments",
+        "operator": "Operator",
+        "admin": "Admin",
+        "feedback": "Feedback",
+        "astrologers": "Astrologers",
+        "auditLog": "Audit log",
+        "invitations": "Invitations",
+        "inbox": "Feedback",
+        "system": "System",
+        "security": "Security"
     },
     "auth": {
         "art": {
@@ -323,35 +332,6 @@
                 "newCodesDone": "New recovery codes made. The old ones no longer work.",
                 "enabled": "Two-factor sign-in is on",
                 "disabled": "Two-factor sign-in is off"
-            },
-            "activity": {
-                "title": "Recent security activity",
-                "intro": "Sign-ins and changes to your account. If something here was not you, change your password and sign out other sessions.",
-                "empty": "Nothing yet.",
-                "when": "When",
-                "what": "What",
-                "device": "Browser",
-                "ip": "IP address",
-                "deviceOn": "{browser} on {system}",
-                "unknownDevice": "Unknown browser",
-                "remembered": "kept signed in",
-                "events": {
-                    "login": "Signed in",
-                    "login_failed": "Failed sign-in attempt",
-                    "lockout": "Sign-in paused after too many attempts",
-                    "logout": "Signed out",
-                    "registered": "Account created",
-                    "email_verified": "Email address confirmed",
-                    "email_changed": "Email address changed",
-                    "password_changed": "Password changed",
-                    "password_reset": "Password reset by email",
-                    "other_sessions_signed_out": "Other sessions signed out",
-                    "two_factor_enabled": "Two-factor sign-in turned on",
-                    "two_factor_disabled": "Two-factor sign-in turned off",
-                    "two_factor_failed": "Wrong two-factor code",
-                    "recovery_codes_regenerated": "New recovery codes made",
-                    "recovery_code_used": "Signed in with a recovery code"
-                }
             }
         },
         "orbs": {
@@ -1654,5 +1634,281 @@
         "cancel": "Cancel the deletion",
         "cancelled": "The deletion was cancelled. Welcome back.",
         "signOut": "Sign out"
+    },
+    "feedback": {
+        "title": "Send feedback",
+        "intro": "Something broken, missing or unclear? It goes to the people building AstroLabe.",
+        "privacy": "Please do not include client names, birth data or notes.",
+        "category": "What is it about?",
+        "categories": {
+            "bug": "Something does not work",
+            "idea": "An idea",
+            "question": "A question",
+            "other": "Something else"
+        },
+        "message": "Your message",
+        "submit": "Send",
+        "sent": "Thank you — your feedback was sent."
+    },
+    "admin": {
+        "badge": "Operator",
+        "noTwoFactor": {
+            "title": "Turn on two-factor sign-in",
+            "body": "The admin opens only with two-factor sign-in. Turn it on below; the other screens unlock right after."
+        },
+        "common": {
+            "reason": "Reason",
+            "reasonHint": "Recorded in the audit log and sent to the astrologer.",
+            "reasonOptionalHint": "Optional. Recorded in the audit log.",
+            "password": "Your password",
+            "passwordHint": "Asked again for changes to someone else’s account.",
+            "confirm": "Confirm",
+            "never": "Never",
+            "none": "—",
+            "all": "All",
+            "search": "Search",
+            "loading": "Loading…",
+            "empty": "Nothing here.",
+            "filter": "Filter",
+            "clear": "Clear"
+        },
+        "astrologers": {
+            "title": "Astrologers",
+            "sub": "Accounts and practice figures only — never client data.",
+            "searchPlaceholder": "Name, email or practice",
+            "status": "State",
+            "statuses": {
+                "active": "Active",
+                "unverified": "Email not confirmed",
+                "suspended": "Suspended",
+                "closing": "Practice closing",
+                "no_two_factor": "No two-factor"
+            },
+            "columns": {
+                "astrologer": "Astrologer",
+                "practice": "Practice",
+                "registered": "Registered",
+                "lastLogin": "Last sign-in",
+                "clients": "Clients",
+                "consultations": "Consultations",
+                "appointments": "Appointments",
+                "storage": "Files",
+                "state": "State"
+            },
+            "twoFactor": "2FA",
+            "empty": "No astrologers yet."
+        },
+        "astrologer": {
+            "back": "Astrologers",
+            "account": "Account",
+            "practice": "Practice",
+            "email": "Email",
+            "emailConfirmed": "Confirmed",
+            "emailNotConfirmed": "Not confirmed",
+            "twoFactor": "Two-factor sign-in",
+            "on": "On",
+            "off": "Off",
+            "locale": "Language",
+            "timezone": "Time zone",
+            "registered": "Registered",
+            "lastLogin": "Last sign-in",
+            "invitation": "Invitation",
+            "invitationNote": "Note",
+            "noInvitation": "Registered without an invitation.",
+            "memberships": "Practices",
+            "deletesOn": "Scheduled for deletion on {date}",
+            "suspendedSince": "Suspended since {date}",
+            "figures": "Figures",
+            "help": "Account help",
+            "helpIntro": "Each action asks for your password again and a reason, is recorded in the audit log and is emailed to the astrologer.",
+            "actions": {
+                "resetTwoFactor": {
+                    "button": "Turn off two-factor sign-in",
+                    "title": "Turn off two-factor sign-in for {name}?",
+                    "body": "Use this when the astrologer lost their phone and their recovery codes and you are sure it is them. They sign in with the password alone until they turn it on again.",
+                    "done": "Two-factor sign-in was turned off."
+                },
+                "verification": {
+                    "button": "Send the confirmation email again",
+                    "title": "Send the confirmation email to {name} again?",
+                    "body": "A new link to confirm the email address goes to the address on the account.",
+                    "done": "The confirmation email was sent."
+                },
+                "suspend": {
+                    "button": "Suspend the account",
+                    "title": "Suspend {name}?",
+                    "body": "Signing in stops at once and every open session ends. Nothing in the practice is changed or deleted; you can restore the account later.",
+                    "done": "The account was suspended."
+                },
+                "restore": {
+                    "button": "Restore the account",
+                    "title": "Restore {name}?",
+                    "body": "The astrologer can sign in again as before.",
+                    "done": "The account was restored."
+                }
+            },
+            "activity": "Audit log of this account"
+        },
+        "audit": {
+            "title": "Audit log",
+            "sub": "Sign-ins, account changes and the practices’ critical operations — who, what, when, from where, never content. Kept for {months} months.",
+            "filters": {
+                "email": "Person (email)",
+                "event": "Event",
+                "from": "From",
+                "to": "To",
+                "warnings": "Only failed sign-ins and lockouts",
+                "anyEvent": "Any event"
+            },
+            "columns": {
+                "when": "When",
+                "who": "Who",
+                "what": "What",
+                "where": "From",
+                "details": "Details"
+            },
+            "system": "System",
+            "deletedAccount": "Deleted account",
+            "admin": "operator",
+            "practice": "Practice: {name}",
+            "deviceOn": "{browser} on {system}",
+            "unknownDevice": "Unknown browser",
+            "remembered": "kept signed in",
+            "empty": "No entries."
+        },
+        "events": {
+            "login": "Signed in",
+            "login_failed": "Failed sign-in attempt",
+            "lockout": "Sign-in paused after too many attempts",
+            "logout": "Signed out",
+            "registered": "Account created",
+            "email_verified": "Email address confirmed",
+            "email_changed": "Email address changed",
+            "password_changed": "Password changed",
+            "password_reset": "Password reset by email",
+            "other_sessions_signed_out": "Other sessions signed out",
+            "two_factor_enabled": "Two-factor sign-in turned on",
+            "two_factor_disabled": "Two-factor sign-in turned off",
+            "two_factor_failed": "Wrong two-factor code",
+            "recovery_codes_regenerated": "New recovery codes made",
+            "recovery_code_used": "Signed in with a recovery code",
+            "payments_exported": "Payments exported to CSV",
+            "file_downloaded": "File downloaded",
+            "record_deleted": "Record deleted",
+            "practice_settings_changed": "Practice settings changed",
+            "invitation_sent": "Invitation sent",
+            "invitation_revoked": "Invitation revoked",
+            "invitation_accepted": "Invitation used to register",
+            "client_erased": "Client deleted permanently",
+            "practice_export_requested": "Practice export asked for",
+            "practice_export_downloaded": "Practice export downloaded",
+            "practice_deletion_requested": "Practice scheduled for deletion",
+            "practice_deletion_cancelled": "Practice deletion cancelled",
+            "practice_erased": "Practice deleted",
+            "retention_applied": "Retention rules applied",
+            "backup_restored": "Backup restored",
+            "admin_created": "Admin account created",
+            "admin_viewed": "Admin looked at",
+            "admin_two_factor_reset": "Two-factor sign-in turned off by the operator",
+            "admin_verification_resent": "Confirmation email sent again by the operator",
+            "account_suspended": "Account suspended",
+            "account_restored": "Account restored",
+            "admin_job_retried": "Failed job run again",
+            "admin_job_deleted": "Failed job dropped",
+            "feedback_sent": "Feedback sent"
+        },
+        "invitations": {
+            "title": "Invitations",
+            "sub": "The closed beta: an account only through an invitation. The same as `php artisan invitations:send`.",
+            "email": "Email address",
+            "note": "Note",
+            "noteHint": "Private, e.g. who recommended the person.",
+            "days": "Valid for (days)",
+            "send": "Send the invitation",
+            "sent": "Invitation sent to {email}.",
+            "notSent": "The email could not be sent. Give the person this link:",
+            "link": "Link (shown once)",
+            "revoke": "Revoke",
+            "revoked": "Invitation revoked.",
+            "columns": {
+                "email": "Email",
+                "status": "State",
+                "sent": "Sent",
+                "expires": "Valid until",
+                "account": "Account",
+                "note": "Note"
+            },
+            "statuses": {
+                "valid": "Open",
+                "used": "Used",
+                "expired": "Expired",
+                "revoked": "Revoked"
+            },
+            "empty": "No invitations yet."
+        },
+        "feedback": {
+            "title": "Feedback",
+            "sub": "What astrologers sent with the Feedback button.",
+            "open": "Open",
+            "handled": "Handled",
+            "all": "All",
+            "markHandled": "Mark handled",
+            "reopen": "Reopen",
+            "from": "From",
+            "page": "Screen",
+            "version": "Version",
+            "browser": "Browser",
+            "deletedAccount": "Deleted account",
+            "empty": "No feedback here."
+        },
+        "system": {
+            "title": "System",
+            "sub": "The parts AstroLabe depends on, and how big it has grown.",
+            "checks": "Health checks",
+            "checkNames": {
+                "database": "Database",
+                "cache": "Cache",
+                "engine": "Ephemeris engine",
+                "storage": "File storage",
+                "queue": "Queue worker",
+                "scheduler": "Scheduler (cron)",
+                "backup": "Backup"
+            },
+            "ok": "OK",
+            "failing": "Failing",
+            "versions": "Versions",
+            "app": "AstroLabe",
+            "engine": "Engine",
+            "database": "Database",
+            "databaseTotal": "Total",
+            "gazetteer": "GeoNames (re-imported, not backed up)",
+            "rest": "Everything else",
+            "storage": "Storage",
+            "files": "{count} client files",
+            "exports": "Practice exports",
+            "diskFree": "Free disk",
+            "backups": "Backups",
+            "backupsOff": "Not set up (BACKUP_KEY is empty).",
+            "backupLatest": "Latest: {date} · {size}",
+            "backupCount": "{count} kept",
+            "noBackups": "No backup yet.",
+            "queue": "Queue",
+            "pending": "Waiting jobs",
+            "failedCount": "Failed jobs",
+            "schedulerBeat": "Scheduler last ran",
+            "failedJobs": "Failed jobs",
+            "failedJobsHint": "Only the kind of job and the exception’s class — the message and data can quote a client; they are in the server log.",
+            "noFailedJobs": "No failed jobs.",
+            "retry": "Run again",
+            "forget": "Drop",
+            "retried": "The job is back in the queue.",
+            "forgotten": "The job was dropped.",
+            "columns": {
+                "job": "Job",
+                "exception": "Exception",
+                "queue": "Queue",
+                "failed": "Failed"
+            }
+        }
     }
 }

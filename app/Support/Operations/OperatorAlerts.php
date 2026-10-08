@@ -2,6 +2,7 @@
 
 namespace App\Support\Operations;
 
+use App\Models\Feedback;
 use App\Notifications\OperatorAlert;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
@@ -69,6 +70,22 @@ final class OperatorAlerts
                 __('operations.when', ['time' => CarbonImmutable::now()->utc()->toDateTimeString()]),
                 __('operations.health.log'),
             ]),
+        ]);
+    }
+
+    /** New feedback from the app (Phase 8c): that it came, not what it says. */
+    public static function feedback(Feedback $feedback): void
+    {
+        if (! self::enabled()) {
+            return;
+        }
+
+        self::send(null, [
+            'subject' => __('admin.feedback.subject', ['app' => config('app.name')]),
+            'lines' => [
+                __('admin.feedback.line', ['category' => $feedback->category->value, 'user' => $feedback->user_id]),
+                __('operations.when', ['time' => CarbonImmutable::now()->utc()->toDateTimeString()]),
+            ],
         ]);
     }
 

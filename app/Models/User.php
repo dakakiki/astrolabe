@@ -40,6 +40,8 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
             'notification_preferences' => 'array',
             'next_digest_at' => 'immutable_datetime',
             'two_factor_confirmed_at' => 'immutable_datetime',
+            'is_admin' => 'boolean',
+            'suspended_at' => 'immutable_datetime',
         ];
     }
 
@@ -47,6 +49,21 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     public function hasTwoFactorEnabled(): bool
     {
         return $this->two_factor_secret !== null && $this->two_factor_confirmed_at !== null;
+    }
+
+    /**
+     * The operator's account (Phase 8c): made only by `admin:create`, never a
+     * member of a practice, and never set from a request.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->is_admin === true;
+    }
+
+    /** Suspended by the operator: signing in and every request stop until restored. */
+    public function isSuspended(): bool
+    {
+        return $this->suspended_at !== null;
     }
 
     /**

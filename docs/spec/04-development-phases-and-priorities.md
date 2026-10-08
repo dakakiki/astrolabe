@@ -236,6 +236,8 @@ Izvođenje (korisnik, 8. 10. 2026): prvo lokalno, bez produkcionog servera — *
 
 > Status 8b: završeno 8. 10. 2026. Izvoz cele prakse (ZIP sa JSON-om, CSV-om, kartama i fajlovima; queue, mejl sa linkom od 24 h, 7 dana u aplikaciji), pravo brisanje klijenta uz upisano ime (uplate ostaju anonimne), brisanje prakse i naloga sa 30 dana za otkazivanje (praksa je za to vreme zatvorena), pravila čuvanja (`data:prune` svake noći: obrisano posle 30 dana i sa diska, audit log 12 meseci, izvozi, pozivi, neuspeli poslovi, keš), šifrovan backup (`backup:run`, libsodium, 14 kopija) i restore sa probnim vraćanjem (`backup:restore --verify`), proveren lokalno i na aplikaciji nad vraćenom bazom. Settings → Your data. Detalji u dokumentima 02, 05 i 06.
 
+> Status 8c1: završeno 8. 10. 2026 (korisnik: 8c u dva dela — 8c1 admin i Feedback, 8c2 pravne strane, performanse i Linux `swetest` u CI-ju). Admin operatera: poseban nalog (`admin:create`, bez prakse, obavezan 2FA, sesija 30 min bez aktivnosti), ekrani Astrolozi (metapodaci, nikad sadržaj klijenata), Audit log, Pozivi, Feedback, Sistem (provere, verzije, veličine, backup-i, neuspeli poslovi) i pomoć nalogu (isključi 2FA, ponovna potvrda mejla, suspenzija / vraćanje — uz ponovnu lozinku, razlog, zapis i mejl astrologu); svaki pogled i akcija admina u audit log-u; „Recent security activity“ skinut sa strane astrologa; dugme Feedback za astrologe. Detalji u dokumentima 02, 05 i 06.
+
 ## Faza 9 — komercijalizacija i lansiranje
 
 - Freemius subscription billing prema dokumentu 07, uz integraciju preuzetu iz drugog projekta korisnika;

@@ -53,7 +53,8 @@ before starting a phase. The user communicates in Serbian.
   filter names, counts. Auth events arrive through `SecurityEventSubscriber`; deletions through the
   models listed in `AppServiceProvider::auditCriticalOperations()` (add new deletable practice data
   there); exports, downloads and practice settings where they happen. A new event is a new case in
-  `App\Enums\AuditEvent` plus a label in `settings.security.activity.events`.
+  `App\Enums\AuditEvent` plus a label in `admin.events` (a test checks every case has one). Only the
+  operator's admin reads the log; astrologers do not (Phase 8c).
 - Every API route counts against `throttle:api`. A route that may start the ephemeris engine also
   gets `throttle:engine`; `RouteProtectionTest` lists them and checks that every API route needs
   sign-in, the workspace and a verified email unless it is on its public list.
@@ -65,6 +66,26 @@ before starting a phase. The user communicates in Serbian.
 - `GET /api/v1/health` answers yes/no per part (200/503); `health:check` runs every five minutes and
   `OperatorAlerts` emails `OPERATOR_EMAIL` about failures and reported exceptions — at most hourly,
   sent at once (not queued), and never with an exception's message (it can quote client data).
+
+## Operator's admin (Phase 8c)
+
+- The admin is a separate account (`users.is_admin`), made only by `admin:create`, never a member of
+  a practice; `is_admin` is never mass-assignable. `/api/v1/admin/*` uses `auth:sanctum` + `verified`
+  + `admin` (`EnsureAdmin`: the flag, two-factor sign-in on, 30 idle minutes) and never `workspace`;
+  the strict `workspace` middleware refuses the admin everywhere else, `/me` alone uses
+  `workspace:optional`. `RouteProtectionTest` checks both sides.
+- The admin sees metadata only — accounts, counts, sizes, dates (`App\Support\Admin\Astrologers`) —
+  never client names, birth data, notes, files or amounts. A failed job shows its class and the
+  exception's class, never the message or payload. Every admin read is `AuditEvent::AdminViewed`
+  (screen and filter names), every action its own event; account-help actions need
+  `password.confirm` and a reason, and email the astrologer (`AccountNotice`).
+- Suspension (`users.suspended_at`) stops sign-in in `RejectSuspendedAccount` (Fortify pipeline, after
+  the password is right) and every request in `ResolveCurrentWorkspace`; suspending deletes the
+  person's sessions and cycles the remember token.
+- Feedback from the app (`POST /feedback`) keeps the screen as a pattern (`Feedback::pagePattern`, no ids
+  or query) and goes with its author's account; the operator's email never carries the message.
+- The SPA uses the same `AppLayout` with the admin's own menu (`shell-admin`); the router guard keeps
+  admins on `meta.admin` routes (only `admin.security` until 2FA is on) and astrologers off them.
 
 ## Data lifecycle (Phase 8b)
 

@@ -134,6 +134,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Operator's admin
+    |--------------------------------------------------------------------------
+    |
+    | The admin (Phase 8c) is a separate account made by `admin:create`. Its
+    | session ends after `idle_minutes` without an admin request (astrologers
+    | keep SESSION_LIFETIME), and account-help actions ask for the password
+    | again when it was last confirmed more than `confirm_seconds` ago.
+    | `support_email` is named in the emails astrologers get about their account.
+    |
+    */
+
+    'admin' => [
+        'idle_minutes' => (int) env('ADMIN_IDLE_MINUTES', 30),
+        'confirm_seconds' => (int) env('ADMIN_CONFIRM_SECONDS', 900),
+        'support_email' => env('SUPPORT_EMAIL', env('OPERATOR_EMAIL')),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Rate limits
     |--------------------------------------------------------------------------
     |

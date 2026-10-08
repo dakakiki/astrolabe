@@ -2,20 +2,16 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\AuditEvent;
-use App\Models\RegistrationInvitation;
+use App\Actions\Invitations\SendInvitation;
 use App\Models\User;
-use App\Notifications\RegistrationInvite;
-use App\Support\Audit\Audit;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
-use Throwable;
 
 /**
  * Invites people to the closed beta (Phase 8a): one link per address, valid
  * once and for a limited time. A new invitation replaces the address's
  * earlier open one. The link is printed too, in case the email does not arrive.
+ * The admin's Invitations screen does the same (Phase 8c).
  */
 class SendInvitations extends Command
 {
@@ -26,7 +22,7 @@ class SendInvitations extends Command
 
     protected $description = 'Email closed-beta invitations to register';
 
-    public function handle(): int
+    public function handle(SendInvitation $send): int
     {
         $days = (int) ($this->option('days') ?? config('astrolabe.registration.invitation_days'));
 
@@ -54,18 +50,16 @@ class SendInvitations extends Command
                 continue;
             }
 
-            [$invitation, $token] = RegistrationInvitation::issue($email, $days, $this->option('note'));
-            Audit::record(AuditEvent::InvitationSent, $invitation, ['days' => $days]);
+            ['invitation' => $invitation, 'link' => $link, 'sent' => $sent] = $send->handle($email, $days, $this->option('note'));
 
-            try {
-                Notification::route('mail', $email)->notifyNow(new RegistrationInvite($token, $invitation->expires_at));
+            if ($sent) {
                 $this->info("{$email}: invitation sent, valid until {$invitation->expires_at->toDateTimeString()} UTC.");
-            } catch (Throwable $e) {
-                $this->error("{$email}: the email could not be sent ({$e->getMessage()}). The link below still works.");
+            } else {
+                $this->error("{$email}: the email could not be sent (see the log). The link below still works.");
                 $failed = true;
             }
 
-            $this->line('  '.RegistrationInvitation::url($token));
+            $this->line('  '.$link);
         }
 
         return $failed ? self::FAILURE : self::SUCCESS;

@@ -183,6 +183,11 @@
         z-index: 20;
     }
 
+    /* The operator's admin (Phase 8c): the same frame, marked so it is never mistaken for a practice. */
+    .shell-admin .topbar {
+        box-shadow: inset 0 3px 0 var(--warn);
+    }
+
     .menu-btn {
         display: none;
         border: 0;
@@ -883,7 +888,8 @@
         overflow-y: hidden;
     }
 
-    .tabs a {
+    .tabs a,
+    .tabs button {
         color: var(--ink-3);
         font-size: 13px;
         font-weight: 500;
@@ -894,11 +900,13 @@
         text-decoration: none;
     }
 
-    .tabs a:hover {
+    .tabs a:hover,
+    .tabs button:hover {
         color: var(--ink);
     }
 
-    .tabs a[aria-current='page'] {
+    .tabs a[aria-current='page'],
+    .tabs button[aria-current='page'] {
         color: var(--link);
         border-bottom-color: var(--brand-300);
     }

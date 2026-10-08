@@ -15,6 +15,8 @@ export const useAuthStore = defineStore('auth', () => {
     const isAuthenticated = computed(() => user.value !== null);
     const isVerified = computed(() => user.value?.email_verified === true);
     const isOwner = computed(() => workspace.value?.role === 'owner');
+    // The operator's admin (Phase 8c): no practice, only the admin screens.
+    const isAdmin = computed(() => user.value?.is_admin === true);
 
     async function load({ force = false } = {}) {
         if (loaded.value && !force) {
@@ -84,6 +86,7 @@ export const useAuthStore = defineStore('auth', () => {
         isAuthenticated,
         isVerified,
         isOwner,
+        isAdmin,
         load,
         login,
         twoFactorChallenge,

@@ -64,7 +64,9 @@ Samo nazivi i vrednosti koje nisu tajne; lozinke se unose na serveru.
 | `PLACES_SOURCE` | `all` |
 | `ATTACHMENTS_DISK` / `ATTACHMENTS_MAX_MB` | `attachments` (lokalni disk servera) / `100` |
 | `REGISTRATION_MODE` / `INVITATION_DAYS` | `invite` (zatvorena beta — nalog samo uz poziv) / `14` |
-| `OPERATOR_EMAIL` | adresa na koju idu mejlovi o neuspelim proverama i serverskim greškama |
+| `OPERATOR_EMAIL` | adresa na koju idu mejlovi o neuspelim proverama, serverskim greškama i novim povratnim informacijama |
+| `SUPPORT_EMAIL` | adresa koja se navodi astrolozima u mejlovima o njihovom nalogu (podrazumevano `OPERATOR_EMAIL`) |
+| `ADMIN_IDLE_MINUTES` / `ADMIN_CONFIRM_SECONDS` | `30` / `900` (admin sesija se gasi posle 30 min bez admin zahteva; pomoć nalogu ponovo traži lozinku posle 15 min) |
 | `RATE_LIMIT_API` / `RATE_LIMIT_ENGINE` | `300` / `40` (zahteva u minuti po osobi; menjati samo ako beta pokaže potrebu) |
 | `BACKUP_KEY` | `php artisan backup:key` na serveru — **kopija ključa van servera** (menadžer lozinki korisnika); bez njega se backup ne može pročitati. Dok nije postavljen, noćni backup se ne pokreće |
 | `BACKUP_KEEP` | `14` (dnevnih kopija na serveru) |
@@ -88,11 +90,12 @@ Nginx stoji direktno ispred PHP-FPM-a (bez load balancer-a), pa `trustProxies` n
 9. Nginx sajt za `app.astrolabe.online` + `certbot --nginx`; HTTP preusmeren na HTTPS.
 10. **Cron** (korisnik PHP-FPM-a): `* * * * * cd <aplikacija> && php artisan schedule:run >> /dev/null 2>&1` — pokreće i noćne `data:prune` (01:30) i `backup:run` (02:00, kada je `BACKUP_KEY` postavljen; pre toga `php artisan backup:key`, ključ u `.env` i kopija van servera, pa jednom ručno `backup:run` i `backup:restore --verify`).
 11. **Supervisor** za worker: `php artisan queue:work --sleep=3 --max-time=3600`, automatski restart, log u `storage/logs`.
-12. **Prvi nalog:** `php artisan invitations:send <adresa>` (registracija je samo uz poziv; link je i ispisan, ako mejl još ne radi), registracija kroz link, potvrda mejla, uključiti 2FA u Settings → Security; provera: klijent sa podacima rođenja → karta, tranziti, kalendar neba, sinastrija.
-13. **Mejl:** u Settings → Notifications „Send a test email“; proveriti da je stigao i da nije u spamu. Zatim `php artisan health:check` — sve `ok`; mejl operateru se proverava jednom namerno pokvarenom proverom (npr. privremeno pogrešan `SWETEST_PATH`).
-14. **Spoljni monitor dostupnosti** na `https://app.astrolabe.online/api/v1/health` (očekuje 200; 503 znači da neki deo ne radi, uključujući zaustavljen cron). Odgovor nosi samo da/ne po delu, pa monitor ne vidi nikakve podatke.
+12. **Admin nalog operatera:** `php artisan admin:create <adresa> --name="…"` — adresa koja nije ničiji astrološki nalog; komanda šalje i ispisuje link za postavljanje lozinke (važi 60 min). Prijava kroz isti ekran kao astrolozi, pa odmah 2FA u admin → Security (admin se bez njega ne otvara). Admin vidi samo metapodatke i sve što pogleda ili uradi ide u audit log; pozivi za betu mogu i odatle. `php artisan admin:list` pokazuje admin naloge i da li im je 2FA uključen.
+13. **Prvi nalog astrologa:** `php artisan invitations:send <adresa>` (ili admin → Invitations) (registracija je samo uz poziv; link je i ispisan, ako mejl još ne radi), registracija kroz link, potvrda mejla, uključiti 2FA u Settings → Security; provera: klijent sa podacima rođenja → karta, tranziti, kalendar neba, sinastrija.
+14. **Mejl:** u Settings → Notifications „Send a test email“; proveriti da je stigao i da nije u spamu. Zatim `php artisan health:check` — sve `ok`; mejl operateru se proverava jednom namerno pokvarenom proverom (npr. privremeno pogrešan `SWETEST_PATH`).
+15. **Spoljni monitor dostupnosti** na `https://app.astrolabe.online/api/v1/health` (očekuje 200; 503 znači da neki deo ne radi, uključujući zaustavljen cron). Odgovor nosi samo da/ne po delu, pa monitor ne vidi nikakve podatke.
 
-Testeri bete dobijaju poziv istom komandom; `php artisan invitations:list` pokazuje ko je poziv iskoristio, `invitations:revoke <adresa>` poništava neiskorišćen.
+Testeri bete dobijaju poziv istom komandom ili iz admina (Invitations); `php artisan invitations:list` pokazuje ko je poziv iskoristio, `invitations:revoke <adresa>` poništava neiskorišćen. Stanje sistema, neuspeli poslovi (ponovo pokreni / odbaci), audit log i povratne informacije astrologa su u adminu (`/admin`).
 
 ## DNS i mejl
 

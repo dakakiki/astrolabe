@@ -241,6 +241,17 @@ Odluke korisnika na početku 8b (sve preporuke iz predloga): obrisano se trajno 
 
 Odluke donete usput: izvoz sadrži i privatne beleške i fajlove drugih članova (izvoz je praksin, pravi ga vlasnik); jedan izvoz u isto vreme; link iz mejla traži i prijavu vlasnika, a gost posle prijave dolazi nazad na link; trajno brisanje klijenta briše i ranije izvoze prakse (sadrže ga); anonimna uplata se ne menja, samo uklanja, i na strani Payments je „Deleted client“; dok praksa čeka brisanje zatvorena je (403 sa kodom, osim prijave, izvoza i otkazivanja), podsetnici i jutarnji mejl se ne šalju; nalog se briše sa praksom samo ako ne pripada drugoj praksi; audit zapisi obrisane prakse i naloga ostaju do svog roka bez veze sa njima; pravila čuvanja rade pre backup-a (01:30, backup 02:00); backup nosi `sessions` i keš samo kao strukturu (restore nikoga ne prijavljuje); istekli unosi keša se brišu svake noći (mogu sadržati odgovor sa imenom klijenta).
 
+## Faza 8c1 — admin operatera i Feedback (8. 10. 2026)
+
+Odluke korisnika na početku 8c (sve preporuke): 8c u dva dela (8c1 admin + Feedback, 8c2 pravne strane, performanse, Linux `swetest` u CI-ju); admin je red u `users` sa oznakom, bez prakse, ista prijava, 2FA i reset lozinke; admin sesija 30 minuta bez aktivnosti, pomoć nalogu traži ponovnu lozinku; Feedback = kategorija, tekst, ekran, pregledač i verzija, bez snimka ekrana, mejl operateru bez teksta. Izmene:
+
+- 02: „Admin (operater) — Faza 8c1, implementirano“; „Nedavna bezbednosna aktivnost“ skinuta sa strane astrologa.
+- 04: status 8c1.
+- 05: `users.is_admin`, `suspended_at`, `suspension_reason`; tabela `feedback`; događaji admina u audit log-u.
+- 06: admin operatera u bezbednosti; audit log čita samo admin.
+
+Odluke donete usput: admin u istoj Vue aplikaciji i istom okviru, sa svojim menijem, oznakom „Operator“ i trakom u boji upozorenja; `/me` jedina ruta koja propušta nalog bez prakse; admin nalog se pravi samo komandom koja šalje link za lozinku (lozinka nikad kroz terminal); posle prijave bez 2FA otvara se samo admin → Security; razlog akcije operatera je jedini slobodan tekst u audit log-u (i ide astrologu mejlom); audit log naloga prikazuje i ono što je operater uradio tom nalogu; suspendovan nalog se odbija tek posle ispravne lozinke (bez otkrivanja naloga bez lozinke) i beleži kao neuspela prijava; neuspeli poslovi samo po vrsti i klasi izuzetka; pozivi iz admina prikazuju link jednom; ekran u povratnoj informaciji je obrazac bez id-jeva; povratna informacija odlazi sa nalogom autora; operater ne menja druge admin naloge iz admina; pregledi admina se beleže i kada samo lista (ekran i nazivi filtera).
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

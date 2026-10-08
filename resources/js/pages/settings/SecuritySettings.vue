@@ -3,7 +3,6 @@ import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import FormField from '@/components/FormField.vue';
-import SecurityActivity from '@/components/SecurityActivity.vue';
 import TwoFactorSettings from '@/components/TwoFactorSettings.vue';
 import { useForm } from '@/composables/useForm';
 import http from '@/lib/http';
@@ -11,10 +10,6 @@ import { useToastStore } from '@/stores/toast';
 
 const { t } = useI18n();
 const toast = useToastStore();
-
-/* Recent security activity: reloaded after each change made here. */
-const activity = ref(null);
-const refreshActivity = () => activity.value?.load();
 
 /* Password */
 
@@ -26,7 +21,6 @@ async function changePassword() {
             await http.put('/auth/user/password', data);
             password.reset();
             toast.success(t('settings.security.passwordSaved'));
-            refreshActivity();
         })
         .catch(() => {});
 }
@@ -49,7 +43,6 @@ async function signOutOthers() {
             sessions.reset();
             otherSessions.value = 0;
             toast.success(t('settings.security.sessionsDone'));
-            refreshActivity();
         })
         .catch(() => {});
 }
@@ -142,7 +135,5 @@ async function signOutOthers() {
         </div>
     </section>
 
-    <TwoFactorSettings @changed="refreshActivity" />
-
-    <SecurityActivity ref="activity" />
+    <TwoFactorSettings />
 </template>

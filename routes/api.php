@@ -1,5 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Admin\AdminAccountHelpController;
+use App\Http\Controllers\Api\V1\Admin\AdminAstrologerController;
+use App\Http\Controllers\Api\V1\Admin\AdminAuditLogController;
+use App\Http\Controllers\Api\V1\Admin\AdminFeedbackController;
+use App\Http\Controllers\Api\V1\Admin\AdminInvitationController;
+use App\Http\Controllers\Api\V1\Admin\AdminSystemController;
 use App\Http\Controllers\Api\V1\AppointmentController;
 use App\Http\Controllers\Api\V1\AstrologyMethodController;
 use App\Http\Controllers\Api\V1\AttachmentController;
@@ -14,6 +20,7 @@ use App\Http\Controllers\Api\V1\ClientTransitController;
 use App\Http\Controllers\Api\V1\ConsultationChartController;
 use App\Http\Controllers\Api\V1\ConsultationController;
 use App\Http\Controllers\Api\V1\DashboardController;
+use App\Http\Controllers\Api\V1\FeedbackController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\NoteController;
@@ -25,7 +32,6 @@ use App\Http\Controllers\Api\V1\RelatedPersonChartController;
 use App\Http\Controllers\Api\V1\RelatedPersonController;
 use App\Http\Controllers\Api\V1\RelatedPersonConversionController;
 use App\Http\Controllers\Api\V1\RelatedPersonTransitController;
-use App\Http\Controllers\Api\V1\SecurityActivityController;
 use App\Http\Controllers\Api\V1\ServiceController;
 use App\Http\Controllers\Api\V1\SkyController;
 use App\Http\Controllers\Api\V1\StatusController;
@@ -49,10 +55,43 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     // For an uptime monitor: 200 or 503, one yes/no per part (Phase 8a).
     Route::get('/health', HealthController::class)->middleware('throttle:30,1')->name('health');
 
-    Route::middleware(['auth:sanctum', 'workspace'])->group(function () {
-        // Reachable before the email address is verified.
-        Route::get('/me', MeController::class)->name('me');
+    // Reachable before the email address is verified, and by the admin, who has no practice.
+    Route::get('/me', MeController::class)->middleware(['auth:sanctum', 'workspace:optional'])->name('me');
 
+    // The operator's admin (Phase 8c): no practice, two-factor sign-in, everything audited.
+    Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum', 'verified', 'admin'])->group(function () {
+        Route::get('/astrologers', [AdminAstrologerController::class, 'index'])->name('astrologers.index');
+        Route::get('/astrologers/{user}', [AdminAstrologerController::class, 'show'])->name('astrologers.show');
+
+        // Account help: each asks for the password again and a reason, and tells the astrologer.
+        Route::middleware(['password.confirm:,'.config('astrolabe.admin.confirm_seconds'), 'throttle:20,1'])->group(function () {
+            Route::post('/astrologers/{user}/two-factor-reset', [AdminAccountHelpController::class, 'resetTwoFactor'])
+                ->name('astrologers.two-factor-reset');
+            Route::post('/astrologers/{user}/verification', [AdminAccountHelpController::class, 'resendVerification'])
+                ->name('astrologers.verification');
+            Route::post('/astrologers/{user}/suspension', [AdminAccountHelpController::class, 'suspend'])
+                ->name('astrologers.suspend');
+            Route::delete('/astrologers/{user}/suspension', [AdminAccountHelpController::class, 'restore'])
+                ->name('astrologers.restore');
+        });
+
+        Route::get('/audit-logs', AdminAuditLogController::class)->name('audit-logs.index');
+
+        Route::get('/invitations', [AdminInvitationController::class, 'index'])->name('invitations.index');
+        Route::post('/invitations', [AdminInvitationController::class, 'store'])
+            ->middleware('throttle:30,60')
+            ->name('invitations.store');
+        Route::delete('/invitations/{invitation}', [AdminInvitationController::class, 'destroy'])->name('invitations.destroy');
+
+        Route::get('/system', [AdminSystemController::class, 'show'])->name('system.show');
+        Route::post('/failed-jobs/{uuid}/retry', [AdminSystemController::class, 'retry'])->name('failed-jobs.retry');
+        Route::delete('/failed-jobs/{uuid}', [AdminSystemController::class, 'forget'])->name('failed-jobs.forget');
+
+        Route::get('/feedback', [AdminFeedbackController::class, 'index'])->name('feedback.index');
+        Route::patch('/feedback/{feedback}', [AdminFeedbackController::class, 'update'])->name('feedback.update');
+    });
+
+    Route::middleware(['auth:sanctum', 'workspace'])->group(function () {
         Route::middleware('verified')->group(function () {
             // Open while the practice is scheduled for deletion; everything in the
             // "practice.active" group below is closed then (EnsurePracticeIsActive).
@@ -76,8 +115,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 // "throttle:engine" marks every endpoint that may start the ephemeris engine.
                 Route::get('/dashboard', DashboardController::class)->middleware('throttle:engine')->name('dashboard');
 
-                // The person's own sign-ins and account changes (Settings → Security).
-                Route::get('/security-activity', SecurityActivityController::class)->name('security-activity');
+                // The "Feedback" button: to the operator's admin (Phase 8c).
+                Route::post('/feedback', FeedbackController::class)->middleware('throttle:10,60')->name('feedback.store');
 
                 Route::patch('/workspace', [WorkspaceController::class, 'update'])->name('workspace.update');
                 Route::put('/workspace/astrology-methods', [WorkspaceAstrologyMethodController::class, 'update'])

@@ -135,24 +135,12 @@ class AuditLogTest extends TestCase
         $this->assertStringNotContainsString('Renamed practice', $log);
     }
 
-    public function test_a_person_sees_only_their_own_account_events(): void
+    public function test_astrologers_no_longer_read_the_audit_log(): void
     {
+        // Phase 8c: "Recent security activity" moved to the operator's admin.
         $user = User::factory()->withWorkspace()->create();
-        $colleague = $this->memberOf($user);
 
-        $this->postJson('/api/v1/auth/login', ['email' => $user->email, 'password' => 'password'])->assertOk();
-        $this->post('/api/v1/auth/logout');
-        $this->postJson('/api/v1/auth/login', ['email' => $colleague->email, 'password' => 'password'])->assertOk();
-        $this->post('/api/v1/auth/logout');
-        $this->actingAs($user)->get('/api/v1/payments/export')->streamedContent();
-
-        $this->actingAs($user)->getJson('/api/v1/security-activity')
-            ->assertOk()
-            ->assertJsonCount(2, 'data')
-            ->assertJsonPath('data.0.event', 'logout')
-            ->assertJsonPath('data.1.event', 'login')
-            ->assertJsonPath('data.1.ip_address', '127.0.0.1')
-            ->assertJsonStructure(['data' => [['id', 'event', 'at', 'ip_address', 'user_agent', 'remembered']], 'meta']);
-
+        $this->actingAs($user)->getJson('/api/v1/security-activity')->assertNotFound();
+        $this->actingAs($user)->getJson('/api/v1/admin/audit-logs')->assertForbidden();
     }
 }

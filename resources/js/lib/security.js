@@ -1,14 +1,7 @@
 /**
- * Wording helpers for Settings → Security (Phase 8a): the audit log's account
- * events and the browser a sign-in came from. Pure, covered by Vitest.
+ * Wording helpers for two-factor sign-in (Settings → Security, Phase 8a) and for
+ * the browser an audit log entry came from (the admin, Phase 8c). Pure, covered by Vitest.
  */
-
-/** Events that may mean someone else is trying the account. */
-const WARNINGS = new Set(['login_failed', 'lockout', 'two_factor_failed', 'recovery_code_used']);
-
-export function isWarning(event) {
-    return WARNINGS.has(event);
-}
 
 const BROWSERS = [
     // Order matters: Edge and Opera also say "Chrome", Chrome also says "Safari".

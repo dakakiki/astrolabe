@@ -11,8 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * One entry of the audit log, written by App\Support\Audit\Audit. Rows are
  * only ever added: nothing in the application changes or rebuilds them.
  *
- * Not tenant-scoped on purpose: sign-ins belong to a person, not a practice,
- * and are read by `user_id`.
+ * Not tenant-scoped on purpose: sign-ins belong to a person, not a practice.
+ * Read only by the operator's admin (Phase 8c); astrologers do not see it.
  */
 class AuditLog extends Model
 {
@@ -38,13 +38,25 @@ class AuditLog extends Model
     }
 
     /**
-     * The account events a person may see about themselves.
+     * @return BelongsTo<Workspace, $this>
+     */
+    public function workspace(): BelongsTo
+    {
+        return $this->belongsTo(Workspace::class);
+    }
+
+    /**
+     * Failed sign-ins, lockouts and the like (AuditEvent::warnings()).
      *
      * @param  Builder<AuditLog>  $query
      */
-    public function scopeAccountOf(Builder $query, User $user): void
+    public function scopeWarnings(Builder $query): void
     {
-        $query->where('user_id', $user->getKey())
-            ->whereIn('event', array_map(fn (AuditEvent $event) => $event->value, AuditEvent::account()));
+        $query->whereIn('event', array_map(fn (AuditEvent $event) => $event->value, AuditEvent::warnings()));
+    }
+
+    public function isWarning(): bool
+    {
+        return in_array($this->event, AuditEvent::warnings(), true);
     }
 }

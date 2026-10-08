@@ -25,6 +25,8 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 > Faza 8a (implementirano): `users.two_factor_secret`, `two_factor_recovery_codes`, `two_factor_confirmed_at` (Fortify, šifrovano ključem aplikacije); nove tabele `registration_invitations` (zatvorena beta) i `audit_logs` (bezbednost i kritične operacije) — obe van tenant scope-a.
 >
 > Faza 8b (implementirano): `payments.client_id` je nullable sa `nullOnDelete` (uplata ostaje anonimna kada se klijent trajno obriše); `workspaces.deletion_requested_at`, `deletion_requested_by`, `deletes_at` (zakazano brisanje prakse); nova tabela `workspace_exports`; novi događaji audit log-a. Rokovi čuvanja su u `config/astrolabe.php` („retention“) i primenjuje ih `php artisan data:prune`.
+>
+> Faza 8c1 (implementirano): `users.is_admin`, `suspended_at`, `suspension_reason`; nova tabela `feedback`; događaji admina u audit log-u. Audit log čita samo admin operatera.
 
 ## Nalozi i workspace
 
@@ -41,6 +43,8 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 - `notification_preferences`, JSON, nullable — Settings → Notifications (Faza 7c): `appointment_reminders`, `reminder_minutes`, `task_digest`, `digest_time`, `quiet_hours` (`{start, end}` ili `null`); sačuvane vrednosti se slažu preko podrazumevanih (podsetnik 24 h ranije, jutarnji mejl u 08:00, tihi sati 22:00–08:00), pa `null` znači podrazumevano
 - `next_digest_at`, nullable — sledeći jutarnji mejl o zadacima, UTC; računa se iz `digest_time` i `timezone` pri svakoj njihovoj promeni i posle slanja; `null` kada je mejl isključen
 - `two_factor_secret`, `two_factor_recovery_codes`, nullable, šifrovani — prijava u dva koraka (Faza 8a); `two_factor_confirmed_at`, nullable — uključena je tek kada je prvi kod potvrđen. Nikada se ne šalju u API odgovorima (`hidden`); API vraća samo `two_factor_enabled`
+- `is_admin`, boolean, podrazumevano `false` — admin nalog operatera (Faza 8c): pravi ga samo `admin:create`, nema praksu, nikad se ne postavlja iz zahteva
+- `suspended_at`, nullable; `suspension_reason`, nullable, do 500 znakova — nalog koji je operater suspendovao (Faza 8c): prijava i svaki zahtev se odbijaju dok se ne vrati
 - timestamps
 
 ### `registration_invitations` (nije tenant)
@@ -65,7 +69,7 @@ Ko je, šta, kada i odakle uradio — za bezbednost i kritične operacije (dokum
 - `id`
 - `workspace_id`, nullable — praksa u kojoj se desilo; prijave i događaji naloga je nemaju
 - `user_id`, nullable — ko (ili čiji nalog, kod neuspele prijave); `null` za pokušaj na nepostojeću adresu i za komande
-- `event` — zatvorena lista (`App\Enums\AuditEvent`): `login`, `login_failed`, `lockout`, `logout`, `registered`, `email_verified`, `email_changed`, `password_changed`, `password_reset`, `other_sessions_signed_out`, `two_factor_enabled`, `two_factor_disabled`, `two_factor_failed`, `recovery_codes_regenerated`, `recovery_code_used`, `invitation_sent`, `invitation_revoked`, `invitation_accepted`, `payments_exported`, `file_downloaded`, `record_deleted`, `practice_settings_changed`; od Faze 8b i `client_erased` (brojevi po vrsti, nikad ime), `practice_export_requested`, `practice_export_downloaded`, `practice_deletion_requested`, `practice_deletion_cancelled`, `practice_erased`, `retention_applied` i `backup_restored` (poslednja tri bez osobe — raspored ili komanda operatera)
+- `event` — zatvorena lista (`App\Enums\AuditEvent`): `login`, `login_failed`, `lockout`, `logout`, `registered`, `email_verified`, `email_changed`, `password_changed`, `password_reset`, `other_sessions_signed_out`, `two_factor_enabled`, `two_factor_disabled`, `two_factor_failed`, `recovery_codes_regenerated`, `recovery_code_used`, `invitation_sent`, `invitation_revoked`, `invitation_accepted`, `payments_exported`, `file_downloaded`, `record_deleted`, `practice_settings_changed`; od Faze 8b i `client_erased` (brojevi po vrsti, nikad ime), `practice_export_requested`, `practice_export_downloaded`, `practice_deletion_requested`, `practice_deletion_cancelled`, `practice_erased`, `retention_applied` i `backup_restored` (poslednja tri bez osobe — raspored ili komanda operatera); od Faze 8c `admin_created`, `admin_viewed` (ekran i nazivi filtera; predmet je astrolog kada se gleda njegov nalog), `admin_two_factor_reset`, `admin_verification_resent`, `account_suspended`, `account_restored` (sa razlogom koji je upisao operater — jedini slobodan tekst u audit log-u, nikad podaci klijenata), `admin_job_retried`, `admin_job_deleted`, `feedback_sent`; neuspela prijava suspendovanog naloga nosi `suspended`
 - `subject_type`, `subject_id`, nullable — kratko ime (`consultation`, `attachment`, `client_relationship` …) i id
 - `properties`, JSON, nullable — samo nazivi i brojevi (izmenjena polja, filteri izvoza, `permanently`, `remembered`), nikada vrednosti: bez imena klijenata, podataka rođenja, mejl adresa i unetih lozinki
 - `ip_address`, `user_agent` (skraćen na 255)
@@ -91,6 +95,18 @@ Indeksi: `(user_id, created_at)`, `(workspace_id, created_at)`, `(event, created
 - timestamps
 
 `slug` je jedinstven, generisan jednom pri kreiranju i ne menja se sa nazivom, jer će se koristiti u javnim booking URL-ovima.
+
+### `feedback` (Faza 8c, nije tenant)
+
+- `id`, `user_id`, nullable (`cascadeOnDelete` — tekst odlazi sa nalogom autora), `workspace_id`, nullable (`nullOnDelete`)
+- `category` — `bug`, `idea`, `question`, `other`
+- `message` — tekst astrologa, do 5000 znakova
+- `page`, nullable — ekran kao obrazac (`/clients/:id/edit`), bez id-jeva i parametara
+- `user_agent`, nullable; `app_version`, nullable (Git commit ili `APP_VERSION`)
+- `handled_at`, nullable — operater je označio kao rešeno
+- timestamps
+
+Indeks: `(handled_at, created_at)`. Čita je samo admin operatera.
 
 ### `workspace_exports` (Faza 8b)
 
