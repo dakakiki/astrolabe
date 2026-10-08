@@ -28,7 +28,11 @@
 
 - **Registracija samo uz poziv** (`REGISTRATION_MODE=invite`, podrazumevano): operater šalje poziv komandom `php artisan invitations:send <email>` (pregled `invitations:list`, opoziv `invitations:revoke`). Link važi jednom i 14 dana (`INVITATION_DAYS`), samo za adresu na koju je poslat; nov poziv za istu adresu poništava stari. U bazi je samo hash tokena. Strana za prijavu tada ne nudi „Create one“, a strana za registraciju bez važećeg linka objašnjava zašto (nema poziva, neispravan, istekao, iskorišćen, opozvan). Sa `REGISTRATION_MODE=open` registracija je otvorena kao ranije.
 - **Prijava u dva koraka (TOTP), po izboru astrologa**: Settings → Security; uključivanje traži lozinku i jedan kod iz aplikacije (QR kod ili ključ za ručni unos), posle čega se prikazuje 8 rezervnih kodova (svaki važi jednom); rezervni kodovi se mogu prikazati ili zameniti novima, a 2FA isključiti — sve uz potvrdu lozinke. Prijava tada posle lozinke traži kod ili rezervni kod; pokušaji koda su ograničeni (5 u minuti).
-- **Nedavna bezbednosna aktivnost** (Settings → Security): sopstvene prijave, neuspeli pokušaji, blokada posle previše pokušaja, odjave, promena lozinke i mejla, odjava drugih sesija, promene 2FA — sa vremenom, pregledačem i IP adresom; sumnjivi događaji su naglašeni. Član ne vidi tuđe događaje.
+- **Nedavna bezbednosna aktivnost** (Settings → Security): sopstvene prijave, neuspeli pokušaji, blokada posle previše pokušaja, odjave, promena lozinke i mejla, odjava drugih sesija, promene 2FA — sa vremenom, pregledačem i IP adresom; sumnjivi događaji su naglašeni. Član ne vidi tuđe događaje. *Odluka korisnika 8. 10. 2026: astrolozima ovaj pregled ne treba — u Fazi 8c prelazi u admin deo (pregled astrologa i njihovog audit log-a za operatera).*
+
+### Admin (operater) — Faza 8c, planirano
+
+Poseban nalog operatera (pravi se komandom, obavezan 2FA, nije član nijedne prakse) u zasebnom delu aplikacije `/admin`: pregled astrologa (stanje naloga i brojevi, bez sadržaja klijenata), audit log sa filterima, pozivi, pomoć nalogu (isključivanje 2FA, ponovno slanje potvrde mejla, suspenzija — uz razlog, zapis i mejl astrologu), stanje sistema i neuspeli poslovi, povratne informacije iz bete. Admin nikada ne vidi podatke rođenja, beleške, fajlove ni iznose; sve što pogleda ili uradi beleži se u audit log. Prijava „kao astrolog“ se ne pravi. Kasnije (Faza 9): pretplate, obaveštenja korisnicima, funkcije po praksi, zbirna statistika.
 
 ## Klijenti
 

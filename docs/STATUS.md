@@ -128,7 +128,7 @@ Testovi posle Faze 8a: **450 PHP** (3622 provere; od toga referentni testovi poz
   - korisnik: Faza 8 lokalno prvo (8a → 8b → 8c), pa produkcija (8d) i beta (8e); **interfejs za betu samo na engleskom**; usvojene podrazumevane vrednosti iz predloga (poziv, 2FA po izboru, bez spoljnog servisa za greške, bez cookie banera);
   - **pozivi:** `REGISTRATION_MODE=invite`; poziv pravi operater komandom (bez administratorskog ekrana), link važi jednom i 14 dana, samo za tu adresu, nov poziv poništava stari, u bazi je samo hash tokena; registracija ga troši pod zaključavanjem reda; komanda ispisuje i link, za slučaj da mejl ne stigne;
   - **2FA:** Fortify TOTP sa `confirm` i `confirmPassword`; uključen je tek posle prvog potvrđenog koda; 8 rezervnih kodova; svaka promena traži lozinku (važi 3 sata); pokušaji koda 5 u minuti po prijavi; QR se prikazuje kao slika (`data:` URI), ne kao HTML;
-  - **audit log** je zaseban od vremenske linije i samo se dopisuje; nikada vrednosti (ni stara i nova adresa, ni filteri izvoza — samo njihovi nazivi); neuspela prijava beleži nalog na koji je ciljala, a pokušaj na nepostojeću adresu ostaje bez korisnika; blokada prijave jednom po minutu (Fortify sa našim limiterom ne šalje `Lockout`, pa ga šalje odgovor limitera); prijava kolačićem „Keep me signed in“ je prijava sa oznakom; osoba vidi samo svoje događaje naloga, ne događaje prakse;
+  - **audit log** je zaseban od vremenske linije i samo se dopisuje; nikada vrednosti (ni stara i nova adresa, ni filteri izvoza — samo njihovi nazivi); neuspela prijava beleži nalog na koji je ciljala, a pokušaj na nepostojeću adresu ostaje bez korisnika; blokada prijave jednom po minutu (Fortify sa našim limiterom ne šalje `Lockout`, pa ga šalje odgovor limitera); prijava kolačićem „Keep me signed in“ je prijava sa oznakom; osoba vidi samo svoje događaje naloga, ne događaje prakse (korisnik 8. 10. 2026: astrolozima ne treba — u 8c prelazi u admin);
   - **ograničenja:** 300 zahteva u minuti po osobi za ceo API, 40 za rute koje mogu pokrenuti engine (podesivo kroz `.env`); test traži da svaka API ruta ima prijavu, workspace i potvrđen mejl, osim spiska javnih;
   - **zaglavlja:** CSP sa nonce-om (bez `unsafe-eval`; stilovi inline dozvoljeni zbog fontova i Vue-a), `frame-ancestors 'self'` i `X-Frame-Options: SAMEORIGIN` (ne `DENY` — provera na širini telefona radi kroz iframe sa istog domena), HSTS samo preko HTTPS-a; CORS isključen (pre toga `Access-Control-Allow-Origin: *` na API-ju);
   - **slike:** metapodaci se uklanjaju bez ponovnog kodiranja (JPEG segmenti, PNG i WebP blokovi), orijentacija JPEG-a se upisuje nazad kao minimalan Exif; nečitljiv fajl ostaje kakav jeste;
@@ -160,7 +160,7 @@ Testovi posle Faze 8a: **450 PHP** (3622 provere; od toga referentni testovi poz
 
 ## Sledeće
 
-Faze 0–7 su završene (Faza 6 u tri dela: 6a, 6b, 6c; Faza 7 u pet delova: 7a tranziti, 7b uplate, 7c obaveštenja, 7d kalendar neba, 7e sinastrija i kompozit). U **Fazi 8 — zatvorena beta** urađen je deo **8a — bezbednost i audit** (8. 10. 2026). **Sledi 8b — životni ciklus podataka** (tabela ispod): izvoz cele prakse, pravo brisanje klijenta, brisanje naloga i workspace-a, pravila čuvanja (i rok za audit log), backup i restore sa probom na lokalnoj bazi. Za 8b će trebati odluke o rokovima (npr. koliko dugo soft delete pre trajnog brisanja, koliko dugo audit log) — predložiti podrazumevane vrednosti.
+Faze 0–7 su završene (Faza 6 u tri dela: 6a, 6b, 6c; Faza 7 u pet delova: 7a tranziti, 7b uplate, 7c obaveštenja, 7d kalendar neba, 7e sinastrija i kompozit). U **Fazi 8 — zatvorena beta** urađen je deo **8a — bezbednost i audit** (8. 10. 2026). **Sledi 8b — životni ciklus podataka** („Plan 8b“ ispod), **zatim 8c — admin i alati za betu** („Plan 8c“ ispod; admin je dogovoren 8. 10. 2026 posle 8a). Redosled je potvrdio korisnik: „ok, … nastavak sa 8b i onda admin“. Na početku 8b korisniku dati predložene rokove i 2–3 odluke iz „Plan 8b“ (AskUserQuestion sa preporukom), pa graditi.
 
 Paralelno (korisnik): narudžba Swiss Ephemeris licence, Hetzner nalog i AVV, dogovaranje razgovora sa astrolozima, pravnik za Privacy / Terms / ugovor o obradi.
 
@@ -179,7 +179,7 @@ Izvor: dokument 04 (Faza 8), dokument 06 („Bezbednost i privatnost“, „Pouz
 |---|---|
 | **8a — bezbednost i audit** | zatvorena registracija (poziv koji pravi operater komandom, mejl sa linkom); audit log (`audit_logs`: prijava, neuspela prijava, odjava, promena lozinke i mejla, odjava drugih sesija, izvoz, download fajla, brisanje, promene podešavanja prakse — ko, šta, kada, IP, bez sadržaja) i „Recent security activity“ u Settings → Security; ograničenje API-ja za rute koje pokreću engine; sigurnosna zaglavlja; uklanjanje EXIF-a sa slika pri upload-u; health check sa engine-om, queue-om i scheduler-om; `composer audit` / `npm audit` u CI; pregled autorizacije ruta |
 | **8b — životni ciklus podataka** | izvoz cele prakse (ZIP: podaci, karte, fajlovi); pravo brisanje klijenta sa beleškama, fajlovima i kartama (zahtev klijenta astrologa za brisanje); brisanje naloga i workspace-a uz rok; pravila čuvanja (soft delete → trajno posle N dana, fajlovi sa diska); backup komanda (dump bez `places` / `place_names`, šifrovan) i restore, proba na lokalnoj bazi |
-| **8c — alati za betu** | dugme „Feedback“ (tekst, kategorija, strana — bez podataka klijenata; mejl operateru); stranice Privacy, Terms i ugovor o obradi podataka za astrologe, prihvatanje pri registraciji sa verzijom (tekst — nacrt, pregleda ga pravnik); komanda za pregled beta naloga (bez sadržaja); prolaz performansi na većem skupu podataka (`preventLazyLoading`, liste, dashboard, vremenska linija); Linux `swetest` u CI-ju (build iz izvornog koda — preuzimanje uz odobrenje; referentni testovi i merenje niza od 731 dan na Linux-u) |
+| **8c — admin i alati za betu** | **admin deo** (vidi „Plan 8c“; zamenjuje ranije planiranu komandu za pregled beta naloga); dugme „Feedback“ (tekst, kategorija, strana — bez podataka klijenata; stiže u admin i mejlom operateru); stranice Privacy, Terms i ugovor o obradi podataka za astrologe, prihvatanje pri registraciji sa verzijom (tekst — nacrt, pregleda ga pravnik); prolaz performansi na većem skupu podataka (`preventLazyLoading`, liste, dashboard, vremenska linija); Linux `swetest` u CI-ju (build iz izvornog koda — preuzimanje uz odobrenje; referentni testovi i merenje niza od 731 dan na Linux-u) |
 
 **Čeka produkcioni server:** samo podizanje po `docs/deployment.md`, DNS i TLS, cron i worker, pravi mejl (port 587, SPF / DKIM / DMARC, „Send a test email“), off-site backup i probni restore na novoj mašini, praćenje dostupnosti, zaštita servera, merenje na pravom serveru; AVV / DPA u Hetzner nalogu. Server sme da se podigne i pre licence, dok mu pristupa samo developer.
 
@@ -192,6 +192,54 @@ Izvor: dokument 04 (Faza 8), dokument 06 („Bezbednost i privatnost“, „Pouz
 **Podrazumevane odluke (prihvaćene polaskom na 8a):** registracija u beti samo uz poziv; 2FA (TOTP, Fortify) opciono za astrologa u 8a; bez spoljnog servisa za greške u beti (log + mejl operateru, podaci ostaju kod Hetzner-a); bez cookie banera (samo neophodni kolačići sesije); brisanje klijenta samo vlasnik, uz upisano ime kao potvrdu, a audit zapis bez imena (8b). Interfejs za betu samo na engleskom (korisnik, 8. 10. 2026).
 
 **8a — završeno 8. 10. 2026** (vidi „Ključne odluke“ i dokumente 02, 05, 06). Provereno u Chrome-u: CSP bez ijedne blokade na dashboardu, klijentu (karta, tranziti, sinastrija), kalendaru neba, kalendaru, konsultaciji sa editorom, uplatama, zadacima i podešavanjima; inline skripta teme radi uz nonce; prijava bez linka za registraciju; /register bez poziva i sa neispravnim linkom; 2FA u Settings → Security (lozinka, QR i ključ, pogrešan kod, pravi kod, rezervni kodovi, isključivanje); „Recent security activity“; širina telefona 390 px bez bočnog pomeranja (kolona IP sakrivena); upload fotografije sa metapodacima (952 → 704 bajta, ništa od metapodataka, orijentacija 6 ostala). Registracija kroz poziv i prijava sa 2FA kodom provereni na lokalnom Apache-u preko curl-a (isti tok kao SPA), jer je Milin nalog u Chrome-u ponovo prijavljen tokom provere, a ugrađeni browser i dalje blokira `/build/assets`.
+
+### Plan 8b — životni ciklus podataka (sledeće)
+
+Izvor: dokument 06 („Pravna priprema“ — izvoz i brisanje podataka workspace-a uključujući izračunate karte, pravila čuvanja i brisanja; „Pouzdanost“ — automatizovan backup, retencija, periodičan probni restore), `docs/deployment.md` („Backup“), otvorene stavke 7 (fajlovi ostaju na disku posle soft delete-a) i 20 (rok čuvanja audit log-a).
+
+**Obim:**
+
+1. **Izvoz cele prakse** (vlasnik): ZIP sa JSON-om po vrsti podataka (klijenti sa podacima rođenja, povezane osobe, konsultacije, beleške, termini, zadaci, uplate, usluge, metode, podešavanja), CSV za klijente, konsultacije i uplate, izračunate karte (`payload`) i svi fajlovi pod originalnim imenima. Pravi se u queue poslu (`CurrentWorkspace::run`) na privatnom disku; vlasnik dobija mejl kada je spreman; preuzimanje samo za vlasnika, kroz autorizovanu rutu, ograničeno vreme; audit događaj.
+2. **Pravo brisanje klijenta** (zahtev klijenta astrologa za brisanje; sada postoji samo arhiva): samo vlasnik, uz upisano ime klijenta kao potvrdu; trajno briše klijenta, podatke rođenja, konsultacije, beleške, fajlove (i sa diska), karte, termine, zadatke, stavke vremenske linije, veze i povezane osobe koje postoje samo kroz njega; audit zapis bez imena (id i brojevi).
+3. **Brisanje prakse i naloga**: vlasnik, uz lozinku; rok odlaganja sa mogućnošću otkazivanja, pa trajno brisanje svega, uključujući fajlove; pre toga ponuđen izvoz; mejl potvrde. Nalog čija je to jedina praksa briše se zajedno sa njom.
+4. **Pravila čuvanja** (zakazana komanda, npr. `data:prune`, ili `Prunable` modeli): soft-deleted redovi trajno posle roka, fajlovi sa diska zajedno sa njima; audit log posle roka; istekli i iskorišćeni pozivi; stari izvozi; `failed_jobs`.
+5. **Backup i restore**: `backup:run` (`mariadb-dump --single-transaction` bez `places` / `place_names`, kompresovan i šifrovan; fajlovi klijenata kao zasebna šifrovana arhiva), `backup:restore` u zadatu bazu; čuvanje lokalnih kopija; **probni restore** u privremenu lokalnu bazu (globalni `my.ini` WAMP-a se ne dira) i provera da aplikacija radi na njoj. Kopija van servera (Storage Box) i restore na novoj mašini ostaju za 8d.
+
+**Predlozi za potvrdu na početku 8b** (korisniku dati sa preporukom):
+
+- soft delete → trajno brisanje posle **30 dana**;
+- audit log se čuva **12 meseci**;
+- brisanje prakse: **30 dana** odlaganja uz otkazivanje, pa trajno;
+- link za izvoz važi **24 h**, sam izvoz se briše posle **7 dana**;
+- uplate pri brisanju klijenta: **anonimizovati** (ostaju iznos, datum i način, bez klijenta i napomene — knjigovodstvo astrologa može da traži evidenciju) ili obrisati sve; preporuka: anonimizovati;
+- šifrovanje backup-a: **libsodium** iz PHP-a (ključ `BACKUP_KEY` u `.env`, kopija ključa van servera; proveriti da li je ekstenzija `sodium` uključena lokalno, u CI-ju i na serveru) ili `gpg` na serveru; preporuka: libsodium (bez spoljnog programa, testabilno); lokalno se čuva **14** dnevnih kopija.
+
+### Plan 8c — admin i alati za betu (posle 8b)
+
+Korisnik (8. 10. 2026, posle 8a): astrolozima audit log ne treba („ništa im ne znači“) — ide u admin, koji se može koristiti i za druge stvari; predlog je prihvaćen („ok“), redosled 8b pa admin.
+
+**Pravila (prihvaćene preporuke):**
+
+- **poseban admin nalog**, ne astrološki nalog sa dodatnom ulogom; pravi se samo komandom (npr. `admin:create <email>`), **2FA je obavezan**, admin nije član nijedne prakse i nema registraciju;
+- admin vidi astrologe i metapodatke (brojevi, datumi, stanje naloga), **nikada sadržaj klijenata** (podaci rođenja, beleške, fajlovi, iznosi) — astrolog je rukovalac, AstroLabe obrađivač;
+- sve što admin pogleda ili uradi beleži se u audit log, uključujući gledanje tuđeg audit log-a;
+- **„Recent security activity“ se skida iz Settings → Security astrologa** (komponenta `SecurityActivity.vue`, ruta `GET /security-activity` prelazi u admin); mejl astrologu „nova prijava sa novog uređaja“ — kasnije;
+- pravi se u istoj Vue aplikaciji kao poseban deo `/admin` sa svojim izgledom i rutama `/api/v1/admin/*` (middleware `admin` umesto `workspace`), bez Filament-a ili drugog paketa.
+
+**Ekrani za betu:**
+
+| Ekran | Sadržaj |
+|---|---|
+| Astrolozi | lista: ime, mejl, praksa, registracija, potvrđen mejl, 2FA, poslednja prijava, broj klijenata / konsultacija / termina, zauzeće diska; detalj astrologa sa njegovim audit log-om |
+| Audit log | svi događaji, filteri (osoba, praksa, vrsta, period), naglašeni neuspeli pokušaji i blokade |
+| Pozivi | slanje, lista, opoziv (isto što komande `invitations:*`, koje ostaju) |
+| Pomoć nalogu | isključi 2FA (izgubljen telefon i rezervni kodovi), ponovo pošalji potvrdu mejla, suspenduj / vrati nalog (odmah prekida sesije); svaka akcija traži razlog, beleži se i šalje mejl astrologu |
+| Sistem | stanje (kao `/api/v1/health`), neuspeli queue poslovi sa ponovnim pokretanjem, verzija aplikacije i engine-a, veličina baze i diska |
+| Povratne informacije | sanduče za dugme „Feedback“ |
+
+**Kasnije (Faza 9):** pretplate iz Freemius-a (plan, trial, produženje, besplatni nalozi); obaveštenje svim korisnicima (baner); evidencija zahteva za izvoz i brisanje (iz 8b); uključivanje funkcija po praksi; zbirna statistika korišćenja (samo brojevi). **Ne praviti** prijavu „kao astrolog“ (impersonation) — otvara podatke klijenata; ako ikad zatreba, samo uz saglasnost astrologa, vremenski ograničeno i zabeleženo.
+
+**Ostatak 8c:** dugme „Feedback“ (u admin i mejlom operateru), pravne strane i prihvatanje pri registraciji, prolaz performansi, Linux `swetest` u CI-ju (preuzimanje izvornog koda uz odobrenje).
 
 ### Plan Faze 7 (prihvaćen 25. 9. 2026)
 

@@ -222,6 +222,13 @@ Odluka korisnika: Faza 8 počinje lokalnim delovima (8a bezbednost i audit, 8b �
 
 Odluke donete usput: poziv šalje operater komandom (bez administratorskog ekrana); jedan link, jedna adresa, 14 dana, nov poziv poništava stari, u bazi samo hash; 2FA po izboru, uključuje se tek posle potvrđenog koda, svaka promena traži lozinku; audit log je zaseban od vremenske linije, bez vrednosti i sadržaja, osoba vidi samo svoje događaje naloga; blokada prijave se beleži jednom po minutu; ograničenje 300 zahteva u minuti za API i 40 za rute engine-a; CSP sa nonce-om, stilovi inline dozvoljeni; uokvirivanje dozvoljeno samo istom domenu (provera na širini telefona radi kroz iframe); CORS isključen; metapodaci se uklanjaju bez ponovnog kodiranja slike, a orijentacija ostaje; mejl operateru o grešci bez teksta poruke; `/api/v1/health` javno vraća samo da/ne po delu.
 
+## Admin za operatera (8. 10. 2026)
+
+Predlog korisnika posle 8a: admin nalog sa pregledom astrologa i njihovog audit log-a, a astrolozima pregled bezbednosne aktivnosti ne treba. Prihvaćen predlog: poseban nalog (komanda, obavezan 2FA, bez prakse), samo metapodaci — nikada sadržaj klijenata, svaki pogled i akcija admina u audit log-u, bez prijave „kao astrolog“; deo `/admin` u istoj Vue aplikaciji. Redosled: 8b, pa admin kao deo 8c. Izmene:
+
+- 02: napomena da „Nedavna bezbednosna aktivnost“ prelazi u admin; nova sekcija „Admin (operater) — Faza 8c, planirano“.
+- 04: 8c je „admin i alati za betu“.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.
