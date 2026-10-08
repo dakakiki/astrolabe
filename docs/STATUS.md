@@ -1,6 +1,6 @@
 # Status projekta — AstroLabe
 
-Stanje na dan **25. 9. 2026**, posle dela 7e — Faza 7 (tranziti, uplate, obaveštenja, kalendar neba, sinastrija i kompozit) je završena; sledi **Faza 8 — zatvorena beta**, o čijem redosledu odlučuje korisnik. Ovaj dokument je polazna tačka za svaku novu radnu sesiju: šta je gotovo, gde se šta nalazi, šta je odlučeno i šta sledi.
+Stanje na dan **8. 10. 2026** — Faza 7 (tranziti, uplate, obaveštenja, kalendar neba, sinastrija i kompozit) je završena; sledi **Faza 8 — zatvorena beta**. Predlog redosleda je u „Predlog Faze 8“ i čeka odluku korisnika. Ovaj dokument je polazna tačka za svaku novu radnu sesiju: šta je gotovo, gde se šta nalazi, šta je odlučeno i šta sledi.
 
 ## Gde je šta
 
@@ -149,7 +149,34 @@ Testovi posle Faze 7e: **407 PHP** (3029 provera; od toga referentni testovi poz
 
 Faze 0–7 su završene (Faza 6 u tri dela: 6a, 6b, 6c; Faza 7 u pet delova: 7a tranziti, 7b uplate, 7c obaveštenja, 7d kalendar neba, 7e sinastrija i kompozit). Po dokumentu 04 sledi **Faza 8 — zatvorena beta** (nekoliko testnih astrologa, povratne informacije, ispravke UX-a, sigurnosna provera, backup i restore, audit log, performanse, politika privatnosti i uslovi). Za nju su potrebni produkcioni server (Hetzner, cron, queue worker, SMTP), Linux `swetest`, Swiss Ephemeris Professional License i validacioni razgovori — o redosledu odlučuje korisnik.
 
-**Sinastrija (7e) je završena 25. 9. 2026** (odluke korisnika: pre zatvorene bete, kompozit odmah uz nju, natalni orbi prakse; vidi „Ključne odluke“ i dokumente 02 i 11, „Stanje posle Faze 7e“). Sledeći korak bira korisnik: Faza 8 (produkcioni server — izabran 6. 10. 2026, plan u `docs/deployment.md`; Linux `swetest`, licenca, validacioni razgovori) ili još neka stavka iz prototipa pre bete.
+**Sinastrija (7e) je završena 25. 9. 2026** (odluke korisnika: pre zatvorene bete, kompozit odmah uz nju, natalni orbi prakse; vidi „Ključne odluke“ i dokumente 02 i 11, „Stanje posle Faze 7e“). Sledeći korak bira korisnik: Faza 8 (predlog ispod) ili još neka stavka iz prototipa pre bete.
+
+### Predlog Faze 8 (8. 10. 2026 — čeka odluku korisnika)
+
+Izvor: dokument 04 (Faza 8), dokument 06 („Bezbednost i privatnost“, „Pouzdanost“, „Posmatranje sistema“, „Pravna priprema“), odložene stavke 7 i 15 iz „Otvoreno“, `docs/deployment.md`.
+
+**Šta postoji u kodu (pregled 8. 10. 2026):**
+
+- *Ima:* ograničenje prijave (5 u minuti po mejlu i IP-u) i svih Fortify ruta (30 u minuti), upload (60 u minuti), probni mejl (3 u 10 minuta); `/up` i `GET /api/v1/status` (samo baza); lozinka najmanje 8 znakova uz proveru procurelih; provera tipa fajla iz sadržaja, privatni disk, CSP na download-u fajla; soft delete na svim poslovnim tabelama; CSV uplata; indeksi po workspace-u na glavnim tabelama; GeoNames atribucija u izboru mesta; runbook za server (`docs/deployment.md`).
+- *Nema:* audit log (postoji samo vremenska linija klijenta), opšte ograničenje API-ja (karta, tranziti, sinastrija i kalendar neba pokreću engine bez ograničenja), sigurnosna zaglavlja (CSP, HSTS …), 2FA, zatvorena registracija ili pozivi (registracija je uvek otvorena), izvoz workspace-a, brisanje naloga i workspace-a, pravo brisanje klijenta (samo arhiva), uklanjanje obrisanih fajlova sa diska i pravila čuvanja (`model:prune`), uklanjanje EXIF podataka, provera engine-a / queue-a / scheduler-a u health check-u, prijava grešaka operateru, povratne informacije u aplikaciji, stranice Privacy / Terms i prihvatanje pri registraciji, skripte za backup i restore, `preventLazyLoading` (N+1).
+
+**Lokalno, bez produkcionog servera:**
+
+| Deo | Sadržaj |
+|---|---|
+| **8a — bezbednost i audit** | zatvorena registracija (poziv koji pravi operater komandom, mejl sa linkom); audit log (`audit_logs`: prijava, neuspela prijava, odjava, promena lozinke i mejla, odjava drugih sesija, izvoz, download fajla, brisanje, promene podešavanja prakse — ko, šta, kada, IP, bez sadržaja) i „Recent security activity“ u Settings → Security; ograničenje API-ja za rute koje pokreću engine; sigurnosna zaglavlja; uklanjanje EXIF-a sa slika pri upload-u; health check sa engine-om, queue-om i scheduler-om; `composer audit` / `npm audit` u CI; pregled autorizacije ruta |
+| **8b — životni ciklus podataka** | izvoz cele prakse (ZIP: podaci, karte, fajlovi); pravo brisanje klijenta sa beleškama, fajlovima i kartama (zahtev klijenta astrologa za brisanje); brisanje naloga i workspace-a uz rok; pravila čuvanja (soft delete → trajno posle N dana, fajlovi sa diska); backup komanda (dump bez `places` / `place_names`, šifrovan) i restore, proba na lokalnoj bazi |
+| **8c — alati za betu** | dugme „Feedback“ (tekst, kategorija, strana — bez podataka klijenata; mejl operateru); stranice Privacy, Terms i ugovor o obradi podataka za astrologe, prihvatanje pri registraciji sa verzijom (tekst — nacrt, pregleda ga pravnik); komanda za pregled beta naloga (bez sadržaja); prolaz performansi na većem skupu podataka (`preventLazyLoading`, liste, dashboard, vremenska linija); Linux `swetest` u CI-ju (build iz izvornog koda — preuzimanje uz odobrenje; referentni testovi i merenje niza od 731 dan na Linux-u) |
+
+**Čeka produkcioni server:** samo podizanje po `docs/deployment.md`, DNS i TLS, cron i worker, pravi mejl (port 587, SPF / DKIM / DMARC, „Send a test email“), off-site backup i probni restore na novoj mašini, praćenje dostupnosti, zaštita servera, merenje na pravom serveru; AVV / DPA u Hetzner nalogu. Server sme da se podigne i pre licence, dok mu pristupa samo developer.
+
+**Čeka licencu:** pristup bilo koga osim developera (dokument 11) — dakle prvi testni astrolog. Narudžba traje (ugovor → `order@` → uplata → kontrapotpis), pa je korisno pokrenuti je odmah.
+
+**Čeka razgovore i testere:** izbor 3–5 testnih astrologa, sadržaj upitnika za povratne informacije, ispravke UX-a (po definiciji posle povratnih informacija), podrazumevane vrednosti (orbi, pravila dashboard-a), jezik interfejsa za betu (srpski, ako su testeri iz Srbije — dokument 01), tekst Privacy / Terms / ugovora o obradi (pravnik, preduzetnička radnja iz dokumenta 07).
+
+**Predlog redosleda:** 8a → 8b → 8c lokalno (ne zavise od razgovora i moraju postojati pre prvih pravih podataka; audit log treba da beleži od prve prave prijave), paralelno korisnik pokreće licencu, Hetzner nalog i razgovore; zatim **8d** podizanje produkcije i **8e** beta sa testerima.
+
+**Odluke koje predlažem kao podrazumevane (do potvrde):** registracija u beti samo uz poziv; 2FA (TOTP, Fortify) opciono za astrologa u 8a; bez spoljnog servisa za greške u beti (log + mejl operateru, podaci ostaju kod Hetzner-a); bez cookie banera (samo neophodni kolačići sesije); brisanje klijenta samo vlasnik, uz upisano ime kao potvrdu, a audit zapis bez imena.
 
 ### Plan Faze 7 (prihvaćen 25. 9. 2026)
 
