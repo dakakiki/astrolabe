@@ -14,6 +14,7 @@ use App\Enums\ZodiacMode;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
+use Throwable;
 
 /**
  * Runs the Swiss Ephemeris command-line program (`swetest`) as a local process.
@@ -194,6 +195,22 @@ class SwissEphemerisEngine implements EphemerisEngine
     public function fingerprint(): string
     {
         return $this->name().' '.$this->version().' '.$this->ephemerisVersion();
+    }
+
+    /**
+     * The program exists and answers with a version, and there are data files.
+     * Both answers are cached for the files as they are, so a healthy engine
+     * starts no process here; a missing or replaced one is asked once.
+     */
+    public function available(): bool
+    {
+        try {
+            return is_file($this->binary)
+                && $this->version() !== 'unknown'
+                && $this->ephemerisVersion() !== 'none';
+        } catch (Throwable) {
+            return false;
+        }
     }
 
     /**

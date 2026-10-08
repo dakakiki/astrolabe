@@ -7,20 +7,32 @@ use App\Astrology\Contracts\Geocoder;
 use App\Astrology\Engines\FakeEngine;
 use App\Astrology\Engines\SwissEphemerisEngine;
 use App\Astrology\Geocoding\LocalGeoNamesGeocoder;
+use App\Enums\AuditEvent;
 use App\Models\Appointment;
+use App\Models\AstrologyMethod;
 use App\Models\Attachment;
 use App\Models\ChartCalculation;
 use App\Models\Client;
+use App\Models\ClientRelationship;
 use App\Models\Consultation;
 use App\Models\Note;
+use App\Models\Payment;
 use App\Models\RelatedPerson;
+use App\Models\Service;
 use App\Models\Task;
+use App\Support\Audit\Audit;
+use App\Support\Audit\SecurityEventSubscriber;
 use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -64,6 +76,8 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->pointAuthEmailsAtTheSpa();
+        $this->limitRequests();
+        $this->auditCriticalOperations();
 
         // Stable names in polymorphic columns (chart_calculations.subject_type,
         // attachments.attachable_type, activity_events.subject_type).
@@ -77,6 +91,42 @@ class AppServiceProvider extends ServiceProvider
             'chart_calculation' => ChartCalculation::class,
             'task' => Task::class,
         ]);
+    }
+
+    /**
+     * Requests per minute and person (docs/spec/06, rate limiting). "api" covers
+     * every API call; "engine" the endpoints that may start the ephemeris engine,
+     * where one request costs real CPU (config/astrolabe.php, "rate_limits").
+     */
+    private function limitRequests(): void
+    {
+        $by = fn (Request $request) => (string) ($request->user()?->getAuthIdentifier() ?? $request->ip());
+
+        RateLimiter::for('api', fn (Request $request) => Limit::perMinute(config('astrolabe.rate_limits.api'))->by($by($request)));
+        RateLimiter::for('engine', fn (Request $request) => Limit::perMinute(config('astrolabe.rate_limits.engine'))->by($by($request)));
+    }
+
+    /**
+     * The audit log (docs/spec/06): sign-ins and account changes come from the
+     * auth events; deleting practice data is recorded here, from the models,
+     * whichever controller or command does it. The rest is recorded where it happens.
+     */
+    private function auditCriticalOperations(): void
+    {
+        Event::subscribe(SecurityEventSubscriber::class);
+
+        $deletable = [
+            Client::class, Consultation::class, Note::class, Attachment::class, Task::class, Payment::class,
+            Service::class, RelatedPerson::class, ClientRelationship::class, AstrologyMethod::class,
+        ];
+
+        foreach ($deletable as $model) {
+            $model::deleted(function (Model $record) {
+                $permanently = method_exists($record, 'isForceDeleting') ? $record->isForceDeleting() : true;
+
+                Audit::record(AuditEvent::RecordDeleted, $record, ['permanently' => $permanently]);
+            });
+        }
     }
 
     /**

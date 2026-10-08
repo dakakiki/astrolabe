@@ -230,6 +230,10 @@ Izvođenje (dogovoreno 25. 9. 2026): tri dela sa commit-om, zelenim CI-jem i ta�
 
 Kriterijum završetka: proizvod je stabilan za ograničeni broj pravih korisnika i njihovih podataka.
 
+Izvođenje (korisnik, 8. 10. 2026): prvo lokalno, bez produkcionog servera — **8a** bezbednost i audit, **8b** životni ciklus podataka (izvoz prakse, pravo brisanje klijenta, brisanje naloga, pravila čuvanja, backup i restore), **8c** alati za betu (povratne informacije, pravne strane, performanse, Linux `swetest` u CI-ju); zatim **8d** podizanje produkcije i **8e** beta sa testerima. Interfejs za betu ostaje na engleskom. Licenca, Hetzner nalog, razgovori i pravnik se pokreću paralelno.
+
+> Status 8a: završeno 8. 10. 2026. Registracija samo uz poziv operatera (komande `invitations:send`, `invitations:list`, `invitations:revoke`), prijava u dva koraka (TOTP) po izboru uz rezervne kodove, audit log prijava, izmena naloga i kritičnih operacija sa „Recent security activity“ u Settings → Security, ograničenja zahteva za ceo API i posebno za rute ephemeris engine-a, Content Security Policy sa nonce-om i ostala sigurnosna zaglavlja, CORS isključen, uklanjanje metapodataka sa slika, health check (`/api/v1/health` i `health:check` sa mejlom operateru), mejl operateru o serverskim greškama bez sadržaja poruke, provera paketa u CI-ju. Detalji u dokumentima 02, 05 i 06.
+
 ## Faza 9 — komercijalizacija i lansiranje
 
 - Freemius subscription billing prema dokumentu 07, uz integraciju preuzetu iz drugog projekta korisnika;

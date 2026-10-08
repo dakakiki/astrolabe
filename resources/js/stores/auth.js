@@ -35,9 +35,26 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    /**
+     * Returns `{ twoFactor: true }` when the account asks for a code from the
+     * authenticator app next; the session starts only after twoFactorChallenge().
+     */
     async function login(credentials) {
         await ensureCsrfCookie();
-        await http.post('/auth/login', credentials);
+        const { data } = await http.post('/auth/login', credentials);
+
+        if (data?.two_factor === true) {
+            return { twoFactor: true };
+        }
+
+        await load({ force: true });
+
+        return { twoFactor: false };
+    }
+
+    /** `{ code }` from the app, or `{ recovery_code }`. */
+    async function twoFactorChallenge(payload) {
+        await http.post('/auth/two-factor-challenge', payload);
         await load({ force: true });
     }
 
@@ -69,6 +86,7 @@ export const useAuthStore = defineStore('auth', () => {
         isOwner,
         load,
         login,
+        twoFactorChallenge,
         register,
         logout,
         clear,

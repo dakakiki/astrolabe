@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Payments\SavePayment;
+use App\Enums\AuditEvent;
 use App\Enums\PaymentKind;
 use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SavePaymentRequest;
 use App\Http\Resources\PaymentResource;
 use App\Models\Payment;
+use App\Support\Audit\Audit;
 use App\Support\Billing\Ledger;
 use App\Support\Billing\PaymentsCsv;
 use Carbon\CarbonImmutable;
@@ -58,6 +60,12 @@ class PaymentController extends Controller
             ->with(self::RELATIONS)
             ->orderBy('paid_on')
             ->orderBy('id');
+
+        // Which filters, not their values (a client or a search would name someone).
+        $filters = ['client_id', 'consultation_id', 'appointment_id', 'from', 'to', 'method', 'kind', 'currency', 'search'];
+        Audit::record(AuditEvent::PaymentsExported, properties: [
+            'filters' => array_keys(array_filter($request->only($filters), 'filled')) ?: null,
+        ]);
 
         return $csv->download($payments, 'payments-'.CarbonImmutable::now($request->user()->timezone ?: 'UTC')->format('Y-m-d').'.csv');
     }

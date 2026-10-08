@@ -65,7 +65,8 @@
             "submit": "Sign in",
             "forgot": "Forgot your password?",
             "noAccount": "No account yet?",
-            "register": "Create one"
+            "register": "Create one",
+            "closedBeta": "AstroLabe is in a closed beta: accounts are by invitation."
         },
         "register": {
             "title": "Create your account",
@@ -74,7 +75,17 @@
             "passwordHint": "At least 8 characters. Passwords found in known data breaches are refused.",
             "submit": "Create account",
             "haveAccount": "Already have an account?",
-            "login": "Sign in"
+            "login": "Sign in",
+            "closedBeta": "Closed beta.",
+            "invitedSub": "You are invited to the closed beta. Set up your practice in a minute.",
+            "emailFromInvitation": "The address your invitation was sent to.",
+            "invitation": {
+                "missing": "Accounts are by invitation for now. Please use the link from your invitation email.",
+                "invalid": "This invitation link is not valid. Please use the link from your invitation email.",
+                "expired": "This invitation has expired. Ask for a new one.",
+                "used": "This invitation has already been used. Sign in instead.",
+                "revoked": "This invitation is no longer valid. Ask for a new one."
+            }
         },
         "forgot": {
             "title": "Reset your password",
@@ -102,6 +113,17 @@
             "done": "Your email address is confirmed.",
             "failed": "This link is invalid or has expired.",
             "failedHint": "Links are valid for 60 minutes and only for the account they were sent to."
+        },
+        "twoFactor": {
+            "title": "Two-step sign-in",
+            "sub": "Enter the 6-digit code from your authenticator app.",
+            "recoverySub": "Enter one of the recovery codes you saved when you turned on two-factor sign-in. Each works once.",
+            "code": "Code",
+            "recoveryCode": "Recovery code",
+            "submit": "Continue",
+            "useRecovery": "Use a recovery code instead",
+            "useApp": "Use the code from the app instead",
+            "startOver": "Sign in with another account"
         }
     },
     "dashboard": {
@@ -275,7 +297,61 @@
             "sessionsSome": "You are signed in on one other browser or device. | You are signed in on {count} other browsers or devices.",
             "sessionsIntro": "Signing them out needs your password.",
             "sessionsSubmit": "Sign out other sessions",
-            "sessionsDone": "Other sessions signed out"
+            "sessionsDone": "Other sessions signed out",
+            "twoFactor": {
+                "title": "Two-factor sign-in",
+                "on": "On",
+                "off": "Off",
+                "intro": "After your password, AstroLabe also asks for a code from an authenticator app on your phone — for example Google Authenticator, Microsoft Authenticator, 1Password or Bitwarden. A stolen password alone then opens nothing.",
+                "enable": "Turn on",
+                "disable": "Turn off",
+                "disableConfirm": "Turn off two-factor sign-in? Signing in will need only your password.",
+                "confirmPassword": "Confirm your password to change two-factor settings.",
+                "continue": "Continue",
+                "scan": "Scan this QR code with your authenticator app, or type the setup key into it. Then enter the code the app shows.",
+                "qrAlt": "QR code for your authenticator app",
+                "setupKey": "Setup key",
+                "code": "Code from the app",
+                "confirm": "Confirm and turn on",
+                "codesTitle": "Recovery codes",
+                "codesIntro": "If you lose your phone, each of these codes signs you in once. Keep them somewhere safe, such as a password manager; they are shown again only when you ask.",
+                "codesDone": "I have saved them",
+                "showCodes": "Show recovery codes",
+                "newCodes": "New recovery codes",
+                "newCodesConfirm": "Make new recovery codes? The old ones stop working.",
+                "newCodesDone": "New recovery codes made. The old ones no longer work.",
+                "enabled": "Two-factor sign-in is on",
+                "disabled": "Two-factor sign-in is off"
+            },
+            "activity": {
+                "title": "Recent security activity",
+                "intro": "Sign-ins and changes to your account. If something here was not you, change your password and sign out other sessions.",
+                "empty": "Nothing yet.",
+                "when": "When",
+                "what": "What",
+                "device": "Browser",
+                "ip": "IP address",
+                "deviceOn": "{browser} on {system}",
+                "unknownDevice": "Unknown browser",
+                "remembered": "kept signed in",
+                "events": {
+                    "login": "Signed in",
+                    "login_failed": "Failed sign-in attempt",
+                    "lockout": "Sign-in paused after too many attempts",
+                    "logout": "Signed out",
+                    "registered": "Account created",
+                    "email_verified": "Email address confirmed",
+                    "email_changed": "Email address changed",
+                    "password_changed": "Password changed",
+                    "password_reset": "Password reset by email",
+                    "other_sessions_signed_out": "Other sessions signed out",
+                    "two_factor_enabled": "Two-factor sign-in turned on",
+                    "two_factor_disabled": "Two-factor sign-in turned off",
+                    "two_factor_failed": "Wrong two-factor code",
+                    "recovery_codes_regenerated": "New recovery codes made",
+                    "recovery_code_used": "Signed in with a recovery code"
+                }
+            }
         },
         "orbs": {
             "title": "Aspects and orbs",

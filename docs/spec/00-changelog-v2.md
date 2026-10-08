@@ -211,6 +211,17 @@ Odluka korisnika: aplikacija na Hetzner Cloud CX33, prezentacioni WordPress sajt
 - 04: podizanje produkcije kao prva stavka Faze 8.
 - 06: mejl na produkciji preko porta 587.
 
+## Faza 8a — bezbednost i audit (8. 10. 2026)
+
+Odluka korisnika: Faza 8 počinje lokalnim delovima (8a bezbednost i audit, 8b životni ciklus podataka, 8c alati za betu), pa produkcija (8d) i beta (8e); interfejs za betu ostaje na engleskom. Usvojene predložene podrazumevane vrednosti: registracija samo uz poziv, 2FA po izboru, bez spoljnog servisa za greške, bez cookie banera. Izmene:
+
+- 02: „Zatvorena beta i bezbednost naloga“ (pozivi, 2FA, nedavna bezbednosna aktivnost); two-factor više nije „posle MVP-a“; metapodaci sa slika i beleženje preuzimanja kod fajlova.
+- 04: izvođenje Faze 8 (8a–8e) i status 8a.
+- 05: `users.two_factor_*`, nove tabele `registration_invitations` i `audit_logs`.
+- 06: sigurnosna provera 8a (ograničenja, zaglavlja, CORS, audit, fajlovi, paketi); health check i mejl operateru umesto spoljnog error reporting-a.
+
+Odluke donete usput: poziv šalje operater komandom (bez administratorskog ekrana); jedan link, jedna adresa, 14 dana, nov poziv poništava stari, u bazi samo hash; 2FA po izboru, uključuje se tek posle potvrđenog koda, svaka promena traži lozinku; audit log je zaseban od vremenske linije, bez vrednosti i sadržaja, osoba vidi samo svoje događaje naloga; blokada prijave se beleži jednom po minutu; ograničenje 300 zahteva u minuti za API i 40 za rute engine-a; CSP sa nonce-om, stilovi inline dozvoljeni; uokvirivanje dozvoljeno samo istom domenu (provera na širini telefona radi kroz iframe); CORS isključen; metapodaci se uklanjaju bez ponovnog kodiranja slike, a orijentacija ostaje; mejl operateru o grešci bez teksta poruke; `/api/v1/health` javno vraća samo da/ne po delu.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

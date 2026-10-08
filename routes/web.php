@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\OtherSessionsController;
+use App\Http\Controllers\Auth\RegistrationController;
 use Illuminate\Support\Facades\Route;
 
 // Session management sits next to Fortify's auth endpoints (config/fortify.php):
@@ -11,6 +12,11 @@ Route::prefix('api/v1/auth')->middleware(['throttle:auth', 'auth'])->group(funct
         ->middleware('throttle:6,1')
         ->name('other-sessions.destroy');
 });
+
+// Before registering: open or by invitation (closed beta), and the invitation's state.
+Route::get('/api/v1/auth/registration', [RegistrationController::class, 'show'])
+    ->middleware('throttle:auth')
+    ->name('registration.show');
 
 // Named so framework redirects (e.g. an expired session) have somewhere to go.
 Route::view('/login', 'app')->name('login');

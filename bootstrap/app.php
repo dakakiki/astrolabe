@@ -2,7 +2,9 @@
 
 use App\Http\Middleware\EnsureIdempotency;
 use App\Http\Middleware\ResolveCurrentWorkspace;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
+use App\Support\Operations\OperatorAlerts;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,6 +21,13 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // First-party SPA authenticates through Sanctum's cookie session.
         $middleware->statefulApi();
+
+        // Every API call counts against the "api" limiter; engine endpoints also
+        // against "engine" (AppServiceProvider::limitRequests, routes/api.php).
+        $middleware->throttleApi();
+
+        // CSP, HSTS and friends on every response, pages and API alike.
+        $middleware->append(SecurityHeaders::class);
 
         $middleware->web(append: [SetLocale::class]);
         $middleware->api(append: [SetLocale::class]);
@@ -44,4 +53,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        // Errors worth reporting (not 404s, validation or sign-in) are also
+        // emailed to the operator, once an hour per error and place. The log
+        // entry is written as before.
+        $exceptions->report(function (Throwable $e) {
+            try {
+                OperatorAlerts::exception($e);
+            } catch (Throwable) {
+                // Reporting must never fail because of the alert.
+            }
+        });
     })->create();

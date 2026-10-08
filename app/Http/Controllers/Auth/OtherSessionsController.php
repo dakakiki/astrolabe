@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\AuditEvent;
 use App\Http\Controllers\Controller;
+use App\Support\Audit\Audit;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -27,11 +29,13 @@ class OtherSessionsController extends Controller
             'password' => ['required', 'string', 'current_password'],
         ]);
 
-        $this->otherSessions($request)->delete();
+        $count = $this->otherSessions($request)->delete();
 
         // A "keep me signed in" cookie elsewhere would otherwise sign that device back in.
         $request->user()->setRememberToken(Str::random(60));
         $request->user()->save();
+
+        Audit::record(AuditEvent::OtherSessionsSignedOut, properties: ['sessions' => $count]);
 
         return response()->noContent();
     }

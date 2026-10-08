@@ -38,4 +38,10 @@ interface EphemerisEngine
      * key, so a new engine or new ephemeris files lead to a new calculation.
      */
     public function fingerprint(): string;
+
+    /**
+     * Whether the engine could calculate now — program and data in place — for
+     * the health check. Cheap: never a calculation, at most one version query.
+     */
+    public function available(): bool;
 }

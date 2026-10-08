@@ -119,6 +119,7 @@ return [
 
     'limiters' => [
         'login' => 'login',
+        'two-factor' => 'two-factor',
     ],
 
     /*
@@ -146,13 +147,19 @@ return [
     |
     */
 
-    // Two-factor authentication and passkeys are post-MVP (docs/spec/02).
+    // Two-factor authentication (TOTP) is optional for each person since Phase 8a:
+    // turned on in Settings → Security after confirming the password and one code.
+    // Passkeys stay post-MVP (docs/spec/02).
     'features' => [
         Features::registration(),
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::updateProfileInformation(),
         Features::updatePasswords(),
+        Features::twoFactorAuthentication([
+            'confirm' => true,
+            'confirmPassword' => true,
+        ]),
     ],
 
 ];

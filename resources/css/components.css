@@ -33,6 +33,23 @@
         color: var(--link);
     }
 
+    .qr-code {
+        background: var(--qr-paper);
+        padding: 8px;
+        border-radius: 6px;
+    }
+
+    /* A button that reads as a link (e.g. "Use a recovery code instead"). */
+    button.link {
+        color: var(--link);
+        text-decoration: underline;
+        background: none;
+        border: 0;
+        padding: 0;
+        font: inherit;
+        cursor: pointer;
+    }
+
     :focus-visible {
         outline: 2px solid var(--brand-300);
         outline-offset: 2px;

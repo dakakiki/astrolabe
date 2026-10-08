@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
 use Tests\Concerns\AddsWorkspaceMembers;
 use Tests\TestCase;
+use Tests\Unit\ImageMetadataTest;
 use ZipArchive;
 
 /**
@@ -88,6 +89,23 @@ class AttachmentsTest extends TestCase
         $this->assertSame(hash('sha256', base64_decode(self::PNG)), $attachment->checksum);
         $this->assertSame($this->user->id, $attachment->uploaded_by);
         $this->assertSame(strlen(base64_decode(self::PNG)), $response->json('data.file_size'));
+    }
+
+    public function test_a_photo_is_stored_without_its_metadata(): void
+    {
+        $photo = ImageMetadataTest::jpegWithMetadata(orientation: 6);
+
+        $response = $this->upload(UploadedFile::fake()->createWithContent('Birth certificate.jpg', $photo))->assertCreated();
+
+        $attachment = Attachment::withoutGlobalScopes()->findOrFail($response->json('data.id'));
+        $stored = Storage::disk('attachments')->get($attachment->storage_path);
+
+        $this->assertStringNotContainsString('SECRET', $stored);
+        $this->assertNotFalse(imagecreatefromstring($stored));
+        // Size and checksum describe the file as kept, not as it arrived.
+        $this->assertSame(strlen($stored), $attachment->file_size);
+        $this->assertSame(hash('sha256', $stored), $attachment->checksum);
+        $this->assertLessThan(strlen($photo), $attachment->file_size);
     }
 
     public function test_the_content_must_match_the_name(): void

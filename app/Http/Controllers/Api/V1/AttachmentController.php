@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Attachments\StoreAttachment;
 use App\Enums\AttachmentKind;
+use App\Enums\AuditEvent;
 use App\Enums\Visibility;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAttachmentRequest;
@@ -13,6 +14,7 @@ use App\Models\Attachment;
 use App\Models\Client;
 use App\Models\Consultation;
 use App\Support\Attachments\AllowedFileTypes;
+use App\Support\Audit\Audit;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -98,6 +100,8 @@ class AttachmentController extends Controller
 
         $inline = $request->boolean('inline') && AllowedFileTypes::showsInline($attachment->mime_type);
         $disposition = $inline ? HeaderUtils::DISPOSITION_INLINE : HeaderUtils::DISPOSITION_ATTACHMENT;
+
+        Audit::record(AuditEvent::FileDownloaded, $attachment, ['inline' => $inline ?: null]);
         $disk = Storage::disk($attachment->storage_disk);
 
         if (config("filesystems.disks.{$attachment->storage_disk}.driver") === 's3') {

@@ -69,6 +69,14 @@ class FakeEngine implements EphemerisEngine
         return 'fake-1';
     }
 
+    /** Tests switch it off to see the health check fail. */
+    public bool $available = true;
+
+    public function available(): bool
+    {
+        return $this->available;
+    }
+
     /**
      * Pin a body to a longitude and speed for every following calculation.
      * With `$from` (a Julian day) the body is at that longitude then and moves

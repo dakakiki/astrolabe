@@ -30,6 +30,16 @@ Dodatno za proračunski modul:
 
 Podaci rođenja su osetljiv lični podatak. Tretiraju se istim režimom kao zdravstveni podaci u pogledu logovanja i izvoza, iako to formalno nisu.
 
+> Faza 8a — sigurnosna provera (implementirano 8. 10. 2026):
+>
+> - **Zatvorena registracija:** nalog samo uz poziv operatera (`REGISTRATION_MODE=invite`, dokument 02).
+> - **Prijava u dva koraka (TOTP)** po izboru, uz potvrdu lozinke za svaku promenu i rezervne kodove; isti kod se ne prihvata dvaput.
+> - **Rate limiting:** prijava 5 u minuti po adresi i IP-u (blokada se beleži jednom po minutu), sve auth rute 30 u minuti po IP-u, kod za 2FA 5 u minuti po prijavi; ceo API 300 zahteva u minuti po osobi (`RATE_LIMIT_API`), a rute koje mogu pokrenuti ephemeris engine (karta, tranziti, sinastrija, kalendar neba, dashboard, prilaganje karte konsultaciji) 40 u minuti (`RATE_LIMIT_ENGINE`); `/api/v1/health` 30 u minuti po IP-u. Test (`RouteProtectionTest`) zahteva da svaka API ruta ima prijavu, workspace i potvrđen mejl (osim spiska javnih) i da sve rute engine-a imaju svoje ograničenje.
+> - **Zaglavlja:** na stranici aplikacije Content Security Policy — skripte samo sa istog domena ili sa nonce-om po odgovoru (inline skripta za temu), bez `eval`, bez plugin-a, `frame-ancestors 'self'`, `form-action 'self'`; stilovi smeju inline (fontovi i Vue). Na svim odgovorima `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: same-origin`, `Cross-Origin-Opener-Policy`, `Permissions-Policy` (kamera, mikrofon, lokacija, plaćanje isključeni), bez `X-Powered-By`; HSTS samo preko HTTPS-a. Preuzimanje fajla zadržava svoju strožu politiku (`sandbox`). CORS je isključen (SPA je na istom domenu; ranije je API odgovarao `Access-Control-Allow-Origin: *`).
+> - **Audit log** (`audit_logs`, dokument 05): prijave, neuspele prijave, blokade, odjave, registracija i potvrda mejla, promene lozinke, mejla i 2FA, odjava drugih sesija, pozivi, izvoz uplata (samo nazivi filtera), preuzimanje fajla, brisanje podataka prakse (konsultacija, beleška, fajl, zadatak, uplata, usluga, povezana osoba, veza, metoda, klijent) i promene podešavanja prakse (nazivi polja). Nikada sadržaj ni vrednosti. Osoba vidi svoje događaje naloga u Settings → Security.
+> - **Fajlovi:** slike se čiste od metapodataka (GPS, fotoaparat, autor) bez ponovnog kodiranja, orijentacija ostaje (dokument 02). Antivirus i umanjene slike nisu urađeni — dolaze ako ih beta zatraži.
+> - **Paketi:** CI pokreće `composer audit --no-dev` i `npm audit --omit=dev --audit-level=high` (ranjivost u `source-map-js` je ispravljena; preostala prijava je samo u razvojnom alatu `concurrently`, koji ne ide na server).
+
 ## Tačnost proračuna
 
 Astrološki rezultat koji je pogrešan gori je od odsustva rezultata, jer astrolog gubi poverenje u ceo proizvod.
@@ -159,6 +169,10 @@ Pre javnog lansiranja:
 - osnovni audit log;
 - upozorenja za neuspešne backup-e;
 - praćenje neuspelih proračuna i neuspelih geokodiranja.
+
+> Faza 8a (implementirano): `GET /api/v1/health` za spoljni monitor dostupnosti — 200 kada sve prolazi, 503 kada nešto ne prolazi, i samo da/ne po delu: baza, keš, ephemeris engine (program i fajlovi, bez proračuna), disk za fajlove klijenata, queue (nijedan posao ne čeka duže od 10 minuta) i scheduler (otkucaj koji scheduler upisuje svakog minuta nije stariji od 3 minuta). Razlozi idu u log, ne u odgovor.
+>
+> Prijava grešaka bez spoljnog servisa (odluka 8. 10. 2026, podaci ostaju na serveru): `php artisan health:check` (svakih 5 minuta iz scheduler-a) šalje mejl operateru (`OPERATOR_EMAIL`) kada provera ne prolazi ili su se od prošle provere pojavili neuspeli queue poslovi, i još jednom kada sve ponovo prolazi; svaka prijavljena serverska greška (ne 404, validacija ni prijava) šalje mejl sa vrstom greške, fajlom i linijom, metodom i putanjom zahteva i id-jem korisnika — **bez teksta poruke**, upita i podataka zahteva, jer poruka greške baze može navesti ime klijenta. Ista greška ili isti problem najviše jednom na sat; mejl ide odmah, ne kroz queue. Zaustavljen scheduler sam sebe ne može prijaviti — za to je spoljni monitor na `/api/v1/health`.
 
 ## Pravna priprema
 

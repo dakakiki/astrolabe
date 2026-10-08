@@ -6,8 +6,9 @@
 
         <title>{{ config('app.name', 'AstroLabe') }}</title>
 
-        {{-- Apply the stored theme before first paint to avoid a flash of the wrong one. --}}
-        <script>
+        {{-- Apply the stored theme before first paint to avoid a flash of the wrong one.
+             The nonce lets it past the Content Security Policy (SecurityHeaders). --}}
+        <script nonce="{{ Vite::cspNonce() }}">
             try {
                 if (localStorage.getItem('astrolabe.theme') === 'day') {
                     document.documentElement.dataset.theme = 'day';

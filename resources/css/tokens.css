@@ -30,6 +30,8 @@
     --surface: #131a2e;
     --surface-2: #1a2340;
     --canvas: #090d1b;
+    /* A QR code needs a light quiet zone in either theme (two-factor setup). */
+    --qr-paper: #ffffff;
     --shell: #060a15;
     --shell-2: #151d36;
     --shell-ink: #b9c3dc;

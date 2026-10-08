@@ -38,7 +38,8 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: mbstring, intl, pdo_mysql, bcmath, zip
+          # gd only for the tests that make images (metadata stripping, Phase 8a).
+          extensions: mbstring, intl, pdo_mysql, bcmath, zip, gd
           coverage: none
 
       - uses: actions/setup-node@v7
@@ -51,6 +52,14 @@ jobs:
 
       - name: Install Node dependencies
         run: npm ci
+
+      # Known vulnerabilities in what runs in production (Phase 8a security review).
+      # Development-only npm tools are left out: they never reach the server or the browser.
+      - name: Audit PHP dependencies
+        run: composer audit --no-dev
+
+      - name: Audit Node dependencies
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Prepare environment
         run: |

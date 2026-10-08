@@ -21,6 +21,8 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 > Faza 7b (implementirano): `consultations.fee_amount` i `fee_currency`; `payments` bez `status` — status i dugovanje se izvode za konsultaciju; `kind` (`payment` / `refund`), `paid_on` umesto `paid_at`, `method` i `reference` umesto `payment_method` i `external_reference`, `created_by`, soft deletes; nova vrsta događaja `payment` u `activity_events`.
 >
 > Faza 7c (implementirano): `users.notification_preferences` i `users.next_digest_at`; `appointments.reminder_minutes`, `remind_at` i `reminder_sent_at`; `tasks.remind`. Tabela `notifications` (Laravel database kanal, Notification Center) nije uvedena — obaveštenja su za sada samo email.
+>
+> Faza 8a (implementirano): `users.two_factor_secret`, `two_factor_recovery_codes`, `two_factor_confirmed_at` (Fortify, šifrovano ključem aplikacije); nove tabele `registration_invitations` (zatvorena beta) i `audit_logs` (bezbednost i kritične operacije) — obe van tenant scope-a.
 
 ## Nalozi i workspace
 
@@ -36,7 +38,38 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 - `email_verified_at`
 - `notification_preferences`, JSON, nullable — Settings → Notifications (Faza 7c): `appointment_reminders`, `reminder_minutes`, `task_digest`, `digest_time`, `quiet_hours` (`{start, end}` ili `null`); sačuvane vrednosti se slažu preko podrazumevanih (podsetnik 24 h ranije, jutarnji mejl u 08:00, tihi sati 22:00–08:00), pa `null` znači podrazumevano
 - `next_digest_at`, nullable — sledeći jutarnji mejl o zadacima, UTC; računa se iz `digest_time` i `timezone` pri svakoj njihovoj promeni i posle slanja; `null` kada je mejl isključen
+- `two_factor_secret`, `two_factor_recovery_codes`, nullable, šifrovani — prijava u dva koraka (Faza 8a); `two_factor_confirmed_at`, nullable — uključena je tek kada je prvi kod potvrđen. Nikada se ne šalju u API odgovorima (`hidden`); API vraća samo `two_factor_enabled`
 - timestamps
+
+### `registration_invitations` (nije tenant)
+
+Poziv za registraciju u zatvorenoj beti (Faza 8a); pravi ga operater komandom `invitations:send`.
+
+- `id`
+- `email` — mala slova; registracija mora biti na tu adresu
+- `token_hash` — SHA-256 tokena iz linka, jedinstven; sam token postoji samo u mejlu
+- `note`, nullable — operaterova beleška (npr. ko je preporučio)
+- `expires_at`
+- `accepted_at`, nullable; `user_id`, nullable — nalog napravljen pozivom
+- `revoked_at`, nullable — opozvan ili zamenjen novim pozivom za istu adresu
+- timestamps
+
+Status (`valid`, `expired`, `used`, `revoked`) se izvodi. Poziv se pri registraciji zaključava (`lockForUpdate`), pa jedan link pravi tačno jedan nalog.
+
+### `audit_logs` (nije tenant)
+
+Ko je, šta, kada i odakle uradio — za bezbednost i kritične operacije (dokument 06). Redovi se samo dodaju; ništa ih ne menja niti obnavlja. Nije vremenska linija klijenta (`activity_events`).
+
+- `id`
+- `workspace_id`, nullable — praksa u kojoj se desilo; prijave i događaji naloga je nemaju
+- `user_id`, nullable — ko (ili čiji nalog, kod neuspele prijave); `null` za pokušaj na nepostojeću adresu i za komande
+- `event` — zatvorena lista (`App\Enums\AuditEvent`): `login`, `login_failed`, `lockout`, `logout`, `registered`, `email_verified`, `email_changed`, `password_changed`, `password_reset`, `other_sessions_signed_out`, `two_factor_enabled`, `two_factor_disabled`, `two_factor_failed`, `recovery_codes_regenerated`, `recovery_code_used`, `invitation_sent`, `invitation_revoked`, `invitation_accepted`, `payments_exported`, `file_downloaded`, `record_deleted`, `practice_settings_changed`
+- `subject_type`, `subject_id`, nullable — kratko ime (`consultation`, `attachment`, `client_relationship` …) i id
+- `properties`, JSON, nullable — samo nazivi i brojevi (izmenjena polja, filteri izvoza, `permanently`, `remembered`), nikada vrednosti: bez imena klijenata, podataka rođenja, mejl adresa i unetih lozinki
+- `ip_address`, `user_agent` (skraćen na 255)
+- `created_at`
+
+Indeksi: `(user_id, created_at)`, `(workspace_id, created_at)`, `(event, created_at)`. Rok čuvanja se određuje u Fazi 8b (pravila čuvanja podataka).
 
 ### `workspaces`
 

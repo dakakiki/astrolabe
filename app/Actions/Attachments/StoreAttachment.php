@@ -7,6 +7,7 @@ use App\Enums\Visibility;
 use App\Models\Attachment;
 use App\Models\Client;
 use App\Models\Consultation;
+use App\Support\Attachments\ImageMetadata;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -19,6 +20,7 @@ use Throwable;
  * - the stored name is generated ({workspace}/{year}/{month}/{uuid}.{ext});
  *   the original name is kept only as metadata;
  * - the stored type is the one the content was verified as, not the browser's;
+ * - images lose their metadata first (GPS position, camera, owner; Phase 8a);
  * - a checksum and the uploader are recorded.
  */
 class StoreAttachment
@@ -30,7 +32,12 @@ class StoreAttachment
     {
         $disk = config('astrolabe.attachments.disk');
         $directory = sprintf('%d/%s', $client->workspace_id, now()->format('Y/m'));
+
+        ImageMetadata::strip($file->getRealPath(), $type['mime']);
+        clearstatcache(true, $file->getRealPath());
+
         $checksum = hash_file('sha256', $file->getRealPath());
+        $size = filesize($file->getRealPath());
 
         $path = Storage::disk($disk)->putFileAs($directory, $file, Str::uuid()->toString().'.'.$type['extension']);
 
@@ -40,7 +47,7 @@ class StoreAttachment
                 'storage_disk' => $disk,
                 'storage_path' => $path,
                 'mime_type' => $type['mime'],
-                'file_size' => $file->getSize(),
+                'file_size' => $size,
                 'checksum' => $checksum,
             ])->save();
         } catch (Throwable $failure) {

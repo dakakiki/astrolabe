@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\ClientTransitController;
 use App\Http\Controllers\Api\V1\ConsultationChartController;
 use App\Http\Controllers\Api\V1\ConsultationController;
 use App\Http\Controllers\Api\V1\DashboardController;
+use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\NoteController;
 use App\Http\Controllers\Api\V1\NotificationPreferencesController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\Api\V1\RelatedPersonChartController;
 use App\Http\Controllers\Api\V1\RelatedPersonController;
 use App\Http\Controllers\Api\V1\RelatedPersonConversionController;
 use App\Http\Controllers\Api\V1\RelatedPersonTransitController;
+use App\Http\Controllers\Api\V1\SecurityActivityController;
 use App\Http\Controllers\Api\V1\ServiceController;
 use App\Http\Controllers\Api\V1\SkyController;
 use App\Http\Controllers\Api\V1\StatusController;
@@ -42,6 +44,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('api.v1.')->group(function () {
     Route::get('/status', StatusController::class)->name('status');
+    // For an uptime monitor: 200 or 503, one yes/no per part (Phase 8a).
+    Route::get('/health', HealthController::class)->middleware('throttle:30,1')->name('health');
 
     Route::middleware(['auth:sanctum', 'workspace'])->group(function () {
         // Reachable before the email address is verified.
@@ -49,7 +53,11 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
         Route::middleware('verified')->group(function () {
             Route::get('/reference-data', ReferenceDataController::class)->name('reference-data');
-            Route::get('/dashboard', DashboardController::class)->name('dashboard');
+            // "throttle:engine" marks every endpoint that may start the ephemeris engine.
+            Route::get('/dashboard', DashboardController::class)->middleware('throttle:engine')->name('dashboard');
+
+            // The person's own sign-ins and account changes (Settings → Security).
+            Route::get('/security-activity', SecurityActivityController::class)->name('security-activity');
 
             Route::get('/workspace', [WorkspaceController::class, 'show'])->name('workspace.show');
             Route::patch('/workspace', [WorkspaceController::class, 'update'])->name('workspace.update');
@@ -68,10 +76,12 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::apiResource('clients', ClientController::class)->except('destroy');
             Route::put('/clients/{client}/birth-details', [ClientBirthDetailsController::class, 'update'])
                 ->name('clients.birth-details.update');
-            Route::get('/clients/{client}/chart', [ClientChartController::class, 'show'])->name('clients.chart');
-            Route::get('/clients/{client}/transits', [ClientTransitController::class, 'show'])->name('clients.transits');
-            // Another person's chart laid over the client's, with the composite (Phase 7e).
-            Route::get('/clients/{client}/synastry', [ClientSynastryController::class, 'show'])->name('clients.synastry');
+            Route::middleware('throttle:engine')->group(function () {
+                Route::get('/clients/{client}/chart', [ClientChartController::class, 'show'])->name('clients.chart');
+                Route::get('/clients/{client}/transits', [ClientTransitController::class, 'show'])->name('clients.transits');
+                // Another person's chart laid over the client's, with the composite (Phase 7e).
+                Route::get('/clients/{client}/synastry', [ClientSynastryController::class, 'show'])->name('clients.synastry');
+            });
             Route::post('/clients/{client}/archive', [ClientArchiveController::class, 'store'])->name('clients.archive');
             Route::delete('/clients/{client}/archive', [ClientArchiveController::class, 'destroy'])->name('clients.restore');
 
@@ -89,15 +99,17 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::apiResource('related-people', RelatedPersonController::class)
                 ->except('index')
                 ->parameters(['related-people' => 'relatedPerson']);
-            Route::get('/related-people/{relatedPerson}/chart', [RelatedPersonChartController::class, 'show'])
-                ->name('related-people.chart');
-            Route::get('/related-people/{relatedPerson}/transits', [RelatedPersonTransitController::class, 'show'])
-                ->name('related-people.transits');
+            Route::middleware('throttle:engine')->group(function () {
+                Route::get('/related-people/{relatedPerson}/chart', [RelatedPersonChartController::class, 'show'])
+                    ->name('related-people.chart');
+                Route::get('/related-people/{relatedPerson}/transits', [RelatedPersonTransitController::class, 'show'])
+                    ->name('related-people.transits');
+            });
             Route::post('/related-people/{relatedPerson}/convert', [RelatedPersonConversionController::class, 'store'])
                 ->name('related-people.convert');
 
             // The sky itself, nobody's chart (Phase 7d).
-            Route::get('/sky', SkyController::class)->name('sky');
+            Route::get('/sky', SkyController::class)->middleware('throttle:engine')->name('sky');
 
             Route::apiResource('services', ServiceController::class);
 
@@ -113,6 +125,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
             Route::apiResource('consultations', ConsultationController::class);
             Route::post('/consultations/{consultation}/chart', [ConsultationChartController::class, 'store'])
+                ->middleware('throttle:engine')
                 ->name('consultations.chart.store');
             Route::delete('/consultations/{consultation}/chart', [ConsultationChartController::class, 'destroy'])
                 ->name('consultations.chart.destroy');

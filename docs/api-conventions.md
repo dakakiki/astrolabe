@@ -23,8 +23,15 @@ Registruje ih Laravel Fortify pod `/api/v1/auth` (`config/fortify.php`), sa `web
 
 | Metoda | Putanja | Namena |
 |---|---|---|
-| POST | `/auth/register` | registracija + workspace |
-| POST | `/auth/login` | prijava (dodatno 5/min po emailu + IP) |
+| GET | `/auth/registration` | pre registracije: `mode` (`invite` / `open`) i, sa `?invitation=`, `invitation.status` (`valid`, `invalid`, `expired`, `used`, `revoked`) — adresa samo uz važeći poziv (Faza 8a) |
+| POST | `/auth/register` | registracija + workspace; u zatvorenoj beti obavezno `invitation` (token iz linka) za istu adresu |
+| POST | `/auth/login` | prijava (dodatno 5/min po emailu + IP); `{"two_factor": true}` kada nalog ima 2FA — sesija počinje tek posle koda |
+| POST | `/auth/two-factor-challenge` | `code` iz aplikacije ili `recovery_code`; **204**; 5/min po prijavi |
+| POST | `/auth/user/confirm-password`, GET `/auth/user/confirmed-password-status` | potvrda lozinke pre izmene 2FA (važi 3 sata); bez nje 2FA rute vraćaju **423** |
+| POST / DELETE | `/auth/user/two-factor-authentication` | uključi (pa potvrdi) / isključi 2FA |
+| POST | `/auth/user/confirmed-two-factor-authentication` | prvi `code` iz aplikacije; tek tada je 2FA uključen |
+| GET | `/auth/user/two-factor-qr-code`, `/auth/user/two-factor-secret-key` | `{svg, url}` / `{secretKey}` za podešavanje aplikacije |
+| GET / POST | `/auth/user/two-factor-recovery-codes` | 8 rezervnih kodova / novi kodovi |
 | POST | `/auth/logout` | odjava |
 | POST | `/auth/forgot-password` | link za reset; isti odgovor postojao nalog ili ne |
 | POST | `/auth/reset-password` | nova lozinka sa tokenom |
@@ -40,7 +47,9 @@ Linkovi u emailovima vode na SPA stranice (`/verify-email/...`, `/reset-password
 
 | Metoda | Putanja | Namena |
 |---|---|---|
-| GET | `/me` | korisnik + trenutni workspace i uloga (radi i pre verifikacije emaila) |
+| GET | `/me` | korisnik (sa `two_factor_enabled`) + trenutni workspace i uloga (radi i pre verifikacije emaila) |
+| GET | `/security-activity` | sopstvene prijave i izmene naloga iz audit log-a, najnovije prvo, 20 po strani: `event`, `at`, `ip_address`, `user_agent`, `remembered` |
+| GET | `/health` | javno, za monitor: `status` i da/ne po delu (`database`, `cache`, `engine`, `storage`, `queue`, `scheduler`); **200** ili **503**; 30/min po IP-u |
 | GET | `/reference-data` | dozvoljene vrednosti za forme (jezici, valute, sistemi kuća, tipovi aspekata sa podrazumevanim orbima …) |
 | GET / PATCH | `/workspace` | trenutni workspace; nema `{workspace}` parametra. PATCH menja samo poslata polja, uključujući `aspect_orbs` i `transit_orbs` |
 | PUT | `/workspace/astrology-methods` | izbor metoda i podrazumevana metoda |
@@ -255,7 +264,8 @@ Liste su paginirane na serveru i nose `links` i `meta` kako ih generiše Laravel
 | 409 | sukob sa postojećim stanjem: usluga u upotrebi ne može da se obriše; termin se preklapa (`conflicts`, vidi „Kalendar“) |
 | 419 | istekao CSRF token |
 | 422 | validacija (Form Request) |
-| 429 | rate limit |
+| 423 | potrebna je ponovna potvrda lozinke (izmene 2FA) |
+| 429 | rate limit, sa `Retry-After`: ceo API 300/min po osobi (`RATE_LIMIT_API`), rute koje mogu pokrenuti ephemeris engine — karta, tranziti, sinastrija, kalendar neba, dashboard, prilaganje karte konsultaciji — 40/min (`RATE_LIMIT_ENGINE`); plus ograničenja auth ruta iznad |
 | 5xx | serverska greška; poruka je generička, detalji samo u logu |
 
 Validaciona greška koristi Laravel format:

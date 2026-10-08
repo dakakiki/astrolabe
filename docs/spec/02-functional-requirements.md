@@ -19,10 +19,16 @@
 ### Posle MVP-a
 
 - Google prijava;
-- two-factor authentication;
+- ~~two-factor authentication~~ — urađeno u Fazi 8a (vidi ispod);
 - pozivanje članova tima;
 - detaljne uloge i dozvole;
 - članstvo korisnika u više workspace-ova.
+
+### Zatvorena beta i bezbednost naloga (Faza 8a, implementirano)
+
+- **Registracija samo uz poziv** (`REGISTRATION_MODE=invite`, podrazumevano): operater šalje poziv komandom `php artisan invitations:send <email>` (pregled `invitations:list`, opoziv `invitations:revoke`). Link važi jednom i 14 dana (`INVITATION_DAYS`), samo za adresu na koju je poslat; nov poziv za istu adresu poništava stari. U bazi je samo hash tokena. Strana za prijavu tada ne nudi „Create one“, a strana za registraciju bez važećeg linka objašnjava zašto (nema poziva, neispravan, istekao, iskorišćen, opozvan). Sa `REGISTRATION_MODE=open` registracija je otvorena kao ranije.
+- **Prijava u dva koraka (TOTP), po izboru astrologa**: Settings → Security; uključivanje traži lozinku i jedan kod iz aplikacije (QR kod ili ključ za ručni unos), posle čega se prikazuje 8 rezervnih kodova (svaki važi jednom); rezervni kodovi se mogu prikazati ili zameniti novima, a 2FA isključiti — sve uz potvrdu lozinke. Prijava tada posle lozinke traži kod ili rezervni kod; pokušaji koda su ograničeni (5 u minuti).
+- **Nedavna bezbednosna aktivnost** (Settings → Security): sopstvene prijave, neuspeli pokušaji, blokada posle previše pokušaja, odjave, promena lozinke i mejla, odjava drugih sesija, promene 2FA — sa vremenom, pregledačem i IP adresom; sumnjivi događaji su naglašeni. Član ne vidi tuđe događaje.
 
 ## Klijenti
 
@@ -313,6 +319,8 @@ Vidljivost:
 - Fajl ili link može biti na klijentu ili na njegovoj konsultaciji; prilozi na beleškama i zadacima dolaze kasnije. Lista fajlova klijenta obuhvata i one sa njegovih konsultacija.
 - Vidljivost važi i za download: tuđ privatni fajl je 404. Novi fajlovi su privatni dok se drugačije ne izabere; vidljivost i naziv se mogu promeniti, sam fajl ne.
 - Obrisan fajl je soft delete i ostaje na disku dok ga ne uklone pravila čuvanja podataka (Faza 8).
+- Slike (JPEG, PNG, WebP) se pre čuvanja čiste od metapodataka — GPS položaj, fotoaparat, autor, komentari, dodatne slike iz telefona — bez ponovnog kodiranja piksela; orijentacija JPEG fotografije se zadržava (Faza 8a). Veličina i kontrolni zbir opisuju sačuvan fajl. PDF i Word dokumenti se ne menjaju.
+- Preuzimanje fajla se beleži u audit log (ko, koji fajl, kada).
 
 ## Usluge
 

@@ -35,7 +35,7 @@ Odluke i razlozi (korisnik, 6. 10. 2026):
 3. **Osnovna zaštita:** poseban korisnik za deploy, `PermitRootLogin no`, `PasswordAuthentication no`, `ufw`, `unattended-upgrades` (bezbednosna ažuriranja), vremenska zona servera UTC.
 4. **Softver:**
    - Nginx, certbot (Let's Encrypt, automatsko obnavljanje);
-   - **PHP 8.3**-FPM (ista verzija kao lokalno i u CI-ju) sa `mbstring`, `intl`, `pdo_mysql`, `bcmath`, `zip`, `xml`, `curl`, `fileinfo`, `opcache`; **bez Xdebug-a**; preporučen PECL `timezonedb` (dokument 06); `proc_open` mora biti dozvoljen (podrazumevano jeste);
+   - **PHP 8.3**-FPM (ista verzija kao lokalno i u CI-ju) sa `mbstring`, `intl`, `pdo_mysql`, `bcmath`, `zip`, `xml`, `curl`, `fileinfo`, `opcache`; **bez Xdebug-a**; preporučen PECL `timezonedb` (dokument 06); `proc_open` mora biti dozvoljen (podrazumevano jeste); `expose_php = Off` (aplikacija i sama uklanja `X-Powered-By`); `gd` i `exif` nisu potrebni (metapodaci sa slika se uklanjaju bez njih);
    - **MariaDB 11.8** iz zvaničnog MariaDB repozitorijuma (Ubuntu 24.04 sam nudi stariju granu); `bind-address = 127.0.0.1`; `innodb_buffer_pool_size` oko 3 GB; poseban korisnik baze samo za bazu aplikacije;
    - Composer, Node 24 LTS (za `npm run build`), Supervisor, `build-essential` (za `make swetest`), `git`, `unzip`.
 5. **PHP / Nginx granice za upload:** `upload_max_filesize` i `post_max_size` u PHP-FPM-u i `client_max_body_size` u Nginx-u bar `ATTACHMENTS_MAX_MB` (100 MB).
@@ -63,6 +63,12 @@ Samo nazivi i vrednosti koje nisu tajne; lozinke se unose na serveru.
 | `SWETEST_PATH` / `EPHEMERIS_PATH` | putanje do Linux `swetest`-a i direktorijuma sa `.se1` fajlovima |
 | `PLACES_SOURCE` | `all` |
 | `ATTACHMENTS_DISK` / `ATTACHMENTS_MAX_MB` | `attachments` (lokalni disk servera) / `100` |
+| `REGISTRATION_MODE` / `INVITATION_DAYS` | `invite` (zatvorena beta — nalog samo uz poziv) / `14` |
+| `OPERATOR_EMAIL` | adresa na koju idu mejlovi o neuspelim proverama i serverskim greškama |
+| `RATE_LIMIT_API` / `RATE_LIMIT_ENGINE` | `300` / `40` (zahteva u minuti po osobi; menjati samo ako beta pokaže potrebu) |
+| `LOG_STACK` | `daily` (14 dana logova) |
+
+Nginx stoji direktno ispred PHP-FPM-a (bez load balancer-a), pa `trustProxies` nije potreban; ako se kasnije doda proxy ili Cloudflare, mora se podesiti, inače su IP adrese u audit log-u i ograničenjima adrese proxy-ja.
 
 ## Prvo podizanje — redosled
 
@@ -77,8 +83,11 @@ Samo nazivi i vrednosti koje nisu tajne; lozinke se unose na serveru.
 9. Nginx sajt za `app.astrolabe.online` + `certbot --nginx`; HTTP preusmeren na HTTPS.
 10. **Cron** (korisnik PHP-FPM-a): `* * * * * cd <aplikacija> && php artisan schedule:run >> /dev/null 2>&1`
 11. **Supervisor** za worker: `php artisan queue:work --sleep=3 --max-time=3600`, automatski restart, log u `storage/logs`.
-12. **Mejl:** u Settings → Notifications „Send a test email“; proveriti da je stigao i da nije u spamu.
-13. Prvi nalog (vlasnik) kroz registraciju, potvrda mejla, provera: klijent sa podacima rođenja → karta, tranziti, kalendar neba, sinastrija.
+12. **Prvi nalog:** `php artisan invitations:send <adresa>` (registracija je samo uz poziv; link je i ispisan, ako mejl još ne radi), registracija kroz link, potvrda mejla, uključiti 2FA u Settings → Security; provera: klijent sa podacima rođenja → karta, tranziti, kalendar neba, sinastrija.
+13. **Mejl:** u Settings → Notifications „Send a test email“; proveriti da je stigao i da nije u spamu. Zatim `php artisan health:check` — sve `ok`; mejl operateru se proverava jednom namerno pokvarenom proverom (npr. privremeno pogrešan `SWETEST_PATH`).
+14. **Spoljni monitor dostupnosti** na `https://app.astrolabe.online/api/v1/health` (očekuje 200; 503 znači da neki deo ne radi, uključujući zaustavljen cron). Odgovor nosi samo da/ne po delu, pa monitor ne vidi nikakve podatke.
+
+Testeri bete dobijaju poziv istom komandom; `php artisan invitations:list` pokazuje ko je poziv iskoristio, `invitations:revoke <adresa>` poništava neiskorišćen.
 
 ## DNS i mejl
 
@@ -115,8 +124,8 @@ Pre deploy-a: zelen CI na tom commit-u; posle promene `swetest`-a ili fajlova ef
 
 ## Posle podizanja (Faza 8)
 
-- praćenje dostupnosti (uptime) i upozorenja za neuspeo backup (dokument 06);
-- rotacija logova, pregled `failed_jobs`;
+- upozorenja za neuspeo backup (dokument 06); dostupnost i neuspeli queue poslovi su pokriveni od 8a (`/api/v1/health`, `health:check`, `OPERATOR_EMAIL`);
+- rotacija logova (`LOG_STACK=daily`);
 - merenje na Linux-u: niz od 731 dan za tranzite, godina kalendara neba (lokalno na Windows-u ~210 ms po pokretanju `swetest`-a);
-- sigurnosna provera, politika privatnosti i uslovi korišćenja, audit log (dokument 04, Faza 8);
+- serverski deo sigurnosne provere (firewall, SSH, TLS ocena, zaglavlja preko HTTPS-a uključujući HSTS); aplikacioni deo i audit log su urađeni u 8a; politika privatnosti i uslovi korišćenja (8c);
 - kada broj korisnika poraste: veći server (rescale **samo CPU i RAM** — proširen disk se ne može vratiti na manji), za fajlove Hetzner Volume montiran na `storage/app/private/attachments` (bez promene koda) ili kasnije bucket preko `ATTACHMENTS_DISK`, po potrebi baza na posebnom serveru.

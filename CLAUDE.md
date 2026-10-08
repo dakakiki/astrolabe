@@ -38,6 +38,33 @@ before starting a phase. The user communicates in Serbian.
 - SPA auth is the Sanctum cookie session; `auth:sanctum` + `verified` + `workspace` protect
   practice data. Session-based helper routes live in `routes/web.php` under the same prefix.
 - Mail goes to `storage/logs/laravel.log` locally (`MAIL_MAILER=log`).
+- Closed beta: with `REGISTRATION_MODE=invite` (the default) `CreateNewUser` needs a valid
+  `RegistrationInvitation` for the same address and uses it up under `lockForUpdate`. Invitations
+  come only from `php artisan invitations:send`; only the token's hash is stored. Tests that
+  register create one with `RegistrationInvitation::issue()`.
+- Two-factor sign-in is Fortify's TOTP (`confirm` + `confirmPassword`). The SPA gets
+  `two_factor: true` from login and then posts the code to `/auth/two-factor-challenge`; Fortify
+  takes each code once, so a test that signs in twice in one window uses the next code.
+
+## Security and operations (Phase 8a)
+
+- The audit log (`audit_logs`, `App\Support\Audit\Audit::record()`) is separate from the client
+  timeline and only ever appended. Record who, what, when — never values or content: field names,
+  filter names, counts. Auth events arrive through `SecurityEventSubscriber`; deletions through the
+  models listed in `AppServiceProvider::auditCriticalOperations()` (add new deletable practice data
+  there); exports, downloads and practice settings where they happen. A new event is a new case in
+  `App\Enums\AuditEvent` plus a label in `settings.security.activity.events`.
+- Every API route counts against `throttle:api`. A route that may start the ephemeris engine also
+  gets `throttle:engine`; `RouteProtectionTest` lists them and checks that every API route needs
+  sign-in, the workspace and a verified email unless it is on its public list.
+- `SecurityHeaders` (global) sets the CSP with a per-response nonce for the page; an inline
+  `<script>` must carry `nonce="{{ Vite::cspNonce() }}"`. No `eval`, no external scripts, fonts or
+  images — add a host to the policy deliberately or not at all. CORS is off (`config/cors.php`).
+- Uploaded images lose their metadata in `StoreAttachment` (`ImageMetadata`, no re-encoding);
+  size and checksum describe the stored file.
+- `GET /api/v1/health` answers yes/no per part (200/503); `health:check` runs every five minutes and
+  `OperatorAlerts` emails `OPERATOR_EMAIL` about failures and reported exceptions — at most hourly,
+  sent at once (not queued), and never with an exception's message (it can quote client data).
 
 ## Birth data
 

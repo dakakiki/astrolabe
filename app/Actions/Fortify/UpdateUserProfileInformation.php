@@ -2,7 +2,9 @@
 
 namespace App\Actions\Fortify;
 
+use App\Enums\AuditEvent;
 use App\Models\User;
+use App\Support\Audit\Audit;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -44,6 +46,11 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
         }
 
         $user->save();
+
+        if ($emailChanged) {
+            // Neither address goes into the log; the account and the moment are enough.
+            Audit::record(AuditEvent::EmailChanged, user: $user);
+        }
 
         if ($emailChanged && $user instanceof MustVerifyEmail) {
             $user->sendEmailVerificationNotification();

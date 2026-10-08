@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Enums\AuditEvent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SyncWorkspaceMethodsRequest;
+use App\Support\Audit\Audit;
 use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Http\Response;
 
@@ -16,11 +18,15 @@ class WorkspaceAstrologyMethodController extends Controller
     {
         $defaultId = $request->integer('default_id') ?: null;
 
-        $current->get()->astrologyMethods()->sync(
+        $changes = $current->get()->astrologyMethods()->sync(
             collect($request->input('method_ids'))
                 ->mapWithKeys(fn ($id) => [(int) $id => ['is_default' => (int) $id === $defaultId]])
                 ->all()
         );
+
+        if (array_filter($changes) !== []) {
+            Audit::record(AuditEvent::PracticeSettingsChanged, $current->get(), ['fields' => ['astrology_methods']]);
+        }
 
         return response()->noContent();
     }

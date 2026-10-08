@@ -101,4 +101,51 @@ return [
         'signed_url_minutes' => 5,
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Registration
+    |--------------------------------------------------------------------------
+    |
+    | "invite" (the closed beta): an account is created only through a link
+    | from `php artisan invitations:send`, for the address it was sent to.
+    | "open": anyone may register. Invitation links work for `invitation_days`.
+    |
+    */
+
+    'registration' => [
+        'mode' => env('REGISTRATION_MODE', 'invite'),
+        'invitation_days' => (int) env('INVITATION_DAYS', 14),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Operator
+    |--------------------------------------------------------------------------
+    |
+    | Whoever runs the installation. Failing health checks and server errors
+    | are emailed here (no external error service: nothing leaves the server
+    | but the email, and the email names no client). Empty = no emails.
+    |
+    */
+
+    'operator' => [
+        'email' => env('OPERATOR_EMAIL'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Rate limits
+    |--------------------------------------------------------------------------
+    |
+    | Requests per minute and person (or IP address when signed out). "engine"
+    | covers the endpoints that may start the ephemeris engine: charts,
+    | transits, synastry, the sky calendar and the dashboard.
+    |
+    */
+
+    'rate_limits' => [
+        'api' => (int) env('RATE_LIMIT_API', 300),
+        'engine' => (int) env('RATE_LIMIT_ENGINE', 40),
+    ],
+
 ];
