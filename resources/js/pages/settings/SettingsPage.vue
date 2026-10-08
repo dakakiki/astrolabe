@@ -4,7 +4,7 @@ import { RouterLink, RouterView } from 'vue-router';
 
 const { t } = useI18n();
 
-const sections = ['profile', 'practice', 'chart', 'regional', 'notifications', 'security'];
+const sections = ['profile', 'practice', 'chart', 'regional', 'notifications', 'security', 'data'];
 </script>
 
 <template>

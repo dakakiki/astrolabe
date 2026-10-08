@@ -31,9 +31,10 @@ class PaymentPolicy
         return $this->isMember($user);
     }
 
+    /** A payment kept after its client was deleted is a record only; it may still be removed. */
     public function update(User $user, Payment $payment): bool
     {
-        return $this->view($user, $payment);
+        return $this->view($user, $payment) && ! $payment->isAnonymised();
     }
 
     public function delete(User $user, Payment $payment): bool

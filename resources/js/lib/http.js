@@ -18,10 +18,16 @@ export function ensureCsrfCookie() {
 }
 
 let onUnauthenticated = () => {};
+let onPracticeClosed = () => {};
 
 /** Called when the API reports the session has ended (401), e.g. to show the sign-in screen. */
 export function setUnauthenticatedHandler(handler) {
     onUnauthenticated = handler;
+}
+
+/** Called when the practice turns out to be scheduled for deletion (403 with that code, Phase 8b). */
+export function setPracticeClosedHandler(handler) {
+    onPracticeClosed = handler;
 }
 
 http.interceptors.response.use(
@@ -39,6 +45,10 @@ http.interceptors.response.use(
 
         if (status === 401 && !config.skipAuthRedirect) {
             onUnauthenticated();
+        }
+
+        if (status === 403 && error.response?.data?.code === 'practice_pending_deletion') {
+            onPracticeClosed();
         }
 
         return Promise.reject(error);

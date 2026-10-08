@@ -83,6 +83,15 @@ class ReferenceDataController extends Controller
                     'max_size' => UploadLimit::bytes(),
                     'extensions' => AllowedFileTypes::extensions(),
                 ],
+                // How long data is kept (Settings → Your data), so the page states the real periods.
+                'retention' => [
+                    'deleted_days' => config('astrolabe.retention.deleted_days'),
+                    'audit_log_months' => config('astrolabe.retention.audit_log_months'),
+                    'practice_deletion_days' => config('astrolabe.retention.practice_deletion_days'),
+                    'export_link_hours' => config('astrolabe.exports.link_hours'),
+                    'export_keep_days' => config('astrolabe.exports.keep_days'),
+                    'backup_days' => config('astrolabe.backup.keep'),
+                ],
             ],
         ]);
     }

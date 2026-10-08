@@ -23,6 +23,8 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 > Faza 7c (implementirano): `users.notification_preferences` i `users.next_digest_at`; `appointments.reminder_minutes`, `remind_at` i `reminder_sent_at`; `tasks.remind`. Tabela `notifications` (Laravel database kanal, Notification Center) nije uvedena — obaveštenja su za sada samo email.
 >
 > Faza 8a (implementirano): `users.two_factor_secret`, `two_factor_recovery_codes`, `two_factor_confirmed_at` (Fortify, šifrovano ključem aplikacije); nove tabele `registration_invitations` (zatvorena beta) i `audit_logs` (bezbednost i kritične operacije) — obe van tenant scope-a.
+>
+> Faza 8b (implementirano): `payments.client_id` je nullable sa `nullOnDelete` (uplata ostaje anonimna kada se klijent trajno obriše); `workspaces.deletion_requested_at`, `deletion_requested_by`, `deletes_at` (zakazano brisanje prakse); nova tabela `workspace_exports`; novi događaji audit log-a. Rokovi čuvanja su u `config/astrolabe.php` („retention“) i primenjuje ih `php artisan data:prune`.
 
 ## Nalozi i workspace
 
@@ -63,13 +65,13 @@ Ko je, šta, kada i odakle uradio — za bezbednost i kritične operacije (dokum
 - `id`
 - `workspace_id`, nullable — praksa u kojoj se desilo; prijave i događaji naloga je nemaju
 - `user_id`, nullable — ko (ili čiji nalog, kod neuspele prijave); `null` za pokušaj na nepostojeću adresu i za komande
-- `event` — zatvorena lista (`App\Enums\AuditEvent`): `login`, `login_failed`, `lockout`, `logout`, `registered`, `email_verified`, `email_changed`, `password_changed`, `password_reset`, `other_sessions_signed_out`, `two_factor_enabled`, `two_factor_disabled`, `two_factor_failed`, `recovery_codes_regenerated`, `recovery_code_used`, `invitation_sent`, `invitation_revoked`, `invitation_accepted`, `payments_exported`, `file_downloaded`, `record_deleted`, `practice_settings_changed`
+- `event` — zatvorena lista (`App\Enums\AuditEvent`): `login`, `login_failed`, `lockout`, `logout`, `registered`, `email_verified`, `email_changed`, `password_changed`, `password_reset`, `other_sessions_signed_out`, `two_factor_enabled`, `two_factor_disabled`, `two_factor_failed`, `recovery_codes_regenerated`, `recovery_code_used`, `invitation_sent`, `invitation_revoked`, `invitation_accepted`, `payments_exported`, `file_downloaded`, `record_deleted`, `practice_settings_changed`; od Faze 8b i `client_erased` (brojevi po vrsti, nikad ime), `practice_export_requested`, `practice_export_downloaded`, `practice_deletion_requested`, `practice_deletion_cancelled`, `practice_erased`, `retention_applied` i `backup_restored` (poslednja tri bez osobe — raspored ili komanda operatera)
 - `subject_type`, `subject_id`, nullable — kratko ime (`consultation`, `attachment`, `client_relationship` …) i id
 - `properties`, JSON, nullable — samo nazivi i brojevi (izmenjena polja, filteri izvoza, `permanently`, `remembered`), nikada vrednosti: bez imena klijenata, podataka rođenja, mejl adresa i unetih lozinki
 - `ip_address`, `user_agent` (skraćen na 255)
 - `created_at`
 
-Indeksi: `(user_id, created_at)`, `(workspace_id, created_at)`, `(event, created_at)`. Rok čuvanja se određuje u Fazi 8b (pravila čuvanja podataka).
+Indeksi: `(user_id, created_at)`, `(workspace_id, created_at)`, `(event, created_at)`. Čuva se 12 meseci (`RETENTION_AUDIT_LOG_MONTHS`, Faza 8b); kada se praksa ili nalog obrišu, njihovi zapisi ostaju do tog roka sa praznim `workspace_id` / `user_id`.
 
 ### `workspaces`
 
@@ -85,9 +87,21 @@ Indeksi: `(user_id, created_at)`, `(workspace_id, created_at)`, `(event, created
 - `default_ayanamsa`, nullable — npr. `lahiri`; obavezno samo za `sidereal`
 - `aspect_orbs`, JSON, nullable — koji aspekti se prikazuju i sa kojim orbom (Faza 5): `{"aspects": {"conjunction": {"enabled": true, "orb": 8}, …}, "luminary_bonus": 1.5}`; `null` znači podrazumevane vrednosti iz dokumenta 11. Čuva se ceo i normalizovan, pa kasnija promena podrazumevanih vrednosti ne pomera već sačuvana podešavanja
 - `transit_orbs`, JSON, nullable — isti oblik kao `aspect_orbs`, zaseban skup za tranzite (Faza 7a); `null` znači podrazumevane vrednosti za tranzite iz dokumenta 11 (uži orbi, bez dodatka za Sunce i Mesec). Ne ulazi u `input_hash` natalne karte, jer se tranziti ne keširaju
+- `deletion_requested_at`, nullable; `deletion_requested_by`, nullable (`nullOnDelete`); `deletes_at`, nullable, indeks — Faza 8b: vlasnik je zakazao brisanje prakse; dok je `deletes_at` postavljen praksa je zatvorena, a na taj dan je `data:prune` briše sa svim podacima i nalozima koji ne pripadaju drugoj praksi
 - timestamps
 
 `slug` je jedinstven, generisan jednom pri kreiranju i ne menja se sa nazivom, jer će se koristiti u javnim booking URL-ovima.
+
+### `workspace_exports` (Faza 8b)
+
+- `id`, `workspace_id` (`cascadeOnDelete`), `requested_by`, nullable (`nullOnDelete`)
+- `status` — `pending`, `ready`, `failed`
+- `disk`, `path`, nullable — ZIP na privatnom disku `exports` (`<workspace_id>/<uuid>.zip`)
+- `file_size`, nullable; `counts`, JSON — koliko je čega ušlo (klijenti, konsultacije …)
+- `completed_at`, `expires_at`, nullable — preuzimanje dok `expires_at` nije prošao (7 dana), zatim `data:prune` briše fajl i red
+- timestamps
+
+Indeksi: `(workspace_id, created_at)`, `expires_at`. Trajno brisanje klijenta briše sve izvoze prakse (sadrže ga).
 
 ### `workspace_user`
 
@@ -411,7 +425,7 @@ Metode za koje je usluga namenjena; bez njih — bilo koja.
 
 - `id`
 - `workspace_id`
-- `client_id` — kod uplate za konsultaciju ili termin, njihov klijent
+- `client_id` — kod uplate za konsultaciju ili termin, njihov klijent; od Faze 8b nullable (`nullOnDelete`): kada se klijent trajno obriše, uplata ostaje bez klijenta, konsultacije, termina, reference i napomene (anonimna, samo zapis — ne menja se, može se ukloniti)
 - `consultation_id`, nullable — `nullOnDelete`
 - `appointment_id`, nullable — termin za koji je plaćen avans; `nullOnDelete`
 - `created_by`, nullable
@@ -494,7 +508,7 @@ Dve vrste događaja:
 - Svaki tenant entitet sadrži `workspace_id`.
 - Jedinstveni indeksi uključuju workspace kada je vrednost jedinstvena samo unutar workspace-a.
 - Foreign keys se definišu eksplicitno.
-- Osetljivi zapisi koriste soft delete gde je opravdano.
+- Osetljivi zapisi koriste soft delete gde je opravdano; soft-deleted redovi se trajno brišu posle 30 dana (`data:prune`, Faza 8b), fajlovi i sa diska. Klijent nema soft delete u upotrebi: arhiva je status, a brisanje klijenta je odmah trajno.
 - Svi statusi imaju jasno definisane dozvoljene vrednosti.
 - API nikada ne prihvata `workspace_id` klijenta kao dokaz autorizacije.
 - Izračunate karte su keš; brisanje keša ne sme prouzrokovati gubitak poslovnog podatka.

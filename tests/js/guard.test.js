@@ -45,6 +45,41 @@ describe('resolveNavigation', () => {
     it('leaves public pages alone', () => {
         expect(resolveNavigation(route('not-found'), guest)).toBe(true);
     });
+
+    describe('a practice scheduled for deletion', () => {
+        const closing = { ...verified, workspace: { deletion: { deletes_at: '2026-11-07T12:00:00Z' } } };
+        const open = { ...verified, workspace: { deletion: null } };
+
+        it('leads every screen of the app to the closing screen', () => {
+            expect(resolveNavigation(route('dashboard', { verified: true }), closing)).toEqual({
+                name: 'practice-deletion',
+            });
+            expect(resolveNavigation(route('settings.data', { verified: true }), closing)).toEqual({
+                name: 'practice-deletion',
+            });
+        });
+
+        it('keeps the closing screen and the export link open', () => {
+            expect(resolveNavigation(route('practice-deletion', { verified: true, closing: true }), closing)).toBe(true);
+            expect(resolveNavigation(route('practice-exports.link', { verified: true, closing: true }), closing)).toBe(
+                true,
+            );
+        });
+
+        it('sends people back to the app once the deletion is cancelled', () => {
+            expect(resolveNavigation(route('practice-deletion', { verified: true, closing: true }), open)).toEqual({
+                name: 'dashboard',
+            });
+            expect(resolveNavigation(route('dashboard', { verified: true }), open)).toBe(true);
+        });
+
+        it('still sends guests to sign in first', () => {
+            expect(resolveNavigation(route('practice-deletion', { verified: true, closing: true }), guest)).toEqual({
+                name: 'login',
+                query: { redirect: '/practice-deletion' },
+            });
+        });
+    });
 });
 
 describe('safeRedirect', () => {

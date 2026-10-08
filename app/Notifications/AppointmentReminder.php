@@ -23,6 +23,9 @@ class AppointmentReminder extends Notification implements ShouldQueue
 
     public int $tries = 3;
 
+    // The account may be deleted (with its practice) before the queue gets here.
+    public bool $deleteWhenMissingModels = true;
+
     public function __construct(
         public readonly int $appointmentId,
         public readonly string $startsAt,

@@ -29,6 +29,11 @@ class WorkspaceResource extends JsonResource
             'aspect_orbs' => $this->aspectSettings()->toArray(),
             'transit_orbs' => $this->transitSettings()->toArray(),
             'role' => $request->user()?->roleIn($this->resource)?->value,
+            // Scheduled for deletion by the owner: the SPA shows only the closing screen.
+            'deletion' => $this->deletes_at === null ? null : [
+                'requested_at' => $this->deletion_requested_at?->toIso8601ZuluString(),
+                'deletes_at' => $this->deletes_at->toIso8601ZuluString(),
+            ],
         ];
     }
 }

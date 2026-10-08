@@ -178,7 +178,32 @@ const routes = [
                 name: 'settings.security',
                 component: () => import('@/pages/settings/SecuritySettings.vue'),
             },
+            {
+                path: 'data',
+                name: 'settings.data',
+                component: () => import('@/pages/settings/DataSettings.vue'),
+            },
         ],
+    },
+
+    // A practice scheduled for deletion shows only this (Phase 8b).
+    {
+        path: '/practice-deletion',
+        name: 'practice-deletion',
+        component: () => import('@/pages/PracticeDeletionPage.vue'),
+        meta: { verified: true, closing: true, layout: 'auth' },
+    },
+    // The export link from the email, after signing in: the server sends the file.
+    {
+        path: '/exports/:id(\\d+)/download',
+        name: 'practice-exports.link',
+        component: () => import('@/pages/NotFoundPage.vue'),
+        meta: { verified: true, closing: true },
+        beforeEnter: (to) => {
+            window.location.assign(to.fullPath);
+
+            return false;
+        },
     },
 
     {
@@ -199,7 +224,7 @@ router.beforeEach(async (to) => {
     const auth = useAuthStore();
     await auth.load();
 
-    return resolveNavigation(to, { user: auth.user });
+    return resolveNavigation(to, { user: auth.user, workspace: auth.workspace });
 });
 
 export default router;

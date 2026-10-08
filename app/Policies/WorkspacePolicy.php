@@ -17,4 +17,16 @@ class WorkspacePolicy
     {
         return $user->ownsWorkspace($workspace);
     }
+
+    /** Exporting everything the practice holds belongs to the owner (Phase 8b). */
+    public function export(User $user, Workspace $workspace): bool
+    {
+        return $user->ownsWorkspace($workspace);
+    }
+
+    /** So does scheduling the practice for deletion, and cancelling it. */
+    public function delete(User $user, Workspace $workspace): bool
+    {
+        return $user->ownsWorkspace($workspace);
+    }
 }

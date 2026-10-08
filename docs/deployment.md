@@ -35,7 +35,7 @@ Odluke i razlozi (korisnik, 6. 10. 2026):
 3. **Osnovna zaštita:** poseban korisnik za deploy, `PermitRootLogin no`, `PasswordAuthentication no`, `ufw`, `unattended-upgrades` (bezbednosna ažuriranja), vremenska zona servera UTC.
 4. **Softver:**
    - Nginx, certbot (Let's Encrypt, automatsko obnavljanje);
-   - **PHP 8.3**-FPM (ista verzija kao lokalno i u CI-ju) sa `mbstring`, `intl`, `pdo_mysql`, `bcmath`, `zip`, `xml`, `curl`, `fileinfo`, `opcache`; **bez Xdebug-a**; preporučen PECL `timezonedb` (dokument 06); `proc_open` mora biti dozvoljen (podrazumevano jeste); `expose_php = Off` (aplikacija i sama uklanja `X-Powered-By`); `gd` i `exif` nisu potrebni (metapodaci sa slika se uklanjaju bez njih);
+   - **PHP 8.3**-FPM (ista verzija kao lokalno i u CI-ju) sa `mbstring`, `intl`, `pdo_mysql`, `bcmath`, `zip` (izvoz prakse, backup fajlova), `sodium` (šifrovanje backup-a), `xml`, `curl`, `fileinfo`, `opcache`; **bez Xdebug-a**; preporučen PECL `timezonedb` (dokument 06); `proc_open` mora biti dozvoljen (podrazumevano jeste); `expose_php = Off` (aplikacija i sama uklanja `X-Powered-By`); `gd` i `exif` nisu potrebni (metapodaci sa slika se uklanjaju bez njih);
    - **MariaDB 11.8** iz zvaničnog MariaDB repozitorijuma (Ubuntu 24.04 sam nudi stariju granu); `bind-address = 127.0.0.1`; `innodb_buffer_pool_size` oko 3 GB; poseban korisnik baze samo za bazu aplikacije;
    - Composer, Node 24 LTS (za `npm run build`), Supervisor, `build-essential` (za `make swetest`), `git`, `unzip`.
 5. **PHP / Nginx granice za upload:** `upload_max_filesize` i `post_max_size` u PHP-FPM-u i `client_max_body_size` u Nginx-u bar `ATTACHMENTS_MAX_MB` (100 MB).
@@ -66,6 +66,11 @@ Samo nazivi i vrednosti koje nisu tajne; lozinke se unose na serveru.
 | `REGISTRATION_MODE` / `INVITATION_DAYS` | `invite` (zatvorena beta — nalog samo uz poziv) / `14` |
 | `OPERATOR_EMAIL` | adresa na koju idu mejlovi o neuspelim proverama i serverskim greškama |
 | `RATE_LIMIT_API` / `RATE_LIMIT_ENGINE` | `300` / `40` (zahteva u minuti po osobi; menjati samo ako beta pokaže potrebu) |
+| `BACKUP_KEY` | `php artisan backup:key` na serveru — **kopija ključa van servera** (menadžer lozinki korisnika); bez njega se backup ne može pročitati. Dok nije postavljen, noćni backup se ne pokreće |
+| `BACKUP_KEEP` | `14` (dnevnih kopija na serveru) |
+| `BACKUP_DUMP_BINARY` / `BACKUP_CLIENT_BINARY` | `mariadb-dump` / `mariadb` (iz paketa MariaDB 11.8) |
+| `RETENTION_DELETED_DAYS` / `RETENTION_AUDIT_LOG_MONTHS` / `PRACTICE_DELETION_DAYS` | `30` / `12` / `30` (odluke korisnika 8. 10. 2026) |
+| `EXPORT_LINK_HOURS` / `EXPORT_KEEP_DAYS` | `24` / `7` |
 | `LOG_STACK` | `daily` (14 dana logova) |
 
 Nginx stoji direktno ispred PHP-FPM-a (bez load balancer-a), pa `trustProxies` nije potreban; ako se kasnije doda proxy ili Cloudflare, mora se podesiti, inače su IP adrese u audit log-u i ograničenjima adrese proxy-ja.
@@ -81,7 +86,7 @@ Nginx stoji direktno ispred PHP-FPM-a (bez load balancer-a), pa `trustProxies` n
 7. Swiss Ephemeris (korak 6 iz „Server“), pa provera: otvoriti kartu probnog klijenta — prikazuje engine i verziju.
 8. `php artisan optimize` (keš konfiguracije, ruta, prikaza i događaja).
 9. Nginx sajt za `app.astrolabe.online` + `certbot --nginx`; HTTP preusmeren na HTTPS.
-10. **Cron** (korisnik PHP-FPM-a): `* * * * * cd <aplikacija> && php artisan schedule:run >> /dev/null 2>&1`
+10. **Cron** (korisnik PHP-FPM-a): `* * * * * cd <aplikacija> && php artisan schedule:run >> /dev/null 2>&1` — pokreće i noćne `data:prune` (01:30) i `backup:run` (02:00, kada je `BACKUP_KEY` postavljen; pre toga `php artisan backup:key`, ključ u `.env` i kopija van servera, pa jednom ručno `backup:run` i `backup:restore --verify`).
 11. **Supervisor** za worker: `php artisan queue:work --sleep=3 --max-time=3600`, automatski restart, log u `storage/logs`.
 12. **Prvi nalog:** `php artisan invitations:send <adresa>` (registracija je samo uz poziv; link je i ispisan, ako mejl još ne radi), registracija kroz link, potvrda mejla, uključiti 2FA u Settings → Security; provera: klijent sa podacima rođenja → karta, tranziti, kalendar neba, sinastrija.
 13. **Mejl:** u Settings → Notifications „Send a test email“; proveriti da je stigao i da nije u spamu. Zatim `php artisan health:check` — sve `ok`; mejl operateru se proverava jednom namerno pokvarenom proverom (npr. privremeno pogrešan `SWETEST_PATH`).
@@ -99,9 +104,20 @@ Testeri bete dobijaju poziv istom komandom; `php artisan invitations:list` pokaz
 ## Backup
 
 - **Hetzner Backups:** dnevna slika celog servera (čuva se 7). Slika nije pouzdan backup baze koja radi, pa uz nju:
-- **Baza:** svake noći `mariadb-dump --single-transaction` bez tabela `places` i `place_names` (mogu se ponovo uvesti), šifrovan (dokument 06: enkriptovani backup) i kopiran **van servera** (npr. Hetzner Storage Box ili Object Storage), sa definisanim čuvanjem.
-- **Fajlovi klijenata** (na disku servera): u dnevnoj slici servera, plus svake noći šifrovana kopija van servera, kao baza.
-- **Probni restore** pre bete (stavka Faze 8 „backup i restore procedura“): nova mašina iz backup-a, aplikacija radi.
+- **Baza i fajlovi klijenata — `php artisan backup:run`** (Faza 8b; scheduler ga pokreće u 02:00 čim je `BACKUP_KEY` postavljen): `mariadb-dump --single-transaction` cele baze, s tim da `places`, `place_names`, `sessions`, `cache` i `cache_locks` idu samo kao struktura, i ZIP diska `attachments`; oba kompresovana i šifrovana libsodium-om (`BACKUP_KEY`) u `storage/app/private/backups/backup-YYYYmmdd-HHMMSS/` sa `manifest.json` (vreme, veličine, SHA-256, poslednja migracija, broj redova — bez podataka klijenata). Čuva se 14 najnovijih. Lozinka baze ide u privremeni option fajl, ne u komandnu liniju. Neuspeh šalje mejl operateru; `/api/v1/health` ima stavku `backup` (najnoviji mlađi od 26 h).
+- `php artisan backup:list` — spisak; `php artisan backup:restore --verify` — **probni restore** u privremenu bazu `<baza>_restore_check`, poređenje broja redova i migracije, pa brisanje privremene baze (korisnik baze mora smeti `CREATE DATABASE` i `DROP DATABASE` za tu bazu). Raditi ga redovno (npr. mesečno) i posle svake promene MariaDB-a.
+- **Kopija van servera** (8d): folder `storage/app/private/backups` svake noći posle 02:00 na Hetzner Storage Box (npr. `rsync` ili `rclone` preko SSH ključa); fajlovi su već šifrovani, pa Storage Box ne vidi sadržaj. Čuvanje tamo duže od 14 dana znači i duže zadržavanje obrisanih podataka — uskladiti sa politikom privatnosti.
+- **Pravila čuvanja — `php artisan data:prune`** u 01:30 (pre backup-a, da obrisano što pre nestane i iz kopija): obrisano posle 30 dana (fajlovi i sa diska), audit log posle 12 meseci, istekli izvozi, prakse kojima je došao dan brisanja, stari pozivi, neuspeli poslovi i istekli keš. `--dry-run` samo broji.
+
+### Restore na novoj mašini (8d, pre bete)
+
+1. Server po koracima iz „Server“ i „Prvo podizanje“ do `.env` (isti `APP_KEY` kao na starom serveru — njime su šifrovane 2FA tajne; isti `BACKUP_KEY`).
+2. Prebaciti folder backup-a u `storage/app/private/backups/`.
+3. `php artisan backup:restore <ime> --database=<baza> --files-to=storage/app/private/attachments --force` (prazna nova baza je i baza aplikacije, pa traži `--force` i potvrdu).
+4. `php artisan places:import --source=all` (GeoNames nije u backup-u), `php artisan optimize`, `php artisan queue:restart`.
+5. Provera: prijava, klijent sa kartom (karta se računa iz vraćenih podataka rođenja), preuzimanje fajla, `php artisan health:check`.
+
+Lokalno provereno 8. 10. 2026: backup prave baze 31 KB (bez GeoNames), restore u posebnu bazu i fajlovi u poseban folder — broj redova isti, fajlovi identični, aplikacija nad vraćenom bazom računa kartu i odgovara na `/api/v1/health`.
 
 ## Svaka sledeća verzija
 
@@ -124,7 +140,7 @@ Pre deploy-a: zelen CI na tom commit-u; posle promene `swetest`-a ili fajlova ef
 
 ## Posle podizanja (Faza 8)
 
-- upozorenja za neuspeo backup (dokument 06); dostupnost i neuspeli queue poslovi su pokriveni od 8a (`/api/v1/health`, `health:check`, `OPERATOR_EMAIL`);
+- upozorenja za neuspeo backup (dokument 06) su urađena u 8b (mejl operateru i stavka `backup` u `/api/v1/health`); dostupnost i neuspeli queue poslovi su pokriveni od 8a (`/api/v1/health`, `health:check`, `OPERATOR_EMAIL`);
 - rotacija logova (`LOG_STACK=daily`);
 - merenje na Linux-u: niz od 731 dan za tranzite, godina kalendara neba (lokalno na Windows-u ~210 ms po pokretanju `swetest`-a);
 - serverski deo sigurnosne provere (firewall, SSH, TLS ocena, zaglavlja preko HTTPS-a uključujući HSTS); aplikacioni deo i audit log su urađeni u 8a; politika privatnosti i uslovi korišćenja (8c);

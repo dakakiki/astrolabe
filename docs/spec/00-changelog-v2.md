@@ -229,6 +229,18 @@ Predlog korisnika posle 8a: admin nalog sa pregledom astrologa i njihovog audit 
 - 02: napomena da „Nedavna bezbednosna aktivnost“ prelazi u admin; nova sekcija „Admin (operater) — Faza 8c, planirano“.
 - 04: 8c je „admin i alati za betu“.
 
+## Faza 8b — životni ciklus podataka (8. 10. 2026)
+
+Odluke korisnika na početku 8b (sve preporuke iz predloga): obrisano se trajno briše posle 30 dana (fajlovi i sa diska), audit log se čuva 12 meseci, brisanje prakse ima 30 dana za otkazivanje, link za izvoz važi 24 h a izvoz se briše posle 7 dana, uplate trajno obrisanog klijenta ostaju anonimne, backup se šifruje libsodium-om i lokalno se čuva 14 kopija, pravo brisanje klijenta je odmah (uz upisano ime; za ostavljanje po strani je arhiva). Izmene:
+
+- 02: „Brisanje klijenta“ kod klijenata; „Podaci prakse: izvoz i brisanje“ (Settings → Your data); obrisani fajlovi se uklanjaju sa diska posle 30 dana.
+- 04: status 8b.
+- 05: `payments.client_id` nullable, kolone zakazanog brisanja na `workspaces`, tabela `workspace_exports`, novi događaji audit log-a, rok čuvanja audit log-a, pravilo za soft delete.
+- 06: backup i restore (libsodium, 14 kopija, probni restore, provera u health check-u); pravila čuvanja, izvoz i brisanje u „Pravnoj pripremi“.
+- 09: Settings → Your data umesto „Security & Data“ za izvoz, retenciju i brisanje.
+
+Odluke donete usput: izvoz sadrži i privatne beleške i fajlove drugih članova (izvoz je praksin, pravi ga vlasnik); jedan izvoz u isto vreme; link iz mejla traži i prijavu vlasnika, a gost posle prijave dolazi nazad na link; trajno brisanje klijenta briše i ranije izvoze prakse (sadrže ga); anonimna uplata se ne menja, samo uklanja, i na strani Payments je „Deleted client“; dok praksa čeka brisanje zatvorena je (403 sa kodom, osim prijave, izvoza i otkazivanja), podsetnici i jutarnji mejl se ne šalju; nalog se briše sa praksom samo ako ne pripada drugoj praksi; audit zapisi obrisane prakse i naloga ostaju do svog roka bez veze sa njima; pravila čuvanja rade pre backup-a (01:30, backup 02:00); backup nosi `sessions` i keš samo kao strukturu (restore nikoga ne prijavljuje); istekli unosi keša se brišu svake noći (mogu sadržati odgovor sa imenom klijenta).
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

@@ -17,3 +17,9 @@ Schedule::command('notifications:send-digests')->everyMinute()->withoutOverlappi
 // and the checks email the operator about failures (astrolabe.operator.email).
 Schedule::call(fn () => HealthCheck::beat())->everyMinute()->name('health:heartbeat');
 Schedule::command('health:check')->everyFiveMinutes()->withoutOverlapping();
+
+// The data lifecycle (Phase 8b): first what the retention rules no longer keep,
+// then the encrypted backup — so deleted data leaves the backups as early as it can.
+Schedule::command('data:prune')->dailyAt('01:30')->withoutOverlapping();
+Schedule::command('backup:run')->dailyAt('02:00')->withoutOverlapping()
+    ->when(fn () => filled(config('astrolabe.backup.key')));

@@ -38,7 +38,7 @@ Klijentski portal je zaštićen, invite-only prostor. Ne pretvara svaki klijents
 | Notifications | Email/push kanali, kategorije, podsetnici, quiet hours i uređaji |
 | Team & Access | Članovi, uloge i pozivnice kada timski rad bude dostupan |
 | Billing | paket (Freemius), status pretplate i Customer Portal |
-| Security & Data | Lozinka, aktivne sesije (prijave na drugim uređajima), izvoz, retencija i brisanje |
+| Security & Data | Lozinka, aktivne sesije (prijave na drugim uređajima), izvoz, retencija i brisanje — implementirano kao dve sekcije: **Security** (lozinka, sesije, 2FA; Faza 8a) i **Your data** (izvoz prakse, koliko se šta čuva, brisanje prakse i naloga; Faza 8b) |
 
 Poslovna polja su opciona. Svako polje namenjeno klijentu ima eksplicitnu vidljivost, na primer `internal`, `client_visible` ili `public_booking_visible`.
 

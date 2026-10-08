@@ -36,6 +36,16 @@ enum AuditEvent: string
     case RecordDeleted = 'record_deleted';
     case PracticeSettingsChanged = 'practice_settings_changed';
 
+    // The data lifecycle (Phase 8b).
+    case ClientErased = 'client_erased';
+    case PracticeExportRequested = 'practice_export_requested';
+    case PracticeExportDownloaded = 'practice_export_downloaded';
+    case PracticeDeletionRequested = 'practice_deletion_requested';
+    case PracticeDeletionCancelled = 'practice_deletion_cancelled';
+    case PracticeErased = 'practice_erased';
+    case RetentionApplied = 'retention_applied';
+    case BackupRestored = 'backup_restored';
+
     /**
      * Events about the account, shown to its owner ("Recent security activity").
      *

@@ -239,7 +239,8 @@
             "chart": "Chart & methods",
             "regional": "Regional",
             "notifications": "Notifications",
-            "security": "Security"
+            "security": "Security",
+            "data": "Your data"
         },
         "ownerOnly": "Only the owner of this workspace can change these settings.",
         "profile": {
@@ -391,6 +392,40 @@
             "testIntro": "Sends a message to {email} the same way reminders go, to check that email reaches you.",
             "testSend": "Send a test email",
             "testQueued": "Test email on its way to {email}"
+        },
+        "data": {
+            "export": {
+                "title": "Export your practice",
+                "intro": "A ZIP file with everything in your practice: clients and their birth data, related people, consultations, notes, appointments, tasks, payments, services, calculated charts and every file under its original name. JSON for moving to another program, CSV for a spreadsheet.",
+                "private": "It holds your clients’ personal data, private notes included. Keep it somewhere safe.",
+                "request": "Prepare an export",
+                "requested": "The export is being prepared. You will get an email when it is ready.",
+                "inProgress": "Preparing…",
+                "failed": "This export failed. Please try again.",
+                "ready": "Ready {date}",
+                "until": "Available until {date}",
+                "size": "{size}",
+                "download": "Download",
+                "none": "No exports yet.",
+                "emailHint": "The link in the email works for {hours} hours, and only while you are signed in."
+            },
+            "retention": {
+                "title": "How long data is kept",
+                "deleted": "Deleted consultations, notes, files, tasks and payments can be restored for {days} days. Then they are deleted for good, and files are removed from the disk.",
+                "clients": "Archived clients stay until you delete them. Deleting a client for good is immediate.",
+                "audit": "The sign-in and security log is kept for {months} months.",
+                "exports": "An export is deleted {days} days after it is ready.",
+                "backups": "Encrypted backups are kept for {days} days, so deleted data leaves them within that time."
+            },
+            "deletion": {
+                "title": "Delete practice and account",
+                "intro": "This deletes the practice and everything in it — clients, consultations, notes, files, charts, payments — and the accounts that belong only to it, yours included.",
+                "grace": "The practice closes at once. For {days} days you can change your mind and cancel; then everything is deleted for good.",
+                "exportFirst": "Download an export first if you want to keep anything.",
+                "password": "Your password",
+                "submit": "Delete practice and account",
+                "confirm": "Close this practice now and delete it for good in {days} days?"
+            }
         }
     },
     "roles": {
@@ -619,7 +654,19 @@
             "zoneHistory": "Time-zone records before 1970 are unreliable in some regions. Check the offset if the chart looks wrong."
         },
         "addConsultation": "New consultation",
-        "addAppointment": "New appointment"
+        "addAppointment": "New appointment",
+        "deletePermanently": "Delete permanently",
+        "deleteDialog": {
+            "title": "Delete {name} permanently?",
+            "intro": "Use this when the client asks you to delete their data. It cannot be undone.",
+            "gone": "Deleted at once: birth data, consultations, notes, files, charts, appointments, tasks, the timeline, and related people who belong only to this client.",
+            "kept": "Payments stay in your figures as amount, date and method only — without the client, reference or notes.",
+            "exports": "Earlier exports of the practice are deleted too, because they contain this client.",
+            "archiveInstead": "To put the client aside without deleting anything, archive them instead.",
+            "label": "Type {name} to confirm",
+            "submit": "Delete permanently",
+            "deleted": "The client was deleted permanently."
+        }
     },
     "bodies": {
         "sun": "Sun",
@@ -1506,7 +1553,9 @@
             "notes": "Note",
             "create": "Record",
             "save": "Save"
-        }
+        },
+        "anonymous": "Deleted client",
+        "anonymousHint": "Kept after the client was deleted permanently: amount, date and method only."
     },
     "billing": {
         "title": "Billing",
@@ -1595,5 +1644,15 @@
         "outside": "outside the period",
         "positionsTitle": "Positions",
         "positionsAt": "At {time}"
+    },
+    "practiceDeletion": {
+        "eyebrow": "Practice closed",
+        "title": "{practice} will be deleted on {date}",
+        "intro": "The owner asked to delete this practice. Until that day nothing is lost and the deletion can be cancelled; on that day everything is deleted for good, with the accounts that belong only to it.",
+        "ownerHint": "Changed your mind? Cancel the deletion and everything is back as it was.",
+        "memberHint": "Only the owner of the practice can cancel the deletion.",
+        "cancel": "Cancel the deletion",
+        "cancelled": "The deletion was cancelled. Welcome back.",
+        "signOut": "Sign out"
     }
 }

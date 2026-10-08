@@ -49,6 +49,16 @@ return [
             'report' => false,
         ],
 
+        // Practice exports (Phase 8b): private like client files, downloaded only by
+        // the practice's owner through the app, deleted after a few days.
+        'exports' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/exports'),
+            'serve' => false,
+            'throw' => true,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

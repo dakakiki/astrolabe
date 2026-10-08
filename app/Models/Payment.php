@@ -107,11 +107,25 @@ class Payment extends Model
     }
 
     /**
+     * Kept, without saying who paid, after its client was deleted for good
+     * (DeleteClient): the amount, currency, day and method still count in the
+     * practice's figures; the client, what it was for, reference and notes are gone.
+     */
+    public function isAnonymised(): bool
+    {
+        return $this->client_id === null;
+    }
+
+    /**
      * The payment on its client's timeline, on the day it arrived. The day has no
      * time; noon UTC keeps it on that date for everyone reading the timeline.
      */
-    public function activityProjection(): ActivityProjection
+    public function activityProjection(): ?ActivityProjection
     {
+        if ($this->client_id === null) {
+            return null;
+        }
+
         return new ActivityProjection(
             type: self::activityType(),
             clientId: $this->client_id,

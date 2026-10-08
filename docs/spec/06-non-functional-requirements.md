@@ -172,6 +172,14 @@ Pre javnog lansiranja:
 
 > Faza 8a (implementirano): `GET /api/v1/health` za spoljni monitor dostupnosti — 200 kada sve prolazi, 503 kada nešto ne prolazi, i samo da/ne po delu: baza, keš, ephemeris engine (program i fajlovi, bez proračuna), disk za fajlove klijenata, queue (nijedan posao ne čeka duže od 10 minuta) i scheduler (otkucaj koji scheduler upisuje svakog minuta nije stariji od 3 minuta). Razlozi idu u log, ne u odgovor.
 >
+> Faza 8b — backup i restore (implementirano 8. 10. 2026; odluke korisnika: libsodium, 14 kopija):
+>
+> - `php artisan backup:run` (svake noći u 02:00 kada je postavljen `BACKUP_KEY`): `mariadb-dump --single-transaction` cele baze, s tim da `places`, `place_names`, `sessions`, `cache` i `cache_locks` idu samo kao struktura (GeoNames se vraća sa `places:import`, a vraćena baza nikoga ne prijavljuje ponovo); fajlovi klijenata sa lokalnog diska kao ZIP. Oba su kompresovana (gzip) i šifrovana libsodium-om (secretstream XChaCha20-Poly1305, deo po deo, svaki deo proveren — izmenjen, skraćen ili tuđim ključem šifrovan fajl se ne dešifruje). Ključ pravi `php artisan backup:key`, stoji u `.env` servera, a kopija van servera (bez nje backup je nečitljiv). Uz svaki backup `manifest.json` bez podataka klijenata: vreme, veličine, SHA-256, poslednja migracija, broj redova glavnih tabela.
+> - Čuva se 14 najnovijih kopija (`BACKUP_KEEP`); obrisani podaci time nestaju i iz backup-a najkasnije za 14 dana.
+> - `php artisan backup:restore [ime] --database=… [--files-to=…]` vraća u zadatu bazu (pravi je ako ne postoji) i fajlove u folder; vraćanje preko baze aplikacije traži `--force` i potvrdu. **Probni restore:** `backup:restore --verify` vraća u privremenu bazu, poredi broj redova sa manifestom, proverava poslednju migraciju kroz sopstvenu konekciju i briše privremenu bazu. Lokalno provereno i da aplikacija radi na vraćenoj bazi (karta iz vraćenih podataka rođenja, fajlovi identični).
+> - Neuspeo backup šalje mejl operateru (kao svaka prijavljena greška), a `/api/v1/health` dobija stavku `backup` (najnoviji backup mlađi od 26 sati) čim je ključ postavljen.
+> - Kopija van servera (Storage Box) i restore na novoj mašini ostaju za podizanje produkcije (8d).
+
 > Prijava grešaka bez spoljnog servisa (odluka 8. 10. 2026, podaci ostaju na serveru): `php artisan health:check` (svakih 5 minuta iz scheduler-a) šalje mejl operateru (`OPERATOR_EMAIL`) kada provera ne prolazi ili su se od prošle provere pojavili neuspeli queue poslovi, i još jednom kada sve ponovo prolazi; svaka prijavljena serverska greška (ne 404, validacija ni prijava) šalje mejl sa vrstom greške, fajlom i linijom, metodom i putanjom zahteva i id-jem korisnika — **bez teksta poruke**, upita i podataka zahteva, jer poruka greške baze može navesti ime klijenta. Ista greška ili isti problem najviše jednom na sat; mejl ide odmah, ne kroz queue. Zaustavljen scheduler sam sebe ne može prijaviti — za to je spoljni monitor na `/api/v1/health`.
 
 ## Pravna priprema
@@ -185,6 +193,13 @@ Pre beta rada sa stvarnim podacima pripremiti:
 - saglasnost za obradu klijentskih podataka gde je potrebna;
 - pravila za audio i video zapise konsultacija;
 - potvrđenu licencu ephemeris biblioteke i uslove korišćenja provajdera geokodiranja.
+
+> Faza 8b — životni ciklus podataka (implementirano 8. 10. 2026; rokovi su odluka korisnika istog dana, svi podesivi kroz `.env`):
+>
+> - **Pravila čuvanja** (`php artisan data:prune`, svake noći u 01:30, pre backup-a; `--dry-run` samo broji): obrisane konsultacije, beleške, fajlovi, zadaci, uplate, termini i povezane osobe mogu da se vrate **30 dana**, zatim se brišu trajno — fajlovi i sa diska, karte povezanih osoba sa njima; **audit log 12 meseci**; izvoz 7 dana posle nastanka; istekli ili opozvani pozivi i neuspeli queue poslovi posle 30 dana; iskorišćeni linkovi za lozinku i istekle stavke keša (u kojima može biti odgovor sa imenom klijenta, `Idempotency-Key`) odmah po isteku. Klijent se nikad ne „baca u korpu“: arhiva je status, a brisanje klijenta je odmah i trajno. Jedan audit zapis po pokretanju, samo brojevi.
+> - **Izvoz cele prakse** (vlasnik, Settings → Your data): ZIP sa JSON-om po vrsti podataka, CSV za klijente, konsultacije i uplate, izračunatim kartama (payload) i svim fajlovima pod originalnim imenima po klijentima, plus README sa konvencijama (UTC, podaci rođenja kako su uneti, novac u najmanjoj jedinici). Pravi se u queue-u, mejl vlasniku nosi potpisan link koji važi **24 h** i i dalje traži prijavu vlasnika; u aplikaciji se preuzima dok postoji (**7 dana**). Uključeni su i privatne beleške i fajlovi drugih članova — izvoz je praksin. Svaki zahtev i preuzimanje su u audit log-u.
+> - **Pravo brisanje klijenta** (zahtev klijenta astrologu): samo vlasnik, uz upisano puno ime (veličina slova i razmaci nisu bitni); briše odmah sve o klijentu, fajlove i sa diska, povezane osobe koje postoje samo kroz njega i ranije izvoze prakse (sadrže ga). **Uplate ostaju anonimne** (iznos, valuta, dan, način — bez klijenta, svrhe, reference i napomene), da knjigovodstvo astrologa ostane tačno.
+> - **Brisanje prakse i naloga** (vlasnik, lozinka): praksa se odmah zatvara (API vraća 403 sa kodom `practice_pending_deletion`, osim prijave, izvoza i otkazivanja; podsetnici i jutarnji mejl se ne šalju), **30 dana** može da se otkaže, zatim `data:prune` briše sve, zajedno sa nalozima koji ne pripadaju nijednoj drugoj praksi; svi članovi dobijaju mejl pri zakazivanju, otkazivanju i posle brisanja.
 
 Pravna dokumentacija i zahtevi zavise od tržišta i moraju biti provereni sa kvalifikovanim pravnim savetnikom pre javnog lansiranja.
 

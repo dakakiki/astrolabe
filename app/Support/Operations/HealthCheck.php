@@ -3,6 +3,7 @@
 namespace App\Support\Operations;
 
 use App\Astrology\Contracts\EphemerisEngine;
+use App\Support\Backup\Backups;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,9 @@ use Throwable;
  * - engine: the ephemeris program and data files are in place;
  * - storage: the client-files directory can be written;
  * - queue: no job has waited longer than QUEUE_STUCK_SECONDS (the worker runs);
- * - scheduler: the heartbeat the scheduler writes every minute is recent (cron runs).
+ * - scheduler: the heartbeat the scheduler writes every minute is recent (cron runs);
+ * - backup (once BACKUP_KEY is set): the newest encrypted backup is younger than
+ *   astrolabe.backup.max_age_hours (Phase 8b).
  */
 final class HealthCheck
 {
@@ -36,7 +39,7 @@ final class HealthCheck
      */
     public function run(): array
     {
-        return [
+        $checks = [
             'database' => $this->check('database', fn () => DB::select('select 1') !== []),
             'cache' => $this->check('cache', function () {
                 $value = (string) random_int(1, PHP_INT_MAX);
@@ -49,6 +52,13 @@ final class HealthCheck
             'queue' => $this->check('queue', fn () => $this->queueIsMoving()),
             'scheduler' => $this->check('scheduler', fn () => $this->schedulerIsBeating()),
         ];
+
+        // Only where backups are set up (BACKUP_KEY): a dev machine has none.
+        if (filled(config('astrolabe.backup.key'))) {
+            $checks['backup'] = $this->check('backup', fn () => $this->backupIsRecent());
+        }
+
+        return $checks;
     }
 
     /** Written by the scheduler every minute (routes/console.php). */
@@ -108,5 +118,13 @@ final class HealthCheck
         $last = Cache::get(self::SCHEDULER_HEARTBEAT);
 
         return is_int($last) && $last >= CarbonImmutable::now()->getTimestamp() - self::SCHEDULER_STALE_SECONDS;
+    }
+
+    private function backupIsRecent(): bool
+    {
+        $made = app(Backups::class)->latest()['created_at'] ?? null;
+
+        return $made !== null
+            && CarbonImmutable::parse($made)->greaterThan(CarbonImmutable::now()->subHours(config('astrolabe.backup.max_age_hours')));
     }
 }

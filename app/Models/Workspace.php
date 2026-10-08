@@ -6,6 +6,7 @@ use App\Astrology\ValueObjects\AspectSettings;
 use App\Enums\Ayanamsa;
 use App\Enums\HouseSystem;
 use App\Enums\ZodiacMode;
+use Carbon\CarbonImmutable;
 use Database\Factories\WorkspaceFactory;
 use DateTimeZone;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -24,6 +25,8 @@ use Throwable;
  * @property Ayanamsa|null $default_ayanamsa
  * @property array<string, mixed>|null $aspect_orbs
  * @property array<string, mixed>|null $transit_orbs
+ * @property CarbonImmutable|null $deletion_requested_at
+ * @property CarbonImmutable|null $deletes_at when a practice scheduled for deletion goes for good
  */
 #[Fillable([
     'name', 'default_locale', 'timezone', 'default_currency',
@@ -49,7 +52,26 @@ class Workspace extends Model
             'default_ayanamsa' => Ayanamsa::class,
             'aspect_orbs' => 'array',
             'transit_orbs' => 'array',
+            'deletion_requested_at' => 'immutable_datetime',
+            'deletes_at' => 'immutable_datetime',
         ];
+    }
+
+    /**
+     * Scheduled for deletion by its owner (Settings → Your data): closed until the
+     * deletion is cancelled or carried out (docs/spec/06, "Pravna priprema").
+     */
+    public function isPendingDeletion(): bool
+    {
+        return $this->deletes_at !== null;
+    }
+
+    /**
+     * @return HasMany<WorkspaceExport, $this>
+     */
+    public function exports(): HasMany
+    {
+        return $this->hasMany(WorkspaceExport::class);
     }
 
     /** The aspects and orbs this workspace works with, over the defaults. */

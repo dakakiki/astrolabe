@@ -39,7 +39,7 @@ jobs:
         with:
           php-version: '8.3'
           # gd only for the tests that make images (metadata stripping, Phase 8a).
-          extensions: mbstring, intl, pdo_mysql, bcmath, zip, gd
+          extensions: mbstring, intl, pdo_mysql, bcmath, zip, gd, sodium
           coverage: none
 
       - uses: actions/setup-node@v7

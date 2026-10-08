@@ -62,6 +62,12 @@ const amount = (payment) => money.format({ amount: signedAmount(payment), curren
                         class="hover:underline"
                         >{{ payment.client.full_name }}</RouterLink
                     >
+                    <span
+                        v-else-if="payment.client_id === null"
+                        class="text-ink-3 italic"
+                        :title="t('payments.anonymousHint')"
+                        >{{ t('payments.anonymous') }}</span
+                    >
                 </td>
                 <td class="text-sm">
                     <RouterLink
@@ -101,7 +107,13 @@ const amount = (payment) => money.format({ amount: signedAmount(payment), curren
                 </td>
                 <td class="hidden text-xs text-ink-3 lg:table-cell">{{ payment.reference ?? '—' }}</td>
                 <td v-if="editable" class="text-right whitespace-nowrap">
-                    <button type="button" class="btn btn-ghost btn-sm" @click="emit('edit', payment)">
+                    <!-- Kept after its client was deleted permanently: a record only. -->
+                    <button
+                        v-if="payment.client_id !== null"
+                        type="button"
+                        class="btn btn-ghost btn-sm"
+                        @click="emit('edit', payment)"
+                    >
                         {{ t('payments.edit') }}
                     </button>
                     <button

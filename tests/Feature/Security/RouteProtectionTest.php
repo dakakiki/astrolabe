@@ -55,6 +55,32 @@ class RouteProtectionTest extends TestCase
         }
     }
 
+    /** Open while the practice is scheduled for deletion (Phase 8b): the closing screen needs them. */
+    private const OPEN_WHILE_CLOSING = [
+        'api/v1/me',
+        'api/v1/reference-data',
+        'api/v1/workspace GET|HEAD',
+        'api/v1/workspace/exports GET|HEAD',
+        'api/v1/workspace/exports POST',
+        'api/v1/workspace/exports/{export}/download GET|HEAD',
+        'api/v1/workspace/deletion POST',
+        'api/v1/workspace/deletion DELETE',
+    ];
+
+    public function test_a_practice_scheduled_for_deletion_is_closed_everywhere_else(): void
+    {
+        foreach ($this->apiRoutes() as $route) {
+            if (in_array($route->uri(), self::PUBLIC, true)) {
+                continue;
+            }
+
+            $name = $route->uri().' '.implode('|', $route->methods());
+            $open = in_array($route->uri(), self::OPEN_WHILE_CLOSING, true) || in_array($name, self::OPEN_WHILE_CLOSING, true);
+
+            $this->assertSame(! $open, in_array('practice.active', $route->gatherMiddleware(), true), $name);
+        }
+    }
+
     public function test_every_api_route_counts_against_the_general_limit(): void
     {
         $this->assertContains('throttle:api', $this->app['router']->getMiddlewareGroups()['api']);

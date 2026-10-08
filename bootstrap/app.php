@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureIdempotency;
+use App\Http\Middleware\EnsurePracticeIsActive;
 use App\Http\Middleware\ResolveCurrentWorkspace;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
@@ -34,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'workspace' => ResolveCurrentWorkspace::class,
+            'practice.active' => EnsurePracticeIsActive::class,
             'idempotent' => EnsureIdempotency::class,
         ]);
 
@@ -47,7 +49,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // Signed-in users hitting a guest-only endpoint, and guests hitting a
         // protected page, are sent to the SPA's own screens.
         $middleware->redirectUsersTo('/');
-        $middleware->redirectGuestsTo('/login');
+        // The export link from an email comes back after signing in (Phase 8b).
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('exports/*')
+            ? '/login?'.http_build_query(['redirect' => $request->getRequestUri()])
+            : '/login');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

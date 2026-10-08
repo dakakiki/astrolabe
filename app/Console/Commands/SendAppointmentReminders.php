@@ -34,6 +34,8 @@ class SendAppointmentReminders extends Command
             ->where('remind_at', '<=', $now)
             ->where('status', AppointmentStatus::Scheduled->value)
             ->where('starts_at', '>', $now)
+            // A practice scheduled for deletion is closed; its reminders are not sent.
+            ->whereHas('workspace', fn ($query) => $query->whereNull('deletes_at'))
             ->chunkById(200, function (Collection $appointments) use ($now, &$sent) {
                 foreach ($appointments as $appointment) {
                     $claimed = DB::table('appointments')

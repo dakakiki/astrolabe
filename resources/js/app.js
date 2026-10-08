@@ -4,7 +4,7 @@ import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
 import i18n, { setLocale } from './i18n';
-import { setUnauthenticatedHandler } from './lib/http';
+import { setPracticeClosedHandler, setUnauthenticatedHandler } from './lib/http';
 import { useAuthStore } from './stores/auth';
 import { useToastStore } from './stores/toast';
 
@@ -23,6 +23,12 @@ setUnauthenticatedHandler(() => {
     auth.clear();
     useToastStore().error(i18n.global.t('errors.sessionExpired'));
     router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath } });
+});
+
+// The owner scheduled the practice for deletion in another tab or on another device.
+setPracticeClosedHandler(async () => {
+    await auth.load({ force: true });
+    router.push({ name: 'practice-deletion' });
 });
 
 // Mount once the first route (and the session check in its guard) has resolved,

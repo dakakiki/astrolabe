@@ -234,6 +234,8 @@ Izvođenje (korisnik, 8. 10. 2026): prvo lokalno, bez produkcionog servera — *
 
 > Status 8a: završeno 8. 10. 2026. Registracija samo uz poziv operatera (komande `invitations:send`, `invitations:list`, `invitations:revoke`), prijava u dva koraka (TOTP) po izboru uz rezervne kodove, audit log prijava, izmena naloga i kritičnih operacija sa „Recent security activity“ u Settings → Security, ograničenja zahteva za ceo API i posebno za rute ephemeris engine-a, Content Security Policy sa nonce-om i ostala sigurnosna zaglavlja, CORS isključen, uklanjanje metapodataka sa slika, health check (`/api/v1/health` i `health:check` sa mejlom operateru), mejl operateru o serverskim greškama bez sadržaja poruke, provera paketa u CI-ju. Detalji u dokumentima 02, 05 i 06.
 
+> Status 8b: završeno 8. 10. 2026. Izvoz cele prakse (ZIP sa JSON-om, CSV-om, kartama i fajlovima; queue, mejl sa linkom od 24 h, 7 dana u aplikaciji), pravo brisanje klijenta uz upisano ime (uplate ostaju anonimne), brisanje prakse i naloga sa 30 dana za otkazivanje (praksa je za to vreme zatvorena), pravila čuvanja (`data:prune` svake noći: obrisano posle 30 dana i sa diska, audit log 12 meseci, izvozi, pozivi, neuspeli poslovi, keš), šifrovan backup (`backup:run`, libsodium, 14 kopija) i restore sa probnim vraćanjem (`backup:restore --verify`), proveren lokalno i na aplikaciji nad vraćenom bazom. Settings → Your data. Detalji u dokumentima 02, 05 i 06.
+
 ## Faza 9 — komercijalizacija i lansiranje
 
 - Freemius subscription billing prema dokumentu 07, uz integraciju preuzetu iz drugog projekta korisnika;

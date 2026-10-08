@@ -29,12 +29,31 @@ final class Audit
         array $properties = [],
         ?Authenticatable $user = null,
     ): AuditLog {
+        return self::write($event, $subject, $properties, ($user ?? auth()->user())?->getAuthIdentifier());
+    }
+
+    /**
+     * Done by the schedule or an operator's command, not by a person signed in
+     * (retention, deleting a due practice, restoring a backup).
+     *
+     * @param  array<string, mixed>  $properties
+     */
+    public static function system(AuditEvent $event, ?Model $subject = null, array $properties = []): AuditLog
+    {
+        return self::write($event, $subject, $properties, null);
+    }
+
+    /**
+     * @param  array<string, mixed>  $properties
+     */
+    private static function write(AuditEvent $event, ?Model $subject, array $properties, int|string|null $userId): AuditLog
+    {
         $request = request();
         $userAgent = $request->userAgent();
 
         return AuditLog::query()->create([
             'workspace_id' => app(CurrentWorkspace::class)->id(),
-            'user_id' => ($user ?? auth()->user())?->getAuthIdentifier(),
+            'user_id' => $userId,
             'event' => $event,
             'subject_type' => $subject ? self::subjectType($subject) : null,
             'subject_id' => $subject?->getKey(),

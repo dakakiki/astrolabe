@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\WorkspaceExportController;
 use App\Http\Controllers\Auth\OtherSessionsController;
 use App\Http\Controllers\Auth\RegistrationController;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +21,12 @@ Route::get('/api/v1/auth/registration', [RegistrationController::class, 'show'])
 
 // Named so framework redirects (e.g. an expired session) have somewhere to go.
 Route::view('/login', 'app')->name('login');
+
+// The link in the "export ready" email (Phase 8b): signed for a day, and still only
+// for the practice's owner, signed in. A guest is sent to sign in and comes back here.
+Route::get('/exports/{export}/download', [WorkspaceExportController::class, 'download'])
+    ->middleware(['auth', 'verified', 'workspace', 'signed', 'throttle:30,1'])
+    ->name('practice-exports.link');
 
 // The Vue SPA owns every path except the API, Sanctum and the health check,
 // which are registered separately and take precedence.

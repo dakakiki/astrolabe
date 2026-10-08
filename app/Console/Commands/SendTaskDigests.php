@@ -42,7 +42,9 @@ class SendTaskDigests extends Command
                         continue;
                     }
 
-                    foreach ($user->activeWorkspaces()->orderBy('workspaces.id')->get() as $workspace) {
+                    $open = $user->activeWorkspaces()->whereNull('workspaces.deletes_at')->orderBy('workspaces.id')->get();
+
+                    foreach ($open as $workspace) {
                         $counts = $current->run($workspace, fn () => TaskDigest::counts($user, $now));
 
                         if ($counts['today'] > 0) {

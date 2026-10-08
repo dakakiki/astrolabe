@@ -148,4 +148,72 @@ return [
         'engine' => (int) env('RATE_LIMIT_ENGINE', 40),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Retention
+    |--------------------------------------------------------------------------
+    |
+    | How long data is kept (docs/spec/06, "pravila čuvanja i brisanja"),
+    | applied every night by `php artisan data:prune`. Deleted consultations,
+    | notes, files, tasks, payments and related people stay restorable for
+    | `deleted_days`, then go for good — files from the disk too. A practice
+    | scheduled for deletion can be cancelled for `practice_deletion_days`.
+    | Expired or revoked invitations and failed queue jobs go after
+    | `housekeeping_days`.
+    |
+    */
+
+    'retention' => [
+        'deleted_days' => (int) env('RETENTION_DELETED_DAYS', 30),
+        'audit_log_months' => (int) env('RETENTION_AUDIT_LOG_MONTHS', 12),
+        'practice_deletion_days' => (int) env('PRACTICE_DELETION_DAYS', 30),
+        'housekeeping_days' => (int) env('RETENTION_HOUSEKEEPING_DAYS', 30),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Practice exports
+    |--------------------------------------------------------------------------
+    |
+    | The owner's ZIP of everything in the practice, built by a queued job on
+    | the private "exports" disk. The link in the "ready" email works for
+    | `link_hours`; the file can be downloaded in Settings → Your data until it
+    | is deleted after `keep_days`.
+    |
+    */
+
+    'exports' => [
+        'disk' => env('EXPORTS_DISK', 'exports'),
+        'link_hours' => (int) env('EXPORT_LINK_HOURS', 24),
+        'keep_days' => (int) env('EXPORT_KEEP_DAYS', 7),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Backups
+    |--------------------------------------------------------------------------
+    |
+    | `php artisan backup:run` (every night once BACKUP_KEY is set) dumps the
+    | database without the GeoNames rows (they come back with places:import)
+    | and archives the client files, both compressed and encrypted with
+    | BACKUP_KEY (libsodium; `php artisan backup:key` makes one). Without the
+    | key a backup cannot be read: keep a copy of it away from the server. The
+    | newest `keep` backups stay in `path`; older ones are removed.
+    |
+    */
+
+    'backup' => [
+        'key' => env('BACKUP_KEY'),
+        'path' => env('BACKUP_PATH', storage_path('app/private/backups')),
+        'keep' => (int) env('BACKUP_KEEP', 14),
+        'dump_binary' => env('BACKUP_DUMP_BINARY', 'mariadb-dump'),
+        'client_binary' => env('BACKUP_CLIENT_BINARY', 'mariadb'),
+        // Dumped as structure only: the gazetteer (~1.8 GB) comes back with places:import;
+        // sessions and cache refill by use — a restore signs nobody back in.
+        'structure_only' => ['places', 'place_names', 'sessions', 'cache', 'cache_locks'],
+        // With a key set, a newest backup older than this fails the health check.
+        'max_age_hours' => (int) env('BACKUP_MAX_AGE_HOURS', 26),
+        'timeout' => (int) env('BACKUP_TIMEOUT', 1800),
+    ],
+
 ];

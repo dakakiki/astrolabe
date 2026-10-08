@@ -30,6 +30,14 @@
 - **Prijava u dva koraka (TOTP), po izboru astrologa**: Settings → Security; uključivanje traži lozinku i jedan kod iz aplikacije (QR kod ili ključ za ručni unos), posle čega se prikazuje 8 rezervnih kodova (svaki važi jednom); rezervni kodovi se mogu prikazati ili zameniti novima, a 2FA isključiti — sve uz potvrdu lozinke. Prijava tada posle lozinke traži kod ili rezervni kod; pokušaji koda su ograničeni (5 u minuti).
 - **Nedavna bezbednosna aktivnost** (Settings → Security): sopstvene prijave, neuspeli pokušaji, blokada posle previše pokušaja, odjave, promena lozinke i mejla, odjava drugih sesija, promene 2FA — sa vremenom, pregledačem i IP adresom; sumnjivi događaji su naglašeni. Član ne vidi tuđe događaje. *Odluka korisnika 8. 10. 2026: astrolozima ovaj pregled ne treba — u Fazi 8c prelazi u admin deo (pregled astrologa i njihovog audit log-a za operatera).*
 
+### Podaci prakse: izvoz i brisanje (Faza 8b, implementirano)
+
+Settings → **Your data** (rokovi su odluka korisnika 8. 10. 2026, svi podesivi):
+
+- **Izvoz prakse** (vlasnik): dugme „Prepare an export“ pravi ZIP u pozadini — JSON po vrsti podataka (klijenti sa podacima rođenja, povezane osobe i veze, konsultacije, beleške, termini, zadaci, uplate, usluge, fajlovi, izračunate karte), CSV za klijente, konsultacije i uplate, svi fajlovi pod originalnim imenima u folderu svakog klijenta i README sa objašnjenjem formata. Vlasnik dobija mejl sa linkom koji važi 24 h i radi samo dok je prijavljen; izvoz se može preuzeti u aplikaciji 7 dana, zatim se briše. Jedan izvoz u isto vreme.
+- **Koliko se čuva**: obrisano se može vratiti 30 dana, pa se briše trajno (i fajlovi sa diska); bezbednosni zapis 12 meseci; izvoz 7 dana; šifrovani backup-i 14 dana.
+- **Brisanje prakse i naloga** (vlasnik, uz lozinku): praksa se odmah zatvara i 30 dana se može otkazati, pa se briše sve, sa nalozima koji ne pripadaju drugoj praksi. Dok čeka, svaka strana vodi na ekran sa datumom brisanja, otkazivanjem i izvozom (članovi vide samo datum i odjavu); podsetnici i jutarnji mejl se ne šalju. Svi članovi dobijaju mejl kada je brisanje zakazano, otkazano i izvršeno.
+
 ### Admin (operater) — Faza 8c, planirano
 
 Poseban nalog operatera (pravi se komandom, obavezan 2FA, nije član nijedne prakse) u zasebnom delu aplikacije `/admin`: pregled astrologa (stanje naloga i brojevi, bez sadržaja klijenata), audit log sa filterima, pozivi, pomoć nalogu (isključivanje 2FA, ponovno slanje potvrde mejla, suspenzija — uz razlog, zapis i mejl astrologu), stanje sistema i neuspeli poslovi, povratne informacije iz bete. Admin nikada ne vidi podatke rođenja, beleške, fajlove ni iznose; sve što pogleda ili uradi beleži se u audit log. Prijava „kao astrolog“ se ne pravi. Kasnije (Faza 9): pretplate, obaveštenja korisnicima, funkcije po praksi, zbirna statistika.
@@ -55,6 +63,10 @@ Potrebne operacije:
 - arhiviranje i vraćanje iz arhive;
 - pretraga, filtriranje i paginacija;
 - filtriranje po statusu, metodi, oznaci i poslednjoj aktivnosti.
+
+### Brisanje klijenta (Faza 8b, implementirano)
+
+Kada klijent zatraži brisanje svojih podataka, vlasnik prakse na profilu bira „Delete permanently“ i upisuje puno ime klijenta (veličina slova i razmaci nisu bitni). Brisanje je odmah i nepovratno — za ostavljanje po strani postoji arhiva. Briše se: klijent, podaci rođenja, konsultacije, beleške, fajlovi (i sa diska), karte, termini, zadaci, stavke vremenske linije, veze sa drugim klijentima, povezane osobe koje postoje samo kroz njega (i zapis osobe koja je postala ovaj klijent) i raniji izvozi prakse (sadrže klijenta). **Uplate ostaju** kao iznos, valuta, dan i način, bez klijenta, svrhe, reference i napomene; na strani Payments su „Deleted client“, ulaze u zbirove i izvoz i mogu se samo ukloniti, ne i menjati. Audit log beleži brojeve, nikad ime. Član prakse koji nije vlasnik ne vidi ovu opciju (403).
 
 ## Podaci rođenja
 
@@ -322,7 +334,7 @@ Vidljivost:
 - **Eksterni linkovi** (npr. snimak sesije na Zoom-u ili dokument na Drive-u) čuvaju se kao prilog vrste `link`, samo `http`/`https`.
 - Fajl ili link može biti na klijentu ili na njegovoj konsultaciji; prilozi na beleškama i zadacima dolaze kasnije. Lista fajlova klijenta obuhvata i one sa njegovih konsultacija.
 - Vidljivost važi i za download: tuđ privatni fajl je 404. Novi fajlovi su privatni dok se drugačije ne izabere; vidljivost i naziv se mogu promeniti, sam fajl ne.
-- Obrisan fajl je soft delete i ostaje na disku dok ga ne uklone pravila čuvanja podataka (Faza 8).
+- Obrisan fajl je soft delete i ostaje na disku 30 dana (može se vratiti), zatim ga pravila čuvanja podataka brišu iz baze i sa diska (Faza 8b, `data:prune`).
 - Slike (JPEG, PNG, WebP) se pre čuvanja čiste od metapodataka — GPS položaj, fotoaparat, autor, komentari, dodatne slike iz telefona — bez ponovnog kodiranja piksela; orijentacija JPEG fotografije se zadržava (Faza 8a). Veličina i kontrolni zbir opisuju sačuvan fajl. PDF i Word dokumenti se ne menjaju.
 - Preuzimanje fajla se beleži u audit log (ko, koji fajl, kada).
 

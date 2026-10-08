@@ -66,6 +66,29 @@ before starting a phase. The user communicates in Serbian.
   `OperatorAlerts` emails `OPERATOR_EMAIL` about failures and reported exceptions — at most hourly,
   sent at once (not queued), and never with an exception's message (it can quote client data).
 
+## Data lifecycle (Phase 8b)
+
+- Retention lives in `config/astrolabe.php` (`retention`, `exports`, `backup`) and is applied nightly by
+  `data:prune` (`App\Support\Retention\Retention`): trashed rows go for good after `deleted_days`,
+  files from the disk first. A new soft-deletable table with files or charts needs its step there.
+  Clients are never trashed — archive is a status, `DeleteClient` is immediate and for good.
+- `DeleteClient` and `DeletePractice` delete with plain queries, children first, and write one audit
+  entry with counts (never names); file deletion happens after the transaction commits. A new table
+  holding client data must be added to both — and to `PracticeExport` — or it survives an erasure.
+- A deleted client's payments stay anonymised (`client_id` null, no purpose, reference or notes):
+  they count in the ledger and the CSV, can be removed but not edited (`PaymentPolicy::update`).
+- A practice with `workspaces.deletes_at` set is closed: `practice.active` (`EnsurePracticeIsActive`)
+  wraps every practice route; `RouteProtectionTest::OPEN_WHILE_CLOSING` lists the few left open.
+  Scheduled emails skip such practices. The SPA follows `workspace.deletion` (router guard, `closing` meta)
+  and the 403 code `practice_pending_deletion` (`setPracticeClosedHandler`).
+- The practice export (`BuildPracticeExport` → `PracticeExport`) reads with queries by workspace id,
+  so birth data comes out exactly as entered; the "ready" email holds a signed web link
+  (`practice-exports.link`) that still needs the owner signed in.
+- Backups: `backup:run` / `backup:restore [--verify]` (`App\Support\Backup`): `mariadb-dump` through a
+  temporary option file (never a password on the command line), then gzip + libsodium secretstream with
+  `BACKUP_KEY`. Commands without a signed-in person audit with `Audit::system()`. Tests fake the tools
+  with `Process::fake()`; the real round trip runs only where the MariaDB tools are installed.
+
 ## Birth data
 
 - Birth places come from the local GeoNames copy (`places`, `place_names`) through the
@@ -161,6 +184,7 @@ before starting a phase. The user communicates in Serbian.
   (allowlist). The SPA renders stored HTML only through `RichText.vue`. Never render any other
   user HTML with `v-html`, and never store editor output without `RichText::sanitize()`.
 - The client of a consultation or note is set on creation and never changes.
+- Deleted (trashed) files stay on disk for the retention period; `data:prune` removes them (Phase 8b).
 - Visibility (`private`, `team`, `shared_with_client`): someone else's private note or file must be
   a 404 (`Response::denyAsNotFound()` in the policy, `Gate::authorize` in FormRequests) and must
   be left out of lists and the timeline (`visibleTo($user)` scopes).

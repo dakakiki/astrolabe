@@ -6,13 +6,17 @@
  *   guest    — only for signed-out visitors (sign in, register …)
  *   auth     — needs a signed-in user
  *   verified — additionally needs a verified email address
+ *   closing  — still open while the practice is scheduled for deletion
+ *
+ * A practice scheduled for deletion (`workspace.deletion`) is closed: every
+ * other verified screen leads to the closing screen (Phase 8b).
  *
  * @param {{ name?: string, fullPath: string, meta: Record<string, unknown> }} to
- * @param {{ user: { email_verified: boolean } | null }} session
+ * @param {{ user: { email_verified: boolean } | null, workspace?: { deletion: object | null } | null }} session
  * @returns {true | { name: string, query?: Record<string, string> }}
  */
-export function resolveNavigation(to, { user }) {
-    const { guest, auth, verified } = to.meta;
+export function resolveNavigation(to, { user, workspace = null }) {
+    const { guest, auth, verified, closing } = to.meta;
 
     if (guest && user) {
         return { name: 'dashboard' };
@@ -27,6 +31,16 @@ export function resolveNavigation(to, { user }) {
     }
 
     if (to.name === 'verify-email' && user?.email_verified) {
+        return { name: 'dashboard' };
+    }
+
+    const closed = Boolean(workspace?.deletion);
+
+    if (verified && closed && !closing) {
+        return { name: 'practice-deletion' };
+    }
+
+    if (to.name === 'practice-deletion' && !closed) {
         return { name: 'dashboard' };
     }
 

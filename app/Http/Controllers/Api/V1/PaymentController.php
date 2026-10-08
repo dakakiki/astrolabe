@@ -144,7 +144,8 @@ class PaymentController extends Controller
         ]);
 
         return Payment::query()
-            ->whereHas('client')
+            // Payments kept after their client was deleted for good still count.
+            ->where(fn (Builder $query) => $query->whereNull('client_id')->orWhereHas('client'))
             ->when($filters['client_id'] ?? null, fn (Builder $query, int $id) => $query->where('client_id', $id))
             ->when($filters['consultation_id'] ?? null, fn (Builder $query, int $id) => $query->where('consultation_id', $id))
             ->when($filters['appointment_id'] ?? null, fn (Builder $query, int $id) => $query->where('appointment_id', $id))

@@ -35,6 +35,14 @@ class ClientPolicy
         return $this->view($user, $client);
     }
 
+    /** Deleting a client for good belongs to the practice's owner (Phase 8b). */
+    public function delete(User $user, Client $client): bool
+    {
+        $workspace = $this->current->get();
+
+        return $this->view($user, $client) && $user->ownsWorkspace($workspace);
+    }
+
     private function isMember(User $user): bool
     {
         $workspace = $this->current->get();

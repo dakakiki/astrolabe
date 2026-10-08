@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Clients\DeleteClient;
 use App\Actions\Clients\SaveClient;
 use App\Enums\ClientStatus;
 use App\Enums\ConsultationStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\DeleteClientRequest;
 use App\Http\Requests\SaveClientRequest;
 use App\Http\Resources\ClientResource;
 use App\Models\Client;
@@ -15,6 +17,7 @@ use App\Support\Billing\Ledger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
@@ -87,6 +90,17 @@ class ClientController extends Controller
     public function update(SaveClientRequest $request, Client $client, SaveClient $saveClient): ClientResource
     {
         return ClientResource::make($saveClient->handle($client, $request->validated()))->withNotes();
+    }
+
+    /**
+     * For good, at the client's request (DeleteClient). Archive is the way to put
+     * a client aside; this cannot be undone.
+     */
+    public function destroy(DeleteClientRequest $request, Client $client, DeleteClient $delete): Response
+    {
+        $delete->handle($client);
+
+        return response()->noContent();
     }
 
     private function search(Builder $query, string $search): void

@@ -5,6 +5,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
 import BirthDetailsCard from '@/components/BirthDetailsCard.vue';
+import ClientDeleteDialog from '@/components/ClientDeleteDialog.vue';
 import ClientTimeline from '@/components/ClientTimeline.vue';
 import ConsultationsTable from '@/components/ConsultationsTable.vue';
 import NatalChart from '@/components/NatalChart.vue';
@@ -19,6 +20,7 @@ import { useLabels } from '@/composables/useLabels';
 import { useMoney } from '@/composables/useMoney';
 import { formatDate, formatRelative, initials } from '@/lib/format';
 import http from '@/lib/http';
+import { useAuthStore } from '@/stores/auth';
 import { useToastStore } from '@/stores/toast';
 
 /**
@@ -34,6 +36,7 @@ const money = useMoney();
 const route = useRoute();
 const router = useRouter();
 const toast = useToastStore();
+const auth = useAuthStore();
 
 const TABS = ['overview', 'chart', 'transits', 'synastry', 'consultations', 'notes', 'files', 'tasks', 'related'];
 
@@ -178,6 +181,14 @@ async function toggleArchive() {
     client.value = { ...data.data, stats: client.value.stats };
     toast.success(archived ? t('clients.restored') : t('clients.archived'));
 }
+
+// Deleting for good, at the client's request (owner only, Phase 8b).
+const deleteDialog = ref(null);
+
+function deleted() {
+    toast.success(t('clients.deleteDialog.deleted'));
+    router.push({ name: 'clients.index' });
+}
 </script>
 
 <template>
@@ -211,6 +222,14 @@ async function toggleArchive() {
                 }}</RouterLink>
                 <button type="button" class="btn btn-ghost" @click="toggleArchive">
                     {{ client.status === 'archived' ? t('clients.restore') : t('clients.archive') }}
+                </button>
+                <button
+                    v-if="auth.isOwner"
+                    type="button"
+                    class="btn btn-ghost text-danger"
+                    @click="deleteDialog.open()"
+                >
+                    {{ t('clients.deletePermanently') }}
                 </button>
                 <RouterLink :to="{ name: 'calendar', query: { new: 1, client: client.id } }" class="btn"
                     >+ {{ t('clients.addAppointment') }}</RouterLink
@@ -464,6 +483,8 @@ async function toggleArchive() {
 
         <!-- Related people -->
         <RelatedPeoplePanel v-else-if="tab === 'related'" :client-id="client.id" @changed="refreshStats" />
+
+        <ClientDeleteDialog v-if="auth.isOwner" ref="deleteDialog" :client="client" @deleted="deleted" />
     </template>
 
     <p v-else class="text-ink-3">{{ t('common.loading') }}</p>

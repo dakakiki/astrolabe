@@ -19,6 +19,9 @@ class TasksDueToday extends Notification implements ShouldQueue
 
     public int $tries = 3;
 
+    // The account may be deleted (with its practice) before the queue gets here.
+    public bool $deleteWhenMissingModels = true;
+
     public function __construct(
         public readonly string $practice,
         public readonly int $today,
