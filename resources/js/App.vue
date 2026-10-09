@@ -5,10 +5,13 @@ import { RouterView, useRoute } from 'vue-router';
 import ToastHost from '@/components/ToastHost.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
+import { layoutOf } from '@/lib/layout';
 
 const route = useRoute();
 
-const layout = computed(() => ({ auth: AuthLayout, bare: null })[route.meta.layout] ?? AppLayout);
+// 'bare' has no component: the page draws its own header.
+const LAYOUTS = { app: AppLayout, auth: AuthLayout, bare: null };
+const layout = computed(() => LAYOUTS[layoutOf(route.meta)]);
 </script>
 
 <template>
