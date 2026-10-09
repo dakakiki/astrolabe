@@ -2,7 +2,7 @@
 
 > Nov dokument, 9. 10. 2026. Korisnik je odlučio da se zatvorena beta za sada ostavi po strani i da se **prvo uradi klijentski portal, a posle njega PWA za klijente**. Ovaj dokument je plan izvođenja: preuzima zahteve iz dokumenata 09 („Klijentski portal“) i 10 („Dostupnost i booking pravila“, „Klijentski prikaz“), dopunjuje ih modelom podataka, tokovima, bezbednošću i PWA delom, i deli posao na tri dela sa tačkom za pauzu posle svakog. Kada se deo uradi, detalji prelaze u dokumente 02, 05, 06, 09 i 10, kao u ranijim fazama.
 
-> **9a — urađeno 9. 10. 2026** (vidi „Stanje posle 9a“ na kraju). Sledi **9b — zakazivanje**.
+> **9a — urađeno 9. 10. 2026** (commit `c123349`; vidi „Stanje posle 9a“ na kraju). Sledi **9b — zakazivanje**.
 
 ## Odluke (korisnik, 9. 10. 2026 — sve preporuke)
 
