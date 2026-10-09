@@ -264,6 +264,18 @@ Odluke korisnika na početku 8c2 (sve preporuke): nacrte Terms, DPA i Privacy Po
 
 Odluke donete usput: verzija dokumenta je datum u nazivu fajla, tekstovi su u repou (ne u bazi), važeća je najnovija; HTML iz Markdown-a sa uklonjenim sirovim HTML-om; praksu zatvara isti skup ruta kao zakazano brisanje (test to čuva); privacy se „vidi“, ne prihvata; operater ne prihvata ništa; zapis o prihvatanju se briše sa nalogom (pitanje za pravnika); adresa izvornog repozitorijuma biblioteke je GitHub secret `SWISSEPH_SOURCE` jer sadrži ime autora (tačka 9), a link je skinut i iz README-a; preuzimaju se samo potrebni fajlovi (~3,8 MB), commit proverava git, efemeride SHA-256 iz lokalnih kopija; `preventLazyLoading` u produkciji samo piše u log; sesija baze u UTC-u (nađeno pri seed-u: upis u satu prelaska na letnje vreme padao je na lokalnom serveru); dodatni indeksi nisu uvedeni jer nisu doneli merljivu razliku.
 
+## Klijentski portal pre bete (9. 10. 2026)
+
+Odluka korisnika: beta (8d, 8e) za sada čeka; prvo klijentski portal, pa PWA za klijente. Na pitanja iz pripreme izabrane su sve preporuke: portal na `portal.astrolabe.online` (poseban origin, svoj kolačić i tabela sesija), prijava linkom i šestocifrenim kodom na mejl (Google kasnije), zakazivanje pre PWA, brend prakse u portalu = prikazno ime, logo i jedna boja. Izmene:
+
+- 12: nov dokument — plan portala i PWA (9a, 9b, 9c), model podataka, tokovi, bezbednost, šta priprema korisnik, kriterijumi prihvatanja.
+- 04: Faza 8 prekinuta posle 8c2; u Fazi 9 portal i PWA idu prvi.
+- 05: pokazivač na model portala u dokumentu 12.
+- 09: portal po dokumentu 12; od brendinga u 9a samo ime, logo i jedna boja.
+- 10: portal booking u 9b.
+
+Odluke u planu (bez posebnog pitanja): portal na engleskom; poziv važi 7 dana, link i kod 15 minuta, 5 pokušaja koda; prihvatanje poziva i prijava preko linka traže dugme (POST), da mejl skeneri ne troše linkove; sesija portala 30 dana bez aktivnosti; arhiviran klijent ne može u portal te prakse dok se ne vrati; jedan nalog portala sa više praksi uz izbor prakse; service worker bez paketa i bez keširanja API-ja i HTML-a; push samo opštim tekstom i samo uz uključivanje.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

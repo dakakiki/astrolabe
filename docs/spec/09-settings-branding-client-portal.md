@@ -15,6 +15,8 @@ Ovaj dokument je detaljno specificiran, ali ta detaljnost **ne sme povlačiti ra
 | Billing | Faza 9 |
 | **Klijentski portal u celini** | **Faza 9** |
 
+> Izmena 9. 10. 2026 (korisnik): portal se radi pre bete, po dokumentu 12 — **9a** pristup i pregled, **9b** zakazivanje, **9c** PWA za klijente. Portal je na posebnom origin-u `portal.astrolabe.online`, prijava je linkom ili kodom na mejl (Google kasnije). Branding iz Faze 6 nije bio urađen; u 9a se radi samo ono što portal treba — prikazno ime prakse, logo i jedna glavna boja sa proverom kontrasta — a ostatak ovog odeljka (varijante loga, do pet boja, izvezena karta, mejlovi) ostaje za kasnije.
+
 ### Napomena o portal autentifikaciji
 
 Google OIDC + email magic link/OTP nije „samo login". To je **drugi, nezavisan auth sistem** sa sopstvenom sesijom, sopstvenim rate limitingom i sopstvenom napadnom površinom, koji koegzistira sa Sanctum sesijom astrologa u istoj aplikaciji.

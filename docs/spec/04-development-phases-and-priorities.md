@@ -230,6 +230,8 @@ Izvođenje (dogovoreno 25. 9. 2026): tri dela sa commit-om, zelenim CI-jem i ta�
 
 Kriterijum završetka: proizvod je stabilan za ograničeni broj pravih korisnika i njihovih podataka.
 
+> Izmena 9. 10. 2026 (korisnik): posle 8c2 beta se za sada ostavlja po strani — 8d (podizanje produkcije) i 8e (testeri) čekaju. Prvo se radi klijentski portal iz Faze 9 (vidi ispod i dokument 12).
+
 Izvođenje (korisnik, 8. 10. 2026): prvo lokalno, bez produkcionog servera — **8a** bezbednost i audit, **8b** životni ciklus podataka (izvoz prakse, pravo brisanje klijenta, brisanje naloga, pravila čuvanja, backup i restore), **8c** admin i alati za betu (admin deo za operatera — pregled astrologa, audit log, pozivi, pomoć nalogu, stanje sistema, povratne informacije; dogovoreno 8. 10. 2026 posle 8a — zatim pravne strane, performanse, Linux `swetest` u CI-ju); zatim **8d** podizanje produkcije i **8e** beta sa testerima. Interfejs za betu ostaje na engleskom. Licenca, Hetzner nalog, razgovori i pravnik se pokreću paralelno.
 
 > Status 8a: završeno 8. 10. 2026. Registracija samo uz poziv operatera (komande `invitations:send`, `invitations:list`, `invitations:revoke`), prijava u dva koraka (TOTP) po izboru uz rezervne kodove, audit log prijava, izmena naloga i kritičnih operacija sa „Recent security activity“ u Settings → Security, ograničenja zahteva za ceo API i posebno za rute ephemeris engine-a, Content Security Policy sa nonce-om i ostala sigurnosna zaglavlja, CORS isključen, uklanjanje metapodataka sa slika, health check (`/api/v1/health` i `health:check` sa mejlom operateru), mejl operateru o serverskim greškama bez sadržaja poruke, provera paketa u CI-ju. Detalji u dokumentima 02, 05 i 06.
@@ -253,6 +255,8 @@ Izvođenje (korisnik, 8. 10. 2026): prvo lokalno, bez produkcionog servera — *
 - proširenje jezika.
 
 Ova faza se planira detaljno tek nakon bete. Obim se određuje prema tome šta su korisnici stvarno tražili.
+
+> Izmena 9. 10. 2026 (korisnik): klijentski portal i portal booking se rade **pre bete**, a posle njih PWA za klijente — plan, model podataka i kriterijumi su u dokumentu 12. Tri dela sa tačkom za pauzu: **9a** pristup i pregled (pozivnica, prijava linkom ili kodom, termini i deljeni sadržaj, brend prakse — ime, logo, jedna boja), **9b** zakazivanje (radno vreme, pravila, slobodni termini, rezervacija, pomeranje i otkazivanje), **9c** PWA za klijente (instalacija, service worker bez privatnih podataka, web push po izboru). Ostatak Faze 9 (Freemius, onboarding, PDF karte, javna booking stranica, integracije kalendara, analitika, jezici) planira se kasnije.
 
 ## Preporučeni redosled prvog backloga
 

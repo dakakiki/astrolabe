@@ -531,6 +531,10 @@ Dve vrste događaja:
 
 `php artisan activity:rebuild [--workspace=]` briše i ponovo pravi sve projekcije iz osnovnih tabela; zapisi promena ne postoje nigde drugde i ostaju netaknuti.
 
+## Klijentski portal (plan, Faza 9a–9c)
+
+Model portala je u dokumentu 12 dok se ne implementira: `portal_users`, `portal_access`, `portal_invitations`, `portal_login_tokens`, `portal_sessions`; `workspaces.display_name`, `logo_path`, `brand_color`; `audit_logs.portal_user_id`; u 9b `availability_rules`, `availability_exceptions`, `booking_policies`, `services.bookable_in_portal`, status termina `requested`, `appointments.client_note` i `portal_user_id`; u 9c `portal_push_subscriptions`. Posle svakog dela opis prelazi ovde.
+
 ## Obavezna pravila
 
 - Svaki tenant entitet sadrži `workspace_id`.
