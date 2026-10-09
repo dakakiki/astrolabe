@@ -82,16 +82,18 @@ and are refreshed by `php artisan countries:import`.
 ## Chart calculation (Swiss Ephemeris)
 
 Positions come from the Swiss Ephemeris `swetest` program and its data files (1800–2400), kept in
-`storage/app/private/swisseph` (not in Git). From the official repository
-[github.com/aloistr/swisseph](https://github.com/aloistr/swisseph):
+`storage/app/private/swisseph` (not in Git), from the official Swiss Ephemeris source repository
+(the one the licence contract names — its address is deliberately not written here):
 
 - Windows: `windows/programs/swetest64.exe` → `storage/app/private/swisseph/swetest64.exe`
-- Linux: build `swetest` from the sources (`make swetest`) and set `SWETEST_PATH`
-- data: `ephe/sepl_18.se1` and `ephe/semo_18.se1` → `storage/app/private/swisseph/ephe/`
+- Linux: `SWISSEPH_SOURCE=<repository URL> bash scripts/build-swetest.sh <directory>` builds `swetest`
+  at a pinned commit and copies the data files next to it; then set `SWETEST_PATH` and `EPHEMERIS_PATH`
+- data: `ephe/sepl_18.se1`, `ephe/semo_18.se1` and `ephe/seas_18.se1` (Chiron) → `storage/app/private/swisseph/ephe/`
 
-`EPHEMERIS_ENGINE=fake` runs without them (tests and CI do). `tests/Feature/Astrology/SwissEphemerisReferenceTest.php`
-checks the real engine against NASA JPL Horizons and runs wherever the files are present; run it
-before deploying a new engine, new data files or new tzdata.
+`EPHEMERIS_ENGINE=fake` runs without them (the tests do). `tests/Feature/Astrology/SwissEphemerisReferenceTest.php`
+checks the real engine against NASA JPL Horizons and runs wherever the files are present — in CI too,
+where the same script builds `swetest` on Linux; run it before deploying a new engine, new data files
+or new tzdata. `php artisan ephemeris:benchmark` times a chart, the transit series and the sky calendar.
 
 ## Licensing note
 

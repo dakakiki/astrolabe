@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Actions\Fortify\CreateNewUser;
 use App\Http\Controllers\Controller;
 use App\Models\RegistrationInvitation;
+use App\Support\Legal\LegalDocument;
+use App\Support\Legal\LegalDocuments;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -33,6 +35,8 @@ class RegistrationController extends Controller
         return response()->json(['data' => [
             'mode' => CreateNewUser::invitationsOnly() ? 'invite' : 'open',
             'invitation' => $invitation,
+            // The versions the person accepts with the form (Phase 8c).
+            'legal' => array_map(fn (LegalDocument $document) => $document->summaryArray(), LegalDocuments::inForce()),
         ]]);
     }
 }

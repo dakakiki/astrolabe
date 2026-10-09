@@ -3,7 +3,9 @@
 namespace Database\Factories;
 
 use App\Actions\Workspaces\CreateWorkspace;
+use App\Models\LegalAcceptance;
 use App\Models\User;
+use App\Support\Legal\LegalDocuments;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -34,6 +36,29 @@ class UserFactory extends Factory
             'timezone' => 'Europe/Belgrade',
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * An astrologer has accepted the Terms and the DPA in force and seen the
+     * privacy policy, as registration records it (Phase 8c). A test about a
+     * new version deletes these rows or publishes one.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            if ($user->is_admin) {
+                return;
+            }
+
+            foreach (LegalDocuments::currentVersions() as $document => $version) {
+                LegalAcceptance::query()->create([
+                    'user_id' => $user->getKey(),
+                    'document' => $document,
+                    'version' => $version,
+                    'accepted_at' => now(),
+                ]);
+            }
+        });
     }
 
     /**

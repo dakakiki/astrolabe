@@ -94,7 +94,8 @@
                 "expired": "This invitation has expired. Ask for a new one.",
                 "used": "This invitation has already been used. Sign in instead.",
                 "revoked": "This invitation is no longer valid. Ask for a new one."
-            }
+            },
+            "acceptTerms": "I accept the {terms} and the {dpa}, and I have read the {privacy}."
         },
         "forgot": {
             "title": "Reset your password",
@@ -405,6 +406,14 @@
                 "password": "Your password",
                 "submit": "Delete practice and account",
                 "confirm": "Close this practice now and delete it for good in {days} days?"
+            },
+            "legal": {
+                "title": "Terms and privacy",
+                "accepted": "accepted on {date}",
+                "seen": "seen on {date}",
+                "thatVersion": "the version you accepted",
+                "notYet": "not accepted yet",
+                "notSeen": "not seen yet"
             }
         }
     },
@@ -1815,7 +1824,8 @@
             "account_restored": "Account restored",
             "admin_job_retried": "Failed job run again",
             "admin_job_deleted": "Failed job dropped",
-            "feedback_sent": "Feedback sent"
+            "feedback_sent": "Feedback sent",
+            "legal_accepted": "Terms or privacy policy accepted"
         },
         "invitations": {
             "title": "Invitations",
@@ -1909,6 +1919,45 @@
                 "queue": "Queue",
                 "failed": "Failed"
             }
+        }
+    },
+    "legal": {
+        "title": "Legal",
+        "eyebrow": "Legal",
+        "documents": {
+            "terms": "Terms of Service",
+            "dpa": "Data Processing Agreement",
+            "privacy": "Privacy Policy"
+        },
+        "short": {
+            "terms": "Terms",
+            "dpa": "DPA",
+            "privacy": "Privacy"
+        },
+        "versionLine": "Version {version} · in force from {date}",
+        "draftTitle": "Draft under legal review.",
+        "draftBody": "A lawyer is still reviewing this text, and it may change before the beta. The parts in [brackets] are filled in then.",
+        "earlierVersion": "This is an earlier version.",
+        "readCurrent": "Read the current one",
+        "contents": "Contents",
+        "versions": "Versions",
+        "notFound": "This document could not be found.",
+        "backToApp": "Back to AstroLabe",
+        "backToSignIn": "Sign in",
+        "privacyNotice": "Our Privacy Policy changed on {date}.",
+        "privacyRead": "Read it",
+        "privacyDismiss": "Got it",
+        "accept": {
+            "eyebrow": "Updated terms",
+            "title": "Please review the updated terms",
+            "intro": "We changed the documents below. Your practice opens again as soon as you accept them; nothing in it has changed.",
+            "read": "Read it",
+            "agree": "I have read and accept: {documents}.",
+            "submit": "Accept and continue",
+            "done": "Thank you — the new terms are accepted.",
+            "leaveOwner": "Don't agree? You can still download your practice's data and delete the practice in",
+            "leaveMember": "Don't agree? Sign out and talk to the owner of the practice.",
+            "yourData": "Settings → Your data"
         }
     }
 }

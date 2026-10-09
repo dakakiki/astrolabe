@@ -29,7 +29,17 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class PaymentController extends Controller
 {
-    private const RELATIONS = ['client', 'consultation.service', 'appointment', 'creator'];
+    /**
+     * A payment shows which consultation it was for, never that consultation's notes: loading
+     * them made the CSV of a busy practice read megabytes it never wrote (Phase 8c).
+     */
+    private const RELATIONS = [
+        'client',
+        'consultation:id,client_id,service_id,title,starts_at,timezone,status',
+        'consultation.service',
+        'appointment',
+        'creator',
+    ];
 
     /**
      * Newest first. `totals` is what the filtered payments add up to, per

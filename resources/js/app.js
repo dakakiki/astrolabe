@@ -4,7 +4,7 @@ import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
 import i18n, { setLocale } from './i18n';
-import { setPracticeClosedHandler, setUnauthenticatedHandler } from './lib/http';
+import { setLegalPendingHandler, setPracticeClosedHandler, setUnauthenticatedHandler } from './lib/http';
 import { useAuthStore } from './stores/auth';
 import { useToastStore } from './stores/toast';
 
@@ -29,6 +29,15 @@ setUnauthenticatedHandler(() => {
 setPracticeClosedHandler(async () => {
     await auth.load({ force: true });
     router.push({ name: 'practice-deletion' });
+});
+
+// New terms were published while the app was open: accept them first (Phase 8c).
+setLegalPendingHandler(async () => {
+    await auth.load({ force: true });
+
+    if (router.currentRoute.value.name !== 'legal.accept') {
+        router.push({ name: 'legal.accept', query: { redirect: router.currentRoute.value.fullPath } });
+    }
 });
 
 // Mount once the first route (and the session check in its guard) has resolved,

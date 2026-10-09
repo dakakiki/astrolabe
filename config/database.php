@@ -81,6 +81,10 @@ return [
             // Explicit, so tables never depend on the server default (the local
             // WAMP MariaDB defaults to MyISAM with the COMPACT row format).
             'engine' => env('DB_ENGINE', 'InnoDB ROW_FORMAT=DYNAMIC'),
+            // The app writes UTC; so must the session, or TIMESTAMP columns convert through the
+            // server's zone (the local WAMP server is on Central European time): a write in the
+            // hour the clocks go forward fails, one in the hour they go back is ambiguous.
+            'timezone' => env('DB_TIMEZONE', '+00:00'),
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],

@@ -5,6 +5,8 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 
 import FeedbackDialog from '@/components/FeedbackDialog.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
+import http from '@/lib/http';
+import { formatLegalDate, LEGAL_DOCUMENTS, privacyNotice } from '@/lib/legal';
 import { useAuthStore } from '@/stores/auth';
 
 const { t, locale } = useI18n();
@@ -103,6 +105,18 @@ async function signOut() {
     await auth.logout();
     router.push({ name: 'login' });
 }
+
+// A new privacy policy is a notice, not a gate (Phase 8c): read it, then dismiss it.
+const privacyVersion = computed(() => privacyNotice(auth.user));
+
+async function dismissPrivacyNotice() {
+    try {
+        const { data } = await http.post('/legal/acceptances', { documents: { privacy: privacyVersion.value } });
+        auth.user = data.data;
+    } catch {
+        await auth.load({ force: true });
+    }
+}
 </script>
 
 <template>
@@ -128,6 +142,14 @@ async function signOut() {
                         >{{ t(item.label) }}
                     </RouterLink>
                 </template>
+            </nav>
+            <nav class="legal-links" :aria-label="t('legal.title')">
+                <RouterLink
+                    v-for="slug in LEGAL_DOCUMENTS"
+                    :key="slug"
+                    :to="{ name: 'legal.show', params: { document: slug } }"
+                    >{{ t(`legal.short.${slug}`) }}</RouterLink
+                >
             </nav>
         </aside>
         <div class="backdrop" :class="{ open: sidebarOpen }" @click="sidebarOpen = false" />
@@ -176,6 +198,17 @@ async function signOut() {
                 </div>
             </header>
             <main class="content">
+                <div v-if="privacyVersion" class="notice n-info mb-4 items-center" role="status">
+                    <div class="flex-1">
+                        {{ t('legal.privacyNotice', { date: formatLegalDate(privacyVersion, locale) }) }}
+                        <RouterLink :to="{ name: 'legal.show', params: { document: 'privacy' } }">{{
+                            t('legal.privacyRead')
+                        }}</RouterLink>
+                    </div>
+                    <button type="button" class="btn btn-ghost btn-sm" @click="dismissPrivacyNotice">
+                        {{ t('legal.privacyDismiss') }}
+                    </button>
+                </div>
                 <slot />
             </main>
         </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\User;
+use App\Support\Legal\LegalDocuments;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -25,6 +26,9 @@ class UserResource extends JsonResource
             'is_admin' => $this->isAdmin(),
             // Always complete: stored values laid over the defaults.
             'notification_preferences' => $this->notificationPreferences()->toArray(),
+            // Terms, DPA and privacy policy (Phase 8c): what blocks the practice until accepted,
+            // what changed since last seen, and what was accepted. The admin accepts nothing.
+            'legal' => $this->isAdmin() ? null : LegalDocuments::stateFor($this->resource),
         ];
     }
 }

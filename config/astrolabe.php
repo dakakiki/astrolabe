@@ -209,6 +209,29 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Legal documents
+    |--------------------------------------------------------------------------
+    |
+    | The Terms of Service, the Data Processing Agreement and the Privacy
+    | Policy (Phase 8c). Each version is its own Markdown file in
+    | `path/<document>/<version>.md`; the newest file is the one in force. A
+    | document with `acceptance` is accepted at registration and again, before
+    | the practice opens, whenever a new version appears; the privacy policy
+    | is acknowledged instead (a notice that blocks nothing).
+    |
+    */
+
+    'legal' => [
+        'path' => env('LEGAL_PATH', resource_path('legal')),
+        'documents' => [
+            'terms' => ['acceptance' => true],
+            'dpa' => ['acceptance' => true],
+            'privacy' => ['acceptance' => false],
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Backups
     |--------------------------------------------------------------------------
     |

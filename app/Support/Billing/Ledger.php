@@ -6,7 +6,7 @@ use App\Models\Consultation;
 use App\Models\Payment;
 use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * The practice's money in figures (docs/spec/02, "Plaćanja" and "Dashboard"):
@@ -54,13 +54,20 @@ class Ledger
      */
     public function outstanding(?Builder $consultations = null): array
     {
-        $owed = ($consultations ?? Consultation::query())->owed()->withBilling()->get();
+        // Summed by the database: the consultations themselves (notes and all) are never loaded.
+        $paid = Payment::netFor(DB::query(), 'consultations.id');
+
+        $owed = ($consultations ?? Consultation::query())->owed()->toBase()
+            ->reorder()
+            ->select('fee_currency')
+            ->selectRaw('count(*) as owed_count')
+            ->selectRaw('sum(fee_amount - ('.$paid->toSql().')) as owed_amount', $paid->getBindings())
+            ->groupBy('fee_currency')
+            ->get();
 
         return [
-            'total' => $this->sorted($owed
-                ->groupBy('fee_currency')
-                ->map(fn (Collection $group) => $group->sum(fn (Consultation $consultation) => $consultation->fee_amount - (int) $consultation->billing_paid))),
-            'count' => $owed->count(),
+            'total' => $this->sorted($owed->pluck('owed_amount', 'fee_currency')),
+            'count' => (int) $owed->sum('owed_count'),
         ];
     }
 

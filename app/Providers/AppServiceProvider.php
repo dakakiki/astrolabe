@@ -32,6 +32,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -78,6 +79,7 @@ class AppServiceProvider extends ServiceProvider
         $this->pointAuthEmailsAtTheSpa();
         $this->limitRequests();
         $this->auditCriticalOperations();
+        $this->preventLazyLoading();
 
         // Stable names in polymorphic columns (chart_calculations.subject_type,
         // attachments.attachable_type, activity_events.subject_type).
@@ -91,6 +93,28 @@ class AppServiceProvider extends ServiceProvider
             'chart_calculation' => ChartCalculation::class,
             'task' => Task::class,
         ]);
+    }
+
+    /**
+     * Relations a list needs are loaded with it (performance pass, Phase 8c). Locally and in
+     * tests a relation loaded row by row (N+1) is an error; in production it goes to the log,
+     * once per model and relation, and the person never notices.
+     */
+    private function preventLazyLoading(): void
+    {
+        Model::preventLazyLoading();
+
+        if ($this->app->isProduction()) {
+            $seen = [];
+            Model::handleLazyLoadingViolationUsing(function (Model $model, string $relation) use (&$seen) {
+                $key = $model::class.'::'.$relation;
+
+                if (! isset($seen[$key])) {
+                    $seen[$key] = true;
+                    Log::warning('Lazy loading: '.$key);
+                }
+            });
+        }
     }
 
     /**

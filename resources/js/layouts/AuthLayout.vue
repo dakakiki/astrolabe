@@ -1,8 +1,10 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
+import { RouterLink } from 'vue-router';
 
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import WheelArt from '@/components/WheelArt.vue';
+import { LEGAL_DOCUMENTS } from '@/lib/legal';
 
 const { t } = useI18n();
 </script>
@@ -28,6 +30,14 @@ const { t } = useI18n();
                 <ThemeToggle />
             </div>
             <slot />
+            <nav class="legal-links mt-8" :aria-label="t('legal.title')">
+                <RouterLink
+                    v-for="slug in LEGAL_DOCUMENTS"
+                    :key="slug"
+                    :to="{ name: 'legal.show', params: { document: slug } }"
+                    >{{ t(`legal.documents.${slug}`) }}</RouterLink
+                >
+            </nav>
         </main>
     </div>
 </template>

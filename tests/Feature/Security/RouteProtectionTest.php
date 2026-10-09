@@ -16,6 +16,9 @@ class RouteProtectionTest extends TestCase
     private const PUBLIC = [
         'api/v1/status',
         'api/v1/health',
+        // The Terms, the DPA and the privacy policy (Phase 8c).
+        'api/v1/legal',
+        'api/v1/legal/{document}',
     ];
 
     /** Signed in, but before the email address is verified. */
@@ -97,6 +100,8 @@ class RouteProtectionTest extends TestCase
         'api/v1/workspace/exports/{export}/download GET|HEAD',
         'api/v1/workspace/deletion POST',
         'api/v1/workspace/deletion DELETE',
+        // Accepting new terms (Phase 8c) — closed practices accept nothing, but it opens nothing either.
+        'api/v1/legal/acceptances POST',
     ];
 
     public function test_a_practice_scheduled_for_deletion_is_closed_everywhere_else(): void
@@ -110,6 +115,23 @@ class RouteProtectionTest extends TestCase
             $open = in_array($route->uri(), self::OPEN_WHILE_CLOSING, true) || in_array($name, self::OPEN_WHILE_CLOSING, true);
 
             $this->assertSame(! $open, in_array('practice.active', $route->gatherMiddleware(), true), $name);
+        }
+    }
+
+    /**
+     * New terms close exactly what a closing practice closes (Phase 8c): someone
+     * who does not accept them can still see who they are, export and leave.
+     */
+    public function test_new_terms_close_the_same_routes_as_a_closing_practice(): void
+    {
+        foreach ($this->apiRoutes() as $route) {
+            $middleware = $route->gatherMiddleware();
+
+            $this->assertSame(
+                in_array('practice.active', $middleware, true),
+                in_array('legal.accepted', $middleware, true),
+                $route->uri().' '.implode('|', $route->methods()),
+            );
         }
     }
 

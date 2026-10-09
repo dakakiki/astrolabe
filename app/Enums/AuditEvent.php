@@ -24,6 +24,8 @@ enum AuditEvent: string
     case TwoFactorFailed = 'two_factor_failed';
     case RecoveryCodesRegenerated = 'recovery_codes_regenerated';
     case RecoveryCodeUsed = 'recovery_code_used';
+    // Terms, DPA or privacy policy versions accepted or seen (Phase 8c).
+    case LegalAccepted = 'legal_accepted';
 
     // Closed beta: invitations to register (the operator, from the command line).
     case InvitationSent = 'invitation_sent';

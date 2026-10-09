@@ -31,6 +31,9 @@ jobs:
       DB_DATABASE: astrolabe_test
       DB_USERNAME: root
       DB_PASSWORD: root
+      # Linux swetest (Phase 8c): built only where the source URL is known. It is a secret
+      # because the URL names the library's author (licence contract, clause 9).
+      HAS_SWISSEPH_SOURCE: ${{ secrets.SWISSEPH_SOURCE != '' }}
 
     steps:
       - uses: actions/checkout@v7
@@ -78,5 +81,35 @@ jobs:
       - name: Build frontend
         run: npm run build
 
+      # The Swiss Ephemeris built from its official sources at a pinned commit
+      # (scripts/build-swetest.sh), so the reference tests run on the real engine.
+      - name: Cache swetest
+        id: swetest-cache
+        if: env.HAS_SWISSEPH_SOURCE == 'true'
+        uses: actions/cache@v6
+        with:
+          path: .swisseph
+          key: swetest-${{ runner.os }}-${{ hashFiles('scripts/build-swetest.sh') }}
+
+      - name: Build swetest
+        if: env.HAS_SWISSEPH_SOURCE == 'true' && steps.swetest-cache.outputs.cache-hit != 'true'
+        env:
+          SWISSEPH_SOURCE: ${{ secrets.SWISSEPH_SOURCE }}
+        run: bash scripts/build-swetest.sh .swisseph
+
       - name: Run tests
+        env:
+          # Where present, SwissEphemerisReferenceTest, HouseAccuracyTest and
+          # SkyCalendarAccuracyTest use them; elsewhere they are skipped.
+          SWETEST_PATH: ${{ github.workspace }}/.swisseph/swetest
+          EPHEMERIS_PATH: ${{ github.workspace }}/.swisseph/ephe
         run: php artisan test
+
+      - name: Time the engine on Linux
+        if: env.HAS_SWISSEPH_SOURCE == 'true'
+        env:
+          SWETEST_PATH: ${{ github.workspace }}/.swisseph/swetest
+          EPHEMERIS_PATH: ${{ github.workspace }}/.swisseph/ephe
+          EPHEMERIS_ENGINE: swiss
+          CACHE_STORE: array
+        run: php artisan ephemeris:benchmark --runs=5

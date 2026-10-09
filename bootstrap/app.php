@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureIdempotency;
+use App\Http\Middleware\EnsureLegalAccepted;
 use App\Http\Middleware\EnsurePracticeIsActive;
 use App\Http\Middleware\ResolveCurrentWorkspace;
 use App\Http\Middleware\SecurityHeaders;
@@ -37,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'workspace' => ResolveCurrentWorkspace::class,
             'practice.active' => EnsurePracticeIsActive::class,
+            'legal.accepted' => EnsureLegalAccepted::class,
             'admin' => EnsureAdmin::class,
             'idempotent' => EnsureIdempotency::class,
         ]);

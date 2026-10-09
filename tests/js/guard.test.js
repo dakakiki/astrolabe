@@ -81,6 +81,50 @@ describe('resolveNavigation', () => {
         });
     });
 
+    describe('new terms waiting to be accepted', () => {
+        const pending = { user: { email_verified: true, legal: { pending: ['terms', 'dpa'] } } };
+        const accepted = { user: { email_verified: true, legal: { pending: [] } } };
+
+        it('leads every screen of the app to the acceptance screen, remembering where it was going', () => {
+            expect(resolveNavigation(route('dashboard', { verified: true }, '/'), pending)).toEqual({ name: 'legal.accept' });
+            expect(resolveNavigation(route('clients.index', { verified: true }, '/clients'), pending)).toEqual({
+                name: 'legal.accept',
+                query: { redirect: '/clients' },
+            });
+        });
+
+        it('keeps the acceptance screen, the data settings and the documents open', () => {
+            expect(resolveNavigation(route('legal.accept', { verified: true, legal: true }), pending)).toBe(true);
+            expect(resolveNavigation(route('settings.data', { verified: true, legal: true }), pending)).toBe(true);
+            expect(resolveNavigation(route('legal.show', { layout: 'bare' }), pending)).toBe(true);
+        });
+
+        it('sends people on once everything is accepted', () => {
+            expect(resolveNavigation(route('legal.accept', { verified: true, legal: true }), accepted)).toEqual({
+                name: 'dashboard',
+            });
+            expect(resolveNavigation(route('clients.index', { verified: true }), accepted)).toBe(true);
+        });
+
+        it('lets the closing screen of a practice being deleted come first', () => {
+            const closing = { ...pending, workspace: { deletion: { deletes_at: '2026-11-08T00:00:00Z' } } };
+
+            expect(resolveNavigation(route('dashboard', { verified: true }), closing)).toEqual({
+                name: 'practice-deletion',
+            });
+            expect(resolveNavigation(route('practice-deletion', { verified: true, closing: true }), closing)).toBe(true);
+        });
+
+        it('shows the documents to guests and the admin', () => {
+            expect(resolveNavigation(route('legal.show', { layout: 'bare' }), guest)).toBe(true);
+            expect(
+                resolveNavigation(route('legal.show', { layout: 'bare' }), {
+                    user: { email_verified: true, is_admin: true, two_factor_enabled: true, legal: null },
+                }),
+            ).toBe(true);
+        });
+    });
+
     describe('the operator’s admin', () => {
         const admin = { user: { email_verified: true, is_admin: true, two_factor_enabled: true }, workspace: null };
         const newAdmin = { user: { email_verified: true, is_admin: true, two_factor_enabled: false }, workspace: null };

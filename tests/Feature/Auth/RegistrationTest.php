@@ -10,6 +10,7 @@ use App\Enums\ZodiacMode;
 use App\Models\AuditLog;
 use App\Models\RegistrationInvitation;
 use App\Models\User;
+use App\Support\Legal\LegalDocuments;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -37,6 +38,9 @@ class RegistrationTest extends TestCase
             'workspace_name' => 'Vega Astrology',
             'timezone' => 'Europe/Belgrade',
             'locale' => 'en',
+            // The Terms and the DPA accepted, the privacy policy seen (Phase 8c).
+            'accept_terms' => true,
+            'legal' => LegalDocuments::currentVersions(),
         ]);
     }
 

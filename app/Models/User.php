@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -128,6 +129,17 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     public function currentWorkspace(): BelongsTo
     {
         return $this->belongsTo(Workspace::class, 'current_workspace_id');
+    }
+
+    /**
+     * Versions of the Terms, the DPA and the privacy policy this person
+     * accepted or saw (Phase 8c, `LegalDocuments`).
+     *
+     * @return HasMany<LegalAcceptance, $this>
+     */
+    public function legalAcceptances(): HasMany
+    {
+        return $this->hasMany(LegalAcceptance::class);
     }
 
     public function roleIn(Workspace $workspace): ?WorkspaceRole

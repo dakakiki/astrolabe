@@ -182,6 +182,8 @@ const routes = [
                 path: 'data',
                 name: 'settings.data',
                 component: () => import('@/pages/settings/DataSettings.vue'),
+                // Open while new terms wait for acceptance: export and leave (Phase 8c).
+                meta: { legal: true },
             },
         ],
     },
@@ -232,6 +234,21 @@ const routes = [
         name: 'admin.security',
         component: () => import('@/pages/admin/AdminSecurityPage.vue'),
         meta: { admin: true },
+    },
+
+    // Terms of Service, Data Processing Agreement, Privacy Policy (Phase 8c): public, and
+    // the screen for a new version, which closes the practice until it is accepted.
+    {
+        path: '/legal/accept',
+        name: 'legal.accept',
+        component: () => import('@/pages/legal/LegalAcceptancePage.vue'),
+        meta: { verified: true, legal: true, layout: 'auth' },
+    },
+    {
+        path: '/legal/:document(terms|dpa|privacy)',
+        name: 'legal.show',
+        component: () => import('@/pages/legal/LegalDocumentPage.vue'),
+        meta: { layout: 'bare' },
     },
 
     // A practice scheduled for deletion shows only this (Phase 8b).

@@ -19,6 +19,7 @@ export function ensureCsrfCookie() {
 
 let onUnauthenticated = () => {};
 let onPracticeClosed = () => {};
+let onLegalPending = () => {};
 
 /** Called when the API reports the session has ended (401), e.g. to show the sign-in screen. */
 export function setUnauthenticatedHandler(handler) {
@@ -28,6 +29,11 @@ export function setUnauthenticatedHandler(handler) {
 /** Called when the practice turns out to be scheduled for deletion (403 with that code, Phase 8b). */
 export function setPracticeClosedHandler(handler) {
     onPracticeClosed = handler;
+}
+
+/** Called when new terms must be accepted before the practice opens (403 with that code, Phase 8c). */
+export function setLegalPendingHandler(handler) {
+    onLegalPending = handler;
 }
 
 http.interceptors.response.use(
@@ -49,6 +55,10 @@ http.interceptors.response.use(
 
         if (status === 403 && error.response?.data?.code === 'practice_pending_deletion') {
             onPracticeClosed();
+        }
+
+        if (status === 403 && error.response?.data?.code === 'legal_acceptance_required') {
+            onLegalPending();
         }
 
         return Promise.reject(error);

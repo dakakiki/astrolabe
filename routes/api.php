@@ -22,6 +22,8 @@ use App\Http\Controllers\Api\V1\ConsultationController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\FeedbackController;
 use App\Http\Controllers\Api\V1\HealthController;
+use App\Http\Controllers\Api\V1\LegalAcceptanceController;
+use App\Http\Controllers\Api\V1\LegalDocumentController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\NoteController;
 use App\Http\Controllers\Api\V1\NotificationPreferencesController;
@@ -54,6 +56,13 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     Route::get('/status', StatusController::class)->name('status');
     // For an uptime monitor: 200 or 503, one yes/no per part (Phase 8a).
     Route::get('/health', HealthController::class)->middleware('throttle:30,1')->name('health');
+
+    // Terms of Service, Data Processing Agreement, Privacy Policy (Phase 8c): public, every version.
+    Route::get('/legal', [LegalDocumentController::class, 'index'])->middleware('throttle:60,1')->name('legal.index');
+    Route::get('/legal/{document}', [LegalDocumentController::class, 'show'])
+        ->whereIn('document', array_keys(config('astrolabe.legal.documents')))
+        ->middleware('throttle:60,1')
+        ->name('legal.show');
 
     // Reachable before the email address is verified, and by the admin, who has no practice.
     Route::get('/me', MeController::class)->middleware(['auth:sanctum', 'workspace:optional'])->name('me');
@@ -111,7 +120,12 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::delete('/workspace/deletion', [WorkspaceDeletionController::class, 'destroy'])
                 ->name('workspace.deletion.destroy');
 
-            Route::middleware('practice.active')->group(function () {
+            // A new version of the Terms or the DPA, accepted (Phase 8c); the practice is closed until then.
+            Route::post('/legal/acceptances', [LegalAcceptanceController::class, 'store'])
+                ->middleware('throttle:20,1')
+                ->name('legal.acceptances.store');
+
+            Route::middleware(['practice.active', 'legal.accepted'])->group(function () {
                 // "throttle:engine" marks every endpoint that may start the ephemeris engine.
                 Route::get('/dashboard', DashboardController::class)->middleware('throttle:engine')->name('dashboard');
 
