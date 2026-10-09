@@ -53,6 +53,8 @@ Samo nazivi i vrednosti koje nisu tajne; lozinke se unose na serveru.
 | `APP_KEY` | `php artisan key:generate` na serveru |
 | `SESSION_DOMAIN` | **`app.astrolabe.online`** — nikako `.astrolabe.online`, inače bi WordPress sajt video kolačiće prijave u aplikaciju; postavlja se jednom, pre prvog korisnika |
 | `SANCTUM_STATEFUL_DOMAINS` | `app.astrolabe.online` |
+| `PORTAL_DOMAIN` | `portal.astrolabe.online` — klijentski portal (Faza 9a): ista aplikacija na svom hostu, sa svojim kolačićem sesije (`astrolabe_portal_session`, samo za taj host) i tabelom `portal_sessions` |
+| `PORTAL_URL` | `https://portal.astrolabe.online` — početak linkova u mejlovima poziva i prijave |
 | `SESSION_SECURE_COOKIE` | `true` |
 | `DB_CONNECTION` | `mariadb` (host `127.0.0.1`, ime baze bez tačke) |
 | `QUEUE_CONNECTION` / `CACHE_STORE` / `SESSION_DRIVER` | `database` |
@@ -89,7 +91,7 @@ Nginx stoji direktno ispred PHP-FPM-a (bez load balancer-a), pa `trustProxies` n
 6. `php artisan places:import --source=all` — preuzima GeoNames (`allCountries.zip`) i puni ~5,1 mil. mesta i ~9,6 mil. naziva; traje. Može i sa lokalnim fajlom: `--file=…`.
 7. Swiss Ephemeris (korak 6 iz „Server“), pa provera: `php artisan ephemeris:benchmark` i karta probnog klijenta — prikazuje engine i verziju. Komande `perf:seed` i `perf:measure` (merenje performansi na izmišljenoj praksi) se na produkciji odbijaju i ne pokreću.
 8. `php artisan optimize` (keš konfiguracije, ruta, prikaza i događaja).
-9. Nginx sajt za `app.astrolabe.online` + `certbot --nginx`; HTTP preusmeren na HTTPS.
+9. Nginx sajt za `app.astrolabe.online` i `portal.astrolabe.online` (isti `public/` i isti PHP-FPM; `server_name` oba hosta ili dva bloka) + `certbot --nginx` za oba; HTTP preusmeren na HTTPS. Na portal hostu rute aplikacije odgovaraju 404 — to radi aplikacija, ne Nginx.
 10. **Cron** (korisnik PHP-FPM-a): `* * * * * cd <aplikacija> && php artisan schedule:run >> /dev/null 2>&1` — pokreće i noćne `data:prune` (01:30) i `backup:run` (02:00, kada je `BACKUP_KEY` postavljen; pre toga `php artisan backup:key`, ključ u `.env` i kopija van servera, pa jednom ručno `backup:run` i `backup:restore --verify`).
 11. **Supervisor** za worker: `php artisan queue:work --sleep=3 --max-time=3600`, automatski restart, log u `storage/logs`.
 12. **Admin nalog operatera:** `php artisan admin:create <adresa> --name="…"` — adresa koja nije ničiji astrološki nalog; komanda šalje i ispisuje link za postavljanje lozinke (važi 60 min). Prijava kroz isti ekran kao astrolozi, pa odmah 2FA u admin → Security (admin se bez njega ne otvara). Admin vidi samo metapodatke i sve što pogleda ili uradi ide u audit log; pozivi za betu mogu i odatle. `php artisan admin:list` pokazuje admin naloge i da li im je 2FA uključen.
@@ -101,7 +103,7 @@ Testeri bete dobijaju poziv istom komandom ili iz admina (Invitations); `php art
 
 ## DNS i mejl
 
-- `astrolabe.online` (i `www`) → Webhosting (WordPress); `app.astrolabe.online` → A i AAAA zapis CX33 servera.
+- `astrolabe.online` (i `www`) → Webhosting (WordPress); `app.astrolabe.online` i `portal.astrolabe.online` → A i AAAA zapis CX33 servera.
 - MX → Webhosting.
 - **SPF, DKIM, DMARC** za `astrolabe.online` prema uputstvu Webhosting-a; pošto aplikacija šalje preko sandučića na Webhosting-u, važe isti zapisi.
 - Mejlovi aplikacije su opšti (vreme i link, bez imena klijenata — dokument 10), pa sandučić pošiljaoca ne nosi osetljive podatke.

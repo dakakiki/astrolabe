@@ -531,9 +531,46 @@ Dve vrste događaja:
 
 `php artisan activity:rebuild [--workspace=]` briše i ponovo pravi sve projekcije iz osnovnih tabela; zapisi promena ne postoje nigde drugde i ostaju netaknuti.
 
-## Klijentski portal (plan, Faza 9a–9c)
+## Klijentski portal (Faza 9a, implementirano)
 
-Model portala je u dokumentu 12 dok se ne implementira: `portal_users`, `portal_access`, `portal_invitations`, `portal_login_tokens`, `portal_sessions`; `workspaces.display_name`, `logo_path`, `brand_color`; `audit_logs.portal_user_id`; u 9b `availability_rules`, `availability_exceptions`, `booking_policies`, `services.bookable_in_portal`, status termina `requested`, `appointments.client_note` i `portal_user_id`; u 9c `portal_push_subscriptions`. Posle svakog dela opis prelazi ovde.
+Plan i tokovi: dokument 12. Nalog portala nije u workspace-u; praksu vidi samo kroz prihvaćen poziv.
+
+### `portal_users` (nisu tenant)
+
+| Polje | Napomena |
+|---|---|
+| `email` | jedinstven, malim slovima; ista adresa nikad sama ne spaja zapise klijenata |
+| `name` | nullable — pozdrav u portalu |
+| `locale`, `timezone` | nullable; dok klijent ne izabere zonu, vremena su u zoni prakse |
+| `email_verified_at` | prvo prihvatanje poziva ili prijava (mejl je stigao) |
+| `last_signed_in_at` | |
+
+Briše se zajedno sa sesijama i tokenima kada klijent ili praksa budu trajno obrisani i nijedna druga veza ne ostane, a preko `data:prune` kada nema aktivnu vezu 30 dana posle poslednjeg opoziva.
+
+### `portal_access` (tenant)
+
+`workspace_id`, `client_id`, `portal_user_id` (nullable dok poziv nije prihvaćen; `nullOnDelete`), `email` (adresa poziva), `status` — `invited`, `active`, `revoked`; `invited_by`, `invited_at`, `accepted_at`, `revoked_at`, `revoked_by`, `last_seen_at` (poslednja poseta te prakse, upisuje se najviše jednom u 5 minuta), `shared_seen_at` (kada je klijent poslednji put otvorio Shared — „novo od poslednje posete“). Najviše jedna veza `invited` ili `active` po klijentu (proverava se pod zaključanim redom klijenta); ponovni poziv posle opoziva pravi novu vezu, stara ostaje kao istorija. Portal čita veze naloga kroz `acrossPractices()` — uvek uz nalog.
+
+### `portal_invitations`
+
+`portal_access_id`, `token_hash` (SHA-256; sam token samo u mejlu, posle `#` u linku), `expires_at` (7 dana), `sent_at`, `used_at`, `revoked_at` (nov poziv istom klijentu ili opoziv). Završeni pozivi se brišu posle 30 dana.
+
+### `portal_login_tokens`
+
+`portal_user_id`, `token_hash` (link, SHA-256), `code_hash` (šestocifreni kod kao HMAC sa ključem aplikacije), `expires_at` (15 minuta), `used_at`, `attempts` (najviše 5 pogrešnih), `ip_address`, `user_agent`, `created_at`. Nov zahtev poništava raniji otvoren; iskorišćeni i istekli se brišu posle jednog dana.
+
+### `portal_sessions`
+
+Isti oblik kao Laravel `sessions`; `user_id` je id iz `portal_users` (piše ga `PortalSessionHandler`). Kolačić `astrolabe_portal_session` samo za portal host, 30 dana bez aktivnosti. Nikad se ne meša sa sesijama astrologa.
+
+### Izmene postojećih tabela
+
+- `workspaces`: `display_name` (nullable, ime za klijente), `logo_path` (nullable, na disku `attachments` pod `{workspace_id}/branding/`, novo ime pri svakoj promeni), `brand_color` (nullable, `#rrggbb`, malim slovima).
+- `audit_logs`: `portal_user_id` (nullable, `nullOnDelete`) — izvršilac kada radnju radi klijent; tada je `user_id` prazan. Događaji: `portal_invitation_sent`, `portal_invitation_revoked`, `portal_access_accepted`, `portal_access_revoked`, `portal_signed_in`, `portal_sign_in_failed`, `portal_signed_out`, `portal_sessions_revoked`, `portal_file_downloaded`, `portal_profile_updated` (nazivi polja). Admin vidi samo broj naloga portala, nikad adresu.
+- `activity_events`: `client_updated` sa `metadata.source = portal` kada klijent promeni telefon u portalu (`created_by` prazan).
+- Izvoz prakse dobija `portal_access.json` (klijent, adresa, stanje, datumi; bez tokena i sesija).
+
+U 9b: `availability_rules`, `availability_exceptions`, `booking_policies`, `services.bookable_in_portal`, status termina `requested`, `appointments.client_note` i `portal_user_id`; u 9c `portal_push_subscriptions` (dokument 12).
 
 ## Obavezna pravila
 

@@ -1,0 +1,231 @@
+/* The client portal (docs/spec/12): the application's tokens, theme and
+   components, the practice's colour over --brand* (lib/brand.js), and only
+   the portal's own templates scanned for utilities. */
+@import 'tailwindcss' source(none);
+@import './tokens.css';
+@import './components.css';
+@import './theme.css';
+
+@source '../js/portal';
+@source '../js/components/BrandMark.vue';
+@source '../js/components/FormField.vue';
+@source '../js/components/PhoneInput.vue';
+@source '../js/components/RichText.vue';
+@source '../js/components/ThemeToggle.vue';
+@source '../js/components/ToastHost.vue';
+
+@layer base {
+    html,
+    body {
+        height: 100%;
+    }
+
+    body {
+        @apply bg-canvas font-sans text-ink antialiased;
+        font-size: 14px;
+    }
+}
+
+@layer components {
+    #portal {
+        position: relative;
+        z-index: 1;
+        min-height: 100%;
+    }
+
+    .portal {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .portal-top {
+        background: var(--surface);
+        border-bottom: 1px solid var(--line);
+        position: sticky;
+        top: 0;
+        z-index: 20;
+    }
+
+    .portal-top-inner,
+    .portal-nav-inner,
+    .portal-main {
+        width: 100%;
+        max-width: 880px;
+        margin: 0 auto;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .portal-top-inner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 60px;
+    }
+
+    .portal-practice {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        color: var(--ink);
+        text-decoration: none;
+        font-family: var(--serif);
+        font-size: 18px;
+    }
+
+    .portal-practice .name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .portal-nav {
+        border-top: 1px solid var(--line-soft);
+    }
+
+    /* Five sections fit a phone in one row; the row scrolls on its own if not. */
+    .portal-nav-inner {
+        display: flex;
+        gap: 2px;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .portal-nav a {
+        padding: 11px 8px;
+        color: var(--ink-3);
+        text-decoration: none;
+        font-size: 13.5px;
+        white-space: nowrap;
+        border-bottom: 2px solid transparent;
+    }
+
+    .portal-nav a:hover {
+        color: var(--ink);
+    }
+
+    /* --link, not --brand: it is checked against the surface of each theme (lib/brand.js). */
+    .portal-nav a.router-link-exact-active {
+        color: var(--ink);
+        border-bottom-color: var(--link);
+    }
+
+    .portal-main {
+        flex: 1;
+        padding-top: 24px;
+        padding-bottom: 32px;
+    }
+
+    .portal-foot {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 18px 16px 24px;
+        font-size: 12px;
+        color: var(--ink-4);
+    }
+
+    .practice-logo {
+        object-fit: contain;
+        flex: 0 0 auto;
+    }
+
+    .practice-logo.is-md {
+        height: 36px;
+        max-width: 140px;
+    }
+
+    .practice-logo.is-lg {
+        height: 64px;
+        max-width: 240px;
+    }
+
+    .practice-initials {
+        display: grid;
+        place-items: center;
+        flex: 0 0 auto;
+        border-radius: 50%;
+        background: var(--brand);
+        color: var(--on-brand);
+        font-family: var(--sans);
+        font-weight: 600;
+    }
+
+    .practice-initials.is-md {
+        width: 36px;
+        height: 36px;
+        font-size: 13px;
+    }
+
+    .practice-initials.is-lg {
+        width: 64px;
+        height: 64px;
+        font-size: 22px;
+    }
+
+    /* Signed-out screens and the pages emailed links open. */
+    .portal-auth {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 24px 16px;
+    }
+
+    .portal-auth-top {
+        width: 100%;
+        max-width: 440px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        font-family: var(--serif);
+        font-size: 17px;
+    }
+
+    .portal-auth-card {
+        width: 100%;
+        max-width: 440px;
+        padding: 28px 24px;
+    }
+
+    .portal-auth-card h1 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .portal-auth-card .sub {
+        color: var(--ink-3);
+        font-size: 13.5px;
+        margin-bottom: 20px;
+    }
+
+    .code-input {
+        font-family: var(--mono);
+        font-size: 22px;
+        letter-spacing: 0.3em;
+        text-align: center;
+    }
+
+    .portal-list > * + * {
+        border-top: 1px solid var(--line-soft);
+    }
+
+    .portal-item {
+        padding: 14px 16px;
+    }
+
+    .new-dot {
+        display: inline-block;
+        font-size: 10.5px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--link);
+        margin-left: 6px;
+    }
+}

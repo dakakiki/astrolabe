@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\ClientArchiveController;
 use App\Http\Controllers\Api\V1\ClientBirthDetailsController;
 use App\Http\Controllers\Api\V1\ClientChartController;
 use App\Http\Controllers\Api\V1\ClientController;
+use App\Http\Controllers\Api\V1\ClientPortalController;
 use App\Http\Controllers\Api\V1\ClientRelationshipController;
 use App\Http\Controllers\Api\V1\ClientSynastryController;
 use App\Http\Controllers\Api\V1\ClientTimelineController;
@@ -43,6 +44,7 @@ use App\Http\Controllers\Api\V1\WorkspaceAstrologyMethodController;
 use App\Http\Controllers\Api\V1\WorkspaceController;
 use App\Http\Controllers\Api\V1\WorkspaceDeletionController;
 use App\Http\Controllers\Api\V1\WorkspaceExportController;
+use App\Http\Controllers\Api\V1\WorkspaceLogoController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -158,6 +160,18 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 Route::delete('/clients/{client}/archive', [ClientArchiveController::class, 'destroy'])->name('clients.restore');
 
                 Route::get('/clients/{client}/timeline', [ClientTimelineController::class, 'index'])->name('clients.timeline');
+
+                // The client portal (Phase 9a, docs/spec/12): the client's access, and the practice's logo.
+                Route::get('/clients/{client}/portal', [ClientPortalController::class, 'show'])->name('clients.portal.show');
+                Route::post('/clients/{client}/portal/invitation', [ClientPortalController::class, 'invite'])
+                    ->middleware('throttle:30,60')
+                    ->name('clients.portal.invite');
+                Route::delete('/clients/{client}/portal', [ClientPortalController::class, 'revoke'])->name('clients.portal.revoke');
+                Route::get('/workspace/logo', [WorkspaceLogoController::class, 'show'])->name('workspace.logo.show');
+                Route::post('/workspace/logo', [WorkspaceLogoController::class, 'store'])
+                    ->middleware('throttle:20,60')
+                    ->name('workspace.logo.store');
+                Route::delete('/workspace/logo', [WorkspaceLogoController::class, 'destroy'])->name('workspace.logo.destroy');
 
                 // Related people and links between clients (docs/spec/02, "Povezane osobe").
                 Route::get('/clients/{client}/relationships', [ClientRelationshipController::class, 'index'])

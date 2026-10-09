@@ -276,6 +276,19 @@ Odluka korisnika: beta (8d, 8e) za sada čeka; prvo klijentski portal, pa PWA za
 
 Odluke u planu (bez posebnog pitanja): portal na engleskom; poziv važi 7 dana, link i kod 15 minuta, 5 pokušaja koda; prihvatanje poziva i prijava preko linka traže dugme (POST), da mejl skeneri ne troše linkove; sesija portala 30 dana bez aktivnosti; arhiviran klijent ne može u portal te prakse dok se ne vrati; jedan nalog portala sa više praksi uz izbor prakse; service worker bez paketa i bez keširanja API-ja i HTML-a; push samo opštim tekstom i samo uz uključivanje.
 
+## Faza 9a — klijentski portal: pristup i pregled (9. 10. 2026)
+
+Korisnik: „Kreni sa Fazom 9a“ — sve odluke iz plana (dokument 12) važe; beta i dalje čeka. Izmene:
+
+- 02: „`shared_with_client`“ — vidi i klijent u portalu; nova sekcija „Klijentski portal — Faza 9a, implementirano“ (strana astrologa i portal).
+- 04: status 9a; sledi 9b.
+- 05: „Klijentski portal (Faza 9a, implementirano)“ — `portal_users`, `portal_access`, `portal_invitations`, `portal_login_tokens`, `portal_sessions`, izmene `workspaces`, `audit_logs`, `activity_events`, izvoz.
+- 06: portal u „Bezbednosti i privatnosti“ (poseban host, sesija, tokeni, ograničenja, izolacija, logo) i u „Pravnoj pripremi“ (pitanja za pravnika, čuvanje).
+- 09: Branding iz 9a urađen (ime, logo, jedna boja sa proverom kontrasta).
+- 12: status i „Stanje posle 9a“ (kako je napravljeno, 13 odluka donetih usput, šta je provereno).
+
+Odluke donete usput (detalji u dokumentu 12): tokeni posle `#` i POST na dugme; kod kao HMAC, nov zahtev poništava stari, ista poruka i vreme za svaku adresu; mejl za prijavu samo adresi sa praksom koja se otvara; dodati `portal_invitations.revoked_at`, `portal_access.last_seen_at` i `shared_seen_at`, događaj `portal_profile_updated`; telefon iz portala ide na zapis klijenta uz stavku na vremenskoj liniji; ponovni poziv posle opoziva = nova veza; svetle boje zadržavaju boju uz tamni tekst na dugmetu; logo kroz potpisan link; portal ima svoj fajl prevoda; admin vidi samo broj naloga portala.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

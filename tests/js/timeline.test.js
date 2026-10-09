@@ -61,6 +61,11 @@ describe('describeEvent', () => {
             fields: ['time'],
         });
         expect(describeEvent(event('client_updated', { fields: ['email', 'tags'] })).fields).toEqual(['email', 'tags']);
+        // The client's own change in the portal (Phase 9a).
+        expect(describeEvent(event('client_updated', { fields: ['phone'], source: 'portal' })).title).toEqual([
+            'timeline.profileUpdatedByClient',
+            {},
+        ]);
     });
 
     it('names a task and its completion, and leads both to the tasks tab', () => {

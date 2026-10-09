@@ -246,6 +246,7 @@
         "sections": {
             "profile": "My profile",
             "practice": "Practice",
+            "branding": "Branding",
             "chart": "Chart & methods",
             "regional": "Regional",
             "notifications": "Notifications",
@@ -415,6 +416,38 @@
                 "notYet": "not accepted yet",
                 "notSeen": "not seen yet"
             }
+        },
+        "branding": {
+            "title": "Client portal branding",
+            "intro": "What your clients see in the client portal: the practice’s name, your logo and one colour. Everything else keeps the AstroLabe look.",
+            "displayName": "Name clients see",
+            "displayNameHint": "In the portal and its emails. Empty: “{name}”.",
+            "color": "Main colour",
+            "colorHint": "Buttons, links and highlights in the portal. Status colours stay the system’s.",
+            "colorPicker": "Pick a colour",
+            "useDefault": "Use AstroLabe’s colours",
+            "adjusted": "White text is hard to read on {color}, so portal buttons use the slightly darker {button}. Links use a shade that reads well in each theme.",
+            "saved": "Branding saved",
+            "logo": "Logo",
+            "logoAlt": "Your practice’s logo",
+            "noLogo": "No logo yet — the portal shows your initials on your colour.",
+            "uploadLogo": "Upload a logo",
+            "replaceLogo": "Replace",
+            "removeLogo": "Remove",
+            "logoHint": "PNG, WebP or SVG, up to 1 MB, square or wide. SVG files are cleaned of anything but the drawing.",
+            "logoSaved": "Logo saved",
+            "preview": "Preview",
+            "themes": {
+                "night": "Night",
+                "day": "Day"
+            },
+            "sampleHome": "Home",
+            "sampleAppointments": "Appointments",
+            "sampleText": "Your next appointment is on Tuesday.",
+            "sampleLink": "All appointments",
+            "sampleButton": "Accept and continue",
+            "poweredBy": "Powered by AstroLabe",
+            "darkText": "White text is hard to read on {color}, so portal buttons keep your colour with dark text. Links use a shade that reads well in each theme."
         }
     },
     "roles": {
@@ -1110,8 +1143,9 @@
         "hints": {
             "private": "Only you",
             "team": "Everyone in your practice",
-            "shared_with_client": "Ready for the client portal"
-        }
+            "shared_with_client": "Visible to the client in the client portal"
+        },
+        "inPortal": "Visible in the client portal"
     },
     "notes": {
         "title": "Notes",
@@ -1253,7 +1287,8 @@
         "taskDone": "Done",
         "payment": "Payment received: {amount}",
         "refund": "Refund: {amount}",
-        "deposit": "Deposit received: {amount}"
+        "deposit": "Deposit received: {amount}",
+        "profileUpdatedByClient": "Updated by the client in the portal"
     },
     "editor": {
         "toolbar": "Formatting",
@@ -1783,7 +1818,8 @@
             "deviceOn": "{browser} on {system}",
             "unknownDevice": "Unknown browser",
             "remembered": "kept signed in",
-            "empty": "No entries."
+            "empty": "No entries.",
+            "portalAccount": "Portal account #{id}"
         },
         "events": {
             "login": "Signed in",
@@ -1825,7 +1861,17 @@
             "admin_job_retried": "Failed job run again",
             "admin_job_deleted": "Failed job dropped",
             "feedback_sent": "Feedback sent",
-            "legal_accepted": "Terms or privacy policy accepted"
+            "legal_accepted": "Terms or privacy policy accepted",
+            "portal_invitation_sent": "Portal invitation sent",
+            "portal_invitation_revoked": "Portal invitation withdrawn",
+            "portal_access_accepted": "Portal invitation accepted",
+            "portal_access_revoked": "Portal access revoked",
+            "portal_signed_in": "Portal sign-in",
+            "portal_sign_in_failed": "Failed portal sign-in",
+            "portal_signed_out": "Portal sign-out",
+            "portal_sessions_revoked": "Portal: signed out everywhere",
+            "portal_file_downloaded": "Portal: file downloaded",
+            "portal_profile_updated": "Portal: profile changed"
         },
         "invitations": {
             "title": "Invitations",
@@ -1959,5 +2005,36 @@
             "leaveMember": "Don't agree? Sign out and talk to the owner of the practice.",
             "yourData": "Settings → Your data"
         }
+    },
+    "clientPortal": {
+        "title": "Client portal",
+        "states": {
+            "active": "Active",
+            "invited": "Invited",
+            "paused": "Paused",
+            "expired": "Expired"
+        },
+        "none": "Not invited. With an invitation the client sees their appointments and what you share with them.",
+        "invitedTo": "Invitation sent to {email}.",
+        "expires": "Works until {date}.",
+        "expired": "The invitation has expired. Send it again.",
+        "signsInAs": "Signs in as {email}.",
+        "lastSeen": "Last visit {when}.",
+        "acceptedOn": "Accepted on {date}, not visited since.",
+        "paused": "Paused while the client is archived. Restoring the client opens it again.",
+        "otherAddress": "The client’s address on this profile is different now. To move the access to it, revoke and invite again.",
+        "revokedOn": "Access revoked on {date}.",
+        "needsEmail": "Add an email address to the client to invite them.",
+        "archived": "Restore the client to invite them.",
+        "invite": "Invite to portal",
+        "resend": "Resend invitation",
+        "withdraw": "Withdraw invitation",
+        "revoke": "Revoke access",
+        "sent": "Invitation sent to {email}",
+        "resent": "A new invitation went to {email}; the earlier link no longer works",
+        "revoked": "Portal access ended",
+        "confirmWithdraw": "Withdraw the invitation? The link in the email stops working.",
+        "confirmRevoke": "Revoke the client’s portal access? Their next click in the portal is refused. Nothing in the client’s history changes.",
+        "where": "Clients sign in at {url}"
     }
 }

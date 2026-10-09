@@ -116,7 +116,12 @@ export function describeEvent(event) {
                 to: { tab: 'chart' },
             };
         case 'client_updated':
-            return { tone: 'profile', title: ['timeline.profileUpdated', {}], fields: meta.fields ?? [] };
+            return {
+                tone: 'profile',
+                // The client changed their own phone number in the portal (Phase 9a).
+                title: [meta.source === 'portal' ? 'timeline.profileUpdatedByClient' : 'timeline.profileUpdated', {}],
+                fields: meta.fields ?? [],
+            };
         case 'client_archived':
             return { tone: 'profile', title: ['timeline.archived', {}] };
         case 'client_restored':

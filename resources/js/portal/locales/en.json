@@ -1,0 +1,183 @@
+{
+    "portal": {
+        "title": "Client portal",
+        "poweredBy": "Powered by AstroLabe",
+        "nav": {
+            "label": "Portal sections",
+            "home": "Home",
+            "appointments": "Appointments",
+            "shared": "Shared",
+            "profile": "Profile",
+            "security": "Security",
+            "switch": "Switch practice",
+            "signOut": "Sign out"
+        },
+        "errors": {
+            "generic": "Something went wrong. Please try again."
+        },
+        "fields": {
+            "email": "Email address",
+            "code": "Six-digit code",
+            "name": "Your name",
+            "phone": "Phone",
+            "timezone": "Time zone",
+            "language": "Language"
+        },
+        "signIn": {
+            "title": "Sign in",
+            "sub": "Enter the email address your astrologer invited. We will send you a sign-in link and a code.",
+            "send": "Email me a sign-in link",
+            "noPassword": "No password needed. The link and the code work once, for 15 minutes.",
+            "checkTitle": "Check your email",
+            "checkSub": "If {email} has access to a client portal, a sign-in link and a six-digit code are on their way. Open the link, or type the code here.",
+            "verify": "Sign in",
+            "otherAddress": "Use another address",
+            "resend": "Send a new code",
+            "tooMany": "Too many attempts. Please wait a few minutes and try again."
+        },
+        "link": {
+            "title": "Sign in to your portal",
+            "sub": "Press the button to finish signing in on this device.",
+            "action": "Sign in",
+            "invalidTitle": "This link no longer works",
+            "invalid": "Sign-in links work once, for 15 minutes. Ask for a new one — it only takes a moment.",
+            "again": "Get a new sign-in link"
+        },
+        "invitation": {
+            "eyebrow": "Invitation",
+            "title": "Your client portal",
+            "sub": "{practice} invited you to see your appointments and what they share with you, in one private place.",
+            "switching": "You are signed in as {email}. Accepting signs you in with the invited address instead.",
+            "forAddress": "This invitation is for {email}.",
+            "accept": "Accept and continue",
+            "privacy": "{practice} decides what you see here. You sign in with a link or code sent to your address — there is no password.",
+            "signIn": "Go to sign in",
+            "states": {
+                "expired": {
+                    "title": "This invitation has expired",
+                    "body": "Invitations work for seven days. Ask {practice} to send you a new one."
+                },
+                "used": {
+                    "title": "This invitation was already accepted",
+                    "body": "Sign in with your email address to open your portal."
+                },
+                "revoked": {
+                    "title": "This invitation is no longer valid",
+                    "body": "A newer invitation may have been sent — use the latest email from {practice}."
+                },
+                "unavailable": {
+                    "title": "This invitation cannot be used now",
+                    "body": "Please contact {practice}."
+                },
+                "failed": {
+                    "title": "This invitation could not be accepted",
+                    "body": "It may have expired or been used meanwhile. Please contact {practice}."
+                },
+                "missing": {
+                    "title": "Open the link from your email",
+                    "body": "This page needs the full link from your invitation email. If you already accepted it, sign in instead."
+                }
+            }
+        },
+        "choose": {
+            "title": "Choose a practice",
+            "sub": "Your address has access to more than one practice. Each one opens on its own.",
+            "current": "Open now"
+        },
+        "noAccess": {
+            "title": "Your portal is not open at the moment",
+            "body": "There is no practice you can open right now. If you think this is a mistake, please contact your astrologer."
+        },
+        "notFound": {
+            "title": "Page not found",
+            "body": "There is nothing at this address.",
+            "home": "Go to your portal"
+        },
+        "home": {
+            "hello": "Welcome",
+            "helloName": "Welcome, {name}",
+            "zoneOffer": "Times are shown in the practice's time zone ({practice}). Your device is set to {device}.",
+            "zoneUse": "Use my time zone",
+            "zoneSaved": "Times are now shown in your time zone.",
+            "next": "Your next appointment",
+            "allAppointments": "All appointments",
+            "noNext": "No appointment is booked at the moment.",
+            "moreUpcoming": "and {count} more upcoming appointment | and {count} more upcoming appointments",
+            "shared": "Shared with you",
+            "newShared": "new since your last visit | new since your last visit",
+            "openShared": "Open"
+        },
+        "appointments": {
+            "zone": "Times in {zone}",
+            "upcoming": "Upcoming",
+            "past": "Past",
+            "empty": {
+                "upcoming": "No upcoming appointments.",
+                "past": "No past appointments yet."
+            },
+            "status": {
+                "scheduled": "Past",
+                "completed": "Held",
+                "cancelled": "Cancelled",
+                "no_show": "Missed"
+            },
+            "location": {
+                "online": "Online",
+                "in_person": "In person",
+                "either": "Online or in person"
+            },
+            "minutes": "{count} min",
+            "join": "Join online"
+        },
+        "shared": {
+            "sub": "Notes, files and links {practice} shared with you.",
+            "empty": "Nothing has been shared with you yet.",
+            "kinds": {
+                "note": "Note",
+                "file": "File",
+                "link": "Link"
+            },
+            "new": "New",
+            "fromConsultation": "From your consultation on {date}",
+            "fromConsultationService": "From your consultation on {date} · {service}",
+            "open": "Open",
+            "download": "Download",
+            "title": "Shared with you"
+        },
+        "profile": {
+            "emailHint": "To change your address, please ask {practice}.",
+            "phoneHint": "{practice} sees this number.",
+            "timezoneHint": "Appointment times are shown in this zone.",
+            "practiceZone": "The practice's zone ({zone})",
+            "defaultLanguage": "Automatic (English)",
+            "saved": "Profile saved"
+        },
+        "security": {
+            "sub": "You sign in as {email}, with a link or code sent to that address.",
+            "sessions": "Where you are signed in",
+            "device": "{browser} on {system}",
+            "unknownDevice": "Unknown device",
+            "thisDevice": "This device",
+            "lastActive": "Last active {when}",
+            "everywhere": "Sign out everywhere",
+            "everywhereHint": "Signs you out on every device, this one too. You can sign in again with a new link.",
+            "confirm": "Sign out on every device, this one too?"
+        }
+    },
+    "common": {
+        "loading": "Loading…",
+        "save": "Save changes",
+        "more": "Show more",
+        "cancel": "Cancel"
+    },
+    "theme": {
+        "toNight": "Switch to the night theme",
+        "toDay": "Switch to the day theme"
+    },
+    "clients": {
+        "form": {
+            "dialCode": "Dialling code",
+            "none": "—"
+        }
+    }
+}

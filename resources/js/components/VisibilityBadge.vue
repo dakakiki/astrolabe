@@ -10,6 +10,6 @@ const tone = { private: '', team: 'b-info', shared_with_client: 'b-ok' };
 
 <template>
     <span class="badge" :class="tone[visibility]" :title="t(`visibility.hints.${visibility}`)">
-        {{ t(`visibility.${visibility}`) }}
+        {{ visibility === 'shared_with_client' ? t('visibility.inPortal') : t(`visibility.${visibility}`) }}
     </span>
 </template>

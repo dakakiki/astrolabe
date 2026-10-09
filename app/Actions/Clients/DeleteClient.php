@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\RelatedPerson;
 use App\Models\WorkspaceExport;
 use App\Support\Audit\Audit;
+use App\Support\Portal\PortalAccounts;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +22,8 @@ use Throwable;
  * Gone: the client, birth data, consultations, notes, files (from the disk
  * too), charts, appointments, tasks, timeline entries, links to other clients,
  * and related people who exist only through this client (or who became this
- * client). Kept: the money received — amount, currency, day and method stay in
+ * client); the client's portal links and invitations, and the portal account
+ * when no other link opens it (Phase 9a). Kept: the money received — amount, currency, day and method stay in
  * the practice's figures without the client, what it was for, the reference or
  * notes. The practice's earlier exports contain the client, so they go too.
  *
@@ -42,6 +44,7 @@ final class DeleteClient
             DB::table('clients')->where('id', $id)->lockForUpdate()->first();
 
             $personIds = $this->relatedPeopleOnlyThrough($id);
+            $portalAccounts = DB::table('portal_access')->where('client_id', $id)->whereNotNull('portal_user_id')->pluck('portal_user_id');
             $exports = WorkspaceExport::query()->where('workspace_id', $client->workspace_id)->get();
             $files = DB::table('attachments')->where('client_id', $id)->whereNotNull('storage_path')
                 ->get(['storage_disk', 'storage_path'])
@@ -75,7 +78,12 @@ final class DeleteClient
                     ->delete(),
                 'related_people' => DB::table('related_people')->whereIn('id', $personIds)->delete(),
                 'exports' => DB::table('workspace_exports')->whereIn('id', $exports->modelKeys())->delete(),
+                // Its invitations go with each link (foreign key).
+                'portal_links' => DB::table('portal_access')->where('client_id', $id)->delete(),
             ];
+
+            // The client's portal account, unless another practice (or record) still opens it.
+            $counts['portal_accounts'] = PortalAccounts::deleteUnlinked($portalAccounts);
 
             // Birth data, tags and methods of the client go with the row (foreign keys).
             DB::table('clients')->where('id', $id)->delete();

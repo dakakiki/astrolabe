@@ -5,6 +5,7 @@ namespace App\Support\Retention;
 use App\Actions\Workspaces\DeletePractice;
 use App\Enums\ExportStatus;
 use App\Models\Workspace;
+use App\Support\Portal\PortalAccounts;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,11 @@ use Throwable;
  * - finished exports when they expire;
  * - expired or revoked invitations, failed queue jobs, used-up password
  *   reset links and expired cache entries (which may hold an idempotent
- *   response with a client in it) after their own short periods.
+ *   response with a client in it) after their own short periods;
+ * - the client portal (Phase 9a): used or expired sign-in links and codes
+ *   after a day, finished portal invitations after `housekeeping_days`,
+ *   portal sessions past their lifetime, and portal accounts with no active
+ *   link after `portal.account_days`.
  *
  * Clients are never trashed: archiving is a status, and deleting a client is
  * immediate and for good (DeleteClient). Rows go with plain queries, children
@@ -46,8 +51,32 @@ final class Retention
         );
         $counts['exports'] = $this->exports($now, $dryRun);
         $counts += $this->housekeeping($now, $dryRun);
+        $counts += $this->portal($now, $dryRun);
 
         return $counts;
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    private function portal(CarbonImmutable $now, bool $dryRun): array
+    {
+        $housekeeping = $now->subDays(config('astrolabe.retention.housekeeping_days'));
+        $accounts = PortalAccounts::forgotten($now->subDays(config('portal.account_days')));
+
+        return [
+            'portal_sign_in_tokens' => $this->remove(DB::table('portal_login_tokens')
+                ->where('created_at', '<', $now->subDay())
+                ->where(fn ($query) => $query->whereNotNull('used_at')->orWhere('expires_at', '<=', $now)), $dryRun),
+            'portal_invitations' => $this->remove(DB::table('portal_invitations')
+                ->where(fn ($query) => $query
+                    ->where('used_at', '<=', $housekeeping)
+                    ->orWhere('revoked_at', '<=', $housekeeping)
+                    ->orWhere('expires_at', '<=', $housekeeping)), $dryRun),
+            'portal_sessions' => $this->remove(DB::table(config('portal.session.table'))
+                ->where('last_activity', '<', $now->subMinutes(config('portal.session.lifetime'))->getTimestamp()), $dryRun),
+            'portal_accounts' => $dryRun ? $accounts->count() : PortalAccounts::delete($accounts),
+        ];
     }
 
     private function duePractices(CarbonImmutable $now, bool $dryRun): int

@@ -184,6 +184,8 @@ class RetentionTest extends TestCase
                 ['practices', 0], ['files', 0], ['notes', 1], ['tasks', 0], ['payments', 0], ['consultations', 0],
                 ['appointments', 0], ['related_people', 0], ['audit_logs', 0], ['exports', 0], ['invitations', 0],
                 ['failed_jobs', 0], ['password_resets', 0],
+                // The client portal (Phase 9a).
+                ['portal_sign_in_tokens', 0], ['portal_invitations', 0], ['portal_sessions', 0], ['portal_accounts', 0],
             ])
             ->assertSuccessful();
 

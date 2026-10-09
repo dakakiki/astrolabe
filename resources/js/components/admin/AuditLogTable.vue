@@ -61,6 +61,10 @@ function device(entry) {
                         <span v-else-if="entry.user_id" class="text-ink-3 italic">{{
                             t('admin.audit.deletedAccount')
                         }}</span>
+                        <!-- A practice's client in the portal: only the account's number, never the address. -->
+                        <span v-else-if="entry.portal_user_id" class="text-ink-2">{{
+                            t('admin.audit.portalAccount', { id: entry.portal_user_id })
+                        }}</span>
                         <span v-else class="text-ink-3">{{ t('admin.audit.system') }}</span>
                         <span v-if="entry.workspace" class="block text-xs text-ink-3">{{
                             t('admin.audit.practice', { name: entry.workspace.name })

@@ -67,6 +67,7 @@ final class PracticeExport
                 'services' => $this->services($id),
                 'files' => $files->map(fn (array $file) => $file['entry'])->all(),
                 'charts' => $this->charts($id),
+                'portal_access' => $this->portalAccess($id),
             ];
 
             $counts = array_map('count', $data);
@@ -431,6 +432,31 @@ final class PracticeExport
     /**
      * @return list<array<string, mixed>>
      */
+    /**
+     * Clients' links to the portal (Phase 9a): the address invited, the state and
+     * its dates — no sessions, tokens or invitation links.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function portalAccess(int $workspaceId): array
+    {
+        return DB::table('portal_access')
+            ->where('workspace_id', $workspaceId)
+            ->orderBy('id')
+            ->get()
+            ->map(fn (object $access) => [
+                'id' => $access->id,
+                'client_id' => $access->client_id,
+                'email' => $access->email,
+                'status' => $access->status,
+                'invited_at' => $this->time($access->invited_at),
+                'accepted_at' => $this->time($access->accepted_at),
+                'revoked_at' => $this->time($access->revoked_at),
+                'last_seen_at' => $this->time($access->last_seen_at),
+            ])
+            ->all();
+    }
+
     private function services(int $workspaceId): array
     {
         $methods = DB::table('service_astrology_method')

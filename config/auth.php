@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\PortalUser;
 use App\Models\User;
 
 return [
@@ -42,6 +43,13 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // The client portal (docs/spec/12): its own session cookie and table on its
+        // own host (PortalServiceProvider), never the astrologers' session.
+        'portal' => [
+            'driver' => 'portal-session',
+            'provider' => 'portal_users',
+        ],
     ],
 
     /*
@@ -65,6 +73,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+
+        'portal_users' => [
+            'driver' => 'eloquent',
+            'model' => PortalUser::class,
         ],
 
         // 'users' => [

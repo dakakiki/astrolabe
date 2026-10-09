@@ -4,6 +4,8 @@ namespace App\Support\Audit;
 
 use App\Enums\AuditEvent;
 use App\Models\AuditLog;
+use App\Models\PortalUser;
+use App\Models\Workspace;
 use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
@@ -44,16 +46,40 @@ final class Audit
     }
 
     /**
+     * Done by a client in the portal (Phase 9a). The person is the portal
+     * account, never an astrologer; the practice is the one it acted in (signing
+     * in and out happens outside any).
+     *
      * @param  array<string, mixed>  $properties
      */
-    private static function write(AuditEvent $event, ?Model $subject, array $properties, int|string|null $userId): AuditLog
-    {
+    public static function portal(
+        AuditEvent $event,
+        ?PortalUser $portalUser,
+        ?Model $subject = null,
+        array $properties = [],
+        ?Workspace $workspace = null,
+    ): AuditLog {
+        return self::write($event, $subject, $properties, null, $portalUser?->getKey(), $workspace?->getKey());
+    }
+
+    /**
+     * @param  array<string, mixed>  $properties
+     */
+    private static function write(
+        AuditEvent $event,
+        ?Model $subject,
+        array $properties,
+        int|string|null $userId,
+        ?int $portalUserId = null,
+        ?int $workspaceId = null,
+    ): AuditLog {
         $request = request();
         $userAgent = $request->userAgent();
 
         return AuditLog::query()->create([
-            'workspace_id' => app(CurrentWorkspace::class)->id(),
+            'workspace_id' => $workspaceId ?? app(CurrentWorkspace::class)->id(),
             'user_id' => $userId,
+            'portal_user_id' => $portalUserId,
             'event' => $event,
             'subject_type' => $subject ? self::subjectType($subject) : null,
             'subject_id' => $subject?->getKey(),

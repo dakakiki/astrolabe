@@ -155,6 +155,11 @@ const routes = [
                 component: () => import('@/pages/settings/PracticeSettings.vue'),
             },
             {
+                path: 'branding',
+                name: 'settings.branding',
+                component: () => import('@/pages/settings/BrandingSettings.vue'),
+            },
+            {
                 path: 'chart',
                 name: 'settings.chart',
                 component: () => import('@/pages/settings/ChartSettings.vue'),

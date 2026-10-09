@@ -36,6 +36,9 @@ class UpdateWorkspaceRequest extends FormRequest
             'default_locale' => ['sometimes', 'required', Rule::in(array_keys(config('astrolabe.locales')))],
             'timezone' => ['sometimes', 'required', 'timezone:all_with_bc'],
             'default_currency' => ['sometimes', 'required', Rule::in(config('astrolabe.currencies'))],
+            // Settings → Branding (Phase 9a): what clients see in the portal.
+            'display_name' => ['sometimes', 'nullable', 'string', 'max:120'],
+            'brand_color' => ['sometimes', 'nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
         ];
 
         // Chart defaults travel together, since the ayanamsa depends on the zodiac.
@@ -84,6 +87,10 @@ class UpdateWorkspaceRequest extends FormRequest
     public function workspaceAttributes(): array
     {
         $attributes = $this->withoutStrayAyanamsa($this->validated(), 'default_zodiac_mode', 'default_ayanamsa');
+
+        if (isset($attributes['brand_color'])) {
+            $attributes['brand_color'] = strtolower($attributes['brand_color']);
+        }
 
         // Stored complete and normalised; aspects left out keep their defaults.
         if (isset($attributes['aspect_orbs'])) {

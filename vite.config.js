@@ -8,7 +8,7 @@ import { fileURLToPath, URL } from 'node:url';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/css/portal.css', 'resources/js/portal/main.js'],
             refresh: true,
             fonts: [
                 bunny('Inter Tight', { weights: [400, 500, 600] }),

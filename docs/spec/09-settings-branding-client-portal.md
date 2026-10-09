@@ -17,6 +17,8 @@ Ovaj dokument je detaljno specificiran, ali ta detaljnost **ne sme povlačiti ra
 
 > Izmena 9. 10. 2026 (korisnik): portal se radi pre bete, po dokumentu 12 — **9a** pristup i pregled, **9b** zakazivanje, **9c** PWA za klijente. Portal je na posebnom origin-u `portal.astrolabe.online`, prijava je linkom ili kodom na mejl (Google kasnije). Branding iz Faze 6 nije bio urađen; u 9a se radi samo ono što portal treba — prikazno ime prakse, logo i jedna glavna boja sa proverom kontrasta — a ostatak ovog odeljka (varijante loga, do pet boja, izvezena karta, mejlovi) ostaje za kasnije.
 
+> **Faza 9a — urađeno 9. 10. 2026:** Settings → Branding (ime koje klijenti vide, jedna boja sa proverom kontrasta, logo PNG / WebP / SVG uz čišćenje SVG-a, pregled u obe teme) i klijentski portal — pristup i pregled (dokument 12, „Stanje posle 9a“; dokument 02, „Klijentski portal“). Boja: dugmad sa belim tekstom kada ga boja ili nijansa najviše četvrtinu tamnija nosi na WCAG AA, inače tamni tekst na boji prakse (svetle boje), a tek ako ni to ne prolazi — tamnija nijansa; linkovi se posebno usklađuju sa podlogom noćne i dnevne teme. Statusne boje ostaju sistemske. Varijante loga, do pet boja, izvezena karta i brendirani mejlovi i dalje dolaze kasnije.
+
 ### Napomena o portal autentifikaciji
 
 Google OIDC + email magic link/OTP nije „samo login". To je **drugi, nezavisan auth sistem** sa sopstvenom sesijom, sopstvenim rate limitingom i sopstvenom napadnom površinom, koji koegzistira sa Sanctum sesijom astrologa u istoj aplikaciji.

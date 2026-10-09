@@ -339,7 +339,7 @@ Vidljivost:
 
 - `private` — vidi astrolog;
 - `team` — vide ovlašćeni saradnici;
-- `shared_with_client` — spremno za budući portal.
+- `shared_with_client` — vidi i klijent u klijentskom portalu (Faza 9a; u aplikaciji oznaka „Visible in the client portal“).
 
 ### Implementirano u Fazi 4
 
@@ -514,3 +514,26 @@ Termini i zadaci na dashboardu su lični (dodeljeni onome ko gleda; zadaci i ned
 ### Implementirano u Fazi 7b
 
 Dva nova pokazatelja — „Received in {mesec}“ (uplate minus povraćaji od početka meseca, po valuti) i „Outstanding“ (dugovanje i broj konsultacija) — i kartica „Waiting on payment“: do šest konsultacija koje duguju, najstarije prve, sa klijentom, statusom naplate i preostalim iznosom. Novac je cele prakse, kao klijenti i fajlovi.
+
+## Klijentski portal — Faza 9a, implementirano
+
+Plan i odluke: dokument 12. Portal je ista aplikacija na posebnoj adresi (`portal.astrolabe.online`), sa sopstvenom prijavom i sesijom; klijent nikad ne dolazi u aplikaciju astrologa, a astrolog ne u portal.
+
+**Strana astrologa**
+
+- Kartica **Client portal** na profilu klijenta (Overview): stanje — nije pozvan, pozvan (do kada važi poziv), aktivan (adresa kojom se prijavljuje, poslednja poseta), pauziran (klijent je arhiviran), opozvan — i dugmad „Invite to portal“, „Resend invitation“, „Withdraw invitation“ / „Revoke access“. Poziv ide na e-mail sa profila klijenta; bez adrese ili za arhiviranog klijenta poziv nije moguć. Nov poziv poništava raniji link. Ako se adresa klijenta posle prihvatanja promeni, pristup ostaje na nalogu kojim se prijavljuje (kartica to kaže; prelazak = opoziv + nov poziv). Poziv šalje i opoziva svaki član koji radi sa klijentom.
+- **Settings → Branding** (vlasnik): ime koje klijenti vide (inače naziv prakse), glavna boja i logo (PNG, WebP ili SVG do 1 MB, kvadratan ili širok; SVG se čisti), uz pregled portala u noćnoj i dnevnoj temi. Boja na kojoj se beli tekst ne čita: dugmad zadržavaju boju uz tamni tekst (svetle boje), ili koriste malo tamniju nijansu — šta je sistem uradio piše ispod polja. Linkovi dobijaju nijansu koja se čita na podlozi svake teme.
+- Beleške i fajlovi sa vidljivošću `shared_with_client` nose oznaku „Visible in the client portal“. Promena telefona koju klijent napravi u portalu vidi se na vremenskoj liniji kao „Updated by the client in the portal“.
+
+**Portal (klijent)**
+
+- **Poziv:** link iz mejla otvara stranu sa imenom, logom i bojom prakse i dugmetom „Accept and continue“; prihvatanje pravi (ili nalazi) nalog portala za pozvanu adresu, aktivira vezu sa tačno tim zapisom klijenta i prijavljuje. Poziv važi 7 dana i jednom.
+- **Prijava bez lozinke:** e-mail → mejl sa linkom i šestocifrenim kodom (važe 15 minuta, jednom; upotreba jednog troši oba; 5 pogrešnih kodova gasi zahtev; nov zahtev poništava raniji). Odgovor je uvek isti, bez obzira da li adresa ima nalog. Link otvara stranu sa dugmetom „Sign in“; kod se kuca na strani prijave (za drugi uređaj).
+- **Više praksi:** jedan nalog može imati veze sa više praksi (samo kroz zasebne pozive); posle prijave bira se praksa, izbor važi za sesiju i menja se iz zaglavlja („Switch practice“).
+- **Home:** sledeći termin (dan, vreme u zoni klijenta uz naziv zone, usluga, online / uživo, link ili mesto), broj ostalih predstojećih, broj novih ili izmenjenih deljenih stavki od poslednje posete; dok klijent ne izabere zonu, ponuda da vremena prikazuje u zoni uređaja.
+- **Appointments:** Upcoming (najbliži prvi) i Past (održani, otkazani, propušteni — najnoviji prvi); bez internih napomena, razloga otkazivanja i naplate.
+- **Shared:** beleške (očišćen HTML), fajlovi (preuzimanje kroz portal, u audit log-u) i linkovi sa vidljivošću `shared_with_client`, najnovije prvo, uz konsultaciju (samo datum i usluga) i oznaku „New“.
+- **Profile:** ime za pozdrav, telefon (menja broj na zapisu klijenta u otvorenoj praksi), vremenska zona, jezik; e-mail samo za čitanje.
+- **Security:** gde je klijent prijavljen (pregledač i sistem, poslednja aktivnost, „This device“) i „Sign out everywhere“ (i ovaj uređaj).
+- Zaglavlje sa logom (ili inicijalima na boji prakse) i imenom prakse, pet sekcija u jednom redu i na telefonu, „Powered by AstroLabe“ u dnu; noćna i dnevna tema; 390 px bez bočnog pomeranja.
+- Opoziv, arhiviranje klijenta i zatvaranje prakse zatvaraju portal te prakse od sledećeg zahteva („Your portal is not open at the moment“).

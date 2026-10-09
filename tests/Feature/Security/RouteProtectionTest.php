@@ -165,4 +165,61 @@ class RouteProtectionTest extends TestCase
             'api/v1/consultations/{consultation}/chart POST',
         ], $limited);
     }
+
+    /** The client portal (Phase 9a) without signing in: its session, invitations and signing in. */
+    private const PORTAL_PUBLIC = [
+        'api/portal/v1/session',
+        'api/portal/v1/invitations/preview',
+        'api/portal/v1/invitations/accept',
+        'api/portal/v1/sign-in',
+        'api/portal/v1/sign-in/link',
+        'api/portal/v1/sign-in/code',
+        // A signed link instead of a session (the logo before a practice is open).
+        'api/portal/v1/practices/{workspace}/logo',
+    ];
+
+    /** Signed in to the portal, without a practice open: the account itself. */
+    private const PORTAL_ACCOUNT = [
+        'api/portal/v1/sign-out',
+        'api/portal/v1/practice',
+        'api/portal/v1/sessions',
+    ];
+
+    public function test_every_portal_route_lives_on_the_portal_host_with_its_own_session(): void
+    {
+        $portal = array_filter(Router::getRoutes()->getRoutes(), fn (Route $route) => $route->getDomain() === config('portal.domain'));
+        $this->assertNotEmpty($portal);
+
+        foreach ($portal as $route) {
+            $middleware = $route->gatherMiddleware();
+            $name = $route->uri().' '.implode('|', $route->methods());
+
+            $this->assertContains('portal', $middleware, $name);
+            $this->assertNotContains('web', $middleware, $name);
+            $this->assertNotContains('api', $middleware, $name);
+            $this->assertEmpty(array_filter($middleware, fn ($entry) => is_string($entry)
+                && (str_starts_with($entry, 'auth') || str_starts_with($entry, 'workspace'))), "{$name} must not use the application's guard");
+
+            if (! str_starts_with($route->uri(), 'api/portal/v1/')) {
+                continue;
+            }
+
+            if (in_array($route->uri(), self::PORTAL_PUBLIC, true)) {
+                $this->assertNotContains('portal.auth', $middleware, $name);
+
+                continue;
+            }
+
+            $this->assertContains('portal.auth', $middleware, "{$name} must require signing in to the portal");
+            $this->assertContains('throttle:portal', $middleware, $name);
+            $this->assertSame(! in_array($route->uri(), self::PORTAL_ACCOUNT, true), in_array('portal.access', $middleware, true), "{$name} must open a practice");
+        }
+
+        // Nothing of the portal is reachable outside its host.
+        foreach (Router::getRoutes()->getRoutes() as $route) {
+            if (str_starts_with($route->uri(), 'api/portal/')) {
+                $this->assertSame(config('portal.domain'), $route->getDomain(), $route->uri());
+            }
+        }
+    }
 }

@@ -13,7 +13,7 @@ use App\Http\Resources\AttachmentResource;
 use App\Models\Attachment;
 use App\Models\Client;
 use App\Models\Consultation;
-use App\Support\Attachments\AllowedFileTypes;
+use App\Support\Attachments\FileDownload;
 use App\Support\Audit\Audit;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -21,8 +21,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AttachmentController extends Controller
@@ -88,51 +86,18 @@ class AttachmentController extends Controller
     }
 
     /**
-     * The file itself, after the same authorization as everything else. A private
-     * bucket answers with a short-lived signed URL; local storage streams the file
-     * without loading it into memory. Only images may open in the browser; with
-     * nosniff and a sandboxing CSP nothing in a file can run on this origin.
+     * The file itself, after the same authorization as everything else
+     * (FileDownload streams it, or redirects to a short-lived bucket URL).
      */
     public function download(Request $request, Attachment $attachment): StreamedResponse|RedirectResponse
     {
         Gate::authorize('view', $attachment);
         abort_unless($attachment->isFile(), 404);
 
-        $inline = $request->boolean('inline') && AllowedFileTypes::showsInline($attachment->mime_type);
-        $disposition = $inline ? HeaderUtils::DISPOSITION_INLINE : HeaderUtils::DISPOSITION_ATTACHMENT;
+        $inline = FileDownload::opensInline($attachment, $request->boolean('inline'));
 
         Audit::record(AuditEvent::FileDownloaded, $attachment, ['inline' => $inline ?: null]);
-        $disk = Storage::disk($attachment->storage_disk);
 
-        if (config("filesystems.disks.{$attachment->storage_disk}.driver") === 's3') {
-            return redirect()->away($disk->temporaryUrl(
-                $attachment->storage_path,
-                now()->addMinutes(config('astrolabe.attachments.signed_url_minutes')),
-                [
-                    'ResponseContentType' => $attachment->mime_type,
-                    'ResponseContentDisposition' => HeaderUtils::makeDisposition(
-                        $disposition,
-                        $attachment->original_name,
-                        $this->asciiName($attachment),
-                    ),
-                ],
-            ));
-        }
-
-        abort_unless($disk->exists($attachment->storage_path), 404);
-
-        return $disk->response($attachment->storage_path, $attachment->original_name, [
-            'Content-Type' => $attachment->mime_type,
-            'X-Content-Type-Options' => 'nosniff',
-            'Content-Security-Policy' => "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox",
-            'Cache-Control' => 'private, no-store',
-        ], $disposition);
-    }
-
-    private function asciiName(Attachment $attachment): string
-    {
-        $ascii = preg_replace('/[^\x20-\x7E]|["%\/\\\\]/', '_', $attachment->original_name) ?? '';
-
-        return $ascii !== '' ? $ascii : 'file';
+        return FileDownload::response($attachment, $inline);
     }
 }

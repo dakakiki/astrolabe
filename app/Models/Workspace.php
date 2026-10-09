@@ -27,9 +27,12 @@ use Throwable;
  * @property array<string, mixed>|null $transit_orbs
  * @property CarbonImmutable|null $deletion_requested_at
  * @property CarbonImmutable|null $deletes_at when a practice scheduled for deletion goes for good
+ * @property string|null $display_name the name clients see in the portal (Phase 9a), otherwise `name`
+ * @property string|null $logo_path on the attachments disk (PracticeLogo)
+ * @property string|null $brand_color "#rrggbb", the portal's main colour
  */
 #[Fillable([
-    'name', 'default_locale', 'timezone', 'default_currency',
+    'name', 'display_name', 'brand_color', 'default_locale', 'timezone', 'default_currency',
     'default_house_system', 'default_zodiac_mode', 'default_ayanamsa', 'aspect_orbs', 'transit_orbs',
 ])]
 class Workspace extends Model
@@ -64,6 +67,12 @@ class Workspace extends Model
     public function isPendingDeletion(): bool
     {
         return $this->deletes_at !== null;
+    }
+
+    /** What clients see in the portal and its emails. */
+    public function portalName(): string
+    {
+        return filled($this->display_name) ? $this->display_name : $this->name;
     }
 
     /**

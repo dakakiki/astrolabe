@@ -6,6 +6,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
 import BirthDetailsCard from '@/components/BirthDetailsCard.vue';
 import ClientDeleteDialog from '@/components/ClientDeleteDialog.vue';
+import ClientPortalCard from '@/components/ClientPortalCard.vue';
 import ClientTimeline from '@/components/ClientTimeline.vue';
 import ConsultationsTable from '@/components/ConsultationsTable.vue';
 import NatalChart from '@/components/NatalChart.vue';
@@ -304,6 +305,12 @@ function deleted() {
                         <dd>{{ formatDate(client.created_at?.slice(0, 10), locale, 'medium') }}</dd>
                     </dl>
                 </section>
+
+                <ClientPortalCard
+                    :key="`${client.status}-${client.email}`"
+                    :client-id="client.id"
+                    :client-status="client.status"
+                />
 
                 <section class="card">
                     <div class="card-head">

@@ -59,6 +59,19 @@ enum AuditEvent: string
     case AdminJobDeleted = 'admin_job_deleted';
     case FeedbackSent = 'feedback_sent';
 
+    // The client portal (Phase 9a): the astrologer's invitations, and what the client
+    // does there (`portal_user_id` is the person then, never `user_id`).
+    case PortalInvitationSent = 'portal_invitation_sent';
+    case PortalInvitationRevoked = 'portal_invitation_revoked';
+    case PortalAccessAccepted = 'portal_access_accepted';
+    case PortalAccessRevoked = 'portal_access_revoked';
+    case PortalSignedIn = 'portal_signed_in';
+    case PortalSignInFailed = 'portal_sign_in_failed';
+    case PortalSignedOut = 'portal_signed_out';
+    case PortalSessionsRevoked = 'portal_sessions_revoked';
+    case PortalFileDownloaded = 'portal_file_downloaded';
+    case PortalProfileUpdated = 'portal_profile_updated';
+
     /**
      * Events that may mean someone else is trying an account; the admin's audit
      * log shows them on their own and highlights them (Phase 8c).
@@ -72,6 +85,7 @@ enum AuditEvent: string
             self::Lockout,
             self::TwoFactorFailed,
             self::RecoveryCodeUsed,
+            self::PortalSignInFailed,
         ];
     }
 }

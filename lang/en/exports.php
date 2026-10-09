@@ -20,6 +20,7 @@ What is inside
   services.json        services and prices
   files.json           files and links; each file is in the files/ folder
   charts.json          calculated charts, as the app drew them
+  portal_access.json   clients' access to the client portal (address and dates)
   csv/                 clients, consultations and payments for a spreadsheet
   files/               every file under its original name, one folder per client
 

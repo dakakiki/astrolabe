@@ -28,6 +28,8 @@ class AuditLogEntryResource extends JsonResource
                 'is_admin' => $this->user->isAdmin(),
             ] : null),
             'user_id' => $this->user_id,
+            // A client acting in the portal (Phase 9a): the account's number only — its address is client data.
+            'portal_user_id' => $this->portal_user_id,
             'workspace' => $this->whenLoaded('workspace', fn () => $this->workspace ? [
                 'id' => $this->workspace->id,
                 'name' => $this->workspace->name,

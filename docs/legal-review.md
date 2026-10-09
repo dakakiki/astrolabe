@@ -44,6 +44,16 @@ Strane su javne (bez prijave) i mogu se linkovati sa prezentacionog sajta. Svaka
 9. **Rok za obaveštenje o povredi podataka** prema astrologu: u nacrtu 48 sati (astrolog onda ima 72 sata prema nadzornom organu).
 10. **Revizije** (DPA 11): jednom godišnje, uz najavu, o trošku astrologa, a pisana dokumentacija može zameniti reviziju na licu mesta.
 
+### Klijentski portal (Faza 9a, 9. 10. 2026)
+
+Klijenti astrologa mogu, uz poziv astrologa, da se prijave u portal prakse (adresa e-pošte, link ili kod na mejl, bez lozinke) i vide svoje termine i ono što im je astrolog izričito podelio. Astrolog ostaje rukovalac, AstroLabe obrađivač — portal je deo usluge iz DPA-a. Pitanja:
+
+11. **DPA Prilog 1:** treba li navesti i podatke naloga portala (adresa e-pošte klijenta, ime za pozdrav, vremenska zona, sesije sa IP adresom i pregledačem, vreme poslednje posete koje astrolog vidi)?
+12. **Obaveštenje za korisnike portala:** treba li kratko obaveštenje o privatnosti na strani prijave i poziva (rukovalac je praksa, AstroLabe obrađivač, samo neophodni kolačići — sesija i XSRF, bez analitike)? Ko ga piše — mi ili astrolog (šablon)?
+13. **Mejlovi klijentu:** poziv navodi ime prakse i ime astrologa koji poziva; mejl za prijavu ne navodi praksu. Da li je sadržaj u redu (posebno ime prakse — za neke klijente i sama veza sa astrologom može biti osetljiva)? Isto pitanje važi za buduće podsetnike i push poruke (9b, 9c).
+14. **Rokovi čuvanja portala:** tokeni za prijavu 1 dan, završeni pozivi 30 dana, sesije 30 dana bez aktivnosti, nalog portala bez aktivne veze 30 dana posle poslednjeg opoziva; trajno brisanje klijenta odmah briše i njegov nalog portala ako nema drugih veza. Audit log zadržava radnje klijenta (bez sadržaja) 12 meseci, uz broj naloga, bez adrese.
+15. **Jedan nalog, više praksi:** ista adresa može imati pristup kod više astrologa (svaki je posebno pozvao). Praksa ne vidi da klijent ima pristup kod druge. Da li je ovo „zajednički“ podatak dve prakse (dva rukovaoca) ili naš (obrađivač za obe)?
+
 ## Šta tekst ne sme da sadrži
 
 Ugovor o licenci za Swiss Ephemeris (tačka 9) zabranjuje da se u vezi sa softverom pominju firma nosilac prava i autori biblioteke. Pravni tekstovi zato ne navode biblioteku za proračun. Test `LegalDocumentsTest` proverava da se ta imena ne pojave.

@@ -2,6 +2,8 @@
 
 > Nov dokument, 9. 10. 2026. Korisnik je odlučio da se zatvorena beta za sada ostavi po strani i da se **prvo uradi klijentski portal, a posle njega PWA za klijente**. Ovaj dokument je plan izvođenja: preuzima zahteve iz dokumenata 09 („Klijentski portal“) i 10 („Dostupnost i booking pravila“, „Klijentski prikaz“), dopunjuje ih modelom podataka, tokovima, bezbednošću i PWA delom, i deli posao na tri dela sa tačkom za pauzu posle svakog. Kada se deo uradi, detalji prelaze u dokumente 02, 05, 06, 09 i 10, kao u ranijim fazama.
 
+> **9a — urađeno 9. 10. 2026** (vidi „Stanje posle 9a“ na kraju). Sledi **9b — zakazivanje**.
+
 ## Odluke (korisnik, 9. 10. 2026 — sve preporuke)
 
 | Pitanje | Odluka |
@@ -194,7 +196,7 @@ Klijent nikad ne vidi: interne i timske beleške i fajlove, zadatke, karte i sni
 
 | Kada | Šta |
 |---|---|
-| Pre ili tokom 9a | WAMP vhost `dev.lcl.portal.astrolabe.online` (isti `public/`, `Require local`) i unos u `hosts` |
+| Pre ili tokom 9a | WAMP vhost `dev.lcl.portal.astrolabe.online` (isti `public/`, `Require local`) i unos u `hosts` — još nije napravljen; 9a je proveren preko `php artisan serve` na `localhost:8100` sa `PORTAL_DOMAIN=localhost` |
 | 9c | odobrenje paketa `minishlink/web-push` |
 | Produkcija (posle) | DNS zapis `portal.astrolabe.online` → isti server, TLS sertifikat i za portal host |
 | Google prijava (posle) | Google Cloud projekat, OAuth klijent (redirect na portal host), odobrenje paketa `laravel/socialite` |
@@ -227,6 +229,36 @@ Klijent nikad ne vidi: interne i timske beleške i fajlove, zadatke, karte i sni
 2. Bez mreže se prikazuje samo strana „offline“; nijedan odgovor API-ja ni HTML sa podacima nije u kešu (provera u DevTools → Application).
 3. Nova verzija se najavljuje i preuzima posle osvežavanja.
 4. Push stiže samo uz izričito uključivanje, sa opštim tekstom; odjava ili opoziv brišu pretplate uređaja.
+
+## Stanje posle 9a (9. 10. 2026)
+
+**Urađeno:** sve iz reda „9a“ u tabeli „Podela posla“ i kriterijumi 1–8 iz „Kriterijumi prihvatanja — 9a“ (testovi u `tests/Feature/Portal`, `RouteProtectionTest`, Vitest `brand` i `portal`; provera u pregledaču). Opis za korisnike je u dokumentu 02, model u dokumentu 05, bezbednost i čuvanje u dokumentu 06.
+
+**Kako je napravljeno:**
+
+- Rute portala (`routes/portal.php`) registruje `PortalServiceProvider`, vezane za `PORTAL_DOMAIN`, pre ruta aplikacije — inače bi SPA rute aplikacije odgovarale i na portal hostu. Rute aplikacije, Fortify-a i Sanctum-a na portal hostu daju 404 (`RejectOnPortalHost` u grupama `web` i `api`).
+- Sanctum se za portal ne koristi: grupa `portal` pokreće sopstveni menadžer sesija (`PortalSessionManager`: kolačić, tabela, trajanje, kolačić samo za host) i CSRF kolačić portala. Guard `portal` ne šalje auth događaje (inače bi ih audit astrologa zabeležio kao astrologove). Zaštita ruta je `portal.auth` (ne `auth:portal`, koji bi portal učinio podrazumevanim guard-om pa bi `auth()->id()` u kolonama `created_by` vratio nalog portala) i `portal.access`, koji bira praksu i postavlja tenant scope.
+- Portal SPA je poseban ulaz za Vite (`resources/js/portal`) sa svojim ruterom, prevodima i stanjem; deli tokene, CSS komponente, znak i nekoliko komponenti (polja forme, telefon, tema, obaveštenja). Paket portala: ~15 kB JS (plus zajednički Vue / i18n delovi), CSS 39 kB (aplikacija 78 kB); kod ekrana astrologa se ne učitava.
+
+**Odluke donete usput (moje, za proveru):**
+
+1. Tokeni iz mejlova idu posle `#` (ne stižu u logove servera); strana ih odmah briše iz adresne trake i šalje POST-om. I pregled poziva je POST (token u telu, nikad u URL-u).
+2. Kod za prijavu se čuva kao HMAC sa ključem aplikacije (milion mogućnosti — SHA-256 bi se pogodio iz kopije baze); nov zahtev za prijavu poništava raniji; pogrešan kod i nepoznata adresa daju istu poruku; zahtev za prijavu traje najmanje 0,4 s (`Timebox`), a mejl ide kroz queue — da se po vremenu ne vidi da li nalog postoji.
+3. Mejl za prijavu se šalje samo adresi koja ima praksu koja se sada otvara (aktivna veza, klijent nije arhiviran, praksa se ne zatvara).
+4. Dodato u model, kog nije bilo u planu: `portal_invitations.revoked_at` (nov poziv ili opoziv), `portal_access.last_seen_at` (astrolog vidi poslednju posetu), `portal_access.shared_seen_at` („novo od poslednje posete“ — nove ili izmenjene stavke), audit događaj `portal_profile_updated`.
+5. Telefon u Profile menja broj na zapisu klijenta u otvorenoj praksi (astrolog ga vidi, stavka na vremenskoj liniji „Updated by the client in the portal“); ime, zona i jezik pripadaju nalogu portala.
+6. Ponovni poziv posle opoziva pravi novu vezu (opozvana ostaje kao istorija); aktivnog klijenta nije moguće ponovo pozvati (409). Arhiviran klijent se ne može pozvati; njegova aktivna veza je „Paused“.
+7. Ako astrolog promeni adresu klijenta posle prihvatanja, veza ostaje na nalogu kojim se klijent prijavljuje; kartica to kaže, a prelazak na novu adresu je opoziv + nov poziv.
+8. Logo na privatnom disku `attachments` pod `{praksa}/branding/`; u portalu kroz potpisan link koji važi 7 dana i isti je ceo dan (keš pregledača), kod astrologa kroz API. Odnos širine i visine 0,9–8. SVG kroz allowlist elemenata i atributa.
+9. Boja: beli tekst na dugmetu ako ga boja (ili nijansa najviše 25% tamnija) nosi na AA; inače tamni tekst (`#10182b`) na boji prakse; tek ako ni to ne prolazi — tamnija nijansa. Linkovi i akcenti se računaju posebno za noćnu i dnevnu podlogu. Šta je urađeno piše ispod polja za boju. Strana poziva već nosi boju prakse.
+10. Lista sesija u Security bez id-jeva (oni su ključ sesije); „Sign out everywhere“ odjavljuje i ovaj uređaj.
+11. Portal ima svoj fajl prevoda (`resources/js/portal/locales/en.json`) — tekst aplikacije astrologa se ne učitava.
+12. Admin vidi portal događaje u audit log-u sa brojem naloga portala, nikad adresom (to je podatak klijenta).
+13. Čuvanje: tokeni za prijavu jedan dan, završeni pozivi 30 dana, sesije 30 dana bez aktivnosti, nalozi bez aktivne veze 30 dana posle poslednjeg opoziva; trajno brisanje klijenta ili prakse odmah briše veze i naloge kojima ne ostane druga veza.
+
+**Provereno u pregledaču (ugrađeni pregledač; aplikacija na `127.0.0.1:8099` sa probnim astrologom, portal na `localhost:8100`):** Settings → Branding (ime, žuta boja → tamni tekst na dugmetu i obaveštenje, SVG logo sa `<script>` i `onclick` — sačuvan bez njih, pregled u obe teme); kartica Client portal → poziv → mejl u `laravel.log` → strana poziva sa logom, imenom i bojom prakse, token uklonjen iz adrese → prihvatanje → Home; Appointments (Upcoming / Past, bez internih napomena i razloga otkazivanja), Shared (tri deljene stavke, bez timskih i privatnih; fajl 200, `application/pdf`, sandbox CSP), Profile (zona Europe/London — vremena se pomeraju; telefon se vidi kod astrologa uz stavku na vremenskoj liniji), Security, odjava, prijava kodom (pogrešan kod → opšta poruka) i linkom (strana sa dugmetom); opoziv iz aplikacije → sledeći klik u portalu vodi na „Your portal is not open at the moment“; ponovni poziv i prihvatanje. Širina 390 px bez bočnog pomeranja na svim ekranima portala u noćnoj i dnevnoj temi (svih pet sekcija staje u red); kolačić sesije portala je httpOnly i samo za portal host.
+
+**Ostaje za 9b i kasnije:** zakazivanje (9b), PWA i push (9c); Google prijava; deljena karta i PDF; vhost `dev.lcl.portal.astrolabe.online` i DNS / TLS za `portal.astrolabe.online` (korisnik); pravnik — pitanja o portalu u `docs/legal-review.md`.
 
 ## Kasnije (van ovog plana)
 

@@ -4,10 +4,18 @@ use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureIdempotency;
 use App\Http\Middleware\EnsureLegalAccepted;
 use App\Http\Middleware\EnsurePracticeIsActive;
+use App\Http\Middleware\Portal\AuthenticatePortal;
+use App\Http\Middleware\Portal\PreventPortalRequestForgery;
+use App\Http\Middleware\Portal\RejectOnPortalHost;
+use App\Http\Middleware\Portal\ResolvePortalAccess;
+use App\Http\Middleware\Portal\SetPortalLocale;
+use App\Http\Middleware\Portal\StartPortalSession;
 use App\Http\Middleware\ResolveCurrentWorkspace;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
 use App\Support\Operations\OperatorAlerts;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -32,8 +40,20 @@ return Application::configure(basePath: dirname(__DIR__))
         // CSP, HSTS and friends on every response, pages and API alike.
         $middleware->append(SecurityHeaders::class);
 
-        $middleware->web(append: [SetLocale::class]);
-        $middleware->api(append: [SetLocale::class]);
+        // The astrologers' routes — Fortify's and Sanctum's included — do not exist on
+        // the client portal's host (Phase 9a).
+        $middleware->web(prepend: [RejectOnPortalHost::class], append: [SetLocale::class]);
+        $middleware->api(prepend: [RejectOnPortalHost::class], append: [SetLocale::class]);
+
+        // The client portal (docs/spec/12): its own session cookie and table and its own
+        // CSRF cookie, all for the portal host only (PortalServiceProvider, routes/portal.php).
+        $middleware->group('portal', [
+            EncryptCookies::class,
+            AddQueuedCookiesToResponse::class,
+            StartPortalSession::class,
+            PreventPortalRequestForgery::class,
+            SetPortalLocale::class,
+        ]);
 
         $middleware->alias([
             'workspace' => ResolveCurrentWorkspace::class,
@@ -41,13 +61,20 @@ return Application::configure(basePath: dirname(__DIR__))
             'legal.accepted' => EnsureLegalAccepted::class,
             'admin' => EnsureAdmin::class,
             'idempotent' => EnsureIdempotency::class,
+            'portal.auth' => AuthenticatePortal::class,
+            'portal.access' => ResolvePortalAccess::class,
         ]);
 
         // Route model binding must already see the tenant scope, so the workspace is
-        // resolved after authentication but before bindings are substituted.
+        // resolved after authentication but before bindings are substituted — in the
+        // application and in the portal alike.
         $middleware->prependToPriorityList(
             before: SubstituteBindings::class,
             prepend: ResolveCurrentWorkspace::class,
+        );
+        $middleware->prependToPriorityList(
+            before: SubstituteBindings::class,
+            prepend: ResolvePortalAccess::class,
         );
 
         // Signed-in users hitting a guest-only endpoint, and guests hitting a

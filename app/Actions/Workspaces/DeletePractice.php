@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Workspace;
 use App\Notifications\PracticeDeleted;
 use App\Support\Audit\Audit;
+use App\Support\Portal\PortalAccounts;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -33,8 +34,8 @@ final class DeletePractice
      */
     private const TABLES = [
         'activity_events', 'attachments', 'notes', 'payments', 'tasks', 'consultations', 'appointments',
-        'chart_calculations', 'client_relationships', 'related_people', 'clients', 'tags', 'services',
-        'astrology_methods', 'workspace_exports',
+        'portal_access', 'chart_calculations', 'client_relationships', 'related_people', 'clients', 'tags',
+        'services', 'astrology_methods', 'workspace_exports',
     ];
 
     /**
@@ -58,6 +59,7 @@ final class DeletePractice
             DB::table('workspaces')->where('id', $id)->lockForUpdate()->first();
 
             $counts = [];
+            $portalAccounts = DB::table('portal_access')->where('workspace_id', $id)->whereNotNull('portal_user_id')->pluck('portal_user_id');
 
             foreach (self::TABLES as $table) {
                 $counts[$table] = DB::table($table)->where('workspace_id', $id)->delete();
@@ -68,6 +70,8 @@ final class DeletePractice
             }
 
             $counts['accounts'] = $leaving->count();
+            // Clients' portal accounts no other practice opens (Phase 9a).
+            $counts['portal_accounts'] = PortalAccounts::deleteUnlinked($portalAccounts);
 
             DB::table('workspaces')->where('id', $id)->delete();
 

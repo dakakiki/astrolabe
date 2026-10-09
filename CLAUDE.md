@@ -46,9 +46,42 @@ before starting a phase. The user communicates in Serbian.
   `two_factor: true` from login and then posts the code to `/auth/two-factor-challenge`; Fortify
   takes each code once, so a test that signs in twice in one window uses the next code.
 - The `sessions` table is read by `user_id` (Settings → Security, "sign out other devices",
-  admin suspension). Any second kind of account — the client portal (Phase 9, plan in
-  `docs/spec/12-client-portal-and-pwa.md`) — needs its own guard, cookie and session table
-  (`portal_sessions`) on its own host, never the astrologers' `sessions`.
+  admin suspension). The client portal therefore has its own guard, cookie and session table
+  (`portal_sessions`) on its own host — see "Client portal" below.
+
+## Client portal (Phase 9a)
+
+- Plan and decisions: `docs/spec/12-client-portal-and-pwa.md`. The same app on its own host
+  (`PORTAL_DOMAIN`, `config/portal.php`; locally `dev.lcl.portal.astrolabe.online`, or
+  `php artisan serve` on localhost with `PORTAL_DOMAIN=localhost`). Email links start with `PORTAL_URL`.
+- `PortalServiceProvider` registers the portal's routes (`routes/portal.php`, bound to the host) before
+  the app's route files, so the app's SPA catch-all never answers there; `RejectOnPortalHost` (prepended
+  to `web` and `api`) makes every app, Fortify and Sanctum route 404 on the portal host.
+- The `portal` middleware group starts the portal's own session (`PortalSessionManager`: cookie
+  `astrolabe_portal_session`, table `portal_sessions`, 30 days, host-only cookie) and CSRF cookie
+  (`PreventPortalRequestForgery`). The `portal` guard (`portal-session` driver, `PortalUser`) fires no auth
+  events — `SecurityEventSubscriber` would file them as an astrologer's.
+- Use `portal.auth` (`AuthenticatePortal`), never `auth:portal`: `auth:` would make `portal` the default
+  guard, and then `auth()->id()` — `created_by` columns, `Audit::record()` — would return a portal
+  account's id. In portal code read the person with `Auth::guard('portal')`, and audit with
+  `Audit::portal()` (`audit_logs.portal_user_id`).
+- `portal.access` (`ResolvePortalAccess`) picks the open practice from the person's usable links
+  (`PortalAccess::usable()`: active, client not archived, practice not closing), checked on every
+  request, and sets the tenant scope plus `PortalContext` (link, client, practice). Every portal query
+  starts from `PortalContext::client()`; nothing in a request names a practice or client.
+- `PortalAccess` is a tenant model; the portal side reads a person's links with `acrossPractices()`
+  (always together with the portal account). Invitation and sign-in tokens are stored as hashes (the code
+  as an HMAC with the app key), single-use, short-lived; email links carry the token after `#` and the SPA
+  posts it (mail scanners open links). Asking for a sign-in answers the same for any address (`Timebox`).
+- The portal SPA is its own Vite entry (`resources/js/portal/main.js`, `resources/css/portal.css`) with its
+  own router, i18n file (`resources/js/portal/locales/en.json`) and session store; it may import shared
+  components and pure libs, never the application's pages or stores. The practice's colour becomes the
+  `--brand*` tokens through `lib/brand.js` (contrast-checked), its logo comes through a signed link
+  (`PracticeLogo::portalUrl`); SVG logos are cleaned by `SvgSanitizer`.
+- Tests: `tests/Concerns/InteractsWithPortal` — `portal()` sends one request as a browser would (only the
+  portal cookie, guards and session stores rebuilt), `portalUserFor()`, `signInToPortal()`. Portal sessions
+  use the database driver in tests (phpunit.xml). A new table holding a client's portal data belongs in
+  `DeleteClient`, `DeletePractice`, `Retention` and `PracticeExport`.
 
 ## SPA shell
 

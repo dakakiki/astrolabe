@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Workspace;
+use App\Support\Portal\PracticeLogo;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,6 +18,10 @@ class WorkspaceResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
+            // Settings → Branding: what clients see in the portal (Phase 9a).
+            'display_name' => $this->display_name,
+            'brand_color' => $this->brand_color,
+            'logo_url' => PracticeLogo::appUrl($this->resource),
             'default_locale' => $this->default_locale,
             'timezone' => $this->timezone,
             // Derived from the time zone; used as the default country in forms.
