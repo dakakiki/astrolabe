@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
+import BrandMark from '@/components/BrandMark.vue';
 import FeedbackDialog from '@/components/FeedbackDialog.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import http from '@/lib/http';
@@ -123,7 +124,7 @@ async function dismissPrivacyNotice() {
     <div class="shell" :class="{ 'shell-admin': auth.isAdmin }">
         <aside id="sidebar" class="sidebar" :class="{ open: sidebarOpen }">
             <div class="brandmark">
-                <div class="glyph" aria-hidden="true">✷</div>
+                <BrandMark class="glyph" />
                 <div class="name">
                     {{ t('app.name') }}<small>{{ auth.isAdmin ? t('admin.badge') : auth.workspace?.name }}</small>
                 </div>

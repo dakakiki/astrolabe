@@ -3,6 +3,7 @@ import { computed, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
+import BrandMark from '@/components/BrandMark.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import http from '@/lib/http';
 import { formatLegalDate, internalPath, LEGAL_DOCUMENTS } from '@/lib/legal';
@@ -65,11 +66,7 @@ function followLink(event) {
     <div class="legal-page">
         <header class="legal-head">
             <RouterLink :to="back" class="flex items-center gap-2 font-serif text-lg text-ink no-underline">
-                <span
-                    class="grid size-7 place-items-center rounded-full bg-brand text-sm text-on-brand"
-                    aria-hidden="true"
-                    >✷</span
-                >
+                <BrandMark class="size-8" />
                 {{ t('app.name') }}
             </RouterLink>
             <div class="flex items-center gap-3">

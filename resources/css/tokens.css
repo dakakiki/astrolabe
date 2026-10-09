@@ -78,6 +78,14 @@
     --stars: 0.55;
     --glow: 0 0 22px rgba(90, 97, 224, 0.22);
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.28);
+
+    /* The AstroLabe mark (BrandMark.vue). Fixed product colours, not the
+       workspace's --brand: the mark is AstroLabe's, not the practice's. */
+    --logo-limb: #e5b25c;
+    --logo-brass: #e5b25c;
+    --logo-sky-1: #5a61e0;
+    --logo-sky-2: #151d36;
+    --logo-star: #ffffff;
 }
 
 /* ---------------- DAY ---------------- */
@@ -127,4 +135,9 @@
     --stars: 0;
     --glow: none;
     --shadow: 0 1px 2px rgba(16, 24, 43, 0.06), 0 4px 14px rgba(16, 24, 43, 0.05);
+
+    /* On paper the limb takes the darker brass; the disc stays a night sky. */
+    --logo-limb: #a2701f;
+    --logo-sky-1: #4950c9;
+    --logo-sky-2: #141b2d;
 }
