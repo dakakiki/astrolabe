@@ -65,6 +65,8 @@ Izbor ephemeris biblioteke je pravno, ne samo tehničko pitanje.
 
 Odluka mora biti doneta pre Faze 3 i zabeležena u dokumentu 11.
 
+> Faza 8c2 (9. 10. 2026): ugovor za Professional License je izmenjen 29. 9. 2026 — licenca sada važi 6 godina (pa se obnavlja), API usluge za druge firme traže njihovu licencu, a tačka 9 imenom navodi koga ne pominjemo. Detalji u dokumentu 11. Adresa izvornog repozitorijuma zato nije u kodu: Linux build (`scripts/build-swetest.sh`) je dobija iz okruženja (`SWISSEPH_SOURCE`, u CI-ju kao secret), a `LegalDocumentsTest` proverava da se imena ne pojave u pravnim tekstovima.
+
 ## Multi-tenant izolacija
 
 Moraju postojati automatski testovi koji potvrđuju da korisnik workspace-a A ne može pregledati, menjati, preuzeti ili obrisati resurse workspace-a B, čak ni direktnim menjanjem API ID-a. Ovo uključuje i izračunate karte.
@@ -88,7 +90,8 @@ Moraju postojati automatski testovi koji potvrđuju da korisnik workspace-a A ne
 - konverzija u UTC za proračun koristi istorijske offsete iz tzdata, uključujući ratna i lokalna letnja računanja vremena;
 - frontend jasno prikazuje zonu pri međunarodnom zakazivanju;
 - promene DST pravila ne smeju menjati originalno unesene podatke rođenja;
-- ako ažuriranje tzdata promeni izračunatu kartu, to mora biti vidljivo kao nova verzija proračuna, a ne kao tiha izmena.
+- ako ažuriranje tzdata promeni izračunatu kartu, to mora biti vidljivo kao nova verzija proračuna, a ne kao tiha izmena;
+- sesija baze radi u UTC-u bez obzira na zonu servera (`DB_TIMEZONE=+00:00`, Faza 8c2): aplikacija upisuje UTC, a TIMESTAMP kolone bi inače konvertovale preko zone servera — na lokalnom serveru u srednjoevropskoj zoni upis u satu prelaska na letnje računanje vremena je padao, a u satu povratka bio dvosmislen. `ConnectionTimeZoneTest` to čuva.
 
 ## Performanse
 
@@ -109,6 +112,14 @@ Za proračun karata:
 - kalendar neba se računa po zahtevu (dva poziva engine-a), bez keša;
 - sinastrija i kompozit se računaju po zahtevu iz dve keširane natalne karte, bez sopstvenog poziva engine-a;
 - SVG točak se renderuje na klijentu iz JSON odgovora, ne generiše se na serveru.
+
+> **Prolaz performansi — Faza 8c2 (9. 10. 2026).** Odluka korisnika: meri se na praksi od **2.000 klijenata**.
+>
+> - `php artisan perf:seed` (samo van produkcije) pravi posebnu praksu: 2.000 klijenata (1.823 sa podacima rođenja), 10.145 konsultacija sa HTML beleškama, 16.317 beleški, 5.952 termina, 4.000 zadataka, 7.832 uplate, 650 linkova, 522 povezane osobe i 49.403 stavke vremenske linije — za ~75 s, bez mejlova (bez podsetnika i jutarnjeg pregleda). `php artisan perf:measure` šalje 33 zahteva glavnih ekrana kroz aplikaciju kao vlasnik te prakse i meri prvi poziv, medijanu narednih, vreme baze, broj upita i veličinu odgovora (`--queries` ispisuje upite po obliku i vremenu).
+> - **N+1:** `Model::preventLazyLoading()` je uključen lokalno i u testovima (greška), a u produkciji samo piše u log, jednom po modelu i relaciji. Ceo skup testova i svi izmereni ekrani prolaze bez ijednog lazy loading-a. `QueryCountTest` proverava da 13 glavnih ekrana (dashboard, klijenti, klijent, vremenska linija, beleške, konsultacije i dugovanja, kalendar, zadaci, uplate i zbir) postavlja isti broj upita za 6 i za 16 klijenata, i da CSV uplata čita u delovima.
+> - **Izmereno lokalno** (Windows, PHP 8.3 sa Xdebug-om, MariaDB 10.6): liste klijenata, konsultacija, zadataka i uplata 25–40 ms (9–22 upita, stalan broj); klijent, njegova vremenska linija, beleške i karta 7–22 ms; kalendar za nedelju ~40 ms, za mesec ~120 ms (~180 termina, 195 kB); konsultacije koje duguju ~90 ms (korelisani zbir uplata nad ~8.400 održanih konsultacija); zbir uplata 122 → **43 ms** posle izmene (dugovanje se sabira u bazi umesto da se učitaju sve konsultacije sa beleškama); dashboard ~400 ms, od čega je ~220 ms jedno pokretanje `swetest`-a za tranzite (na Windows-u je to cena pokretanja procesa); CSV svih 7.832 uplate ~1,7 s (90 upita po 500 redova; vreme je pravljenje ~30.000 Eloquent modela — za retko korišćen izvoz prihvatljivo). Isključen Xdebug ne menja brojke bitno.
+> - **Ispravljeno usput:** uplate učitavaju samo kolone konsultacije koje prikazuju (ne njene beleške); sesija baze u UTC-u (vidi „Vremenske zone“). Dodatni indeksi su probani (pokrivajući na `payments` i `consultations`) i nisu doneli merljivu razliku, pa nisu uvedeni.
+> - Merenje na Linux-u (CI, `php artisan ephemeris:benchmark`): vidi dokument 11, „Stanje posle Faze 8c2“.
 
 ## Pouzdanost
 
@@ -201,6 +212,13 @@ Pre beta rada sa stvarnim podacima pripremiti:
 > - **Izvoz cele prakse** (vlasnik, Settings → Your data): ZIP sa JSON-om po vrsti podataka, CSV za klijente, konsultacije i uplate, izračunatim kartama (payload) i svim fajlovima pod originalnim imenima po klijentima, plus README sa konvencijama (UTC, podaci rođenja kako su uneti, novac u najmanjoj jedinici). Pravi se u queue-u, mejl vlasniku nosi potpisan link koji važi **24 h** i i dalje traži prijavu vlasnika; u aplikaciji se preuzima dok postoji (**7 dana**). Uključeni su i privatne beleške i fajlovi drugih članova — izvoz je praksin. Svaki zahtev i preuzimanje su u audit log-u.
 > - **Pravo brisanje klijenta** (zahtev klijenta astrologu): samo vlasnik, uz upisano puno ime (veličina slova i razmaci nisu bitni); briše odmah sve o klijentu, fajlove i sa diska, povezane osobe koje postoje samo kroz njega i ranije izvoze prakse (sadrže ga). **Uplate ostaju anonimne** (iznos, valuta, dan, način — bez klijenta, svrhe, reference i napomene), da knjigovodstvo astrologa ostane tačno.
 > - **Brisanje prakse i naloga** (vlasnik, lozinka): praksa se odmah zatvara (API vraća 403 sa kodom `practice_pending_deletion`, osim prijave, izvoza i otkazivanja; podsetnici i jutarnji mejl se ne šalju), **30 dana** može da se otkaže, zatim `data:prune` briše sve, zajedno sa nalozima koji ne pripadaju nijednoj drugoj praksi; svi članovi dobijaju mejl pri zakazivanju, otkazivanju i posle brisanja.
+
+> Faza 8c2 — pravni dokumenti (implementirano 9. 10. 2026; odluke korisnika istog dana: nacrte piše razvoj, pregleda ih pravnik; nova verzija uslova se ponovo prihvata):
+>
+> - **Privacy Policy, Terms of Service i Data Processing Agreement** kao nacrti na engleskom u repou (`resources/legal/<dokument>/<verzija>.md`, verzija = datum), javne strane `/legal/*` sa oznakom nacrta; mesta za podatke radnje i pitanja za pravnika su u `docs/legal-review.md`.
+> - **Saglasnost:** astrolog pri registraciji prihvata Terms i DPA i potvrđuje da je pročitao Privacy Policy; čuvaju se verzija, vreme, IP adresa i pregledač (`legal_acceptances`, dok nalog postoji). Nova verzija Terms ili DPA zatvara praksu dok se ne prihvati (izvoz i brisanje ostaju otvoreni); nova Privacy Policy je obaveštenje.
+> - Saglasnost klijenata astrologa za obradu je obaveza astrologa kao rukovaoca (Terms 5, DPA 3); da li AstroLabe treba da ponudi šablon obaveštenja za klijente — pitanje za pravnika.
+> - Pravila za audio i video zapise konsultacija i dalje nisu rešena (snimci za sada nisu funkcija proizvoda; fajl koji astrolog postavi pokriven je DPA-om kao i svaki drugi).
 
 Pravna dokumentacija i zahtevi zavise od tržišta i moraju biti provereni sa kvalifikovanim pravnim savetnikom pre javnog lansiranja.
 

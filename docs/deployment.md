@@ -23,10 +23,11 @@ Odluke i razlozi (korisnik, 6. 10. 2026):
 
 ## Pre podizanja
 
-- [ ] **Swiss Ephemeris Professional License** kupljena (odluka: pre zatvorene bete; dokument 11, „Detalji odluke“). Bez nje se aplikacija ne pušta korisnicima.
+- [ ] **Swiss Ephemeris Professional License** kupljena (odluka: pre zatvorene bete; dokument 11, „Detalji odluke“). Bez nje se aplikacija ne pušta korisnicima. Potpisuje se izdanje ugovora iz **septembra 2026** (važi 6 godina, pa se obnavlja — upisati datum obnove u kalendar).
 - [ ] **Hetzner nalog:** Cloud projekat, Webhosting paket, potpisan AVV / DPA.
 - [ ] **Domen:** pristup DNS zapisima za `astrolabe.online`.
-- [ ] **Izvorni kod `swetest`-a** za Linux build (preuzimanje uz odobrenje korisnika, kao i do sada) i fajlovi efemerida `sepl_18.se1`, `semo_18.se1`, `seas_18.se1` sa lokalne mašine (`storage/app/private/swisseph/ephe`, nisu u Git-u).
+- [x] **Linux `swetest`:** `scripts/build-swetest.sh` (Faza 8c2) gradi ga iz izvornog koda na fiksiranom commit-u i donosi fajlove efemerida (`sepl_18.se1`, `semo_18.se1`, `seas_18.se1`) uz proveru SHA-256; isti postupak radi u CI-ju od 9. 10. 2026. Adresa izvornog repozitorijuma je u ugovoru o licenci i u GitHub secret-u `SWISSEPH_SOURCE` — ne upisuje se u repo (ugovor, tačka 9).
+- [ ] **Pravni tekstovi:** pravnik je pregledao Terms, DPA i Privacy Policy (`docs/legal-review.md`), podaci radnje su upisani, a konačna verzija je objavljena kao nov fajl bez `draft: true` — pre prvog testera; testeri je prihvataju pri registraciji.
 
 ## Server (CX33)
 
@@ -39,7 +40,7 @@ Odluke i razlozi (korisnik, 6. 10. 2026):
    - **MariaDB 11.8** iz zvaničnog MariaDB repozitorijuma (Ubuntu 24.04 sam nudi stariju granu); `bind-address = 127.0.0.1`; `innodb_buffer_pool_size` oko 3 GB; poseban korisnik baze samo za bazu aplikacije;
    - Composer, Node 24 LTS (za `npm run build`), Supervisor, `build-essential` (za `make swetest`), `git`, `unzip`.
 5. **PHP / Nginx granice za upload:** `upload_max_filesize` i `post_max_size` u PHP-FPM-u i `client_max_body_size` u Nginx-u bar `ATTACHMENTS_MAX_MB` (100 MB).
-6. **Swiss Ephemeris:** `make swetest` iz izvornog koda, program i fajlovi efemerida van javnog direktorijuma (npr. `storage/app/private/swisseph/`), putanje u `SWETEST_PATH` i `EPHEMERIS_PATH`. Verzija i kontrolni zbirovi se sami pamte u kešu (fe6f33d) — nov program ili fajl dobija nov ključ, ništa se ne briše ručno.
+6. **Swiss Ephemeris:** `SWISSEPH_SOURCE=<adresa iz ugovora> bash scripts/build-swetest.sh storage/app/private/swisseph` (treba `git`, `make` i `build-essential`; preuzima ~3,8 MB, ne ceo repozitorijum), pa u `.env` `SWETEST_PATH=…/storage/app/private/swisseph/swetest` i `EPHEMERIS_PATH=…/storage/app/private/swisseph/ephe` — van javnog direktorijuma. Provera: `php artisan ephemeris:benchmark` (karta, niz od 731 dan, kalendar neba; u CI-ju na Linux-u: karta ~1 ms, niz ~110 ms). Verzija i kontrolni zbirovi se sami pamte u kešu (fe6f33d) — nov program ili fajl dobija nov ključ, ništa se ne briše ručno.
 
 ## Aplikacija — `.env` na serveru
 
@@ -74,6 +75,7 @@ Samo nazivi i vrednosti koje nisu tajne; lozinke se unose na serveru.
 | `RETENTION_DELETED_DAYS` / `RETENTION_AUDIT_LOG_MONTHS` / `PRACTICE_DELETION_DAYS` | `30` / `12` / `30` (odluke korisnika 8. 10. 2026) |
 | `EXPORT_LINK_HOURS` / `EXPORT_KEEP_DAYS` | `24` / `7` |
 | `LOG_STACK` | `daily` (14 dana logova) |
+| `DB_TIMEZONE` | ne postavlja se — podrazumevano `+00:00`: sesija baze uvek u UTC-u, bez obzira na zonu servera (Faza 8c2) |
 
 Nginx stoji direktno ispred PHP-FPM-a (bez load balancer-a), pa `trustProxies` nije potreban; ako se kasnije doda proxy ili Cloudflare, mora se podesiti, inače su IP adrese u audit log-u i ograničenjima adrese proxy-ja.
 
@@ -85,7 +87,7 @@ Nginx stoji direktno ispred PHP-FPM-a (bez load balancer-a), pa `trustProxies` n
 4. `.env` po tabeli iznad, `php artisan key:generate`, prava upisa za `storage/` i `bootstrap/cache/` (korisnik PHP-FPM-a).
 5. `php artisan migrate --force` — pravi i tabelu `countries` iz priloženog `countryInfo.txt`.
 6. `php artisan places:import --source=all` — preuzima GeoNames (`allCountries.zip`) i puni ~5,1 mil. mesta i ~9,6 mil. naziva; traje. Može i sa lokalnim fajlom: `--file=…`.
-7. Swiss Ephemeris (korak 6 iz „Server“), pa provera: otvoriti kartu probnog klijenta — prikazuje engine i verziju.
+7. Swiss Ephemeris (korak 6 iz „Server“), pa provera: `php artisan ephemeris:benchmark` i karta probnog klijenta — prikazuje engine i verziju. Komande `perf:seed` i `perf:measure` (merenje performansi na izmišljenoj praksi) se na produkciji odbijaju i ne pokreću.
 8. `php artisan optimize` (keš konfiguracije, ruta, prikaza i događaja).
 9. Nginx sajt za `app.astrolabe.online` + `certbot --nginx`; HTTP preusmeren na HTTPS.
 10. **Cron** (korisnik PHP-FPM-a): `* * * * * cd <aplikacija> && php artisan schedule:run >> /dev/null 2>&1` — pokreće i noćne `data:prune` (01:30) i `backup:run` (02:00, kada je `BACKUP_KEY` postavljen; pre toga `php artisan backup:key`, ključ u `.env` i kopija van servera, pa jednom ručno `backup:run` i `backup:restore --verify`).
@@ -145,6 +147,6 @@ Pre deploy-a: zelen CI na tom commit-u; posle promene `swetest`-a ili fajlova ef
 
 - upozorenja za neuspeo backup (dokument 06) su urađena u 8b (mejl operateru i stavka `backup` u `/api/v1/health`); dostupnost i neuspeli queue poslovi su pokriveni od 8a (`/api/v1/health`, `health:check`, `OPERATOR_EMAIL`);
 - rotacija logova (`LOG_STACK=daily`);
-- merenje na Linux-u: niz od 731 dan za tranzite, godina kalendara neba (lokalno na Windows-u ~210 ms po pokretanju `swetest`-a);
-- serverski deo sigurnosne provere (firewall, SSH, TLS ocena, zaglavlja preko HTTPS-a uključujući HSTS); aplikacioni deo i audit log su urađeni u 8a; politika privatnosti i uslovi korišćenja (8c);
+- merenje na serveru: `php artisan ephemeris:benchmark` (u CI-ju na Linux-u 9. 10. 2026: karta 1 ms, niz od 731 dan 109 ms, kalendar neba 30 dana 188 ms, godina 1,3 s; lokalno na Windows-u ~210 ms po pokretanju `swetest`-a);
+- serverski deo sigurnosne provere (firewall, SSH, TLS ocena, zaglavlja preko HTTPS-a uključujući HSTS); aplikacioni deo i audit log su urađeni u 8a; politika privatnosti, uslovi korišćenja i ugovor o obradi su u aplikaciji od 8c2 (nacrti — pre bete konačna verzija od pravnika);
 - kada broj korisnika poraste: veći server (rescale **samo CPU i RAM** — proširen disk se ne može vratiti na manji), za fajlove Hetzner Volume montiran na `storage/app/private/attachments` (bez promene koda) ili kasnije bucket preko `ATTACHMENTS_DISK`, po potrebi baza na posebnom serveru.

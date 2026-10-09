@@ -52,6 +52,17 @@ Poseban nalog operatera (pravi se samo komandom `admin:create`, nije član nijed
 - Admin nikada ne vidi podatke rođenja, imena klijenata, beleške, fajlove ni iznose; sve što pogleda ili uradi beleži se u audit log. Prijava „kao astrolog“ se ne pravi. **Nedavna bezbednosna aktivnost** je skinuta iz Settings → Security astrologa.
 - Kasnije (Faza 9): pretplate, obaveštenja korisnicima, funkcije po praksi, zbirna statistika, pregled zakazanih brisanja i izvoza.
 
+### Pravni dokumenti i prihvatanje — Faza 8c2, implementirano
+
+Odluke korisnika 9. 10. 2026: nacrte piše razvoj (na engleskom), pregleda ih pravnik; verzija je datum; nova verzija uslova ponovo se prihvata. Detalji i pitanja za pravnika: `docs/legal-review.md`.
+
+- **Tri dokumenta:** Terms of Service, Data Processing Agreement (astrolog je rukovalac podacima svojih klijenata, AstroLabe obrađivač, Hetzner podobrađivač; čl. 28 GDPR i čl. 45 ZZPL) i Privacy Policy (podaci samog astrologa). Javne strane `/legal/terms`, `/legal/dpa` i `/legal/privacy`, sa sadržajem, datumom verzije i ranijim verzijama (`?version=`); dok ih pravnik ne odobri, nose oznaku „Draft under legal review“. Linkovi su ispod formulara za prijavu i registraciju i na dnu levog menija.
+- **Registracija:** obavezno štikliranje „I accept the Terms of Service and the Data Processing Agreement, and I have read the Privacy Policy“. Čuvaju se verzije koje je strana prikazala, vreme, IP adresa i pregledač. Ako se dokument promenio dok je formular bio otvoren, registracija se odbija uz poruku i nove verzije.
+- **Nova verzija Terms ili DPA:** praksa se zatvara (kao kod zakazanog brisanja) i svaki ekran vodi na „Please review the updated terms“: koji dokumenti, datum, šta je promenjeno, link za čitanje, štikliranje i „Accept and continue“, pa nazad na ekran sa kog je došao. Ko se ne slaže, i dalje može da preuzme izvoz i obriše praksu (Settings → Your data ostaje otvoren) ili da se odjavi.
+- **Nova verzija Privacy Policy:** samo obaveštenje iznad sadržaja („Our Privacy Policy changed on …“ — Read it / Got it); ništa se ne zatvara, a „Got it“ se beleži.
+- **Settings → Your data:** „Terms and privacy“ — koja verzija svakog dokumenta je prihvaćena (ili viđena) i kada, sa linkom na tu verziju.
+- Operater (admin) ne prihvata uslove. Svako prihvatanje je i u audit log-u (`legal_accepted`, nazivi i verzije dokumenata).
+
 ## Klijenti
 
 Profil klijenta sadrži:

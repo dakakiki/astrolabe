@@ -45,17 +45,19 @@ Placidus je podrazumevani sistem većine zapadnih astrologa. Ako ga nemaš, proi
 
 - **Razvoj:** koristi se besplatna AGPL verzija. Aplikaciju lokalno koristi samo developer, pa obaveza objavljivanja koda nije aktivirana; GitHub repo je ionako javan tokom razvoja.
 - **Pre Faze 8 (zatvorena beta)** kupuje se Professional License, najkasnije pre nego što iko osim developera pristupi aplikaciji.
-- **Uslovi (ugovor, izdanje jun 2026):**
-  - cena CHF 700, jednokratno, „unlimited license“; iznos se pri plaćanju preračunava u EUR;
-  - važi 99 godina;
-  - izričito pokriva softver na serveru kome krajnji korisnici pristupaju iz browsera, što je naš SaaS slučaj;
+- **Uslovi (ugovor, izdanje septembar 2026 — `secont_e_2609.pdf`, izmenjen 29. 9. 2026; pročitan i upoređen 9. 10. 2026):**
+  - cena CHF 700 za neograničen broj projekata licenciranog; iznos se pri plaćanju preračunava u EUR;
+  - **važi 6 godina**, zatim se obnavlja ili se korišćenje u web servisima i distribuiranom softveru prekida (tačka 4; izdanje iz juna 2026 je navodilo 99 godina) — obnova pada oko 2032, uslove obnove proveriti pri kupovini;
+  - izričito pokriva softver na serveru kome krajnji korisnici pristupaju iz browsera, što je naš SaaS slučaj (tačka 2);
+  - **nova tačka 3:** ako licencirani nudi API usluge trećima (firmi koja nije njegova), ta firma mora kupiti sopstvenu licencu pre korišćenja, to se jasno navodi u dokumentaciji API-ja, a licencirani javlja identitet i kontakt svakog korisnika API-ja. AstroLabe API služi samo sopstvenom interfejsu (i budućem portalu klijenata u browseru), pa ovo ne važi; javni API za druge firme ili integracije bi ga aktivirali;
+  - licenca se može preneti trećem uz obaveštenje mejlom (tačka 14); sud za sporove je u kantonu Cirih (tačka 15);
   - licenca se ugovara na preduzetničku radnju iz dokumenta 07.
 - **Postupak:** popuniti i potpisati [ugovor](https://www.astro.com/swisseph/secont_e.pdf) → poslati na `order@astro.com` → platiti u [shopu](https://www.astro.com/swisseph/swephprice_e.htm) → Astrodienst kontrapotpisuje. Licenca važi tek posle uplate. Kontrapotpisan ugovor čuva se uz projektnu dokumentaciju.
 - **Obaveze iz ugovora koje utiču na proizvod:**
-  - tačka 9: u aplikaciji, dokumentaciji i promociji **ne pominju se** Astrodienst AG ni autori biblioteke; oznake „Swiss Ephemeris“ i „Swiss Ephemeris Inside“ su dozvoljene (tačka 6), pa prikaz engine-a i verzije ispod karte ostaje;
+  - tačka 9: u aplikaciji, dokumentaciji i promociji **ne pominju se** firma nosilac prava ni autori biblioteke (izdanje iz septembra 2026 ih navodi imenom), izuzeci samo uz pismenu dozvolu; oznake „Swiss Ephemeris“ i „Swiss Ephemeris Inside“ su dozvoljene (tačka 6), pa prikaz engine-a i verzije ispod karte ostaje. Zato adresa izvornog repozitorijuma (sadrži korisničko ime autora) nije u kodu ni u README-u: CI je čita iz GitHub Actions secret-a `SWISSEPH_SOURCE`, a server iz promenljive okruženja pri build-u (Faza 8c2);
   - tačka 10: copyright napomene u izvornom kodu, bibliotekama i fajlovima efemerida ne smeju se uklanjati ni menjati;
   - tačka 8: Astrodienst ne garantuje tačnost proračuna, pa referentni testovi tačnosti iz ovog dokumenta ostaju obavezni.
-- **Izvori:** izvorni kod i `swetest` sa [github.com/aloistr/swisseph](https://github.com/aloistr/swisseph); fajlovi efemerida iz [download oblasti](https://www.astro.com/swisseph/swedownload_e.htm). Na Windows razvoju koristi se gotov `swetest.exe`, na Hetzner Linux serveru `swetest` se kompajlira iz izvornog koda.
+- **Izvori:** izvorni kod, `swetest` i fajlovi efemerida iz zvaničnog repozitorijuma koji navodi ugovor (tačka 1). Na Windows razvoju koristi se gotov `swetest64.exe`; na Linux-u (CI i Hetzner server) `scripts/build-swetest.sh` kompajlira `swetest` iz izvornog koda na fiksiranom commit-u (`aacf962`, 1. 10. 2026), preuzima samo potrebne fajlove (~1,8 MB izvora i ~2 MB efemerida, ne ceo repozitorijum od 831 MB), proverava commit i SHA-256 fajlova efemerida i kopira ih uz program zajedno sa licencom (tačka 10).
 - **Repozitorijum:** javan tokom razvoja, prebacuje se u private na dan završetka razvoja. Sve što je do tada commit-ovano treba smatrati trajno javnim, jer su klonovi i forkovi van naše kontrole.
 
 ## Arhitektura
@@ -323,6 +325,21 @@ Referentne karte treba pribaviti iz nezavisnog izvora i zapisati očekivane vred
 - **Merenje (25. 9. 2026, lokalni Windows, Apache sa Xdebug-om):** Ana i Marko (obe karte u kešu) — 57 kontakata po natalnim orbima, 18 aspekata u kompozitu; zahtev ~340 ms, od čega čitanje keširane karte ~290 ms (isto kao `GET /clients/{id}/chart`), samo poređenje ~50 ms. Od tih ~290 ms, ~218 ms bio je `swetest -h` za verziju engine-a u `fingerprint()` (deo `input_hash`), na svakom zahtevu. Popravljeno istog dana: verzija i kontrolni zbirovi se pamte u kešu aplikacije, pa je `/chart` sada ~90 ms, a sinastrija ~110 ms (lokalno, sa Xdebug-om).
 - **Prikaz:** tab „Synastry“ (`SynastryPanel`): izbor osobe, „Synastry / Composite“, dvostruki točak (`ChartWheel` sa `outer` — isti prsten kao za tranzite, sada i sa ASC/MC druge osobe i Mesecom kao opsegom), lični kontakti, svi kontakti (prvih 20), pozicije svake osobe u kućama druge; kompozit sa točkom, pozicijama, kuspidima i aspektima i napomenom kako su kuće dobijene.
 - **Testovi:** `CompositeChartTest` (izmišljene karte: sredina preko 0° Ovna i kod suprotnih tačaka, MC iznad horizonta i kuće u redu, Whole Sign, različiti sistemi, nepoznato vreme, tačke za aspekte), `SynastryTest` (API sa `FakeEngine`-om: osoba i drugi klijent, redosled i orbi, nepoznato vreme, nepotpuni podaci sa strane, natalni orbi odlučuju, bez poziva engine-a za keširane karte, 503, izolacija workspace-a), `betweenCharts` u `AspectCalculatorTest`; na frontendu `lib/synastry.js` u Vitest-u.
+
+### Stanje posle Faze 8c2
+
+- **Linux build:** `scripts/build-swetest.sh <direktorijum>` uz `SWISSEPH_SOURCE` (adresa zvaničnog repozitorijuma iz ugovora — nije u kodu, tačka 9) pravi delimičan git checkout na commit-u `aacf962` (1. 10. 2026): samo `*.c`, `*.h`, `Makefile`, `LICENSE` i tri fajla efemerida (~1,8 MB izvora + ~2 MB efemerida, a ne ceo repozitorijum od 831 MB). Git proverava sadržaj prema commit-u, fajlovi efemerida se proveravaju i SHA-256 vrednostima lokalnih kopija sa kojima su testovi rađeni (isti git hash kao u repozitorijumu), pa `make swetest`. U direktorijumu su `swetest`, `ephe/` i `LICENSE` (tačka 10). Program prijavljuje verziju 2.10.03, kao i Windows exe, koji je iz 2023; izvor ima ispravke iz 2023–2026.
+- **CI:** GitHub Actions gradi `swetest` (keš po skripti) i pokreće ceo skup testova sa `SWETEST_PATH` i `EPHEMERIS_PATH`, pa `SwissEphemerisReferenceTest` (JPL Horizons, i Hiron), `HouseAccuracyTest` (Meeus) i `SkyCalendarAccuracyTest` sada rade i na Linux-u — prvi put 9. 10. 2026, svi zeleni. Bez secret-a (npr. fork) koraci se preskaču, a testovi rade sa `FakeEngine`-om kao ranije.
+- **Merenje** (`php artisan ephemeris:benchmark`, medijana; isto se pokreće na serveru posle deploy-a novog engine-a):
+
+| | Windows, lokalno (PHP sa Xdebug-om) | Linux, CI (PHP 8.3 bez Xdebug-a) |
+|---|---|---|
+| Natalna karta sa kućama | 216 ms | 1 ms |
+| Niz za tranzite, 731 dan | 219 ms | 109 ms |
+| Kalendar neba, 30 dana | 450 ms | 188 ms |
+| Kalendar neba, 365 dana | 954 ms | 1.343 ms |
+
+  Na Windows-u je skoro sve pokretanje procesa (~210 ms); na Linux-u ono skoro ne košta, pa je karta trenutna, a tranziti i kalendar zavise od količine izlaza i PHP pretrage (godina kalendara je na CI mašini sporija nego lokalno — slabiji procesor, isti kod). Na pravom serveru (CX33) meri se ponovo u 8d.
 
 ## Rezime obima
 

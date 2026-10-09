@@ -87,6 +87,35 @@ before starting a phase. The user communicates in Serbian.
 - The SPA uses the same `AppLayout` with the admin's own menu (`shell-admin`); the router guard keeps
   admins on `meta.admin` routes (only `admin.security` until 2FA is on) and astrologers off them.
 
+## Legal documents (Phase 8c)
+
+- Terms of Service, the Data Processing Agreement and the Privacy Policy are Markdown files in
+  `resources/legal/<document>/<version>.md` (version = date; a short header: title, effective, draft,
+  summary). The newest file is in force (`AppSupportLegalLegalDocuments`). Publishing a new version
+  is adding a file — never edit a published one, people accepted exactly that text. `docs/legal-review.md`
+  lists the placeholders and the lawyer's questions.
+- Registration needs `accept_terms` and the versions the page showed (`legal`); `AcceptLegalDocuments`
+  writes `legal_acceptances` (version, time, IP, browser) and the audit event. A version that changed in
+  between is refused, never accepted unread.
+- `legal.accepted` (`EnsureLegalAccepted`) closes the practice until the current Terms and DPA are accepted:
+  403 `legal_acceptance_required`. It sits on exactly the routes `practice.active` does
+  (`RouteProtectionTest`), so export and deleting the practice stay open. A new privacy policy is only a
+  notice (`user.legal.updated`). Admins accept nothing. Test users accept the current versions in
+  `UserFactory::configure()`.
+- The SPA renders the server's HTML of these files (raw HTML stripped) in `LegalDocumentPage` — the one
+  `v-html` besides `RichText`. Never name the ephemeris library's owner or authors in them (a test checks).
+
+## Performance (Phase 8c)
+
+- `Model::preventLazyLoading()` is on: a relation loaded row by row is an exception locally and in tests,
+  and a log line in production. Eager-load what a list shows; load only the columns a list needs from a
+  table with big text columns (consultations, notes).
+- `QueryCountTest` asserts the main screens ask the same number of queries for 6 and for 16 clients; add a
+  new list screen there. Sums over many rows belong in SQL (`Ledger::outstanding`), not in PHP.
+- `php artisan perf:seed [--fresh]` builds a local practice with 2,000 clients (`perf.owner@example.com`);
+  `php artisan perf:measure [--only=…] [--queries]` times the main requests on it. Both refuse production.
+- The MariaDB session runs on UTC (`DB_TIMEZONE`, default `+00:00`); never rely on the server's zone.
+
 ## Data lifecycle (Phase 8b)
 
 - Retention lives in `config/astrolabe.php` (`retention`, `exports`, `backup`) and is applied nightly by
@@ -128,7 +157,9 @@ before starting a phase. The user communicates in Serbian.
   (swetest process, array arguments, never user input) or `FakeEngine` (tests; `EPHEMERIS_ENGINE=fake`
   in phpunit.xml). `ChartService` builds the request and caches results in `chart_calculations`.
 - Accuracy tests against NASA JPL Horizons (`tests/fixtures/ephemeris`) must stay green; they skip
-  where swetest is not installed.
+  where swetest is not installed. CI builds a Linux `swetest` with `scripts/build-swetest.sh` (pinned
+  commit; the source URL is the `SWISSEPH_SOURCE` secret — it names the author, licence clause 9, so it
+  never goes into the repo) and runs them, then `php artisan ephemeris:benchmark`.
 - Longitudes are shown truncated to whole minutes (never rounded into the next sign).
 - A consultation's chart snapshot is a `chart_calculation_id`; calculations are never overwritten,
   so never delete a calculation a consultation points to.

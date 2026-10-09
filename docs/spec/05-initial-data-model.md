@@ -27,6 +27,8 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 > Faza 8b (implementirano): `payments.client_id` je nullable sa `nullOnDelete` (uplata ostaje anonimna kada se klijent trajno obriše); `workspaces.deletion_requested_at`, `deletion_requested_by`, `deletes_at` (zakazano brisanje prakse); nova tabela `workspace_exports`; novi događaji audit log-a. Rokovi čuvanja su u `config/astrolabe.php` („retention“) i primenjuje ih `php artisan data:prune`.
 >
 > Faza 8c1 (implementirano): `users.is_admin`, `suspended_at`, `suspension_reason`; nova tabela `feedback`; događaji admina u audit log-u. Audit log čita samo admin operatera.
+>
+> Faza 8c2 (implementirano): nova tabela `legal_acceptances` (prihvaćene verzije Terms i DPA, viđena Privacy Policy) i događaj `legal_accepted`. Sesija baze radi u UTC-u (`DB_TIMEZONE`, podrazumevano `+00:00`), pa TIMESTAMP kolone ne zavise od zone servera.
 
 ## Nalozi i workspace
 
@@ -69,7 +71,7 @@ Ko je, šta, kada i odakle uradio — za bezbednost i kritične operacije (dokum
 - `id`
 - `workspace_id`, nullable — praksa u kojoj se desilo; prijave i događaji naloga je nemaju
 - `user_id`, nullable — ko (ili čiji nalog, kod neuspele prijave); `null` za pokušaj na nepostojeću adresu i za komande
-- `event` — zatvorena lista (`App\Enums\AuditEvent`): `login`, `login_failed`, `lockout`, `logout`, `registered`, `email_verified`, `email_changed`, `password_changed`, `password_reset`, `other_sessions_signed_out`, `two_factor_enabled`, `two_factor_disabled`, `two_factor_failed`, `recovery_codes_regenerated`, `recovery_code_used`, `invitation_sent`, `invitation_revoked`, `invitation_accepted`, `payments_exported`, `file_downloaded`, `record_deleted`, `practice_settings_changed`; od Faze 8b i `client_erased` (brojevi po vrsti, nikad ime), `practice_export_requested`, `practice_export_downloaded`, `practice_deletion_requested`, `practice_deletion_cancelled`, `practice_erased`, `retention_applied` i `backup_restored` (poslednja tri bez osobe — raspored ili komanda operatera); od Faze 8c `admin_created`, `admin_viewed` (ekran i nazivi filtera; predmet je astrolog kada se gleda njegov nalog), `admin_two_factor_reset`, `admin_verification_resent`, `account_suspended`, `account_restored` (sa razlogom koji je upisao operater — jedini slobodan tekst u audit log-u, nikad podaci klijenata), `admin_job_retried`, `admin_job_deleted`, `feedback_sent`; neuspela prijava suspendovanog naloga nosi `suspended`
+- `event` — zatvorena lista (`App\Enums\AuditEvent`): `login`, `login_failed`, `lockout`, `logout`, `registered`, `email_verified`, `email_changed`, `password_changed`, `password_reset`, `other_sessions_signed_out`, `two_factor_enabled`, `two_factor_disabled`, `two_factor_failed`, `recovery_codes_regenerated`, `recovery_code_used`, `invitation_sent`, `invitation_revoked`, `invitation_accepted`, `payments_exported`, `file_downloaded`, `record_deleted`, `practice_settings_changed`; od Faze 8b i `client_erased` (brojevi po vrsti, nikad ime), `practice_export_requested`, `practice_export_downloaded`, `practice_deletion_requested`, `practice_deletion_cancelled`, `practice_erased`, `retention_applied` i `backup_restored` (poslednja tri bez osobe — raspored ili komanda operatera); od Faze 8c `admin_created`, `admin_viewed` (ekran i nazivi filtera; predmet je astrolog kada se gleda njegov nalog), `admin_two_factor_reset`, `admin_verification_resent`, `account_suspended`, `account_restored` (sa razlogom koji je upisao operater — jedini slobodan tekst u audit log-u, nikad podaci klijenata), `admin_job_retried`, `admin_job_deleted`, `feedback_sent`; od Faze 8c2 `legal_accepted` (nazivi i verzije dokumenata); neuspela prijava suspendovanog naloga nosi `suspended`
 - `subject_type`, `subject_id`, nullable — kratko ime (`consultation`, `attachment`, `client_relationship` …) i id
 - `properties`, JSON, nullable — samo nazivi i brojevi (izmenjena polja, filteri izvoza, `permanently`, `remembered`), nikada vrednosti: bez imena klijenata, podataka rođenja, mejl adresa i unetih lozinki
 - `ip_address`, `user_agent` (skraćen na 255)
@@ -107,6 +109,16 @@ Indeksi: `(user_id, created_at)`, `(workspace_id, created_at)`, `(event, created
 - timestamps
 
 Indeks: `(handled_at, created_at)`. Čita je samo admin operatera.
+
+### `legal_acceptances` (Faza 8c2, nije tenant)
+
+- `id`, `user_id` (`cascadeOnDelete` — zapis traje koliko i nalog)
+- `document` — `terms`, `dpa`, `privacy`
+- `version` — naziv fajla verzije (`2026-10-09`); tekstovi su u repou, `resources/legal/<dokument>/<verzija>.md`
+- `accepted_at`; `ip_address`, nullable; `user_agent`, nullable
+- jedinstven `(user_id, document, version)`
+
+Prihvatanje Terms i DPA (registracija i ekran nove verzije) i „viđeno“ za Privacy Policy. Praksa je zatvorena dok osoba nema red za trenutnu verziju svakog dokumenta koji se prihvata (`legal.accepted`). Dokumenti i verzije se ne čuvaju u bazi.
 
 ### `workspace_exports` (Faza 8b)
 

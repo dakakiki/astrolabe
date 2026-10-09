@@ -252,6 +252,18 @@ Odluke korisnika na početku 8c (sve preporuke): 8c u dva dela (8c1 admin + Feed
 
 Odluke donete usput: admin u istoj Vue aplikaciji i istom okviru, sa svojim menijem, oznakom „Operator“ i trakom u boji upozorenja; `/me` jedina ruta koja propušta nalog bez prakse; admin nalog se pravi samo komandom koja šalje link za lozinku (lozinka nikad kroz terminal); posle prijave bez 2FA otvara se samo admin → Security; razlog akcije operatera je jedini slobodan tekst u audit log-u (i ide astrologu mejlom); audit log naloga prikazuje i ono što je operater uradio tom nalogu; suspendovan nalog se odbija tek posle ispravne lozinke (bez otkrivanja naloga bez lozinke) i beleži kao neuspela prijava; neuspeli poslovi samo po vrsti i klasi izuzetka; pozivi iz admina prikazuju link jednom; ekran u povratnoj informaciji je obrazac bez id-jeva; povratna informacija odlazi sa nalogom autora; operater ne menja druge admin naloge iz admina; pregledi admina se beleže i kada samo lista (ekran i nazivi filtera).
 
+## Faza 8c2 — pravni dokumenti, performanse, Linux `swetest` (9. 10. 2026)
+
+Odluke korisnika na početku 8c2 (sve preporuke): nacrte Terms, DPA i Privacy Policy piše razvoj na engleskom, pregleda ih pravnik; prihvatanje pri registraciji sa verzijom, nova verzija uslova se ponovo prihvata; performanse se mere na praksi od 2.000 klijenata; Linux `swetest` iz zvaničnog izvornog repozitorijuma na fiksiranom commit-u, preuzima ga CI; novi ugovor o licenci pročitati i uporediti. Izmene:
+
+- 02: „Pravni dokumenti i prihvatanje — Faza 8c2, implementirano“.
+- 04: status 8c2.
+- 05: tabela `legal_acceptances`, događaj `legal_accepted`, sesija baze u UTC-u.
+- 06: licencna usaglašenost (izmenjen ugovor), sesija baze u UTC-u u „Vremenskim zonama“, prolaz performansi sa merenjima, pravni dokumenti u „Pravnoj pripremi“.
+- 11: uslovi licence iz izdanja septembar 2026 (6 godina, tačka 3, tačka 9 imenom), izvori bez adrese repozitorijuma, „Stanje posle Faze 8c2“ (Linux build i merenje).
+
+Odluke donete usput: verzija dokumenta je datum u nazivu fajla, tekstovi su u repou (ne u bazi), važeća je najnovija; HTML iz Markdown-a sa uklonjenim sirovim HTML-om; praksu zatvara isti skup ruta kao zakazano brisanje (test to čuva); privacy se „vidi“, ne prihvata; operater ne prihvata ništa; zapis o prihvatanju se briše sa nalogom (pitanje za pravnika); adresa izvornog repozitorijuma biblioteke je GitHub secret `SWISSEPH_SOURCE` jer sadrži ime autora (tačka 9), a link je skinut i iz README-a; preuzimaju se samo potrebni fajlovi (~3,8 MB), commit proverava git, efemeride SHA-256 iz lokalnih kopija; `preventLazyLoading` u produkciji samo piše u log; sesija baze u UTC-u (nađeno pri seed-u: upis u satu prelaska na letnje vreme padao je na lokalnom serveru); dodatni indeksi nisu uvedeni jer nisu doneli merljivu razliku.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.
