@@ -63,6 +63,14 @@ Klijent sa pristupom portalu sam zakazuje, pomera i otkazuje termine u okviru pr
 18. **Podsetnik za termine koje unosi astrolog:** klijent sa pristupom portalu dobija podsetnik 24 h pre i za termine koje je astrolog sam upisao (ne samo za one iz portala); isključuje ga sam u Profile, a astrolog to ne bira. Da li je to u redu kao obrada u ime astrologa (rukovaoca), ili astrolog treba da može da isključi podsetnike za svoju praksu?
 19. **Radno vreme i odsustva članova:** svaka osoba u praksi unosi svoje radno vreme i odsustva sa privatnom beleškom (npr. razlog odsustva). Vidi ih samo ta osoba, ali ulaze u izvoz prakse (sa imenom i adresom osobe) koji preuzima vlasnik, a prošla odsustva se za sada ne brišu. Da li je to u redu za članove tima (podaci o radu druge osobe) i koliki rok čuvanja treba za prošla odsustva?
 
+### PWA za klijente i web push (Faza 9c, 15. 10. 2026)
+
+Portal se može instalirati kao aplikacija; ništa o klijentu se ne čuva na uređaju (service worker čuva samo statične fajlove i stranu „offline“). Klijent na svakom uređaju posebno može uključiti obaveštenja (web push) za iste događaje kao mejlovi iz 9b i bira kanal: mejl, push ili oba. Pitanja:
+
+20. **Tekst obaveštenja na zaključanom ekranu:** push je opšti — naslov kao „Appointment reminder“ ili „Booking confirmed“ i vreme („Tomorrow at 2:00 PM“), **bez imena prakse**, usluge i poruka; dodir otvara portal. Da li je to dovoljno diskretno, ili i vreme treba izostaviti? Da li se sme dodati ime prakse (dokument 12 je to ostavio pravniku)?
+21. **Push servisi pregledača kao primaoci:** poruka ide preko servisa proizvođača pregledača (Google FCM za Chrome / Android, Apple za Safari, Mozilla, Microsoft za Edge). Sadržaj je šifrovan za uređaj (servis ga ne može pročitati), ali servis vidi adresu pretplate, vreme i veličinu poruke. Da li su ti servisi podobrađivači koje treba navesti u DPA (Prilog 2) i u obaveštenju za korisnike portala, ili je to prenos koji klijent sam bira uključivanjem obaveštenja u svom pregledaču?
+22. **Podaci o uređaju:** za svaki uređaj sa uključenim obaveštenjima čuvamo adresu pretplate i ključeve pregledača, opis pregledača (user agent) i vreme poslednjeg slanja; brišu se odjavom, „Sign out everywhere“, istekom sesije (30 dana), opozivom pristupa bez druge prakse i brisanjem naloga. Ne ulaze u izvoz prakse. Da li ih treba navesti u DPA Prilogu 1 (uz podatke naloga portala, pitanje 11)?
+
 ## Šta tekst ne sme da sadrži
 
 Ugovor o licenci za Swiss Ephemeris (tačka 9) zabranjuje da se u vezi sa softverom pominju firma nosilac prava i autori biblioteke. Pravni tekstovi zato ne navode biblioteku za proračun. Test `LegalDocumentsTest` proverava da se ta imena ne pojave.

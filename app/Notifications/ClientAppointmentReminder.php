@@ -37,6 +37,14 @@ class ClientAppointmentReminder extends ClientAppointmentEmail
     }
 
     /**
+     * @return array{0: string, 1: string}
+     */
+    protected function push(string $zone): array
+    {
+        return ['reminder', $this->pushWhen($zone)];
+    }
+
+    /**
      * @param  PortalUser  $notifiable
      */
     public function toMail(object $notifiable): MailMessage

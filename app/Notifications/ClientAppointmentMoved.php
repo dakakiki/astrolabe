@@ -24,6 +24,14 @@ class ClientAppointmentMoved extends ClientAppointmentEmail
     }
 
     /**
+     * @return array{0: string, 1: string}
+     */
+    protected function push(string $zone): array
+    {
+        return [$this->byClient ? 'moved_by_you' : 'moved', $this->pushWhen($zone)];
+    }
+
+    /**
      * @param  PortalUser  $notifiable
      */
     public function toMail(object $notifiable): MailMessage

@@ -19,6 +19,16 @@ class ClientBookingReceived extends ClientAppointmentEmail
     }
 
     /**
+     * @return array{0: string, 1: string}
+     */
+    protected function push(string $zone): array
+    {
+        return $this->isRequest()
+            ? ['requested', __('portal.push.requested.body', ['when' => $this->pushWhen($zone)])]
+            : ['booked', $this->pushWhen($zone)];
+    }
+
+    /**
      * @param  PortalUser  $notifiable
      */
     public function toMail(object $notifiable): MailMessage

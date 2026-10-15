@@ -8,6 +8,7 @@ use App\Http\Controllers\Portal\InvitationController;
 use App\Http\Controllers\Portal\LogoController;
 use App\Http\Controllers\Portal\PageController;
 use App\Http\Controllers\Portal\ProfileController;
+use App\Http\Controllers\Portal\PushController;
 use App\Http\Controllers\Portal\SessionController;
 use App\Http\Controllers\Portal\SharedController;
 use App\Http\Controllers\Portal\SignInController;
@@ -50,6 +51,17 @@ Route::prefix('api/portal/v1')->name('portal.')->group(function () {
             // Portal → Security: where the person is signed in, and signing out everywhere.
             Route::get('/sessions', [DeviceController::class, 'index'])->name('sessions.index');
             Route::delete('/sessions', [DeviceController::class, 'destroy'])->name('sessions.destroy');
+
+            // Web push in the client PWA (Phase 9c): whether it is offered, this device on or off
+            // (the browser's subscription, tied to this session), and a test notice to this device.
+            Route::get('/push', [PushController::class, 'show'])->name('push.show');
+            Route::post('/push/subscriptions', [PushController::class, 'store'])
+                ->middleware('throttle:portal-push')
+                ->name('push.store');
+            Route::delete('/push/subscriptions', [PushController::class, 'destroy'])->name('push.destroy');
+            Route::post('/push/test', [PushController::class, 'test'])
+                ->middleware('throttle:portal-push')
+                ->name('push.test');
 
             Route::middleware('portal.access')->group(function () {
                 Route::get('/home', HomeController::class)->name('home');

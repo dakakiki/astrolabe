@@ -7,11 +7,14 @@ import { describeDevice } from '@/lib/security';
 import http from '@/portal/http';
 import { displayZone } from '@/portal/lib/portal';
 import { loadScreen } from '@/portal/load';
+import { unsubscribeLocally } from '@/portal/pwa/push';
 import { useSessionStore } from '@/portal/stores/session';
 
 /**
  * Portal → Security (docs/spec/12): where the person is signed in, and
  * "Sign out everywhere" — this device too. There is no password to change.
+ * Signing out everywhere also ends web push on every device (Phase 9c): the
+ * server forgets them all, and this browser drops its own subscription.
  */
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -47,10 +50,12 @@ async function signOutEverywhere() {
     if (!window.confirm(t('portal.security.confirm'))) return;
 
     busy.value = true;
+    const forgetting = unsubscribeLocally();
 
     try {
         await http.delete('/sessions', { skipAuthRedirect: true });
     } finally {
+        await forgetting;
         session.clear();
         router.replace({ name: 'sign-in' });
     }

@@ -9,6 +9,7 @@ use App\Models\PortalAccess;
 use App\Models\PortalInvitation;
 use App\Models\User;
 use App\Support\Audit\Audit;
+use App\Support\Portal\Push\PortalPush;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -37,6 +38,14 @@ final class RevokePortalAccess
             ])->save();
 
             PortalInvitation::query()->open()->where('portal_access_id', $access->getKey())->update(['revoked_at' => now()]);
+
+            // With no other practice left, the account's devices stop getting pushes (Phase 9c).
+            if ($access->portal_user_id !== null && ! PortalAccess::query()->acrossPractices()
+                ->where('portal_user_id', $access->portal_user_id)
+                ->where('status', PortalAccessStatus::Active->value)
+                ->exists()) {
+                PortalPush::forgetAccount((int) $access->portal_user_id);
+            }
 
             Audit::record($wasInvited ? AuditEvent::PortalInvitationRevoked : AuditEvent::PortalAccessRevoked, $access);
 

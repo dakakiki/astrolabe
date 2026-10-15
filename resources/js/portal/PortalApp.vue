@@ -5,6 +5,7 @@ import { RouterView, useRoute } from 'vue-router';
 
 import ToastHost from '@/components/ToastHost.vue';
 import { brandPalette, paletteCss } from '@/lib/brand';
+import UpdateBanner from '@/portal/components/UpdateBanner.vue';
 import { setLocale } from '@/portal/i18n';
 import PortalAuthLayout from '@/portal/layouts/PortalAuthLayout.vue';
 import PortalLayout from '@/portal/layouts/PortalLayout.vue';
@@ -39,5 +40,6 @@ watch(() => session.user?.locale, setLocale, { immediate: true });
     <component :is="layout">
         <RouterView />
     </component>
+    <UpdateBanner />
     <ToastHost />
 </template>

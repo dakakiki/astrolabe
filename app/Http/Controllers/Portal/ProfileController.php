@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Portal;
 
 use App\Enums\ActivityType;
 use App\Enums\AuditEvent;
+use App\Enums\PortalNotificationChannel;
 use App\Http\Controllers\Controller;
 use App\Models\Country;
 use App\Models\PortalUser;
@@ -40,11 +41,12 @@ class ProfileController extends Controller
             'locale' => ['nullable', Rule::in(array_keys(config('astrolabe.locales')))],
             'phone' => ['nullable', 'string', 'max:50'],
             'appointment_reminders' => ['sometimes', 'boolean'],
+            'notification_channel' => ['sometimes', Rule::enum(PortalNotificationChannel::class)],
         ]);
 
         /** @var PortalUser $user */
         $user = Auth::guard('portal')->user();
-        $user->fill(collect($data)->only(['name', 'timezone', 'locale', 'appointment_reminders'])->all())->save();
+        $user->fill(collect($data)->only(['name', 'timezone', 'locale', 'appointment_reminders', 'notification_channel'])->all())->save();
         $fields = array_keys($user->getChanges());
 
         $client = $context->client();
@@ -79,6 +81,8 @@ class ProfileController extends Controller
             'timezone' => $user->timezone,
             'locale' => $user->locale,
             'appointment_reminders' => (bool) $user->appointment_reminders,
+            // Email, push or both (Phase 9c); devices are in GET /push.
+            'notification_channel' => ($user->notification_channel ?? PortalNotificationChannel::Email)->value,
             'phone' => $client->phone,
             'country_code' => $client->country_code,
             'practice_timezone' => $context->workspace()->timezone,

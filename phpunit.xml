@@ -37,6 +37,9 @@
         <env name="PORTAL_DOMAIN" value="portal.astrolabe.test"/>
         <env name="PORTAL_URL" value="http://portal.astrolabe.test"/>
         <env name="PORTAL_SESSION_DRIVER" value="database"/>
+        <!-- No web push unless a test turns it on (fakePush()), whatever keys the local .env holds. -->
+        <env name="VAPID_PUBLIC_KEY" value=""/>
+        <env name="VAPID_PRIVATE_KEY" value=""/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>

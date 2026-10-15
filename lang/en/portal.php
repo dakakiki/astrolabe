@@ -9,6 +9,9 @@ return [
         'portal_no_access' => 'Your portal access is not open at the moment. Please contact your astrologer.',
         'portal_choose_practice' => 'Choose which practice to open.',
         'too_many' => 'Too many attempts. Please wait a few minutes and try again.',
+        'push_unavailable' => 'Notifications on this device are not available at the moment.',
+        'push_unsupported' => 'This browser\'s notifications are not supported. Please try another browser.',
+        'push_not_on' => 'Notifications are not on for this device.',
     ],
 
     'invitation' => [
@@ -114,5 +117,46 @@ return [
             'line' => 'This is a reminder of your appointment with :practice on :when.',
             'off' => 'You get this reminder a day before each appointment. You can switch it off in your portal, under Profile.',
         ],
+    ],
+
+    // Web push in the client PWA (Phase 9c): generic on purpose — what happened and when,
+    // never the practice, the service or a message. Shown on a lock screen.
+    'push' => [
+        'when' => [
+            'today' => 'Today at :time',
+            'tomorrow' => 'Tomorrow at :time',
+            'day' => ':day at :time',
+        ],
+        'booked' => ['title' => 'Appointment booked'],
+        'requested' => [
+            'title' => 'Booking request sent',
+            'body' => ':when · waiting for confirmation',
+        ],
+        'confirmed' => ['title' => 'Booking confirmed'],
+        'declined' => [
+            'title' => 'Booking not confirmed',
+            'body' => ':when · open the portal for details',
+        ],
+        'moved' => ['title' => 'Appointment moved'],
+        'moved_by_you' => ['title' => 'You moved your appointment'],
+        'cancelled' => ['title' => 'Appointment cancelled'],
+        'cancelled_by_you' => ['title' => 'You cancelled your appointment'],
+        'reminder' => ['title' => 'Appointment reminder'],
+        'test' => [
+            'title' => 'Notifications are on',
+            'body' => 'This device will get your appointment notices.',
+        ],
+    ],
+
+    // The installable portal (Phase 9c): AstroLabe's app, the practice shows inside it.
+    'manifest' => [
+        'description' => 'Your appointments and what your astrologer shared with you.',
+    ],
+
+    // The page the PWA shows without a connection (Phase 9c). No data, no script of the app.
+    'offline' => [
+        'title' => 'You\'re offline',
+        'line' => 'The portal needs a connection to show your appointments and what was shared with you.',
+        'retry' => 'Try again',
     ],
 ];

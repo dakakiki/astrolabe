@@ -27,8 +27,9 @@ use Throwable;
  *   response with a client in it) after their own short periods;
  * - the client portal (Phase 9a): used or expired sign-in links and codes
  *   after a day, finished portal invitations after `housekeeping_days`,
- *   portal sessions past their lifetime, and portal accounts with no active
- *   link after `portal.account_days`.
+ *   portal sessions past their lifetime (with the push subscriptions made in
+ *   them, Phase 9c), and portal accounts with no active link after
+ *   `portal.account_days`.
  *
  * Clients are never trashed: archiving is a status, and deleting a client is
  * immediate and for good (DeleteClient). Rows go with plain queries, children
@@ -75,6 +76,11 @@ final class Retention
                     ->orWhere('expires_at', '<=', $housekeeping)), $dryRun),
             'portal_sessions' => $this->remove(DB::table(config('portal.session.table'))
                 ->where('last_activity', '<', $now->subMinutes(config('portal.session.lifetime'))->getTimestamp()), $dryRun),
+            // Push to a device lives only as long as the session it was switched on in (Phase 9c).
+            'portal_push_subscriptions' => $this->remove(DB::table('portal_push_subscriptions')
+                ->whereNotExists(fn ($query) => $query->from(config('portal.session.table'))
+                    ->whereColumn(config('portal.session.table').'.id', 'portal_push_subscriptions.portal_session_id')
+                    ->where('last_activity', '>=', $now->subMinutes(config('portal.session.lifetime'))->getTimestamp())), $dryRun),
             'portal_accounts' => $dryRun ? $accounts->count() : PortalAccounts::delete($accounts),
         ];
     }

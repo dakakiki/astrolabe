@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PortalNotificationChannel;
 use Carbon\CarbonImmutable;
 use Database\Factories\PortalUserFactory;
 use Illuminate\Auth\Authenticatable;
@@ -24,9 +25,10 @@ use Illuminate\Notifications\Notifiable;
  *
  * @property CarbonImmutable|null $email_verified_at
  * @property CarbonImmutable|null $last_signed_in_at
- * @property bool $appointment_reminders an email a day before each appointment (Phase 9b, Profile)
+ * @property bool $appointment_reminders a reminder a day before each appointment (Phase 9b, Profile)
+ * @property PortalNotificationChannel $notification_channel email, push or both (Phase 9c, Profile)
  */
-#[Fillable(['name', 'locale', 'timezone', 'appointment_reminders'])]
+#[Fillable(['name', 'locale', 'timezone', 'appointment_reminders', 'notification_channel'])]
 class PortalUser extends Model implements AuthenticatableContract, HasLocalePreference
 {
     /** @use HasFactory<PortalUserFactory> */
@@ -35,6 +37,7 @@ class PortalUser extends Model implements AuthenticatableContract, HasLocalePref
     /** @var array<string, mixed> the column defaults, known before the row is read back */
     protected $attributes = [
         'appointment_reminders' => true,
+        'notification_channel' => 'email',
     ];
 
     protected function casts(): array
@@ -43,6 +46,7 @@ class PortalUser extends Model implements AuthenticatableContract, HasLocalePref
             'email_verified_at' => 'immutable_datetime',
             'last_signed_in_at' => 'immutable_datetime',
             'appointment_reminders' => 'boolean',
+            'notification_channel' => PortalNotificationChannel::class,
         ];
     }
 
@@ -66,6 +70,17 @@ class PortalUser extends Model implements AuthenticatableContract, HasLocalePref
     public function accesses(): HasMany
     {
         return $this->hasMany(PortalAccess::class)->acrossPractices();
+    }
+
+    /**
+     * The browsers that switched web push on (Phase 9c); PortalPushSubscription::scopeLive
+     * picks the ones a push goes to.
+     *
+     * @return HasMany<PortalPushSubscription, $this>
+     */
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PortalPushSubscription::class);
     }
 
     /** Whether any practice can be opened right now (see PortalAccess::scopeUsable). */

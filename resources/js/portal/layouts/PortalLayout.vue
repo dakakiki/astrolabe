@@ -6,6 +6,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 import BrandMark from '@/components/BrandMark.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import PracticeMark from '@/portal/components/PracticeMark.vue';
+import { unsubscribeLocally } from '@/portal/pwa/push';
 import { useSessionStore } from '@/portal/stores/session';
 
 /**
@@ -21,8 +22,11 @@ const sections = ['home', 'appointments', 'shared', 'profile', 'security'];
 // A screen inside a section (booking, rescheduling) names it in `meta.section`.
 const active = computed(() => route.meta.section ?? route.name);
 
+// The server forgets this session's push devices; the browser drops its subscription alongside (Phase 9c).
 async function signOut() {
+    const forgetting = unsubscribeLocally();
     await session.signOut();
+    await forgetting;
     router.push({ name: 'sign-in' });
 }
 </script>

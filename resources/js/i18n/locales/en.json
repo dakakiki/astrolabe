@@ -1201,8 +1201,8 @@
             "cancelledByClient": "Cancelled by the client in the portal {when}.",
             "clientReason": "The client wrote",
             "cancelledOn": "Cancelled {when}.",
-            "notifyCancel": "Email the client about the cancellation",
-            "notifyCancelHint": "The email gives the day, time and service — never your reason."
+            "notifyCancel": "Let the client know about the cancellation",
+            "notifyCancelHint": "By email or a notification on their devices, as the client chose: the day, time and service — never your reason."
         },
         "form": {
             "newTitle": "New appointment",
@@ -1230,8 +1230,8 @@
             "reminder": "Reminder",
             "reminderHint": "An email to you before the appointment.",
             "reminderPaused": "Reminders are switched off in Settings → Notifications.",
-            "notifyMove": "Email the client about the new time",
-            "notifyMoveHint": "The client uses the portal; the email gives the new day and time, never your notes."
+            "notifyMove": "Let the client know about the new time",
+            "notifyMoveHint": "The client uses the portal; they hear by email or a notification on their devices, as they chose — the new day and time, never your notes."
         }
     },
     "related": {
@@ -2045,7 +2045,9 @@
             "portal_profile_updated": "Portal: profile changed",
             "portal_appointment_booked": "Portal: appointment booked",
             "portal_appointment_rescheduled": "Portal: appointment moved",
-            "portal_appointment_cancelled": "Portal: appointment cancelled"
+            "portal_appointment_cancelled": "Portal: appointment cancelled",
+            "portal_push_enabled": "Portal: notifications turned on for a device",
+            "portal_push_disabled": "Portal: notifications turned off for a device"
         },
         "invitations": {
             "title": "Invitations",

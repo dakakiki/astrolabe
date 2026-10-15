@@ -633,7 +633,24 @@ Pravila zakazivanja u portalu (Settings → Booking, menja vlasnik). Red nastaje
 - `activity_events`: nova vrsta zapisa promene `appointment_confirmed` (vreme termina i zona); `appointment_rescheduled` i `appointment_cancelled` nose `metadata.source = portal` kada je to uradio klijent, a odbijen zahtev je `appointment_cancelled` sa `declined: true`; projekcija termina nosi `booking_source`.
 - Izvoz prakse: nov `availability.json` (po osobi koja ima pravila ili izuzetke: ime, adresa, zona, pravila, izuzeci sa beleškom, i prošli), `booking_policy` u `practice.json` (sačuvana pravila ili podrazumevana), nove kolone termina (`portal_user_id`, `client_note`, `cancelled_by`, `declined_at`) i `bookable_in_portal` na uslugama. Brisanje prakse briše `availability_exceptions`, `availability_rules` i `booking_policies` pre naloga.
 
-U 9c: `portal_push_subscriptions` (dokument 12).
+## PWA za klijente — web push (Faza 9c, implementirano)
+
+Plan i pravila: dokument 12, „PWA za klijente (9c)“ i „Stanje posle 9c“. Service worker i manifest nemaju tabele: service worker čuva samo statične fajlove build-a i stranu „offline“ u Cache Storage pregledača, ništa o klijentu.
+
+### `portal_push_subscriptions` (nisu tenant)
+
+Jedan pregledač u kome je klijent posle prijave uključio obaveštenja (Portal → Profile → Notifications). Pripada nalogu portala, ne praksi — ne ulazi u izvoz prakse.
+
+- `portal_user_id` (FK, `cascadeOnDelete` — odlazi sa nalogom portala), `portal_session_id` (nullable, indeks) — sesija portala u kojoj je pretplata napravljena: push ide samo dok ta sesija postoji i nije starija od roka sesije (`PortalPushSubscription::live()`).
+- `endpoint` (text) — adresa push servisa pregledača; radi kao ključ, nikad se ne vraća SPA-u i ne upisuje u log ni audit; `endpoint_hash` (SHA-256, jedinstven) — po njemu se red traži i uređaj prepoznaje u SPA-u.
+- `public_key` (p256dh), `auth_token`, `content_encoding` (`aes128gcm` ili `aesgcm`) — ključevi pregledača za šifrovanje poruke.
+- `user_agent` (nullable) — opis uređaja u Profile; `last_used_at` (nullable) — poslednji push koji je servis prihvatio; timestamps.
+- Briše se: odjava (pretplate te sesije), „Sign out everywhere“ (sve naloga), opoziv pristupa kada nalog nema drugu aktivnu vezu, istek sesije (`data:prune`, ključ `portal_push_subscriptions`), odgovor 404 / 410 push servisa, brisanje naloga (sa klijentom ili praksom). Najviše 10 uređaja po nalogu (najstariji odlazi).
+
+### Izmene postojećih tabela (9c)
+
+- `portal_users`: `notification_channel` (string, podrazumevano `email`) — `email`, `push` ili `both`; push bez živog uređaja ide mejlom. Prvi uređaj sa uključenim obaveštenjima menja `email` u `both`.
+- `audit_logs`: `portal_push_enabled`, `portal_push_disabled` (izvršilac `portal_user_id`, bez adrese pretplate).
 
 ## Obavezna pravila
 

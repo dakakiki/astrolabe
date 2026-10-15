@@ -21,6 +21,15 @@ class ClientBookingDeclined extends ClientAppointmentEmail
     }
 
     /**
+     * @return array{0: string, 1: string}
+     */
+    protected function push(string $zone): array
+    {
+        // The practice's message stays in the portal and the email.
+        return ['declined', __('portal.push.declined.body', ['when' => $this->pushWhen($zone)])];
+    }
+
+    /**
      * @param  PortalUser  $notifiable
      */
     public function toMail(object $notifiable): MailMessage

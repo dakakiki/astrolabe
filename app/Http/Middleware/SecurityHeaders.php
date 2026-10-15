@@ -68,6 +68,9 @@ class SecurityHeaders
             "font-src 'self'",
             "connect-src 'self'",
             "media-src 'self' blob:",
+            // The client PWA (Phase 9c): its service worker and manifest come from the portal host itself.
+            "worker-src 'self'",
+            "manifest-src 'self'",
             "object-src 'none'",
             "base-uri 'self'",
             "form-action 'self'",

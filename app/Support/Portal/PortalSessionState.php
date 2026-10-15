@@ -5,9 +5,11 @@ namespace App\Support\Portal;
 use App\Enums\AuditEvent;
 use App\Http\Middleware\Portal\ResolvePortalAccess;
 use App\Models\PortalAccess;
+use App\Models\PortalPushSubscription;
 use App\Models\PortalUser;
 use App\Models\Workspace;
 use App\Support\Audit\Audit;
+use App\Support\Portal\Push\PortalPush;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -70,9 +72,26 @@ final class PortalSessionState
      */
     public static function signIn(Request $request, PortalUser $user, string $method, ?PortalAccess $access = null): void
     {
+        $previousSession = $request->session()->getId();
+        $previousUser = Auth::guard('portal')->id();
+
         Auth::guard('portal')->login($user);
 
         $session = $request->session();
+
+        // Signing in gives the session a new id. Push on this device (Phase 9c) stays on for the
+        // same person — signing in again from an email link, accepting another practice's
+        // invitation — and stops for anyone else who used this browser before.
+        if ($previousSession !== $session->getId()) {
+            if ($previousUser !== null && (int) $previousUser === (int) $user->getKey()) {
+                PortalPushSubscription::query()
+                    ->where('portal_session_id', $previousSession)
+                    ->where('portal_user_id', $user->getKey())
+                    ->update(['portal_session_id' => $session->getId()]);
+            } else {
+                PortalPush::forgetSession($previousSession);
+            }
+        }
         $session->regenerateToken();
         $session->forget(ResolvePortalAccess::SESSION_KEY);
 

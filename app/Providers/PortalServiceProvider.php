@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Support\Portal\PortalContext;
 use App\Support\Portal\PortalSessionManager;
+use App\Support\Portal\Push\PushSender;
+use App\Support\Portal\Push\WebPushSender;
 use Illuminate\Auth\SessionGuard;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Foundation\Application;
@@ -33,6 +35,9 @@ class PortalServiceProvider extends ServiceProvider
     {
         $this->app->singleton(PortalSessionManager::class);
         $this->app->scoped(PortalContext::class);
+
+        // Web push in the client PWA (Phase 9c); tests bind FakePushSender.
+        $this->app->singleton(PushSender::class, WebPushSender::class);
     }
 
     public function boot(): void
@@ -54,6 +59,11 @@ class PortalServiceProvider extends ServiceProvider
         $this->limitRequests();
 
         if (! $this->app->routesAreCached()) {
+            // The PWA's own files (Phase 9c) — service worker, manifest, offline page — carry no
+            // data and start no session: a browser fetching them makes no portal session row.
+            Route::domain(config('portal.domain'))
+                ->group(base_path('routes/portal-pwa.php'));
+
             Route::domain(config('portal.domain'))
                 ->middleware('portal')
                 ->group(base_path('routes/portal.php'));
@@ -82,6 +92,15 @@ class PortalServiceProvider extends ServiceProvider
 
         RateLimiter::for('portal-booking', fn (Request $request) => Limit::perMinutes($limit('booking_per_account')[1], $limit('booking_per_account')[0])
             ->by('portal-booking:'.(Auth::guard('portal')->id() ?? $request->ip()))
+            ->response(fn (Request $request, array $headers) => response()->json(
+                ['message' => __('portal.errors.too_many')],
+                Response::HTTP_TOO_MANY_REQUESTS,
+                $headers,
+            )));
+
+        // Switching push on and sending a test notice (Phase 9c): each one reaches a push service.
+        RateLimiter::for('portal-push', fn (Request $request) => Limit::perMinutes($limit('push_per_account')[1], $limit('push_per_account')[0])
+            ->by('portal-push:'.(Auth::guard('portal')->id() ?? $request->ip()))
             ->response(fn (Request $request, array $headers) => response()->json(
                 ['message' => __('portal.errors.too_many')],
                 Response::HTTP_TOO_MANY_REQUESTS,

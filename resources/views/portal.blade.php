@@ -12,6 +12,14 @@
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
         <meta name="theme-color" content="#090d1b">
 
+        {{-- The installable app (Phase 9c): AstroLabe's name and icon; the practice shows inside it. --}}
+        <link rel="manifest" href="/manifest.webmanifest">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="AstroLabe">
+        {{-- A solid bar: the page starts below the clock (no safe-area insets needed), in both themes. --}}
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
         {{-- The stored theme before first paint, as in the application (its own storage on this origin). --}}
         <script nonce="{{ Vite::cspNonce() }}">
             try {

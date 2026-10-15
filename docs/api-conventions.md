@@ -269,7 +269,7 @@ Pravila (9b):
 - **`PUT /notification-preferences`** prima i `portal_bookings` (bool, podrazumevano `true`).
 - **Izvoz prakse:** `availability.json` (po osobi: `name`, `email`, `timezone`, `rules`, `exceptions` sa beleškom, i prošli), `booking_policy` u `practice.json`, termini sa `portal_user_id`, `client_note`, `cancelled_by`, `declined_at`, usluge sa `bookable_in_portal`.
 
-## Klijentski portal (`/api/portal/v1`, Faze 9a–9b)
+## Klijentski portal (`/api/portal/v1`, Faze 9a–9c)
 
 Portal je ista aplikacija na svom hostu (`PORTAL_DOMAIN`, dokument 12). Rute postoje samo tamo (`routes/portal.php`, imena `portal.*`), a rute aplikacije, Fortify-a i Sanctum-a na portal hostu daju 404. Prijava je sesija portala (kolačić `astrolabe_portal_session`, tabela `portal_sessions`) sa sopstvenim CSRF kolačićem — ne Sanctum. Ostale konvencije važe kao gore: omotač `data`, `snake_case`, UTC ISO 8601, 404 za tuđe.
 
@@ -293,12 +293,18 @@ Portal je ista aplikacija na svom hostu (`PORTAL_DOMAIN`, dokument 12). Rute pos
 | POST | `/appointments/{id}/cancel` | `portal.access`, `portal-booking`, `idempotent` | `{reason?}` (do 500, poruka praksi) → termin; otkazuje i zahtev |
 | GET | `/shared` | `portal.access` | beleške, fajlovi i linkovi `shared_with_client`, najnovije prvo; `meta.seen_before` |
 | GET | `/files/{id}/download` | `portal.access` | deljen fajl (audit `portal_file_downloaded`) |
-| GET / PUT | `/profile` | `portal.access` | `name`, `timezone`, `locale`, `phone` (menja zapis klijenta), od 9b `appointment_reminders`; e-mail samo za čitanje |
+| GET / PUT | `/profile` | `portal.access` | `name`, `timezone`, `locale`, `phone` (menja zapis klijenta), od 9b `appointment_reminders`, od 9c `notification_channel` (`email`, `push`, `both`); e-mail samo za čitanje; PUT menja samo poslata polja |
+| GET | `/push` | `portal.auth` | web push (9c): `available` (VAPID ključevi postoje), `public_key`, `channel`, `devices` — živi uređaji naloga: `hash` (SHA-256 endpoint-a), `current` (pretplata ove sesije), `user_agent`, `created_at`, `last_used_at`; endpoint i ključevi pregledača se nikad ne vraćaju |
+| POST | `/push/subscriptions` | `portal.auth`, `portal-push` | `{endpoint, keys: {p256dh, auth}, content_encoding?}` → **201** nov uređaj / **200** obnovljen, isti oblik kao `GET /push`; vezan za ovu sesiju; 422 za push servis van liste (`portal.push.endpoint_hosts`), **409** `push_unavailable` bez VAPID ključeva; prvi uređaj prebacuje kanal `email` → `both` |
+| DELETE | `/push/subscriptions` | `portal.auth` | `{endpoint}` → isključuje ovaj uređaj (samo red svog naloga); isti oblik kao `GET /push` |
+| POST | `/push/test` | `portal.auth`, `portal-push` | `{endpoint}` → probno obaveštenje samo tom uređaju, `{sent}`; **404** `push_not_on` ako to nije živi uređaj naloga |
+
+PWA fajlovi portala (9c, `routes/portal-pwa.php`, bez sesije i kolačića): `GET /sw.js` (service worker sa verzijom build-a, `no-store`), `GET /manifest.webmanifest`, `GET /offline` (strana bez mreže, bez podataka).
 
 Pravila:
 
 - **Pristup:** `portal.auth` = prijavljen nalog portala; `portal.access` = i otvorena praksa iz upotrebljive veze (aktivna, klijent nije arhiviran, praksa se ne zatvara), proverava se na svakom zahtevu i postavlja tenant scope. Nijedan id prakse, klijenta ili astrologa se ne čita iz zahteva. Termini se traže samo među terminima klijenta iz otvorene veze, a usluge među aktivnim uslugama za portal — sve ostalo je **404**, bez obzira na telo zahteva (`appointment_id` iz putanje je broj, bez model binding-a).
-- **Ograničenja:** ceo portal API 120 u minuti po nalogu (pre prijave po IP-u); prijava 3 na 15 minuta po adresi i 10 na sat po IP-u, link i kod 10 na 15 minuta po IP-u, prihvatanje poziva 10 na sat po IP-u; rezervacija, pomeranje i otkazivanje zajedno **10 na 10 minuta po nalogu** (`portal-booking`; vrednosti su u `config/portal.php`, `limits`). Odgovor 429 nosi `message`.
+- **Ograničenja:** ceo portal API 120 u minuti po nalogu (pre prijave po IP-u); prijava 3 na 15 minuta po adresi i 10 na sat po IP-u, link i kod 10 na 15 minuta po IP-u, prihvatanje poziva 10 na sat po IP-u; rezervacija, pomeranje i otkazivanje zajedno **10 na 10 minuta po nalogu** (`portal-booking`); uključivanje push-a i probno obaveštenje zajedno 10 na 10 minuta po nalogu (`portal-push`, 9c); vrednosti su u `config/portal.php`, `limits`. Odgovor 429 nosi `message`.
 - **`starts_at`** je trenutak iz liste slobodnih vremena: ISO 8601 sa zonom (`2026-10-20T08:30:00Z` ili sa pomakom); vreme bez zone je 422. `location_type` (`online` / `in_person`) važi samo za uslugu „either“, inače se izostavlja; `message` do 1.000 znakova — vidi ga samo astrolog.
 - **`Idempotency-Key`** (8–100 znakova) na sve tri POST rute zakazivanja: kao u aplikaciji (ponovljen zahtev dobija prvi uspešan odgovor uz `Idempotent-Replayed: true`, isti ključ sa drugim telom je 422, 409 i 422 se ne pamte, dan dana), ali se ključevi pamte po nalogu portala, odvojeno od ključeva astrologa.
 - **Greške zakazivanja** su `{message, code}`: **409** `slot_taken` (vreme je u međuvremenu zauzeto; uz novu listu `slots` na vrhu odgovora, ne pod `data` — za pomeranje lista za taj termin), `too_many_open` (klijent već ima najviše otvorenih termina unapred — `PORTAL_BOOKING_MAX_OPEN`, podrazumevano 10; ne važi za pomeranje), `change_too_late` (prošao je rok za pomeranje ili otkazivanje), `not_changeable` (termin nije otvoren, ili pomeranje termina drugog astrologa); **403** `booking_disabled` (zakazivanje je isključeno, praksa nema vlasnika ili je nalog vlasnika suspendovan). Redosled provera: 404 (red ili usluga), 403, `not_changeable`, `change_too_late`. Razlog zbog kog vreme nije slobodno se nikad ne navodi.

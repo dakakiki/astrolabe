@@ -77,6 +77,10 @@ enum AuditEvent: string
     case PortalAppointmentRescheduled = 'portal_appointment_rescheduled';
     case PortalAppointmentCancelled = 'portal_appointment_cancelled';
 
+    // The client PWA (Phase 9c): push switched on or off on a device (never its address).
+    case PortalPushEnabled = 'portal_push_enabled';
+    case PortalPushDisabled = 'portal_push_disabled';
+
     /**
      * Events that may mean someone else is trying an account; the admin's audit
      * log shows them on their own and highlights them (Phase 8c).

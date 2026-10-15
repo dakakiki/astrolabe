@@ -76,6 +76,7 @@ return [
         'invitation_per_ip' => [10, 60],
         'api_per_minute' => 120,
         'booking_per_account' => [10, 10],
+        'push_per_account' => [10, 10],
     ],
 
     /*
@@ -92,6 +93,43 @@ return [
 
     'booking' => [
         'max_open_per_client' => (int) env('PORTAL_BOOKING_MAX_OPEN', 10),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Web push in the client PWA (Phase 9c)
+    |--------------------------------------------------------------------------
+    |
+    | VAPID keys identify this server to the browsers' push services; make a
+    | pair with `php artisan portal:push-keys` and keep the private one out of
+    | the repository. Without both keys the portal offers no push at all. The
+    | subject is a contact for the push services (mailto: or https:).
+    |
+    | Pushes go only to the push services of the browsers in `endpoint_hosts`
+    | (a host, or ".suffix" for its subdomains), over HTTPS — the server never
+    | posts to an address a client made up. A push the service cannot deliver
+    | within `ttl` seconds is dropped.
+    |
+    */
+
+    'push' => [
+        'public_key' => env('VAPID_PUBLIC_KEY'),
+        'private_key' => env('VAPID_PRIVATE_KEY'),
+        // An empty VAPID_SUBJECT counts as unset: push services refuse an empty "sub".
+        'subject' => env('VAPID_SUBJECT') ?: 'mailto:'.(env('OPERATOR_EMAIL') ?: 'operator@astrolabe.online'),
+        'endpoint_hosts' => [
+            'fcm.googleapis.com',                 // Chrome, Android, Opera, Samsung Internet, Brave
+            'updates.push.services.mozilla.com',  // Firefox
+            'web.push.apple.com',                 // Safari on macOS, iOS and iPadOS 16.4+
+            '.notify.windows.com',                // Edge
+        ],
+        'ttl' => (int) env('PORTAL_PUSH_TTL', 60 * 60 * 12),
+        // Seconds per push service request, and for one notice to all of an account's
+        // devices together — well under the queue worker's 60 s, so a notice whose pushes
+        // stall still reaches its email fallback instead of being killed and retried.
+        'timeout' => 5,
+        'connect_timeout' => 3,
+        'deliver_seconds' => 40,
     ],
 
     /*

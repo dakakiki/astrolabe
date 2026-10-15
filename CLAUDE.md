@@ -144,6 +144,40 @@ before starting a phase. The user communicates in Serbian.
   When several agents run PHPUnit at once, each uses its own test database (`DB_DATABASE=…`); never run
   two suites in parallel on one database.
 
+## Client PWA and web push (Phase 9c)
+
+- Plan, decisions and what was built: `docs/spec/12-client-portal-and-pwa.md` ("PWA za klijente (9c)",
+  "Stanje posle 9c"). The PWA's own files come from `routes/portal-pwa.php` on the portal host, outside the
+  `portal` group — no session, no cookie (`RouteProtectionTest` knows the three paths): `/sw.js`
+  (`PwaController` serves `resources/js/portal/service-worker.js` with `self.__PORTAL_SW__ = {version,
+  precache}` in front; the version follows the Vite manifest and the source), `/manifest.webmanifest` and
+  `/offline`. Never put a static `sw.js` or manifest in `public/`.
+- The service worker keeps only `/build/*` files and `/offline`. Pages always come from the network (the
+  offline page only when there is none) and the API is never intercepted; nothing about a client goes into
+  Cache Storage, localStorage or IndexedDB (UI flags only: theme, install hint). Keep the worker a plain
+  script without imports; `tests/js/portal-sw.test.js` runs it against a fake service-worker global.
+- A new worker waits until the SPA's "Reload" (`resources/js/portal/pwa/serviceWorker.js`, `UpdateBanner`)
+  posts `SKIP_WAITING`; the page reloads once on `controllerchange`. The worker is registered only in a
+  production build on a secure origin (`localhost` counts).
+- Web push is opt-in per device (Portal → Profile → Notifications). A `portal_push_subscriptions` row belongs
+  to the portal account and to the portal session it was made in (`PortalPushSubscription::live()`):
+  sign-out, "Sign out everywhere", expiry (`data:prune`), revoking without another active link and deleting
+  the account remove it. The endpoint and keys never go back to the SPA — devices are matched by
+  `endpoint_hash`.
+- Client notices pick their channels in `ClientAppointmentEmail::via()` → `ClientChannels::for()` (the
+  account's `notification_channel`: email, push or both; push only with a live device, otherwise email).
+  `toPortalPush()` is generic — what happened and when on the client's clock, never the practice, the
+  service, notes or messages; a new client notice needs its `push()`. `PortalPushChannel` sends the email
+  itself when no device took the push and the client chose push alone.
+- Sending goes through `PortalPush` (off unless both VAPID keys are set; endpoints only HTTPS on the push
+  services in `portal.push.endpoint_hosts`, plain DNS hosts — the server never posts to a made-up address)
+  and the `PushSender` contract: `WebPushSender` (`minishlink/web-push`) in the app, `FakePushSender` in
+  tests (`InteractsWithPortal::fakePush()`, `pushDevice()`). 404 / 410 deletes the row; logs and the audit
+  log never hold an endpoint. `php artisan portal:push-keys` prints a VAPID pair.
+- Locally on Windows, PHP cannot make EC keys unless `OPENSSL_CONF` points at
+  `C:/wamp64/bin/php/php8.3.29/extras/ssl/openssl.cnf` (the push-keys command, real sending; three tests
+  skip without it). phpunit.xml empties the VAPID keys, so only `fakePush()` turns push on in tests.
+
 ## SPA shell
 
 - `App.vue` picks the layout with `layoutOf(route.meta)` (`resources/js/lib/layout.js`):

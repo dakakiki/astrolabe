@@ -4,9 +4,11 @@ import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 
 import AppointmentItem from '@/portal/components/AppointmentItem.vue';
+import InstallApp from '@/portal/components/InstallApp.vue';
 import http from '@/portal/http';
 import { displayZone, suggestedZone } from '@/portal/lib/portal';
 import { loadScreen } from '@/portal/load';
+import { usePwaStore } from '@/portal/stores/pwa';
 import { useSessionStore } from '@/portal/stores/session';
 import { useToastStore } from '@/stores/toast';
 
@@ -14,11 +16,13 @@ import { useToastStore } from '@/stores/toast';
  * Portal → Home (docs/spec/12): the next appointment (and, since 9b, "Book
  * an appointment" while the practice takes bookings here), how much was
  * shared since the last visit, and — until the client picks a zone — an
- * offer to show times on their device's clock.
+ * offer to show times on their device's clock. Since 9c, below them and
+ * only until "Not now", an offer to install the portal as an app.
  */
 const { t } = useI18n();
 const session = useSessionStore();
 const toast = useToastStore();
+const pwa = usePwaStore();
 
 const home = ref(null);
 const zone = computed(() => displayZone(session.user, session.practice));
@@ -94,4 +98,10 @@ async function useDeviceZone() {
             </div>
         </section>
     </div>
+
+    <section v-if="home && pwa.showHomeInstall" class="card mt-4">
+        <div class="card-body">
+            <InstallApp place="home" />
+        </div>
+    </section>
 </template>

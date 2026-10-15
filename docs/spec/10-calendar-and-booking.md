@@ -150,6 +150,8 @@ Na telefonu je agenda podrazumevani praktični prikaz, uz mogućnost prelaska na
 
 PWA ne kešira događaje kalendara. Bez mreže može prikazati samo aplikacioni shell i obaveštenje da je veza potrebna; svi termini se učitavaju sa SaaS-a.
 
+> Faza 9c (implementirano 15. 10. 2026) — PWA za klijente (portal): service worker čuva samo statične fajlove build-a i stranu „You're offline“; stranice portala i API uvek idu na mrežu, pa termini klijenta nikad nisu na uređaju (kriterijum 9). Isti mejlovi klijentu iz 9b mogu ići i kao web push na uređaje na kojima ih klijent uključi (opšti tekst — šta i kada, bez prakse i usluge); u kalendaru je „Email the client …“ postalo „Let the client know …“. PWA astrologa (aplikacija) još nije urađena.
+
 ## MVP i kasnije
 
 ### P1 — kalendar astrologa

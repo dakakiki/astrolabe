@@ -253,9 +253,69 @@
             "timezoneHint": "Appointment times are shown in this zone.",
             "practiceZone": "The practice's zone ({zone})",
             "defaultLanguage": "Automatic (English)",
-            "reminders": "Email me a reminder a day before each appointment",
-            "remindersHint": "Sent to {email}. Emails about booking, moving and cancelling come either way.",
+            "reminders": "Remind me a day before each appointment",
+            "remindersHint": "Sent the same way as your other notices. Notices about booking, moving and cancelling come either way.",
             "saved": "Profile saved"
+        },
+        "notifications": {
+            "title": "Notifications",
+            "thisDevice": "This device",
+            "on": "On",
+            "off": "Off",
+            "isOn": "Notifications are on for this device.",
+            "isOff": "Notifications are off for this device.",
+            "turnOn": "Turn on for this device",
+            "turnOff": "Turn off for this device",
+            "turnedOn": "Notifications are on for this device.",
+            "turnedOff": "Notifications are off for this device.",
+            "notAllowed": "Notifications were not allowed. You can try again at any time.",
+            "test": "Send a test notification",
+            "testSent": "Test notification sent. It should appear in a moment.",
+            "testFailed": "The test notification could not be delivered. If this keeps happening, turn notifications on again for this device.",
+            "generic": "A notification says only what happened and when. The details open in the portal.",
+            "others": "Also on for {count} other device: {devices}. | Also on for {count} other devices: {devices}.",
+            "unknownDevice": "an unknown device",
+            "channel": "How notices reach you",
+            "channels": {
+                "email": "Email",
+                "push": "Notifications on my devices",
+                "both": "Both"
+            },
+            "channelHint": "If none of your devices can receive notifications, notices come by email.",
+            "byEmail": "Notices about your appointments come by email to {email}.",
+            "saved": "Notification settings saved",
+            "states": {
+                "insecure": "Notifications need a secure (https) connection to the portal.",
+                "installFirst": "On iPhone and iPad, notifications work only in the installed app (iOS 16.4 or later). Tap Share, then Add to Home Screen, open the portal from your Home Screen and turn notifications on there.",
+                "unsupported": "This browser cannot show notifications from the portal. Notices come by email.",
+                "denied": "Notifications are blocked for this site. To allow them, open the site settings in your browser (usually the icon next to the address) and allow notifications, then reload this page. In the installed app, allow them in your device's settings for the app."
+            },
+            "problems": {
+                "unavailable": "Notifications are not available at the moment. Notices come by email.",
+                "service": "This browser's notifications are not supported. Please try another browser.",
+                "notOn": "Notifications are not on for this device any more.",
+                "tooMany": "Too many attempts. Please wait a few minutes and try again.",
+                "failed": "Notifications could not be turned on. Please try again."
+            }
+        },
+        "pwa": {
+            "update": {
+                "available": "A new version is available.",
+                "reload": "Reload"
+            },
+            "install": {
+                "title": "App",
+                "homeTitle": "Use the portal as an app",
+                "lead": "Install the portal on this device. It opens from your home screen like an app.",
+                "action": "Install app",
+                "notNow": "Not now",
+                "badge": "Installed",
+                "standalone": "You're using the installed app.",
+                "installed": "The app is installed. Open it from your home screen or your list of apps.",
+                "iosSteps": "Tap Share, then Add to Home Screen.",
+                "iosNote": "Notifications on iPhone and iPad need the installed app (iOS 16.4 or later).",
+                "hint": "If your browser offers it, you can add the portal to your home screen or dock from the browser's menu."
+            }
         },
         "security": {
             "sub": "You sign in as {email}, with a link or code sent to that address.",

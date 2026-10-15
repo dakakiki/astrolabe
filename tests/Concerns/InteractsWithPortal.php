@@ -6,9 +6,14 @@ use App\Enums\PortalAccessStatus;
 use App\Models\Client;
 use App\Models\PortalAccess;
 use App\Models\PortalLoginToken;
+use App\Models\PortalPushSubscription;
 use App\Models\PortalUser;
 use App\Support\Portal\PortalSessionManager;
+use App\Support\Portal\Push\FakePushSender;
+use App\Support\Portal\Push\PushSender;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use Symfony\Component\HttpFoundation\Cookie;
 
@@ -94,6 +99,63 @@ trait InteractsWithPortal
         [, $token] = PortalLoginToken::issue($user, Request::create('/'));
 
         return $this->portal('POST', 'sign-in/link', ['token' => $token])->assertOk();
+    }
+
+    /**
+     * Web push on, with a sender that only records (Phase 9c). Any non-empty keys do:
+     * FakePushSender never encrypts.
+     */
+    protected function fakePush(): FakePushSender
+    {
+        config([
+            'portal.push.public_key' => 'BTestPublicKeyForThePortalPushTestsOnly',
+            'portal.push.private_key' => 'test-private-key',
+        ]);
+
+        $this->app->instance(PushSender::class, $fake = new FakePushSender);
+
+        return $fake;
+    }
+
+    /**
+     * A browser of the account with push on, in a live portal session — the given one
+     * (the id of a row in portal_sessions), or a new row made here.
+     */
+    protected function pushDevice(PortalUser $user, ?string $sessionId = null, ?string $endpoint = null): PortalPushSubscription
+    {
+        if ($sessionId === null) {
+            $sessionId = Str::random(40);
+
+            DB::table(config('portal.session.table'))->insert([
+                'id' => $sessionId,
+                'user_id' => $user->getKey(),
+                'ip_address' => '127.0.0.1',
+                'user_agent' => 'Mozilla/5.0 (Linux; Android 14) Chrome/130.0 Mobile Safari/537.36',
+                'payload' => base64_encode(serialize([])),
+                'last_activity' => now()->getTimestamp(),
+            ]);
+        }
+
+        $endpoint ??= 'https://fcm.googleapis.com/fcm/send/'.Str::random(32);
+
+        return PortalPushSubscription::query()->create([
+            'portal_user_id' => $user->getKey(),
+            'portal_session_id' => $sessionId,
+            'endpoint' => $endpoint,
+            'endpoint_hash' => PortalPushSubscription::hashEndpoint($endpoint),
+            'public_key' => 'BPublicKeyOfTheBrowser',
+            'auth_token' => 'AuthSecretOfTheBrowser',
+            'user_agent' => 'Mozilla/5.0 (Linux; Android 14) Chrome/130.0 Mobile Safari/537.36',
+        ]);
+    }
+
+    /** The id of the account's newest portal session (the one signInToPortal() made). */
+    protected function latestPortalSessionId(PortalUser $user): ?string
+    {
+        return DB::table(config('portal.session.table'))
+            ->where('user_id', $user->getKey())
+            ->orderByDesc('last_activity')
+            ->value('id');
     }
 
     private function freshPortalRequest(): void

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PortalUser;
 use App\Support\Audit\Audit;
 use App\Support\Portal\PortalSessionManager;
+use App\Support\Portal\Push\PortalPush;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -45,6 +46,9 @@ class DeviceController extends Controller
         /** @var PortalUser $user */
         $user = Auth::guard('portal')->user();
         $count = $this->sessions()->delete();
+
+        // No device of the account gets pushes any more (Phase 9c).
+        PortalPush::forgetAccount($user);
 
         Auth::guard('portal')->logout();
         $request->session()->invalidate();

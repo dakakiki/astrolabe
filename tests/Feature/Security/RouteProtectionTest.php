@@ -183,7 +183,14 @@ class RouteProtectionTest extends TestCase
         'api/portal/v1/sign-out',
         'api/portal/v1/practice',
         'api/portal/v1/sessions',
+        // Web push on this device (Phase 9c).
+        'api/portal/v1/push',
+        'api/portal/v1/push/subscriptions',
+        'api/portal/v1/push/test',
     ];
+
+    /** The client PWA's own files (Phase 9c): no data, no session, no cookie — only read. */
+    private const PORTAL_PWA_FILES = ['sw.js', 'manifest.webmanifest', 'offline'];
 
     public function test_every_portal_route_lives_on_the_portal_host_with_its_own_session(): void
     {
@@ -193,6 +200,13 @@ class RouteProtectionTest extends TestCase
         foreach ($portal as $route) {
             $middleware = $route->gatherMiddleware();
             $name = $route->uri().' '.implode('|', $route->methods());
+
+            if (in_array($route->uri(), self::PORTAL_PWA_FILES, true)) {
+                $this->assertSame(['GET', 'HEAD'], $route->methods(), $name);
+                $this->assertSame([], $middleware, "{$name} must start no session");
+
+                continue;
+            }
 
             $this->assertContains('portal', $middleware, $name);
             $this->assertNotContains('web', $middleware, $name);

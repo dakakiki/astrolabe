@@ -303,6 +303,20 @@ Korisnik: „Kreni sa Fazom 9b — zakazivanje u klijentskom portalu.“ — pod
 
 Odluke donete usput (detalji u dokumentu 12): rezervacije idu vlasniku prakse; radno vreme kao vreme na satu u zoni unosa („24:00“ za ponoć), odsustva u UTC-u; mreža početaka od početka svakog dela radnog vremena; buffer kao „posle“ + „pre“ i oko termina koje je upisao astrolog; dodatno vreme važi i preko odsustva; zahtev zauzima vreme i samo se potvrđuje ili odbija (ni konsultacija iz njega); pomeranje zadržava status, trajanje i zonu, isto vreme ne radi ništa; „Not in the portal“ isključuje izmene klijenta; termin iz portala čuva zonu klijenta; podsetnik klijentu i za termine koje je upisao astrolog, komanda „uzima“ i redove bez primaoca; mejl klijentu o izmeni prakse samo uz „Email the client“, bez internog razloga; mejl astrologu čeka kraj tihih sati; `Idempotency-Key` na sve tri POST rute portala, 10 izmena na 10 minuta i najviše 10 otvorenih termina po klijentu; suspendovan vlasnik zatvara zakazivanje; mejlovi astrologu bez imena i poruke klijenta; izmene pravila u audit-u kao `booking.*`, radno vreme ne; izvoz `availability.json`; otkazivanje i pomeranje iz kalendara zaključavaju red termina.
 
+## Faza 9c — PWA za klijente (15. 10. 2026)
+
+Korisnik: „Kreni sa Fazom 9c — PWA za klijente.“ — podrazumevane vrednosti iz dokumenta 12 važe; odobreno preuzimanje paketa `minishlink/web-push` (MIT); beta i dalje čeka. Izmene:
+
+- 02: „Obaveštenja“ — klijentima i web push po izboru; „Profile“ u sekciji 9b — podsetnik u kartici Notifications; nova sekcija „Klijentski portal — PWA (Faza 9c), implementirano“ (instalacija, offline, nova verzija, obaveštenja, tekst u kalendaru astrologa).
+- 04: status 9c; plan dokumenta 12 završen.
+- 05: „PWA za klijente — web push (Faza 9c, implementirano)“ — `portal_push_subscriptions`, `portal_users.notification_channel`, audit događaji.
+- 06: PWA i push u „Bezbednosti i privatnosti“ (keš samo statičnih fajlova, push po izboru vezan za sesiju, opšti tekst, šifrovanje, lista push servisa protiv SSRF-a, adresa pretplate van logova), push u „Pouzdanosti“, pitanja za pravnika i čuvanje u „Pravnoj pripremi“.
+- 09: Faza 9c urađena (instalabilna ikonica SaaS-a, Profile → Notifications i App, tekst u kalendaru).
+- 10: „Mobilni i PWA prikaz“ — PWA za klijente urađena (kriterijum 9), push klijentu, „Let the client know …“.
+- 12: status, „Šta korisnik priprema“ (odobrenje dato, VAPID na produkciji), „Stanje posle 9c“ (kako je napravljeno; 18 odluka donetih usput; pregled koda; šta je provereno; šta ostaje).
+
+Odluke donete usput (detalji u dokumentu 12): push po uređaju posle prijave, vezan za sesiju portala; kanal mejl / push / oba, prvi uređaj menja mejl u oba, push bez uređaja ili bez isporuke ide mejlom, kanali po stanju u trenutku slanja u red; push za sve događaje iz 9b, opšti naslovi, „Today“ / „Tomorrow“ samo dok ne može da zastari, bez imena prakse; `renotify` za isti termin; samo HTTPS adrese poznatih push servisa; 404 / 410 briše pretplatu, 5 s po zahtevu i 40 s po obaveštenju; najviše 10 uređaja, ponovna prijava zadržava push, druga osoba ga gasi; opoziv gasi push samo bez druge aktivne veze; pretplata nepoznata portalu ili sa starim ključem se ukida u pregledaču; service worker samo u produkciji na bezbednom origin-u; AstroLabe kao instalabilna aplikacija; „Let the client know …“ u kalendaru; `portal:push-keys`; lokalno `OPENSSL_CONF` na Windows-u.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

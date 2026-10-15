@@ -8,6 +8,7 @@ use App\Http\Middleware\Portal\ResolvePortalAccess;
 use App\Models\PortalUser;
 use App\Support\Audit\Audit;
 use App\Support\Portal\PortalSessionState;
+use App\Support\Portal\Push\PortalPush;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -47,6 +48,9 @@ class SessionController extends Controller
     {
         /** @var PortalUser $user */
         $user = Auth::guard('portal')->user();
+
+        // This device's pushes stop with its session (Phase 9c).
+        PortalPush::forgetSession($request->session()->getId());
 
         Auth::guard('portal')->logout();
         $request->session()->invalidate();
