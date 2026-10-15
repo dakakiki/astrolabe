@@ -13,6 +13,10 @@ Schedule::command('places:import', ['--fresh'])->monthlyOn(1, '03:30')->withoutO
 Schedule::command('notifications:send-reminders')->everyMinute()->withoutOverlapping();
 Schedule::command('notifications:send-digests')->everyMinute()->withoutOverlapping();
 
+// The client's reminder a day before an appointment (Phase 9b, docs/spec/12), the
+// same way: claimed first, sent only to a client who can use the portal.
+Schedule::command('notifications:send-client-reminders')->everyMinute()->withoutOverlapping();
+
 // Operations (Phase 8a): the heartbeat shows the scheduler runs (/api/v1/health),
 // and the checks email the operator about failures (astrolabe.operator.email).
 Schedule::call(fn () => HealthCheck::beat())->everyMinute()->name('health:heartbeat');

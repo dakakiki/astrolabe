@@ -337,6 +337,31 @@ class AppointmentsTest extends TestCase
         ])->assertUnprocessable()->assertJsonValidationErrors(['appointment_id' => __('appointments.other_client')]);
     }
 
+    public function test_a_booking_request_is_answered_before_a_consultation_is_recorded_from_it(): void
+    {
+        // A request from the portal (Phase 9b) stays open for the client to move or withdraw,
+        // so it cannot be recorded as held until the astrologer confirms it.
+        $id = $this->book()->json('data.id');
+        Appointment::withoutGlobalScopes()->whereKey($id)->update(['status' => AppointmentStatus::Requested->value]);
+        $consultation = [
+            'client_id' => $this->client->id,
+            'appointment_id' => $id,
+            'status' => 'completed',
+            'starts_at' => '2026-10-05T15:00',
+        ];
+
+        $this->actingAs($this->user)->postJson('/api/v1/consultations', $consultation)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['appointment_id' => __('appointments.request_first')]);
+        $this->assertSame(0, Consultation::withoutGlobalScopes()->count());
+        $this->assertSame(AppointmentStatus::Requested, Appointment::withoutGlobalScopes()->findOrFail($id)->status);
+
+        $this->actingAs($this->user)->postJson("/api/v1/appointments/{$id}/confirm")->assertOk();
+        $this->actingAs($this->user)->postJson('/api/v1/consultations', $consultation)
+            ->assertCreated()
+            ->assertJsonPath('data.appointment.status', 'completed');
+    }
+
     public function test_a_service_with_appointments_is_not_deleted(): void
     {
         $service = Service::factory()->inWorkspace($this->user->current_workspace_id)->create();

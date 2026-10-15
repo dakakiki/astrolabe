@@ -3,9 +3,11 @@
 namespace App\Actions\Appointments;
 
 use App\Enums\ActivityType;
+use App\Enums\AppointmentActor;
 use App\Enums\AppointmentStatus;
 use App\Enums\BookingSource;
 use App\Enums\LocationType;
+use App\Events\Appointments\AppointmentRescheduled;
 use App\Models\Appointment;
 use App\Models\Client;
 use App\Models\Service;
@@ -29,6 +31,12 @@ use Illuminate\Support\Facades\DB;
  * - Moving an appointment keeps the row and records "moved from X to Y".
  * - A new appointment gets the astrologer's usual reminder unless the request
  *   names one (or none); the reminder moves with it (Appointment::booted).
+ * - A move of an open appointment is announced (AppointmentRescheduled, after
+ *   the commit); the client hears about it only when `$notifyClient` and they
+ *   can use the portal (Phase 9b).
+ * - An existing appointment is read again under a row lock before it is
+ *   changed: the client may have moved or cancelled it in the portal since the
+ *   request read it, and the change applies to the row as it is now.
  */
 class SaveAppointment
 {
@@ -44,10 +52,20 @@ class SaveAppointment
      *
      * @throws OverlappingAppointments
      */
-    public function handle(Appointment $appointment, array $input, bool $allowOverlap = false): Appointment
+    public function handle(Appointment $appointment, array $input, bool $allowOverlap = false, bool $notifyClient = true): Appointment
     {
-        return DB::transaction(function () use ($appointment, $input, $allowOverlap) {
+        return DB::transaction(function () use ($appointment, $input, $allowOverlap, $notifyClient) {
             $creating = ! $appointment->exists;
+
+            if (! $creating) {
+                // The client can move or cancel it in the portal too (Phase 9b): work on the
+                // row as it is now, locked, not as the request read it. The astrologer's
+                // membership row first, in the order the portal takes them, so the two queue
+                // behind each other instead of deadlocking.
+                $this->lockAstrologer($appointment->workspace_id, $appointment->assigned_user_id);
+                $appointment = Appointment::query()->lockForUpdate()->findOrFail($appointment->getKey());
+            }
+
             $previousStart = $appointment->starts_at;
             $previousEnd = $appointment->ends_at;
 
@@ -96,6 +114,12 @@ class SaveAppointment
                     'to_end' => $appointment->ends_at->toIso8601ZuluString(),
                     'timezone' => $appointment->timezone,
                 ], $appointment);
+
+                // Moving what is no longer open (held, missed, cancelled — perhaps by the
+                // client a moment ago) corrects the record; it is no news for anyone.
+                if ($appointment->status->isOpen()) {
+                    AppointmentRescheduled::dispatch($appointment, $previousStart, $previousEnd, AppointmentActor::Practice, $notifyClient);
+                }
             }
 
             $client->touchActivity();
@@ -132,17 +156,15 @@ class SaveAppointment
         if ($status !== AppointmentStatus::Cancelled) {
             $appointment->cancellation_reason = null;
             $appointment->cancelled_at = null;
+            $appointment->cancelled_by = null;
+            $appointment->declined_at = null;
         }
     }
 
     private function guardOverlaps(Appointment $appointment, bool $allowOverlap): void
     {
         // One astrologer at a time: parallel requests for the same person queue here.
-        DB::table('workspace_user')
-            ->where('workspace_id', $appointment->workspace_id ?? $this->current->id())
-            ->where('user_id', $appointment->assigned_user_id)
-            ->lockForUpdate()
-            ->first();
+        $this->lockAstrologer($appointment->workspace_id, $appointment->assigned_user_id);
 
         $overlapping = Appointment::query()
             ->with(['client', 'service', 'assignedUser'])
@@ -155,6 +177,20 @@ class SaveAppointment
         if ($overlapping->isNotEmpty() && ! $allowOverlap) {
             throw new OverlappingAppointments($overlapping);
         }
+    }
+
+    /** The astrologer's membership row in the practice — the lock the portal's booking takes too. */
+    private function lockAstrologer(?int $workspaceId, ?int $userId): void
+    {
+        if ($userId === null) {
+            return;
+        }
+
+        DB::table('workspace_user')
+            ->where('workspace_id', $workspaceId ?? $this->current->id())
+            ->where('user_id', $userId)
+            ->lockForUpdate()
+            ->first();
     }
 
     /** Where a new appointment is held when the form does not say: the service's place, online if it allows both. */

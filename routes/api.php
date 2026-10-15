@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\V1\Admin\AdminSystemController;
 use App\Http\Controllers\Api\V1\AppointmentController;
 use App\Http\Controllers\Api\V1\AstrologyMethodController;
 use App\Http\Controllers\Api\V1\AttachmentController;
+use App\Http\Controllers\Api\V1\AvailabilityController;
+use App\Http\Controllers\Api\V1\BookingPolicyController;
 use App\Http\Controllers\Api\V1\ClientArchiveController;
 use App\Http\Controllers\Api\V1\ClientBirthDetailsController;
 use App\Http\Controllers\Api\V1\ClientChartController;
@@ -208,6 +210,22 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 Route::patch('/appointments/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
                 Route::post('/appointments/{appointment}/cancel', [AppointmentController::class, 'cancel'])
                     ->name('appointments.cancel');
+                // A request booked in the client portal, answered (Phase 9b).
+                Route::post('/appointments/{appointment}/confirm', [AppointmentController::class, 'confirm'])
+                    ->name('appointments.confirm');
+                Route::post('/appointments/{appointment}/decline', [AppointmentController::class, 'decline'])
+                    ->name('appointments.decline');
+
+                // Booking in the client portal (Phase 9b, docs/spec/12): the person's own week and
+                // exceptions (Settings → Availability) and the practice's rules (Settings → Booking).
+                Route::get('/availability', [AvailabilityController::class, 'show'])->name('availability.show');
+                Route::put('/availability', [AvailabilityController::class, 'update'])->name('availability.update');
+                Route::post('/availability/exceptions', [AvailabilityController::class, 'storeException'])
+                    ->name('availability.exceptions.store');
+                Route::delete('/availability/exceptions/{exception}', [AvailabilityController::class, 'destroyException'])
+                    ->name('availability.exceptions.destroy');
+                Route::get('/booking-policy', [BookingPolicyController::class, 'show'])->name('booking-policy.show');
+                Route::put('/booking-policy', [BookingPolicyController::class, 'update'])->name('booking-policy.update');
 
                 Route::apiResource('consultations', ConsultationController::class);
                 Route::post('/consultations/{consultation}/chart', [ConsultationChartController::class, 'store'])

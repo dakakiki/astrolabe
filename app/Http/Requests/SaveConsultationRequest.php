@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\AppointmentStatus;
 use App\Enums\ConsultationStatus;
 use App\Models\Appointment;
 use App\Models\Consultation;
@@ -91,13 +92,17 @@ class SaveConsultationRequest extends FormRequest
                 $validator->errors()->add('service_id', __('consultations.service_inactive'));
             }
         }, function (Validator $validator) {
-            // One consultation per appointment, for the appointment's own client.
+            // One consultation per appointment, for the appointment's own client. A
+            // request booked in the portal (Phase 9b) is answered first: recorded as
+            // held, it would stay open for the client to move or withdraw.
             $appointment = $this->filled('appointment_id') && ! $validator->errors()->hasAny(['appointment_id', 'client_id'])
                 ? Appointment::query()->find($this->input('appointment_id'))
                 : null;
 
             if ($appointment && $appointment->client_id !== (int) $this->input('client_id')) {
                 $validator->errors()->add('appointment_id', __('appointments.other_client'));
+            } elseif ($appointment && $appointment->status === AppointmentStatus::Requested) {
+                $validator->errors()->add('appointment_id', __('appointments.request_first'));
             } elseif ($appointment && $appointment->consultation()->exists()) {
                 $validator->errors()->add('appointment_id', __('appointments.already_recorded'));
             }

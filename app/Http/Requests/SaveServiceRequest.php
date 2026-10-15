@@ -55,6 +55,8 @@ class SaveServiceRequest extends FormRequest
             'location_type' => [...$sometimes, 'required', Rule::enum(LocationType::class)],
             'color' => ['nullable', Rule::enum(ServiceColor::class)],
             'requires_deposit' => ['sometimes', 'boolean'],
+            // Offered for booking in the client portal (Phase 9b); off until the owner says so.
+            'bookable_in_portal' => ['sometimes', 'boolean'],
             'is_active' => ['sometimes', 'boolean'],
 
             'method_ids' => ['sometimes', 'array', 'max:20'],

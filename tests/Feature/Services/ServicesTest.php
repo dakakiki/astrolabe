@@ -128,6 +128,36 @@ class ServicesTest extends TestCase
             ->assertJsonPath('data.currency', 'EUR');
     }
 
+    public function test_a_service_is_bookable_in_the_portal_only_once_switched_on(): void
+    {
+        $id = $this->actingAs($this->owner)->postJson('/api/v1/services', [
+            'name' => 'Natal reading', 'duration_minutes' => 60, 'location_type' => 'online',
+        ])->assertCreated()
+            ->assertJsonPath('data.bookable_in_portal', false)
+            ->json('data.id');
+
+        $this->actingAs($this->owner)->patchJson("/api/v1/services/{$id}", ['bookable_in_portal' => true])
+            ->assertOk()
+            ->assertJsonPath('data.bookable_in_portal', true)
+            ->assertJsonPath('data.name', 'Natal reading');
+        $this->assertTrue(Service::withoutGlobalScopes()->find($id)->bookable_in_portal);
+
+        // Other changes leave it as it is.
+        $this->actingAs($this->owner)->patchJson("/api/v1/services/{$id}", ['duration_minutes' => 90])
+            ->assertJsonPath('data.bookable_in_portal', true);
+        $this->actingAs($this->owner)->getJson('/api/v1/services')->assertJsonPath('data.0.bookable_in_portal', true);
+
+        $this->actingAs($this->owner)->postJson('/api/v1/services', [
+            'name' => 'Horary question', 'duration_minutes' => 30, 'location_type' => 'either', 'bookable_in_portal' => true,
+        ])->assertCreated()->assertJsonPath('data.bookable_in_portal', true);
+
+        $this->actingAs($this->owner)->patchJson("/api/v1/services/{$id}", ['bookable_in_portal' => 'often'])
+            ->assertUnprocessable()->assertJsonValidationErrors('bookable_in_portal');
+        $this->actingAs($this->memberOf($this->owner))->patchJson("/api/v1/services/{$id}", ['bookable_in_portal' => false])
+            ->assertForbidden();
+        $this->assertTrue(Service::withoutGlobalScopes()->find($id)->bookable_in_portal);
+    }
+
     public function test_the_list_shows_active_services_first_and_filters_by_status(): void
     {
         $this->service(['name' => 'Zodiac basics']);

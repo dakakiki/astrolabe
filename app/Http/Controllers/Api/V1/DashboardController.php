@@ -37,6 +37,9 @@ use Illuminate\Support\Facades\Log;
  * clients whose chart cannot be drawn yet, the slow transits on the charts of
  * the clients they see this week, and the practice's money: received this
  * month, outstanding, and the consultations waiting on payment.
+ *
+ * Phase 9b adds `requests`: the viewer's bookings from the client portal that
+ * wait for them to confirm or decline, soonest first.
  */
 class DashboardController extends Controller
 {
@@ -84,6 +87,13 @@ class DashboardController extends Controller
             ->where('starts_at', '<', $horizon->utc())
             ->orderBy('starts_at');
 
+        // Booked in the portal and waiting for the viewer's answer, however far ahead.
+        $requests = $appointments()
+            ->where('status', AppointmentStatus::Requested->value)
+            ->where('starts_at', '>', $now->utc())
+            ->orderBy('starts_at')
+            ->orderBy('id');
+
         $tasks = fn (): Builder => Task::query()
             ->for($user)
             ->with(['client', 'consultation.service']);
@@ -97,6 +107,7 @@ class DashboardController extends Controller
                 'today' => AppointmentResource::collection($todays)->resolve($request),
                 'upcoming' => AppointmentResource::collection((clone $upcoming)->limit(self::LIMIT)->get())->resolve($request),
             ],
+            'requests' => AppointmentResource::collection((clone $requests)->limit(self::LIMIT)->get())->resolve($request),
             'tasks' => [
                 'overdue' => $this->tasks($tasks()->overdue($now), $request),
                 'today' => $this->tasks($tasks()->dueToday($now, $tomorrow), $request),
@@ -141,6 +152,7 @@ class DashboardController extends Controller
             'counts' => [
                 'appointments_today' => $todays->count(),
                 'appointments_upcoming' => $upcoming->count(),
+                'appointments_requested' => $requests->count(),
                 'tasks_open' => $tasks()->open()->count(),
                 'tasks_overdue' => $tasks()->overdue($now)->count(),
                 'tasks_today' => $tasks()->dueToday($now, $tomorrow)->count(),

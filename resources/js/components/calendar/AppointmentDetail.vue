@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 
@@ -8,6 +8,7 @@ import NatalChart from '@/components/NatalChart.vue';
 import PaymentForm from '@/components/PaymentForm.vue';
 import { useLabels } from '@/composables/useLabels';
 import { useMoney } from '@/composables/useMoney';
+import { bookedInPortal, cancellation, isOpen, offersCancelEmail } from '@/lib/calendar';
 import { formatDateTime } from '@/lib/datetime';
 import { formatDate, initials } from '@/lib/format';
 import http from '@/lib/http';
@@ -23,6 +24,13 @@ import { useToastStore } from '@/stores/toast';
  * the client's chart without leaving the calendar, or open the transits for
  * the appointment's time (Phase 7a). Money paid for it before the session — a
  * deposit — is recorded here and moves to the consultation later (Phase 7b).
+ *
+ * What the client booked in the client portal says so, with their message
+ * (plain text, only the astrologer sees it). A booking request holds its time
+ * until it is confirmed or declined here; a decline may carry a message that
+ * goes to the client. When the client uses the portal, cancelling a time still
+ * ahead can email them (docs/spec/12, Phase 9b). Each appointment starts with
+ * empty forms: what was typed for one never carries over to the next.
  */
 const props = defineProps({
     appointmentId: { type: Number, required: true },
@@ -43,15 +51,28 @@ const busy = ref(false);
 const cancelling = ref(false);
 const reason = ref('');
 const reasonError = ref(null);
+const notifyClient = ref(true);
+const declining = ref(false);
+const declineMessage = ref('');
+const declineError = ref(null);
 const statusConflicts = ref([]);
 const chart = ref(null);
 const chartState = ref('idle');
 const depositOpen = ref(false);
+const reasonInput = ref(null);
+const declineInput = ref(null);
 
 async function load() {
     appointment.value = null;
     failed.value = false;
+    // Nothing typed for one appointment may reach another: a decline message goes to the client.
     cancelling.value = false;
+    reason.value = '';
+    reasonError.value = null;
+    notifyClient.value = true;
+    declining.value = false;
+    declineMessage.value = '';
+    declineError.value = null;
     statusConflicts.value = [];
     chart.value = null;
     chartState.value = 'idle';
@@ -67,6 +88,17 @@ async function load() {
 }
 
 watch(() => props.appointmentId, load, { immediate: true });
+
+// The appointment as the server has it now, without blanking the panel.
+async function refresh() {
+    const { data } = await http.get(`/appointments/${props.appointmentId}`);
+    appointment.value = data.data;
+}
+
+// An answer to a change carries the appointment, not always its deposits: keep what it leaves out.
+function applied(item) {
+    appointment.value = { ...appointment.value, ...item };
+}
 
 const zone = computed(() => auth.user?.timezone ?? 'UTC');
 const when = computed(() => {
@@ -100,7 +132,7 @@ async function setStatus(status, allowOverlap = false) {
             status,
             allow_overlap: allowOverlap || undefined,
         });
-        appointment.value = data.data;
+        applied(data.data);
         toast.success(t('appointments.statusChanged'));
         emit('changed', data.data);
     } catch (error) {
@@ -108,6 +140,15 @@ async function setStatus(status, allowOverlap = false) {
         else toast.error(t('errors.generic'));
     } finally {
         busy.value = false;
+    }
+}
+
+async function openCancel() {
+    cancelling.value = !cancelling.value;
+    notifyClient.value = true;
+    if (cancelling.value) {
+        await nextTick();
+        reasonInput.value?.focus();
     }
 }
 
@@ -122,8 +163,10 @@ async function cancel() {
     try {
         const { data } = await http.post(`/appointments/${props.appointmentId}/cancel`, {
             reason: reason.value.trim(),
+            // Only a client who uses the portal, about a time still ahead (Phase 9b): no box, no email.
+            notify_client: offersCancelEmail(appointment.value) && notifyClient.value,
         });
-        appointment.value = data.data;
+        applied(data.data);
         cancelling.value = false;
         reason.value = '';
         toast.success(t('appointments.cancelled'));
@@ -135,6 +178,89 @@ async function cancel() {
         busy.value = false;
     }
 }
+
+// Booking requests from the portal (Phase 9b) -----------------------------------------------
+
+/**
+ * The request was answered or changed meanwhile — in another tab, by a
+ * colleague, or the client cancelled it (409 not_requested): say so and show
+ * the appointment as it is now.
+ */
+async function answeredMeanwhile(error) {
+    if (error.response?.status !== 409) {
+        toast.error(t(error.response?.status === 403 ? 'errors.forbidden' : 'errors.generic'));
+        return;
+    }
+
+    toast.error(error.response.data?.message ?? t('appointments.notRequested'));
+    declining.value = false;
+    try {
+        await refresh();
+        emit('changed', appointment.value);
+    } catch {
+        failed.value = true;
+    }
+}
+
+async function confirmRequest() {
+    busy.value = true;
+    try {
+        const { data } = await http.post(`/appointments/${props.appointmentId}/confirm`);
+        applied(data.data);
+        declining.value = false;
+        toast.success(t('appointments.confirmed'));
+        emit('changed', data.data);
+    } catch (error) {
+        await answeredMeanwhile(error);
+    } finally {
+        busy.value = false;
+    }
+}
+
+async function openDecline() {
+    declining.value = !declining.value;
+    declineError.value = null;
+    if (declining.value) {
+        await nextTick();
+        declineInput.value?.focus();
+    }
+}
+
+async function decline() {
+    declineError.value = null;
+    const message = declineMessage.value.trim();
+
+    busy.value = true;
+    try {
+        // The message is optional and goes to the client with the answer.
+        const { data } = await http.post(
+            `/appointments/${props.appointmentId}/decline`,
+            message ? { reason: message } : {},
+        );
+        applied(data.data);
+        declining.value = false;
+        declineMessage.value = '';
+        toast.success(t('appointments.declined'));
+        emit('changed', data.data);
+    } catch (error) {
+        if (error.response?.status === 422) {
+            declineError.value =
+                error.response.data?.errors?.reason?.[0] ?? error.response.data?.message ?? t('errors.generic');
+        } else {
+            await answeredMeanwhile(error);
+        }
+    } finally {
+        busy.value = false;
+    }
+}
+
+// How a cancelled appointment ended: declined, cancelled by the client in the portal, or by the practice.
+const ended = computed(() => {
+    const result = cancellation(appointment.value);
+    if (!result) return null;
+
+    return { ...result, when: result.at ? formatDateTime(result.at, locale.value, zone.value) : '' };
+});
 
 async function toggleChart() {
     if (chartState.value !== 'idle') {
@@ -175,19 +301,15 @@ const reminder = computed(() => {
     return { text, shifted: state.shifted === true };
 });
 
-// Deposits: what was paid before the session; the service may ask for one.
+// Deposits: what was paid before the session; the service may ask for one, a request included.
 const payments = computed(() => appointment.value?.payments ?? []);
 const depositExpected = computed(
-    () =>
-        appointment.value?.service?.requires_deposit &&
-        appointment.value.status === 'scheduled' &&
-        !payments.value.length,
+    () => appointment.value?.service?.requires_deposit && isOpen(appointment.value) && !payments.value.length,
 );
 
 async function depositSaved() {
     depositOpen.value = false;
-    const { data } = await http.get(`/appointments/${props.appointmentId}`);
-    appointment.value = data.data;
+    await refresh();
 }
 </script>
 
@@ -245,6 +367,16 @@ async function depositSaved() {
                     <dd>{{ appointment.assigned_user.name }}</dd>
                 </template>
 
+                <template v-if="bookedInPortal(appointment)">
+                    <dt>{{ t('appointments.detail.source') }}</dt>
+                    <dd>
+                        {{ t('appointments.detail.sourcePortal') }}
+                        <span v-if="appointment.created_at" class="block text-xs text-ink-3">{{
+                            formatDateTime(appointment.created_at, locale, zone)
+                        }}</span>
+                    </dd>
+                </template>
+
                 <template v-if="reminder">
                     <dt>{{ t('appointments.detail.reminder') }}</dt>
                     <dd>
@@ -256,6 +388,68 @@ async function depositSaved() {
                 </template>
             </dl>
 
+            <!-- What the client wrote when booking: plain text, for the astrologer only, read before answering. -->
+            <div v-if="appointment.client_note" class="field">
+                <div class="label">{{ t('appointments.detail.clientNote') }}</div>
+                <p class="break-words whitespace-pre-line text-ink-2">{{ appointment.client_note }}</p>
+            </div>
+
+            <!-- A booking request from the portal: it waits for an answer and holds its time meanwhile. -->
+            <div v-if="appointment.status === 'requested'" class="notice n-warn">
+                <div class="min-w-0">
+                    <strong>{{ t('appointments.detail.requestedTitle') }}</strong>
+                    {{ t('appointments.detail.requested') }}
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-primary btn-sm" :disabled="busy" @click="confirmRequest">
+                            {{ t('appointments.detail.confirm') }}
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-sm"
+                            :disabled="busy"
+                            :aria-expanded="declining"
+                            @click="openDecline"
+                        >
+                            {{ t('appointments.detail.decline') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <form v-if="declining" novalidate @submit.prevent="decline">
+                <div class="field">
+                    <label class="label" for="decline-message">{{ t('appointments.detail.declineMessage') }}</label>
+                    <textarea
+                        id="decline-message"
+                        ref="declineInput"
+                        v-model="declineMessage"
+                        class="input min-h-16"
+                        rows="3"
+                        maxlength="500"
+                        :aria-invalid="declineError ? 'true' : undefined"
+                        :aria-describedby="declineError ? 'decline-message-error' : 'decline-message-hint'"
+                    />
+                    <div v-if="declineError" id="decline-message-error" class="error" role="alert">
+                        {{ declineError }}
+                    </div>
+                    <div v-else id="decline-message-hint" class="hint">
+                        {{
+                            appointment.client_portal
+                                ? t('appointments.detail.declineHint')
+                                : t('appointments.detail.declineHintNoPortal')
+                        }}
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-danger btn-sm" :disabled="busy">
+                        {{ t('appointments.detail.confirmDecline') }}
+                    </button>
+                    <button type="button" class="btn btn-ghost btn-sm" @click="declining = false">
+                        {{ t('appointments.detail.keepRequest') }}
+                    </button>
+                </div>
+            </form>
+
             <div v-if="overlaps.length && appointment.status !== 'cancelled'" class="notice n-warn" role="status">
                 ⚠
                 {{
@@ -265,21 +459,37 @@ async function depositSaved() {
                 }}
             </div>
 
-            <div v-if="appointment.status === 'cancelled'" class="notice n-neutral">
-                {{
-                    t('appointments.detail.cancelledBecause', {
-                        when: formatDateTime(appointment.cancelled_at, locale, zone),
-                        reason: appointment.cancellation_reason,
-                    })
-                }}
+            <div v-if="ended" class="notice n-neutral">
+                <div class="min-w-0">
+                    <!-- Declined: the message went to the client with the answer. -->
+                    <template v-if="ended.by === 'declined'">
+                        {{ t('appointments.detail.declinedOn', { when: ended.when }) }}
+                        <template v-if="ended.reason">
+                            <strong class="mt-1.5">{{ t('appointments.detail.declineSent') }}</strong>
+                            <span class="block break-words whitespace-pre-line">{{ ended.reason }}</span>
+                        </template>
+                    </template>
+                    <!-- Cancelled by the client in the portal, with their message if they wrote one. -->
+                    <template v-else-if="ended.by === 'client'">
+                        {{ t('appointments.detail.cancelledByClient', { when: ended.when }) }}
+                        <template v-if="ended.reason">
+                            <strong class="mt-1.5">{{ t('appointments.detail.clientReason') }}</strong>
+                            <span class="block break-words whitespace-pre-line">{{ ended.reason }}</span>
+                        </template>
+                    </template>
+                    <template v-else-if="ended.reason">
+                        {{ t('appointments.detail.cancelledBecause', { when: ended.when, reason: ended.reason }) }}
+                    </template>
+                    <template v-else>{{ t('appointments.detail.cancelledOn', { when: ended.when }) }}</template>
+                </div>
             </div>
 
-            <div v-if="appointment.notes">
+            <div v-if="appointment.notes" class="field">
                 <div class="label">{{ t('appointments.detail.notes') }}</div>
-                <p class="whitespace-pre-line text-ink-2">{{ appointment.notes }}</p>
+                <p class="break-words whitespace-pre-line text-ink-2">{{ appointment.notes }}</p>
             </div>
 
-            <div v-if="payments.length || depositExpected">
+            <div v-if="payments.length || depositExpected" class="field">
                 <div class="label">{{ t('appointments.detail.deposits') }}</div>
                 <ul v-if="payments.length" class="text-sm">
                     <li v-for="payment in payments" :key="payment.id" class="flex flex-wrap gap-x-2">
@@ -327,7 +537,7 @@ async function depositSaved() {
                     >{{ t('appointments.detail.openConsultation') }}</RouterLink
                 >
                 <RouterLink
-                    v-else-if="appointment.status !== 'cancelled'"
+                    v-else-if="appointment.status !== 'cancelled' && appointment.status !== 'requested'"
                     :to="{ name: 'consultations.create', query: { appointment: appointment.id } }"
                     class="btn btn-primary btn-sm"
                     >{{ t('appointments.detail.recordConsultation') }}</RouterLink
@@ -356,7 +566,12 @@ async function depositSaved() {
                 >
             </div>
 
-            <div class="flex flex-wrap gap-2 border-t border-line-soft pt-3">
+            <!-- A request is answered above; it is never "scheduled again" from here, and neither
+                 is a declined one: the client was told no, and a new booking is theirs to make. -->
+            <div
+                v-if="appointment.status !== 'requested' && !appointment.declined_at"
+                class="flex flex-wrap gap-2 border-t border-line-soft pt-3"
+            >
                 <template v-if="appointment.status === 'scheduled'">
                     <button type="button" class="btn btn-ghost btn-sm" :disabled="busy" @click="setStatus('completed')">
                         {{ t('appointments.detail.markHeld') }}
@@ -368,7 +583,7 @@ async function depositSaved() {
                         type="button"
                         class="btn btn-ghost btn-sm text-danger"
                         :aria-expanded="cancelling"
-                        @click="cancelling = !cancelling"
+                        @click="openCancel"
                     >
                         {{ t('appointments.detail.cancel') }}
                     </button>
@@ -384,20 +599,35 @@ async function depositSaved() {
                 </button>
             </div>
 
-            <form v-if="cancelling" class="space-y-2" novalidate @submit.prevent="cancel">
-                <label class="label" for="cancel-reason">{{ t('appointments.detail.cancelReason') }}</label>
-                <textarea
-                    id="cancel-reason"
-                    v-model="reason"
-                    class="input min-h-16"
-                    rows="2"
-                    maxlength="500"
-                    :aria-invalid="reasonError ? 'true' : undefined"
-                    aria-describedby="cancel-reason-hint"
-                />
-                <div v-if="reasonError" class="error">{{ reasonError }}</div>
-                <div v-else id="cancel-reason-hint" class="hint">{{ t('appointments.detail.cancelHint') }}</div>
-                <div class="flex gap-2">
+            <form v-if="cancelling" novalidate @submit.prevent="cancel">
+                <div class="field">
+                    <label class="label" for="cancel-reason">{{ t('appointments.detail.cancelReason') }}</label>
+                    <textarea
+                        id="cancel-reason"
+                        ref="reasonInput"
+                        v-model="reason"
+                        class="input min-h-16"
+                        rows="2"
+                        maxlength="500"
+                        :aria-invalid="reasonError ? 'true' : undefined"
+                        :aria-describedby="reasonError ? 'cancel-reason-error' : 'cancel-reason-hint'"
+                    />
+                    <div v-if="reasonError" id="cancel-reason-error" class="error" role="alert">
+                        {{ reasonError }}
+                    </div>
+                    <div v-else id="cancel-reason-hint" class="hint">{{ t('appointments.detail.cancelHint') }}</div>
+                </div>
+                <!-- The client uses the portal and the time is still ahead: they can hear of it (never of the reason). -->
+                <label v-if="offersCancelEmail(appointment)" class="mb-3 flex items-start gap-2 text-sm">
+                    <input v-model="notifyClient" type="checkbox" class="mt-1" aria-describedby="cancel-notify-hint" />
+                    <span>
+                        <span class="block">{{ t('appointments.detail.notifyCancel') }}</span>
+                        <span id="cancel-notify-hint" class="block text-xs text-ink-3">{{
+                            t('appointments.detail.notifyCancelHint')
+                        }}</span>
+                    </span>
+                </label>
+                <div class="flex flex-wrap gap-2">
                     <button type="submit" class="btn btn-danger btn-sm" :disabled="busy">
                         {{ t('appointments.detail.confirmCancel') }}
                     </button>

@@ -17,6 +17,7 @@ use App\Models\Note;
 use App\Models\PortalUser;
 use App\Models\Service;
 use App\Models\User;
+use App\Support\Portal\PortalSessionManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -30,7 +31,7 @@ use Tests\TestCase;
  */
 class PortalOverviewTest extends TestCase
 {
-    use InteractsWithPortal, RefreshDatabase;
+    use BookingFixtures, InteractsWithPortal, RefreshDatabase;
 
     private User $astrologer;
 
@@ -99,7 +100,8 @@ class PortalOverviewTest extends TestCase
             ->assertJsonPath('data.next_appointment.service', 'Natal reading')
             ->assertJsonPath('data.next_appointment.location_details', 'https://meet.example.com/ana')
             ->assertJsonPath('data.upcoming_count', 2)
-            ->assertJsonPath('data.new_shared', 1);
+            ->assertJsonPath('data.new_shared', 1)
+            ->assertJsonPath('data.booking', ['enabled' => false, 'services' => 0]);
 
         // After looking at Shared, nothing is new any more.
         $this->portal('GET', 'shared')->assertOk();
@@ -233,9 +235,26 @@ class PortalOverviewTest extends TestCase
         $this->portal('PUT', 'profile', ['timezone' => 'Mars/Olympus'])->assertUnprocessable();
     }
 
-    /** The lists ask the same number of queries for a few items and for many (Phase 8c, performance). */
+    /**
+     * The lists ask the same number of queries for a few items and for many (Phase 8c,
+     * performance) — requests waiting for the practice, the booking screen and the free
+     * times included, and the booking policy behind "may I still move it" read once per
+     * request (Phase 9b).
+     *
+     * The clock stands still ("last seen" is written once every few minutes) and the
+     * session's garbage collection — a 2 % lottery on every request, one more query when
+     * it wins — is off, so the counts compare like with like every time.
+     */
     public function test_the_lists_do_not_ask_once_per_item(): void
     {
+        $this->freezeTime();
+        config(['session.lottery' => [0, 100]]);
+        $this->app->forgetInstance(PortalSessionManager::class);
+
+        $this->service->forceFill(['bookable_in_portal' => true])->save();
+        $this->bookingPolicy($this->astrologer);
+        $this->workingWeek($this->astrologer, array_fill(1, 7, [['08:00', '20:00']]));
+        $mine = $this->appointment(['starts_at' => now()->addDays(3), 'ends_at' => now()->addDays(3)->addHour()]);
         $this->signInToPortal($this->user);
 
         $add = function (int $count) {
@@ -244,7 +263,13 @@ class PortalOverviewTest extends TestCase
                 Note::factory()->forClient($this->client, $this->astrologer)->create(['visibility' => Visibility::SharedWithClient, 'consultation_id' => $consultation->id]);
                 $this->attachment(['original_name' => "file-{$i}.pdf", 'storage_path' => "x/{$i}.pdf", 'attachable_type' => 'consultation', 'attachable_id' => $consultation->id]);
                 $this->appointment(['starts_at' => now()->addDays($i + 1), 'ends_at' => now()->addDays($i + 1)->addHour()]);
+                $this->appointment([
+                    'starts_at' => now()->addDays($i + 1)->addHours(3),
+                    'ends_at' => now()->addDays($i + 1)->addHours(4),
+                    'status' => AppointmentStatus::Requested,
+                ]);
                 $this->appointment(['starts_at' => now()->subDays($i + 1), 'ends_at' => now()->subDays($i + 1)->addHour()]);
+                Service::factory()->bookable()->inWorkspace($this->astrologer->current_workspace_id)->create();
             }
         };
 
@@ -257,13 +282,25 @@ class PortalOverviewTest extends TestCase
             return count(DB::getQueryLog());
         };
 
+        $paths = [
+            'home',
+            'appointments',
+            'appointments?when=past',
+            'shared',
+            'booking',
+            "booking/slots?service_id={$this->service->id}",
+            "booking/slots?appointment_id={$mine->id}",
+        ];
+
         $add(2);
         // "Last seen" is written once every few minutes; get it out of the way first.
         $this->portal('GET', 'home')->assertOk();
-        $few = array_map($count, ['home', 'appointments', 'appointments?when=past', 'shared']);
+        $few = array_map($count, $paths);
         $add(8);
-        $many = array_map($count, ['home', 'appointments', 'appointments?when=past', 'shared']);
+        $many = array_map($count, $paths);
 
         $this->assertSame($few, $many);
+        // Mine, then two and eight days of a booking and a request each: all ahead.
+        $this->assertSame(21, $this->portal('GET', 'appointments')->json('meta.total'));
     }
 }

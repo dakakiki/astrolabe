@@ -135,7 +135,10 @@ function taskLine(task) {
                         >
                         <span v-else>{{ titleOf(entry) }}</span>
                     </div>
-                    <div v-if="entry.body" class="tl-body line-clamp-3 whitespace-pre-line">{{ entry.body }}</div>
+                    <div v-if="entry.detail" class="tl-body">{{ t(entry.detail[0], entry.detail[1]) }}</div>
+                    <div v-if="entry.body" class="tl-body line-clamp-3 break-words whitespace-pre-line">
+                        {{ entry.body }}
+                    </div>
                     <div v-if="entry.fields?.length" class="tl-body">
                         {{ t('timeline.changed', { fields: fieldList(entry.fields) }) }}
                     </div>
@@ -146,6 +149,9 @@ function taskLine(task) {
                     </div>
                     <div v-if="entry.wasAt" class="tl-body">
                         {{ t('timeline.wasAt', { time: moment(entry.wasAt) }) }}
+                    </div>
+                    <div v-if="entry.at" class="tl-body">
+                        {{ t('timeline.forTime', { time: moment(entry.at) }) }}
                     </div>
                     <div v-if="entry.event.created_by && entry.event.created_by.id !== auth.user?.id" class="tl-body">
                         {{ t('timeline.by', { name: entry.event.created_by.name }) }}

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -16,6 +17,9 @@ use Symfony\Component\HttpFoundation\Response;
  * Only successful responses are remembered, so a request refused for an
  * overlap can be repeated with the same key once the overlap is confirmed.
  * The same key with a different body is a client error (422).
+ *
+ * In the client portal (docs/spec/12, Phase 9b: booking) the key belongs to the
+ * signed-in portal account instead, kept apart from the astrologers' keys.
  */
 class EnsureIdempotency
 {
@@ -24,8 +28,9 @@ class EnsureIdempotency
     public function handle(Request $request, Closure $next): Response
     {
         $key = $request->header('Idempotency-Key');
+        $owner = $key === null ? null : self::owner($request);
 
-        if ($key === null || $request->user() === null) {
+        if ($owner === null) {
             return $next($request);
         }
 
@@ -33,7 +38,7 @@ class EnsureIdempotency
             return response()->json(['message' => __('appointments.idempotency_key_invalid')], 422);
         }
 
-        $cacheKey = 'idempotency:'.$request->user()->getKey().':'.sha1($request->method().' '.$request->path().' '.$key);
+        $cacheKey = 'idempotency:'.$owner.':'.sha1($request->method().' '.$request->path().' '.$key);
         $fingerprint = sha1(json_encode($request->all()) ?: '');
 
         $lock = Cache::lock($cacheKey.':lock', 30);
@@ -67,5 +72,25 @@ class EnsureIdempotency
         } finally {
             $lock->release();
         }
+    }
+
+    /**
+     * Whose keys these are: the signed-in astrologer's in the application; on the
+     * portal's host the portal account's (the portal never signs anyone in on the
+     * default guard). Both are numbered from 1, so a portal account's keys carry
+     * their own prefix and never meet an astrologer's with the same number.
+     * Null when nobody is signed in: then there is nothing to remember.
+     */
+    private static function owner(Request $request): ?string
+    {
+        if ($request->getHost() === config('portal.domain')) {
+            $id = Auth::guard('portal')->id();
+
+            return $id === null ? null : 'portal:'.$id;
+        }
+
+        $id = $request->user()?->getKey();
+
+        return $id === null ? null : (string) $id;
     }
 }

@@ -7,10 +7,14 @@
  * - body: text the astrologer wrote (topics, an excerpt), shown as is
  * - fields: changed field names, each translated under timeline.fields.*
  * - to: where the entry leads — a route, or a tab of the client profile
- * - moved / wasAt: moments (UTC) the component formats in the viewer's zone
+ * - detail: a second line, [key, params] (e.g. that the client booked it in the portal)
+ * - moved / wasAt / at: moments (UTC) the component formats in the viewer's zone
  * - task: the task's deadline, priority and status, worded by the component
  * - money / day: a payment's amount (the component formats it into the title
  *   as `amount`) and the day it arrived, shown instead of a time
+ *
+ * What the client did in the portal says so (Phase 9a, 9b): `source: 'portal'`
+ * on a log entry, `booking_source: 'portal'` on an appointment.
  */
 export function describeEvent(event) {
     const meta = event.metadata ?? {};
@@ -25,28 +29,57 @@ export function describeEvent(event) {
                 body: meta.topics ?? null,
                 to: { name: 'consultations.show', params: { id: event.subject.id } },
             };
-        case 'appointment':
+        case 'appointment': {
+            // Booked by the client in the portal (Phase 9b): a request until it is answered, then
+            // "booked in the portal" while it is ahead; once held or ended, a second line says where it came from.
+            const portal = meta.booking_source === 'portal';
+            const portalTitle = portal && meta.status === 'scheduled';
+
             return {
                 tone: 'appointment',
-                title: [`timeline.appointment.${meta.status}`, { title: meta.service ?? '' }],
+                title: [
+                    portalTitle ? 'timeline.bookedInPortal' : `timeline.appointment.${meta.status}`,
+                    { title: meta.service ?? '' },
+                ],
                 titled: Boolean(meta.service),
+                detail: portal && !portalTitle && meta.status !== 'requested' ? ['timeline.bookedInPortal', {}] : null,
                 // A cancelled appointment is not coming up, even when its time is.
                 cancelled: meta.status === 'cancelled',
                 to: appointmentRoute(event.subject.id),
             };
+        }
         case 'appointment_rescheduled':
             return {
                 tone: 'appointment',
-                title: ['timeline.appointmentMoved', {}],
+                title: [
+                    meta.source === 'portal' ? 'timeline.appointmentMovedByClient' : 'timeline.appointmentMoved',
+                    {},
+                ],
                 moved: { from: meta.from, to: meta.to },
                 to: appointmentRoute(event.subject.id),
             };
         case 'appointment_cancelled':
             return {
                 tone: 'appointment',
-                title: ['timeline.appointmentCancelled', {}],
+                // Declined request: the reason went to the client. Cancelled in the portal: the client's own message.
+                title: [
+                    meta.declined
+                        ? 'timeline.requestDeclined'
+                        : meta.source === 'portal'
+                          ? 'timeline.appointmentCancelledByClient'
+                          : 'timeline.appointmentCancelled',
+                    {},
+                ],
                 body: meta.reason ?? null,
+                detail: meta.declined && meta.reason ? ['timeline.declineSent', {}] : null,
                 wasAt: meta.starts_at ?? null,
+                to: appointmentRoute(event.subject.id),
+            };
+        case 'appointment_confirmed':
+            return {
+                tone: 'appointment',
+                title: ['timeline.appointmentConfirmed', {}],
+                at: meta.starts_at ?? null,
                 to: appointmentRoute(event.subject.id),
             };
         case 'task':

@@ -44,6 +44,19 @@ const routes = [
         component: () => import('@/portal/pages/AppointmentsPage.vue'),
         meta: { practice: true },
     },
+    // Booking (Phase 9b): `section` lights "Appointments" in the navigation.
+    {
+        path: '/book',
+        name: 'book',
+        component: () => import('@/portal/pages/BookPage.vue'),
+        meta: { practice: true, section: 'appointments' },
+    },
+    {
+        path: '/appointments/:id(\\d+)/reschedule',
+        name: 'reschedule',
+        component: () => import('@/portal/pages/ReschedulePage.vue'),
+        meta: { practice: true, section: 'appointments' },
+    },
     {
         path: '/shared',
         name: 'shared',

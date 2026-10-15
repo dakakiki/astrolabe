@@ -6,6 +6,7 @@ import ClientPicker from '@/components/ClientPicker.vue';
 import FormField from '@/components/FormField.vue';
 import { useForm } from '@/composables/useForm';
 import { timeZoneOptions, useLabels } from '@/composables/useLabels';
+import { appointmentPatch, offersMoveEmail } from '@/lib/calendar';
 import { formatDateTime } from '@/lib/datetime';
 import http, { idempotencyKey } from '@/lib/http';
 import { reminderChoices } from '@/lib/notifications';
@@ -17,6 +18,10 @@ import { useToastStore } from '@/stores/toast';
  * transaction; when it finds one (409), the form lists what is in the way and
  * offers to save anyway — overlaps are allowed, but only on purpose. A new
  * booking carries an Idempotency-Key, so a double click books once.
+ *
+ * Moving the appointment of a client who uses the portal can email them the
+ * new time (Phase 9b); the astrologer may leave that out. The client may move
+ * it themselves, so an edit that does not move it leaves its time alone.
  */
 const props = defineProps({
     /** The appointment to change, or null for a new one. */
@@ -66,6 +71,10 @@ const serviceOptions = computed(() =>
     props.services.filter((service) => service.is_active || service.id === form.data.service_id),
 );
 
+// A new time still ahead for a client who uses the portal: they hear of it unless the astrologer says no.
+const notifyClient = ref(true);
+const offerNotify = computed(() => editing.value && offersMoveEmail(props.appointment, form.data));
+
 // A new appointment takes the service's length and place, unless they were set by hand.
 watch(
     () => form.data.service_id,
@@ -102,10 +111,12 @@ async function save(allowOverlap = false) {
                     location_details: data.location_details || null,
                     notes: data.notes || null,
                     allow_overlap: allowOverlap || undefined,
+                    // Only what the form offered: no box, no email.
+                    notify_client: editing.value ? offerNotify.value && notifyClient.value : undefined,
                 };
 
                 return editing.value
-                    ? http.patch(`/appointments/${props.appointment.id}`, payload)
+                    ? http.patch(`/appointments/${props.appointment.id}`, appointmentPatch(props.appointment, payload))
                     : http.post(
                           '/appointments',
                           { ...payload, client_id: client.value?.id ?? null },
@@ -217,6 +228,16 @@ const when = (appointment) =>
                     <option v-for="zone in zones" :key="zone" :value="zone">{{ zone }}</option>
                 </select>
             </FormField>
+
+            <label v-if="offerNotify" class="mb-3 flex items-start gap-2 text-sm">
+                <input v-model="notifyClient" type="checkbox" class="mt-1" aria-describedby="notify-move-hint" />
+                <span>
+                    <span class="block">{{ t('appointments.form.notifyMove') }}</span>
+                    <span id="notify-move-hint" class="block text-xs text-ink-3">{{
+                        t('appointments.form.notifyMoveHint')
+                    }}</span>
+                </span>
+            </label>
 
             <div class="row">
                 <FormField

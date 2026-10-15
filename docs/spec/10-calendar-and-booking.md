@@ -19,6 +19,8 @@ Sekcija „Dostupnost i booking pravila" je najsloženiji deo ovog dokumenta i n
 
 > Status: delovi Faze 6 završeni 24. 9. 2026 (Faza 6b) — prikazi, ručno kreiranje, izmena, pomeranje, otkazivanje uz razlog, statusi, zone i serverska provera preklapanja (upozorenje, vidi „Konflikti“). Pomeranje menja isti termin; „veza sa prethodnim terminom i audit događaj“ je zapis „pomeren sa X na Y“ na vremenskoj liniji klijenta. Prevlačenje termina mišem i filter po astrologu (timovi) dolaze kasnije; tranziti za datum termina u Fazi 7. Faza 7: tranziti za vreme termina (7a), avans za termin (7b) i email podsetnik astrologu (7c, vidi „Notifikacije“) su urađeni.
 
+> **Faza 9b — urađeno 15. 10. 2026** (dokument 12, „Stanje posle 9b“; dokument 02, „Klijentski portal — zakazivanje“): radno vreme po osobi (Settings → Availability: delovi dana po danima u nedelji u zoni osobe, odsustva i dodatno vreme), pravila zakazivanja prakse (Settings → Booking: sve stavke iz „Dostupnost i booking pravila“ osim izbora astrologa), usluge za portal, slobodna vremena (slobodno = (radno vreme − odsustva) + dodatno vreme − termini sa buffer-ima, u okviru najranijeg i najkasnijeg zakazivanja, u koraku od početka svakog dela radnog vremena), rezervacija bez preklapanja (vidi „Konflikti“), ručna potvrda po izboru (status `requested`, „Awaiting confirmation“; „Confirm“ / „Decline“ u kalendaru i na dashboardu), klijentsko pomeranje i otkazivanje u rokovima, mejlovi obema stranama (vidi „Notifikacije“) i termini iz portala u kalendaru sa oznakom izvora. **Izbor astrologa nije urađen:** rezervacije idu vlasniku prakse dok ne dođu timovi (dokument 12, „Kasnije“); članovi već mogu da unesu svoje radno vreme. Klijent u portalu bira uslugu i vreme u svojoj zoni (zona se menja u Profile).
+
 ## Cilj
 
 Kalendar je centralni radni ekran astrologa za pregled prošlih i budućih konsultacija, kreiranje novih termina i svakodnevnu organizaciju. Isti podaci se u klijentskom portalu prikazuju u strogo ograničenom obliku: klijent vidi samo sopstvene termine i dostupne opcije za novo zakazivanje.
@@ -118,6 +120,8 @@ Ako dva klijenta pokušaju da rezervišu isti slot, samo jedan zahtev uspeva. Dr
 > Odluka 24. 9. 2026 (Faza 6b) — **kalendar astrologa:** preklapanje nije strogo zabranjeno, nego upozorenje uz mogućnost čuvanja. Server u transakciji (uz zaključan red članstva astrologa, pa paralelni zahtevi za istog astrologa idu jedan za drugim) pronalazi termine istog astrologa koji se preklapaju i odbija zahtev sa 409 i njihovom listom; isti zahtev sa `allow_overlap: true` čuva termin. Razlog: astrolog ponekad namerno ubacuje kratak poziv u duži blok ili vodi dva klijenta istovremeno. Otkazani termini ne zauzimaju vreme; termini koji se samo dodiruju (10–11 i 11–12) se ne preklapaju. Kreiranje prima `Idempotency-Key`: ponovljen zahtev dobija prvi odgovor umesto drugog termina.
 >
 > Za **portal booking** (Faza 9) pravilo iz ovog odeljka ostaje strogo: klijent ne može da rezerviše zauzeto vreme.
+>
+> Urađeno u Fazi 9b (15. 10. 2026): portal nudi samo slobodna vremena, a rezervacija i pomeranje ih proveravaju ponovo u transakciji, pod istim zaključanim redom članstva astrologa kao kalendar; `allow_overlap` u portalu ne postoji. Zauzeto vreme je 409 `slot_taken` sa novom listom slobodnih vremena, bez razloga i bez tuđih termina. Zauzimaju svi termini osim otkazanih — i zahtevi koji čekaju potvrdu, i termini koje je astrolog sam upisao (uz buffer). Rezervacija, pomeranje i otkazivanje iz portala primaju `Idempotency-Key`. Otkazivanje i pomeranje iz kalendara zaključavaju red termina i ponovo proveravaju status, pa istovremena izmena klijenta i astrologa ne prepisuje jedna drugu. Astrolog u kalendaru i dalje može svesno da sačuva preklapanje (odluka iz 6b).
 
 ## Notifikacije
 
@@ -132,7 +136,13 @@ Događaji kalendara mogu kreirati Notification Center zapis i email/push isporuk
 
 Spoljašnja poruka ostaje generička i privatne detalje učitava tek nakon autentifikacije.
 
-> Faza 7c (implementirano 25. 9. 2026): **podsetnik pred termin**, emailom, astrologu koji vodi termin. Podrazumevano 24 sata ranije (odluka korisnika), po terminu drugo vreme ili bez podsetnika; pomeranje pomera podsetnik, otkazivanje ga zaustavlja; tihi sati astrologa se poštuju (podsetnik ide kada se završe ili, ako termin počinje pre toga, pre nego što počnu). Mejl sadrži dan, vreme i zonu i link ka terminu u kalendaru, bez imena klijenta. Notification Center zapis, push i obaveštenja o pomeranju, otkazivanju, promeni lokacije i portal rezervacijama nisu urađeni: dok termine menja samo astrolog, obaveštenje o sopstvenoj izmeni nema svrhu; dolaze sa timovima i portalom (Faza 9).
+> Faza 7c (implementirano 25. 9. 2026): **podsetnik pred termin**, emailom, astrologu koji vodi termin. Podrazumevano 24 sata ranije (odluka korisnika), po terminu drugo vreme ili bez podsetnika; pomeranje pomera podsetnik, otkazivanje ga zaustavlja; tihi sati astrologa se poštuju (podsetnik ide kada se završe ili, ako termin počinje pre toga, pre nego što počnu). Mejl sadrži dan, vreme i zonu i link ka terminu u kalendaru, bez imena klijenta. Notification Center zapis, push i obaveštenja o pomeranju, otkazivanju, promeni lokacije i portal rezervacijama nisu urađeni u 7c: dok termine menja samo astrolog, obaveštenje o sopstvenoj izmeni nema svrhu. Obaveštenja o portal rezervacijama, potvrdi, pomeranju i otkazivanju urađena su u Fazi 9b (ispod); Notification Center, push (9c) i promena lokacije nisu.
+>
+> Faza 9b (implementirano 15. 10. 2026), samo email:
+>
+> - **astrologu** koji vodi termin, kategorija „New portal booking“ (podrazumevano uključena): nova rezervacija iz portala, zahtev za potvrdu (dugme vodi na termin u kalendaru), pomeranje i otkazivanje od strane klijenta. Bez imena klijenta i njegove poruke. Tihi sati važe: mejl ide kada se završe, najkasnije do početka termina (kod pomeranja do ranijeg od starog i novog početka); zahtev koji je u međuvremenu potvrđen ili odbijen se ne javlja;
+> - **klijentu** sa aktivnim pristupom portalu: rezervisano ili zahtev primljen, potvrđeno, odbijeno (sa porukom prakse), pomereno i otkazano — od strane prakse samo kada astrolog ostavi štikliranu opciju „Email the client“ i samo za termin koji je još pred klijentom, bez internog razloga otkazivanja — i podsetnik 24 h pre zakazanog termina (klijent ga isključuje u Profile). Mejl navodi praksu, uslugu, vreme u zoni klijenta sa nazivom zone i rok za izmene, uz link u portal; tihi sati se na klijenta ne primenjuju;
+> - podsetnik klijentu ide istim obrascem kao podsetnik astrologu: trenutak se planira unapred (`client_remind_at`), a `notifications:send-client-reminders` svakog minuta „uzima“ dospele redove uslovnim upitom (i one bez primaoca), pa se ništa ne šalje dvaput.
 
 ## Mobilni i PWA prikaz
 
@@ -153,11 +163,11 @@ PWA ne kešira događaje kalendara. Bez mreže može prikazati samo aplikacioni 
 
 ### P2 — portal booking
 
-- radno vreme, odsustva, buffer i booking politika;
-- invite-only portal pregled `Upcoming` i `Past`;
-- izbor slobodnog termina;
-- konkurentno bezbedna rezervacija;
-- klijentsko pomeranje i otkazivanje prema pravilima.
+- ~~radno vreme, odsustva, buffer i booking politika~~ — urađeno u Fazi 9b;
+- ~~invite-only portal pregled `Upcoming` i `Past`~~ — urađeno u Fazi 9a;
+- ~~izbor slobodnog termina~~ — urađeno u Fazi 9b;
+- ~~konkurentno bezbedna rezervacija~~ — urađeno u Fazi 9b;
+- ~~klijentsko pomeranje i otkazivanje prema pravilima~~ — urađeno u Fazi 9b.
 
 ### Kasnije
 

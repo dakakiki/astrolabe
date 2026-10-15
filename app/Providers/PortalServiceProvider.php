@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * The client portal (docs/spec/12): the same application on its own host,
@@ -62,7 +63,9 @@ class PortalServiceProvider extends ServiceProvider
     /**
      * docs/spec/12, "Ograničenja". Signing in is limited per address and per IP
      * in the controller (the address is in the body); here the code, accepting
-     * an invitation and the API as a whole.
+     * an invitation, the API as a whole, and booking, moving and cancelling
+     * appointments (Phase 9b) — per portal account, whatever the outcome, so
+     * nobody can probe the calendar by booking in a loop.
      */
     private function limitRequests(): void
     {
@@ -76,5 +79,13 @@ class PortalServiceProvider extends ServiceProvider
 
         RateLimiter::for('portal-invitation', fn (Request $request) => Limit::perMinutes($limit('invitation_per_ip')[1], $limit('invitation_per_ip')[0])
             ->by('portal-invitation:'.$request->ip()));
+
+        RateLimiter::for('portal-booking', fn (Request $request) => Limit::perMinutes($limit('booking_per_account')[1], $limit('booking_per_account')[0])
+            ->by('portal-booking:'.(Auth::guard('portal')->id() ?? $request->ip()))
+            ->response(fn (Request $request, array $headers) => response()->json(
+                ['message' => __('portal.errors.too_many')],
+                Response::HTTP_TOO_MANY_REQUESTS,
+                $headers,
+            )));
     }
 }

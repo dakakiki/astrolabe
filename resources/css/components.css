@@ -1086,6 +1086,25 @@
         text-decoration: line-through;
     }
 
+    /*
+     * A booking request from the portal (Phase 9b): it holds its time but is
+     * not confirmed yet — a warm tint and a dashed edge, the service colour kept.
+     */
+    .cal-ev.is-requested {
+        background: var(--warn-bg);
+        border-top: 1px dashed var(--warn);
+        border-right: 1px dashed var(--warn);
+        border-bottom: 1px dashed var(--warn);
+        border-left-style: dashed;
+    }
+
+    /* The mark of what the client booked in the portal (its meaning is in the label). */
+    .cal-src {
+        color: var(--ink-3);
+        font-weight: 400;
+        margin-right: 3px;
+    }
+
     .cal-ev.is-conflict {
         box-shadow: inset 0 0 0 1px var(--warn);
     }
@@ -1106,7 +1125,7 @@
     }
 
     .cal-now::before {
-        content:;
+        content: '';
         position: absolute;
         left: -4px;
         top: -3px;

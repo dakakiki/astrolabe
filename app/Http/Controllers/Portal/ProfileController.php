@@ -21,6 +21,9 @@ use Illuminate\Validation\Rule;
  * account; the phone number is the client record's in the open practice, so
  * the astrologer has it — the change shows on the client's timeline as the
  * client's own. The email address is the practice's to change.
+ *
+ * The account's reminder a day before each appointment (Phase 9b,
+ * `appointment_reminders`) is switched on and off here, for every practice.
  */
 class ProfileController extends Controller
 {
@@ -36,11 +39,12 @@ class ProfileController extends Controller
             'timezone' => ['nullable', 'timezone:all_with_bc'],
             'locale' => ['nullable', Rule::in(array_keys(config('astrolabe.locales')))],
             'phone' => ['nullable', 'string', 'max:50'],
+            'appointment_reminders' => ['sometimes', 'boolean'],
         ]);
 
         /** @var PortalUser $user */
         $user = Auth::guard('portal')->user();
-        $user->fill(collect($data)->only(['name', 'timezone', 'locale'])->all())->save();
+        $user->fill(collect($data)->only(['name', 'timezone', 'locale', 'appointment_reminders'])->all())->save();
         $fields = array_keys($user->getChanges());
 
         $client = $context->client();
@@ -74,6 +78,7 @@ class ProfileController extends Controller
             'name' => $user->name,
             'timezone' => $user->timezone,
             'locale' => $user->locale,
+            'appointment_reminders' => (bool) $user->appointment_reminders,
             'phone' => $client->phone,
             'country_code' => $client->country_code,
             'practice_timezone' => $context->workspace()->timezone,

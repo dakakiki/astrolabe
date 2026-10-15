@@ -2,19 +2,27 @@
 
 namespace Tests\Feature\DataLifecycle;
 
+use App\Enums\AppointmentActor;
+use App\Enums\AppointmentStatus;
 use App\Enums\AuditEvent;
+use App\Enums\BookingSource;
 use App\Enums\ExportStatus;
 use App\Jobs\BuildPracticeExport;
+use App\Models\Appointment;
 use App\Models\AuditLog;
 use App\Models\Client;
 use App\Models\ClientBirthDetails;
 use App\Models\Consultation;
 use App\Models\Note;
 use App\Models\Payment;
+use App\Models\PortalLoginToken;
+use App\Models\PortalUser;
+use App\Models\Service;
 use App\Models\User;
 use App\Models\WorkspaceExport;
 use App\Notifications\PracticeExportReady;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
@@ -131,6 +139,91 @@ class PracticeExportTest extends TestCase
         $this->assertSame($this->owner->email, $practice['members'][0]['email']);
 
         Notification::assertSentTo($this->owner, PracticeExportReady::class);
+    }
+
+    public function test_the_export_holds_portal_booking_the_rules_and_everyones_availability(): void
+    {
+        $member = $this->memberOf($this->owner);
+        $service = Service::factory()->inWorkspace($this->owner->current_workspace_id)->bookable()->create(['name' => 'Natal reading']);
+        $this->actingAs($this->owner)->putJson('/api/v1/booking-policy', [
+            'enabled' => true, 'requires_confirmation' => true, 'client_cancel_until_hours' => null, 'client_note' => 'Deposit first.',
+        ])->assertOk();
+        $this->actingAs($this->owner)->putJson('/api/v1/availability', [
+            'timezone' => 'Europe/Belgrade',
+            'rules' => [
+                ['weekday' => 1, 'start_time' => '09:00', 'end_time' => '13:00'],
+                ['weekday' => 5, 'start_time' => '20:00', 'end_time' => '24:00'],
+            ],
+        ])->assertOk();
+        $this->actingAs($this->owner)->postJson('/api/v1/availability/exceptions', [
+            'kind' => 'unavailable', 'all_day' => true, 'starts_at' => '2026-12-24', 'ends_at' => '2026-12-26',
+            'timezone' => 'Europe/Belgrade', 'note' => 'Holidays',
+        ])->assertCreated();
+        $this->actingAs($member)->postJson('/api/v1/availability/exceptions', [
+            'kind' => 'available', 'all_day' => false, 'starts_at' => '2026-12-28T18:00', 'ends_at' => '2026-12-28T20:00',
+            'timezone' => 'Europe/London',
+        ])->assertCreated();
+
+        // Booked by the client in the portal, then declined by the practice.
+        $account = PortalUser::factory()->create(['email' => 'ana.portal@example.com']);
+        PortalLoginToken::issue($account, Request::create('/'));
+        $declined = Appointment::factory()->forClient($this->client, $this->owner)->at('2026-12-21 09:00')->create([
+            'service_id' => $service->id,
+            'status' => AppointmentStatus::Cancelled,
+            'booking_source' => BookingSource::Portal,
+            'created_by' => null,
+            'portal_user_id' => $account->id,
+            'client_note' => 'Could we look at my career?',
+            'cancellation_reason' => 'Away that week',
+            'cancelled_at' => '2026-12-01 10:00:00',
+            'cancelled_by' => AppointmentActor::Practice,
+            'declined_at' => '2026-12-01 10:00:00',
+        ]);
+
+        $this->request()->assertCreated();
+        $export = $this->export();
+        $files = $this->unzip($export);
+
+        $appointment = json_decode($files['appointments.json'], true)[0];
+        $this->assertSame($declined->id, $appointment['id']);
+        $this->assertSame('portal', $appointment['booking_source']);
+        $this->assertSame($account->id, $appointment['portal_user_id']);
+        $this->assertSame('Could we look at my career?', $appointment['client_note']);
+        $this->assertSame('practice', $appointment['cancelled_by']);
+        $this->assertSame('2026-12-01T10:00:00Z', $appointment['declined_at']);
+
+        $this->assertTrue(json_decode($files['services.json'], true)[0]['bookable_in_portal']);
+
+        $policy = json_decode($files['practice.json'], true)['booking_policy'];
+        $this->assertTrue($policy['enabled']);
+        $this->assertTrue($policy['requires_confirmation']);
+        $this->assertNull($policy['client_cancel_until_hours']);
+        $this->assertSame(24, $policy['client_reschedule_until_hours']);
+        $this->assertSame(30, $policy['slot_step_minutes']);
+        $this->assertSame('Deposit first.', $policy['client_note']);
+
+        $availability = json_decode($files['availability.json'], true);
+        $this->assertSame([$this->owner->email, $member->email], array_column($availability, 'email'));
+        $this->assertSame('Europe/Belgrade', $availability[0]['timezone']);
+        $this->assertSame([
+            ['weekday' => 1, 'start_time' => '09:00', 'end_time' => '13:00'],
+            ['weekday' => 5, 'start_time' => '20:00', 'end_time' => '24:00'],
+        ], $availability[0]['rules']);
+        $this->assertSame([[
+            'kind' => 'unavailable', 'starts_at' => '2026-12-23T23:00:00Z', 'ends_at' => '2026-12-26T23:00:00Z',
+            'timezone' => 'Europe/Belgrade', 'all_day' => true, 'note' => 'Holidays',
+        ]], $availability[0]['exceptions']);
+        $this->assertSame([], $availability[1]['rules']);
+        $this->assertSame('2026-12-28T18:00:00Z', $availability[1]['exceptions'][0]['starts_at']);
+        $this->assertSame(2, $export->counts['availability']);
+        $this->assertStringContainsString('availability.json', $files['README.txt']);
+        $this->assertStringContainsString('availability.json: 2', $files['README.txt']);
+
+        // The portal account is a number: no address, sign-in token or session goes with it.
+        $everything = implode("\n", array_filter($files, fn (string $name) => str_ends_with($name, '.json'), ARRAY_FILTER_USE_KEY));
+        $this->assertStringNotContainsString('ana.portal@example.com', $everything);
+        $this->assertStringNotContainsString((string) PortalLoginToken::query()->value('token_hash'), $everything);
+        $this->assertStringNotContainsString('token', $files['appointments.json'].$files['availability.json']);
     }
 
     public function test_the_export_holds_only_this_practice_and_no_deleted_rows(): void

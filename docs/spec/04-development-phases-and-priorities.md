@@ -260,6 +260,8 @@ Ova faza se planira detaljno tek nakon bete. Obim se određuje prema tome šta s
 
 > **9a — urađeno 9. 10. 2026:** pozivnica sa profila klijenta, prijava linkom ili kodom, sesije portala odvojene od aplikacije, ekrani Home / Appointments / Shared / Profile / Security, izbor prakse, Settings → Branding (ime, logo, boja sa proverom kontrasta), audit, pravila čuvanja, izvoz. Detalji u dokumentu 12 („Stanje posle 9a“) i dokumentu 02. Sledi **9b — zakazivanje**.
 
+> **9b — urađeno 15. 10. 2026:** zakazivanje u klijentskom portalu — radno vreme, odsustva i dodatno vreme po osobi (Settings → Availability), pravila zakazivanja prakse (Settings → Booking), usluge za portal, slobodna vremena u zoni klijenta, rezervacija bez preklapanja (ponovna provera pod zaključavanjem, 409 sa novim vremenima), ručna potvrda po izboru (`requested`, „Confirm“ / „Decline“ u kalendaru i na dashboardu), pomeranje i otkazivanje u rokovima, mejlovi klijentu (i podsetnik dan ranije) i astrologu („New portal booking“, tihi sati), cena usluge samo informativno. Rezervacije idu vlasniku prakse dok ne dođu timovi. Detalji u dokumentu 12 („Stanje posle 9b“) i dokumentu 02. Sledi **9c — PWA za klijente**.
+
 ## Preporučeni redosled prvog backloga
 
 1. Odluka o licenci i provajderu geokodiranja.

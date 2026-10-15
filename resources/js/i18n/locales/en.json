@@ -178,6 +178,19 @@
             "record": "Record consultation",
             "consultation": "Consultation"
         },
+        "requests": {
+            "title": "Booking requests",
+            "hint": "Booked by clients in the portal and waiting for your answer. Each one holds its time until you confirm or decline it.",
+            "summary": "one booking request waiting | {count} booking requests waiting",
+            "confirm": "Confirm",
+            "decline": "Decline",
+            "open": "Open",
+            "message": "Message to the client (optional)",
+            "messageHint": "Goes to the client with the answer. The time becomes free again.",
+            "send": "Decline request",
+            "keep": "Keep the request",
+            "more": "and {count} more in the calendar"
+        },
         "tasks": {
             "title": "Tasks",
             "all": "All tasks",
@@ -250,6 +263,8 @@
             "chart": "Chart & methods",
             "regional": "Regional",
             "notifications": "Notifications",
+            "availability": "Availability",
+            "booking": "Booking",
             "security": "Security",
             "data": "Your data"
         },
@@ -356,7 +371,7 @@
         },
         "notifications": {
             "title": "Email notifications",
-            "intro": "Emails go to you, never to your clients. Times follow your time zone ({zone}), set under Regional.",
+            "intro": "The emails AstroLabe sends you. Times follow your time zone ({zone}), set under Regional. Clients with portal access get their own emails about their appointments, from the portal.",
             "reminders": "Appointment reminders",
             "remindersHint": "An email before each appointment. Each appointment can have its own time, or none.",
             "reminderMinutes": "Usual reminder",
@@ -364,8 +379,10 @@
             "digest": "Tasks due today",
             "digestHint": "One email in the morning with how many tasks are due that day, if any — tasks marked “Remind me”.",
             "digestTime": "Morning email at",
+            "portalBookings": "New portal booking",
+            "portalBookingsHint": "An email when a client books, moves or cancels an appointment in your client portal, or asks you to confirm a time.",
             "quiet": "Quiet hours",
-            "quietHint": "No email in this stretch. A reminder that falls in it goes out when it ends — or just before it begins, if the appointment starts first.",
+            "quietHint": "No email in this stretch. A reminder or booking email that falls in it goes out when it ends — or just before it begins, if the appointment starts first.",
             "quietFrom": "From",
             "quietTo": "Until",
             "private": "Emails stay generic: the time and a link, never a client’s name or a task title. The details open after you sign in.",
@@ -448,6 +465,123 @@
             "sampleButton": "Accept and continue",
             "poweredBy": "Powered by AstroLabe",
             "darkText": "White text is hard to read on {color}, so portal buttons keep your colour with dark text. Links use a shade that reads well in each theme."
+        },
+        "availability": {
+            "title": "Working hours",
+            "intro": "When clients can book with you in the client portal, on your own clock. A day can have more than one stretch — say 09:00–13:00 and 15:00–19:00.",
+            "timezone": "Time zone",
+            "timezoneHint": "Your hours follow this zone’s clock, also when the clocks change for summer time.",
+            "empty": "No working hours yet. Without them the client portal offers no times to book — switch on the days you work.",
+            "notYours": "For now clients book with {name}. Your own hours count once clients can choose an astrologer.",
+            "off": "Not working",
+            "from": "{day}, from",
+            "until": "{day}, until",
+            "midnight": "Midnight as the end time means the end of that day.",
+            "addHours": "Add hours",
+            "remove": "Remove {from}–{until} on {day}",
+            "copyMonday": "Copy Monday to Tuesday–Friday",
+            "private": "Clients only see free times, never why a time is not offered.",
+            "saved": "Working hours saved",
+            "check": "Some hours need a look — see the marked days.",
+            "errors": {
+                "required": "Enter both times.",
+                "endBeforeStart": "The end must be after the start.",
+                "overlap": "Overlaps other hours on this day.",
+                "tooMany": "At most {max} stretches a day."
+            },
+            "exceptions": {
+                "title": "Time off and extra time",
+                "intro": "Holidays, a day off or an afternoon away — and extra time outside your usual hours.",
+                "planned": "Planned",
+                "empty": "Nothing planned.",
+                "new": "Add time off or extra time",
+                "kind": "Kind",
+                "kinds": {
+                    "unavailable": "Time off",
+                    "available": "Extra time"
+                },
+                "wholeDays": "Whole days",
+                "firstDay": "First day",
+                "lastDay": "Last day",
+                "starts": "From",
+                "ends": "Until",
+                "timezone": "Time zone",
+                "note": "Note",
+                "noteHint": "Only you see it.",
+                "add": "Add",
+                "added": "Added to your availability",
+                "remove": "Remove",
+                "removeLabel": "Remove {kind}: {period}",
+                "confirmRemove": "Remove this from your availability? {kind}: {period}",
+                "removed": "Removed from your availability",
+                "inZone": "{zone} time",
+                "errors": {
+                    "required": "Fill this in.",
+                    "lastBeforeFirst": "The last day cannot be before the first.",
+                    "endBeforeStart": "The end must be after the start.",
+                    "tooLong": "At most 366 days at a time.",
+                    "ended": "This has already ended. Choose a time that is still ahead."
+                }
+            }
+        },
+        "booking": {
+            "title": "Booking in the client portal",
+            "intro": "Clients book the services you choose, in the free times left by your working hours, time off and appointments. Nothing is paid in the portal.",
+            "enabled": "Clients can book in the client portal",
+            "enabledHint": "Only active services marked “Bookable in the client portal” are offered.",
+            "confirm": "Confirm each booking myself",
+            "confirmHint": "A booking arrives as a request. It holds its time until you confirm or decline it in the calendar.",
+            "timesTitle": "Times offered",
+            "minNotice": "Earliest booking",
+            "minNoticeHint": "How soon from now a client can book.",
+            "noticeNone": "No minimum",
+            "noticeAhead": "At least {duration} ahead",
+            "maxDays": "How far ahead",
+            "daysAhead": "Up to 1 day ahead | Up to {count} days ahead",
+            "step": "Start times every",
+            "stepHint": "Counted from the start of each stretch of working hours.",
+            "bufferBefore": "Free time before each appointment",
+            "bufferAfter": "Free time after each appointment",
+            "bufferHint": "Kept free around every appointment when the portal offers times.",
+            "bufferNone": "None",
+            "changesTitle": "Changes by the client",
+            "rescheduleUntil": "Clients may reschedule",
+            "cancelUntil": "Clients may cancel",
+            "changesHint": "After that, the portal asks them to contact you.",
+            "changeNever": "Not in the portal",
+            "changeAnyTime": "Until it starts",
+            "changeBefore": "Up to {duration} before",
+            "clientNote": "Note for clients",
+            "clientNoteHint": "Shown when they book — e.g. deposit or cancellation terms. Plain text.",
+            "saved": "Booking settings saved",
+            "duration": {
+                "minutes": "1 minute | {count} minutes",
+                "hours": "1 hour | {count} hours",
+                "days": "1 day | {count} days",
+                "weeks": "1 week | {count} weeks"
+            },
+            "status": {
+                "title": "Booking at a glance",
+                "astrologer": "Bookings go to",
+                "astrologerHint": "The practice’s owner, until clients can choose an astrologer.",
+                "noAstrologer": "Nobody yet",
+                "services": "Bookable services",
+                "servicesCount": "None | 1 service | {count} services",
+                "chooseServices": "Choose in Services",
+                "hours": "Working hours",
+                "hoursSet": "Set",
+                "hoursMissing": "Not set yet",
+                "editHours": "Open Availability",
+                "portal": "Client portal",
+                "open": "Clients can book now.",
+                "off": "Booking in the portal is off. Clients see their appointments but cannot book.",
+                "incomplete": "Booking is on, but clients cannot book yet:",
+                "missing": {
+                    "astrologer": "nobody receives the bookings.",
+                    "services": "no service is bookable — mark one in Services.",
+                    "hours": "no working hours — they are added under Availability."
+                }
+            }
         }
     },
     "roles": {
@@ -899,7 +1033,8 @@
             "held": "Held",
             "deposit": "Deposit",
             "methods": "Methods",
-            "status": "Status"
+            "status": "Status",
+            "portal": "Portal"
         },
         "active": "Active",
         "inactive": "Inactive",
@@ -932,6 +1067,8 @@
             "depositHint": "A marker for now; payments are recorded in a later version.",
             "active": "Active",
             "activeHint": "Inactive services cannot be chosen for new consultations but stay on past ones.",
+            "bookable": "Bookable in the client portal",
+            "bookableHint": "Clients see its name, description, length and price in the portal and can book it when portal booking is on (Settings → Booking).",
             "create": "Add service",
             "save": "Save service",
             "cancel": "Cancel",
@@ -991,11 +1128,13 @@
         "emptyHint": "Click an empty slot in the day or week view to book one.",
         "more": "+{n} more",
         "conflict": "Overlaps another appointment",
+        "portal": "Booked in the portal",
         "slot": "New appointment on {date} at {time}",
         "minutes": "{n} min",
         "loading": "Loading the calendar…"
     },
     "appointmentStatuses": {
+        "requested": "Awaiting confirmation",
         "scheduled": "Scheduled",
         "completed": "Held",
         "cancelled": "Cancelled",
@@ -1006,6 +1145,9 @@
         "saved": "Appointment saved",
         "cancelled": "Appointment cancelled",
         "statusChanged": "Status changed",
+        "confirmed": "Booking confirmed",
+        "declined": "Request declined",
+        "notRequested": "This request has already been answered.",
         "detail": {
             "title": "Appointment",
             "when": "When",
@@ -1041,7 +1183,26 @@
             "reminderShifted": "Moved out of your quiet hours.",
             "reminderSent": "Sent {at}",
             "reminderPaused": "{lead} · reminders are switched off in Settings",
-            "reminderPassed": "{lead} · that time had already passed"
+            "reminderPassed": "{lead} · that time had already passed",
+            "source": "Booked",
+            "sourcePortal": "By the client, in the portal",
+            "clientNote": "Message from the client",
+            "requestedTitle": "Waiting for your answer",
+            "requested": "The client asked for this time in the portal. It stays held for them until you confirm or decline.",
+            "confirm": "Confirm",
+            "decline": "Decline",
+            "declineMessage": "Message to the client (optional)",
+            "declineHint": "Sent to the client with the answer. The time becomes free again.",
+            "declineHintNoPortal": "The client cannot use the portal at the moment, so no email goes out; the message stays in the history. The time becomes free again.",
+            "confirmDecline": "Decline request",
+            "keepRequest": "Keep the request",
+            "declinedOn": "Declined {when}.",
+            "declineSent": "Message sent to the client",
+            "cancelledByClient": "Cancelled by the client in the portal {when}.",
+            "clientReason": "The client wrote",
+            "cancelledOn": "Cancelled {when}.",
+            "notifyCancel": "Email the client about the cancellation",
+            "notifyCancelHint": "The email gives the day, time and service — never your reason."
         },
         "form": {
             "newTitle": "New appointment",
@@ -1068,7 +1229,9 @@
             "saveAnyway": "Save anyway",
             "reminder": "Reminder",
             "reminderHint": "An email to you before the appointment.",
-            "reminderPaused": "Reminders are switched off in Settings → Notifications."
+            "reminderPaused": "Reminders are switched off in Settings → Notifications.",
+            "notifyMove": "Email the client about the new time",
+            "notifyMoveHint": "The client uses the portal; the email gives the new day and time, never your notes."
         }
     },
     "related": {
@@ -1273,13 +1436,21 @@
             "notes": "notes"
         },
         "appointment": {
+            "requested": "Booking request",
             "scheduled": "Appointment",
             "completed": "Appointment held",
             "cancelled": "Cancelled appointment",
             "no_show": "Missed appointment"
         },
+        "bookedInPortal": "Booked in the client portal",
         "appointmentMoved": "Appointment moved",
+        "appointmentMovedByClient": "Moved by the client in the portal",
         "appointmentCancelled": "Appointment cancelled",
+        "appointmentCancelledByClient": "Cancelled by the client in the portal",
+        "requestDeclined": "Request declined",
+        "declineSent": "Message sent to the client:",
+        "appointmentConfirmed": "Booking request confirmed",
+        "forTime": "For {time}",
         "movedFromTo": "From {from} to {to}",
         "wasAt": "It was set for {time}",
         "task": "Task: {title}",
@@ -1871,7 +2042,10 @@
             "portal_signed_out": "Portal sign-out",
             "portal_sessions_revoked": "Portal: signed out everywhere",
             "portal_file_downloaded": "Portal: file downloaded",
-            "portal_profile_updated": "Portal: profile changed"
+            "portal_profile_updated": "Portal: profile changed",
+            "portal_appointment_booked": "Portal: appointment booked",
+            "portal_appointment_rescheduled": "Portal: appointment moved",
+            "portal_appointment_cancelled": "Portal: appointment cancelled"
         },
         "invitations": {
             "title": "Invitations",

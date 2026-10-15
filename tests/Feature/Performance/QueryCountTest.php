@@ -3,6 +3,7 @@
 namespace Tests\Feature\Performance;
 
 use App\Enums\AppointmentStatus;
+use App\Enums\BookingSource;
 use App\Enums\TimeAccuracy;
 use App\Models\Appointment;
 use App\Models\Client;
@@ -42,7 +43,8 @@ class QueryCountTest extends TestCase
 
     /**
      * Clients, each with birth data, a tag, a held and paid consultation with a
-     * note, an appointment this week and an open task.
+     * note, an appointment this week and an open task; every other one has also
+     * asked for a time in the portal (Phase 9b), so the dashboard lists requests.
      */
     private function addClients(int $count): void
     {
@@ -70,6 +72,14 @@ class QueryCountTest extends TestCase
             Appointment::factory()->forClient($client, $this->owner)->at('2026-10-0'.(8 + $i % 2).' 1'.($i % 10).':00')->create([
                 'service_id' => $service->id, 'status' => AppointmentStatus::Scheduled,
             ]);
+
+            if ($i % 2 === 0) {
+                Appointment::factory()->forClient($client, $this->owner)->at('2026-10-1'.($i % 4).' 08:00')->create([
+                    'service_id' => $service->id, 'status' => AppointmentStatus::Requested,
+                    'booking_source' => BookingSource::Portal, 'client_note' => 'Career questions',
+                ]);
+            }
+
             Task::factory()->forClient($client, $this->owner)->due('2026-10-0'.(6 + $i % 3))->create(['consultation_id' => $consultation->id]);
         }
     }
@@ -89,6 +99,7 @@ class QueryCountTest extends TestCase
             'consultations' => '/api/v1/consultations',
             'owed consultations' => '/api/v1/consultations?billing=owed',
             'calendar' => '/api/v1/appointments?from=2026-10-05&to=2026-10-11',
+            'requests in the calendar' => '/api/v1/appointments?from=2026-10-05&to=2026-10-18&status=requested',
             'tasks' => '/api/v1/tasks',
             'overdue tasks' => '/api/v1/tasks?due=overdue',
             'payments' => '/api/v1/payments',

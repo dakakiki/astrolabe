@@ -42,7 +42,7 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 - `timezone` — IANA, podrazumevano iz browsera pri registraciji
 - `current_workspace_id`, nullable — poslednji korišćeni workspace; samo nagoveštaj, članstvo se uvek ponovo proverava
 - `email_verified_at`
-- `notification_preferences`, JSON, nullable — Settings → Notifications (Faza 7c): `appointment_reminders`, `reminder_minutes`, `task_digest`, `digest_time`, `quiet_hours` (`{start, end}` ili `null`); sačuvane vrednosti se slažu preko podrazumevanih (podsetnik 24 h ranije, jutarnji mejl u 08:00, tihi sati 22:00–08:00), pa `null` znači podrazumevano
+- `notification_preferences`, JSON, nullable — Settings → Notifications (Faza 7c): `appointment_reminders`, `reminder_minutes`, `task_digest`, `digest_time`, od Faze 9b `portal_bookings` („New portal booking“), `quiet_hours` (`{start, end}` ili `null`); sačuvane vrednosti se slažu preko podrazumevanih (podsetnik 24 h ranije, jutarnji mejl u 08:00, mejlovi o rezervacijama iz portala uključeni, tihi sati 22:00–08:00), pa `null` znači podrazumevano
 - `next_digest_at`, nullable — sledeći jutarnji mejl o zadacima, UTC; računa se iz `digest_time` i `timezone` pri svakoj njihovoj promeni i posle slanja; `null` kada je mejl isključen
 - `two_factor_secret`, `two_factor_recovery_codes`, nullable, šifrovani — prijava u dva koraka (Faza 8a); `two_factor_confirmed_at`, nullable — uključena je tek kada je prvi kod potvrđen. Nikada se ne šalju u API odgovorima (`hidden`); API vraća samo `two_factor_enabled`
 - `is_admin`, boolean, podrazumevano `false` — admin nalog operatera (Faza 8c): pravi ga samo `admin:create`, nema praksu, nikad se ne postavlja iz zahteva
@@ -441,7 +441,7 @@ Metode za koje je usluga namenjena; bez njih — bilo koja.
 - timestamps
 - soft deletes
 
-> Faza 6b (implementirano): `created_by` (nullable), `cancellation_reason` i `cancelled_at` (nullable). `starts_at` / `ends_at` su UTC (`datetime`), `timezone` je IANA zona unosa. `status` — `scheduled`, `completed`, `cancelled`, `no_show`; otkazan termin ne zauzima vreme. `location_type` — `online` ili `in_person` (usluga sa `either` prepušta izbor terminu). `service_id` ima strani ključ bez brisanja (usluga u upotrebi se ne briše). Indeksi: `(workspace_id, starts_at)`, `(workspace_id, assigned_user_id, starts_at)`, `(workspace_id, client_id, starts_at)`. Termini se ne brišu kroz aplikaciju (soft delete kolona postoji za pravila čuvanja podataka). Veza sa konsultacijom je `consultations.appointment_id` (najviše jedna konsultacija po terminu, proverava aplikacija pod zaključavanjem reda termina).
+> Faza 6b (implementirano): `created_by` (nullable), `cancellation_reason` i `cancelled_at` (nullable). `starts_at` / `ends_at` su UTC (`datetime`), `timezone` je IANA zona unosa. `status` — `scheduled`, `completed`, `cancelled`, `no_show` (od Faze 9b i `requested` — zahtev iz portala koji čeka potvrdu i zauzima vreme kao zakazan; vidi „Klijentski portal — zakazivanje“); otkazan termin ne zauzima vreme. `location_type` — `online` ili `in_person` (usluga sa `either` prepušta izbor terminu). `service_id` ima strani ključ bez brisanja (usluga u upotrebi se ne briše). Indeksi: `(workspace_id, starts_at)`, `(workspace_id, assigned_user_id, starts_at)`, `(workspace_id, client_id, starts_at)`. Termini se ne brišu kroz aplikaciju (soft delete kolona postoji za pravila čuvanja podataka). Veza sa konsultacijom je `consultations.appointment_id` (najviše jedna konsultacija po terminu, proverava aplikacija pod zaključavanjem reda termina).
 >
 > Faza 7c (implementirano): podsetnik astrologu — `reminder_minutes` (nullable, koliko minuta pre početka; `null` = bez podsetnika; novi termin dobija uobičajeno vreme astrologa), `remind_at` (nullable, UTC trenutak slanja: početak minus `reminder_minutes`, pomeren iz tihih sati astrologa; `null` kada termin nije zakazan, kada astrolog ima isključene podsetnike ili kada je trenutak već prošao) i `reminder_sent_at` (nullable). Pomeranje, promena vremena podsetnika, statusa ili astrologa ponovo računa `remind_at`; novi trenutak znači nov, neposlat podsetnik. Indeks `(reminder_sent_at, remind_at)` bez `workspace_id`, jer scheduler traži dospele podsetnike u svim workspace-ima.
 
@@ -570,7 +570,70 @@ Isti oblik kao Laravel `sessions`; `user_id` je id iz `portal_users` (piše ga `
 - `activity_events`: `client_updated` sa `metadata.source = portal` kada klijent promeni telefon u portalu (`created_by` prazan).
 - Izvoz prakse dobija `portal_access.json` (klijent, adresa, stanje, datumi; bez tokena i sesija).
 
-U 9b: `availability_rules`, `availability_exceptions`, `booking_policies`, `services.bookable_in_portal`, status termina `requested`, `appointments.client_note` i `portal_user_id`; u 9c `portal_push_subscriptions` (dokument 12).
+## Klijentski portal — zakazivanje (Faza 9b, implementirano)
+
+Plan i pravila: dokument 12, „Zakazivanje (9b)“ i „Stanje posle 9b“. Rezervacije iz portala idu vlasniku prakse (jedan astrolog dok ne dođu timovi); radno vreme ipak ima svaka osoba.
+
+### `availability_rules` (tenant)
+
+Nedeljno radno vreme osobe (Settings → Availability), jedan red po delu dana — dan može imati više delova.
+
+| Polje | Napomena |
+|---|---|
+| `user_id` | čije je radno vreme (`cascadeOnDelete`); svako unosi samo svoje |
+| `weekday` | 1–7, ISO (1 = ponedeljak) |
+| `start_time`, `end_time` | vreme na satu (`TIME`, „HH:MM“) u zoni `timezone`; kraj „24:00“ = ponoć na kraju dana. Kraj posle početka, delovi istog dana se ne preklapaju (dodir je dozvoljen), najviše 10 u danu |
+| `timezone` | IANA zona u kojoj je nedelja uneta; „9–17“ ostaje 9–17 i posle promene sata |
+
+Indeks `(workspace_id, user_id, weekday)`. Čuvanje menja celu nedelju osobe odjednom, u transakciji pod zaključanim redom `workspace_user` (isti red zaključava rezervacija), pa provera pred upis nikad ne vidi pola nedelje.
+
+### `availability_exceptions` (tenant)
+
+Odsustvo ili dodatno vreme osobe, preko redovne nedelje.
+
+| Polje | Napomena |
+|---|---|
+| `user_id` | čije je (`cascadeOnDelete`) |
+| `kind` | `unavailable` (odsustvo) ili `available` (dodatno vreme) |
+| `starts_at`, `ends_at` | UTC; ceo dan = od ponoći prvog do ponoći posle poslednjeg dana u zoni unosa; najviše 366 dana; ono što je već prošlo se ne prima |
+| `timezone` | IANA zona unosa |
+| `all_day` | čita se nazad kao dani (poslednji dan uključen) |
+| `note` | nullable, do 500 znakova — interno, klijent je nikad ne vidi |
+
+Indeks `(workspace_id, user_id, ends_at)`. Slobodno vreme = (radno vreme − odsustva) + dodatno vreme − termini, pa dodatno vreme važi i kada se poklapa sa odsustvom. Prošla odsustva se za sada ne brišu (ulaze u izvoz).
+
+### `booking_policies` (tenant, jedan red po praksi)
+
+Pravila zakazivanja u portalu (Settings → Booking, menja vlasnik). Red nastaje pri prvom čuvanju; do tada važe podrazumevane vrednosti (`BookingPolicy::DEFAULTS`). `workspace_id` je jedinstven.
+
+| Polje | Podrazumevano | Napomena |
+|---|---|---|
+| `enabled` | `false` | klijenti mogu da zakazuju u portalu |
+| `min_notice_minutes` | 1.440 | najranije zakazivanje od sada; 0–20.160 |
+| `max_days_ahead` | 60 | najkasnije zakazivanje, u danima; 1–365 |
+| `buffer_before_minutes`, `buffer_after_minutes` | 0, 15 | slobodno vreme oko svakog termina; 0–240 |
+| `slot_step_minutes` | 30 | korak početaka od početka svakog dela radnog vremena; 5, 10, 15, 20, 30, 45, 60, 90 ili 120 |
+| `requires_confirmation` | `false` | rezervacija čeka kao `requested` |
+| `client_reschedule_until_hours`, `client_cancel_until_hours` | 24, 24 | nullable, 0–336; `null` = klijent to ne radi u portalu, 0 = do početka termina |
+| `client_note` | `null` | običan tekst do 2.000 znakova, klijent ga vidi pri zakazivanju |
+
+### Izmene postojećih tabela (9b)
+
+- `services`: `bookable_in_portal` (boolean, podrazumevano `false`) — klijent može da zakaže samo aktivnu uslugu sa ovom oznakom.
+- `appointments`:
+  - status `requested` — zahtev iz portala koji čeka potvrdu astrologa; zauzima vreme kao `scheduled` (u kalendaru i za slobodna vremena portala); prelazi u `scheduled` (potvrda) ili `cancelled` (odbijanje), nikad ručnom izmenom statusa, i iz njega se ne beleži konsultacija;
+  - `booking_source = portal` za termine iz portala; termin čuva zonu klijenta (njegovu zonu ili zonu prakse);
+  - `portal_user_id` (nullable, `nullOnDelete`) — nalog portala koji je rezervisao;
+  - `client_note` (nullable) — poruka klijenta astrologu uz rezervaciju (do 1.000 znakova); vidi je samo astrolog, portal je nikad ne vraća;
+  - `cancelled_by` (nullable) — `practice` ili `client`; `declined_at` (nullable) — odbijen zahtev: tada je `cancellation_reason` poruka za klijenta (može biti prazna). Vraćanje otkazanog termina u drugi status (kalendar) briše oba;
+  - `client_remind_at` (nullable) — UTC trenutak podsetnika klijentu, 24 h pre početka; samo za `scheduled`, ponovo se planira pri pomeranju i promeni statusa, `null` kada je trenutak već prošao; migracija ga je isplanirala i za zakazane termine od pre 9b koji počinju više od 24 h kasnije. `client_reminder_sent_at` (nullable) znači „obrađeno“ — upisuje se i kada mejl nije otišao (klijent nema upotrebljiv pristup portalu ili je isključio podsetnike); nov trenutak ga briše. Indeks `(client_reminder_sent_at, client_remind_at)` bez `workspace_id`, jer `notifications:send-client-reminders` traži dospele u svim praksama.
+- `portal_users`: `appointment_reminders` (boolean, podrazumevano `true`) — Portal → Profile.
+- `users.notification_preferences`: ključ `portal_bookings` (podrazumevano `true`).
+- `audit_logs`: `portal_appointment_booked` (sa statusom `scheduled` / `requested`), `portal_appointment_rescheduled`, `portal_appointment_cancelled` — izvršilac je `portal_user_id`. Izmene pravila zakazivanja su `practice_settings_changed` sa nazivima polja `booking.*` (samo promenjena). Radno vreme i odsustva se ne beleže (lično podešavanje, kao obaveštenja).
+- `activity_events`: nova vrsta zapisa promene `appointment_confirmed` (vreme termina i zona); `appointment_rescheduled` i `appointment_cancelled` nose `metadata.source = portal` kada je to uradio klijent, a odbijen zahtev je `appointment_cancelled` sa `declined: true`; projekcija termina nosi `booking_source`.
+- Izvoz prakse: nov `availability.json` (po osobi koja ima pravila ili izuzetke: ime, adresa, zona, pravila, izuzeci sa beleškom, i prošli), `booking_policy` u `practice.json` (sačuvana pravila ili podrazumevana), nove kolone termina (`portal_user_id`, `client_note`, `cancelled_by`, `declined_at`) i `bookable_in_portal` na uslugama. Brisanje prakse briše `availability_exceptions`, `availability_rules` i `booking_policies` pre naloga.
+
+U 9c: `portal_push_subscriptions` (dokument 12).
 
 ## Obavezna pravila
 

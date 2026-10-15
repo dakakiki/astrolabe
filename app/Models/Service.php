@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 #[Fillable([
     'name', 'description', 'duration_minutes', 'price_amount', 'currency',
-    'location_type', 'color', 'requires_deposit', 'is_active',
+    'location_type', 'color', 'requires_deposit', 'bookable_in_portal', 'is_active',
 ])]
 class Service extends Model
 {
@@ -34,6 +34,7 @@ class Service extends Model
     /** @var array<string, mixed> the column defaults, known before the row is read back */
     protected $attributes = [
         'requires_deposit' => false,
+        'bookable_in_portal' => false,
         'is_active' => true,
     ];
 
@@ -57,6 +58,7 @@ class Service extends Model
             'location_type' => LocationType::class,
             'color' => ServiceColor::class,
             'requires_deposit' => 'boolean',
+            'bookable_in_portal' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

@@ -54,6 +54,15 @@ Klijenti astrologa mogu, uz poziv astrologa, da se prijave u portal prakse (adre
 14. **Rokovi čuvanja portala:** tokeni za prijavu 1 dan, završeni pozivi 30 dana, sesije 30 dana bez aktivnosti, nalog portala bez aktivne veze 30 dana posle poslednjeg opoziva; trajno brisanje klijenta odmah briše i njegov nalog portala ako nema drugih veza. Audit log zadržava radnje klijenta (bez sadržaja) 12 meseci, uz broj naloga, bez adrese.
 15. **Jedan nalog, više praksi:** ista adresa može imati pristup kod više astrologa (svaki je posebno pozvao). Praksa ne vidi da klijent ima pristup kod druge. Da li je ovo „zajednički“ podatak dve prakse (dva rukovaoca) ili naš (obrađivač za obe)?
 
+### Zakazivanje u portalu (Faza 9b, 15. 10. 2026)
+
+Klijent sa pristupom portalu sam zakazuje, pomera i otkazuje termine u okviru pravila prakse; astrolog dobija mejl o tome (bez imena klijenta), a klijent mejlove o svojim terminima i podsetnik dan ranije. Ništa se ne plaća u portalu — cena usluge je samo informacija. Pitanja:
+
+16. **Mejlovi klijentu o terminima:** rezervacija ili „zahtev primljen“, potvrda, odbijanje (sa porukom prakse), pomeranje, otkazivanje i podsetnik dan ranije navode **ime prakse**, uslugu, online / uživo, dan i vreme u zoni klijenta i rok za izmene u portalu; idu samo dok klijent ima aktivan pristup portalu. Da li je sadržaj u redu (nastavak pitanja 13 — veza sa astrologom može biti osetljiva)? Treba li mejl da navede i kontakt podatke prakse (sada ih nema)?
+17. **Poruka klijenta astrologu** (`client_note`, do 1.000 znakova uz rezervaciju) i poruka uz otkazivanje (do 500): slobodan tekst koji klijent sam piše i u koji može upisati zdravstvene ili druge osetljive podatke. Vidi ih samo astrolog (portal ih ne prikazuje ponovo, mejl astrologu ih ne prenosi); čuvaju se uz termin, ulaze u izvoz prakse i brišu se sa klijentom. Da li je ovo podatak o klijentu kao i beleške astrologa (rukovalac astrolog, DPA Prilog 1), i treba li upozorenje uz polje (kao pitanje 3)?
+18. **Podsetnik za termine koje unosi astrolog:** klijent sa pristupom portalu dobija podsetnik 24 h pre i za termine koje je astrolog sam upisao (ne samo za one iz portala); isključuje ga sam u Profile, a astrolog to ne bira. Da li je to u redu kao obrada u ime astrologa (rukovaoca), ili astrolog treba da može da isključi podsetnike za svoju praksu?
+19. **Radno vreme i odsustva članova:** svaka osoba u praksi unosi svoje radno vreme i odsustva sa privatnom beleškom (npr. razlog odsustva). Vidi ih samo ta osoba, ali ulaze u izvoz prakse (sa imenom i adresom osobe) koji preuzima vlasnik, a prošla odsustva se za sada ne brišu. Da li je to u redu za članove tima (podaci o radu druge osobe) i koliki rok čuvanja treba za prošla odsustva?
+
 ## Šta tekst ne sme da sadrži
 
 Ugovor o licenci za Swiss Ephemeris (tačka 9) zabranjuje da se u vezi sa softverom pominju firma nosilac prava i autori biblioteke. Pravni tekstovi zato ne navode biblioteku za proračun. Test `LegalDocumentsTest` proverava da se ta imena ne pojave.

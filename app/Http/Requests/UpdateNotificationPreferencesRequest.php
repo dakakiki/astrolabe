@@ -26,6 +26,7 @@ class UpdateNotificationPreferencesRequest extends FormRequest
             'reminder_minutes' => ['sometimes', 'required', 'integer', Rule::in(NotificationPreferences::REMINDER_CHOICES)],
             'task_digest' => ['sometimes', 'required', 'boolean'],
             'digest_time' => ['sometimes', 'required', 'date_format:H:i'],
+            'portal_bookings' => ['sometimes', 'required', 'boolean'],
             'quiet_hours' => ['sometimes', 'nullable', 'array:start,end'],
             'quiet_hours.start' => ['required_with:quiet_hours', 'date_format:H:i'],
             'quiet_hours.end' => ['required_with:quiet_hours', 'date_format:H:i', 'different:quiet_hours.start'],

@@ -2,12 +2,13 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { groupByDay, wallClock } from '@/lib/calendar';
+import { bookedInPortal, groupByDay, wallClock } from '@/lib/calendar';
 import { serviceEdgeClass } from '@/lib/services';
 
 /**
  * The month view: six weeks from Monday, up to three appointments a day and a
- * count of the rest. A day opens in the day view.
+ * count of the rest. A day opens in the day view. Booking requests and what
+ * was booked in the portal are marked as in the week (Phase 9b).
  */
 const props = defineProps({
     days: { type: Array, required: true },
@@ -44,6 +45,19 @@ const clock = (appointment) => {
     const { minutes } = wallClock(appointment.starts_at, props.timeZone);
     return `${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
 };
+
+// The event shows only the time and the name; a screen reader hears the rest.
+const label = (appointment) =>
+    [
+        clock(appointment),
+        appointment.client?.full_name,
+        appointment.service?.name,
+        appointment.status === 'scheduled' ? null : t(`appointmentStatuses.${appointment.status}`),
+        bookedInPortal(appointment) ? t('calendar.portal') : null,
+        props.conflicts.has(appointment.id) ? t('calendar.conflict') : null,
+    ]
+        .filter(Boolean)
+        .join(', ');
 </script>
 
 <template>
@@ -67,14 +81,21 @@ const clock = (appointment) => {
                     :class="[
                         serviceEdgeClass(appointment.service?.color),
                         {
+                            'is-requested': appointment.status === 'requested',
                             'is-cancelled': appointment.status === 'cancelled',
                             'is-conflict': conflicts.has(appointment.id),
                             'is-selected': selectedId === appointment.id,
                         },
                     ]"
+                    :aria-label="label(appointment)"
+                    :title="label(appointment)"
                     @click="emit('select', appointment)"
                 >
-                    <span class="n">{{ clock(appointment) }} {{ appointment.client?.full_name }}</span>
+                    <span class="n"
+                        >{{ clock(appointment) }}
+                        <span v-if="bookedInPortal(appointment)" class="cal-src" aria-hidden="true">◇</span
+                        >{{ appointment.client?.full_name }}</span
+                    >
                 </button>
                 <button
                     v-if="(byDay[day]?.length ?? 0) > SHOWN"

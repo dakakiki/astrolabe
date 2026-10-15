@@ -1,4 +1,4 @@
-import { toLocalInput } from '@/lib/datetime';
+import { isFuture, toLocalInput } from '@/lib/datetime';
 
 /**
  * Calendar arithmetic (docs/spec/10). Days are keys like "2026-10-05" in the
@@ -11,6 +11,107 @@ export const VIEWS = ['day', 'week', 'month', 'agenda'];
 
 /** How many days the agenda shows from its date. */
 export const AGENDA_DAYS = 30;
+
+/**
+ * Every appointment status, in the order of its life: a booking request from
+ * the portal waits for the astrologer (Phase 9b, docs/spec/12), then it is
+ * scheduled, and ends held, cancelled or missed.
+ */
+export const APPOINTMENT_STATUSES = ['requested', 'scheduled', 'completed', 'cancelled', 'no_show'];
+
+/** Still ahead of the astrologer: scheduled, or a request that holds its time until it is answered. */
+export function isOpen(appointment) {
+    return appointment?.status === 'scheduled' || appointment?.status === 'requested';
+}
+
+/** Booked by the client in the portal (Phase 9b), not entered by the practice. */
+export function bookedInPortal(appointment) {
+    return appointment?.booking_source === 'portal';
+}
+
+/**
+ * Who ended a cancelled appointment, and what its reason is (Phase 9b): the
+ * astrologer declined the client's request (the reason went to the client),
+ * the client cancelled in the portal (the reason is their own message), or
+ * the practice cancelled it (the reason stays internal). Null while it is not
+ * cancelled.
+ */
+export function cancellation(appointment) {
+    if (appointment?.status !== 'cancelled') return null;
+
+    const by = appointment.declined_at ? 'declined' : appointment.cancelled_by === 'client' ? 'client' : 'practice';
+
+    return { by, at: appointment.cancelled_at ?? null, reason: appointment.cancellation_reason || null };
+}
+
+/**
+ * Whether an edit moves an appointment: another local start, zone or length.
+ * `values` are the form's (`starts_at` as "2026-10-05T15:00"); an empty length
+ * keeps the one it has. A move by the practice may be emailed to a client who
+ * uses the portal (Phase 9b).
+ */
+export function movesAppointment(appointment, values) {
+    if (!appointment) return false;
+
+    const minutes = Number(values.duration_minutes) || appointment.duration_minutes;
+
+    return (
+        values.starts_at !== appointment.starts_at_local ||
+        values.timezone !== appointment.timezone ||
+        minutes !== appointment.duration_minutes
+    );
+}
+
+/** The form fields that place an appointment in time. */
+const TIME_FIELDS = ['starts_at', 'timezone', 'duration_minutes'];
+
+/**
+ * What saving an edit sends (PATCH, only the fields sent change): the form's
+ * values, without its time when the edit does not move the appointment. The
+ * form holds the time it was opened with; the client may have moved the
+ * appointment in the portal meanwhile (Phase 9b), and a change to the note or
+ * the link must never put it back.
+ */
+export function appointmentPatch(appointment, values) {
+    if (movesAppointment(appointment, values)) return { ...values };
+
+    return Object.fromEntries(Object.entries(values).filter(([key]) => !TIME_FIELDS.includes(key)));
+}
+
+/** Whether a wall-clock value ("2026-10-20T10:00") in a zone is still ahead of `now`. */
+export function isAhead(local, timeZone, now = new Date()) {
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(local ?? '')) return false;
+
+    try {
+        // Both are wall-clock values in the same zone and format, so they compare as strings.
+        return local.slice(0, 16) > toLocalInput(now, timeZone);
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Whether saving an edit may email the client about the new time (Phase 9b):
+ * the server tells a client who can use the portal of a move only while the
+ * appointment is open and its new start is still ahead, so the form offers it
+ * only then.
+ */
+export function offersMoveEmail(appointment, values, now = new Date()) {
+    return (
+        appointment?.client_portal === true &&
+        isOpen(appointment) &&
+        movesAppointment(appointment, values) &&
+        isAhead(values.starts_at, values.timezone, now)
+    );
+}
+
+/**
+ * Whether cancelling may email the client (Phase 9b): only a client who can use
+ * the portal, and only about an appointment that has not started yet.
+ */
+export function offersCancelEmail(appointment, now = new Date()) {
+    return appointment?.client_portal === true && isFuture(appointment.starts_at, now);
+}
 
 const toDate = (key) => new Date(`${key}T00:00:00Z`);
 const toKey = (date) => date.toISOString().slice(0, 10);
@@ -96,6 +197,21 @@ export function todayIn(timeZone, now = new Date()) {
 }
 
 /**
+ * The calendar query for booking requests beyond a list that shows only the
+ * soonest (Phase 9b): the agenda, requests only, from the day of the last one
+ * listed, so the ones left out — always later — are on the page it opens.
+ */
+export function requestsAgenda(listed, timeZone) {
+    const last = listed.at(-1);
+
+    return {
+        view: 'agenda',
+        status: 'requested',
+        ...(last ? { date: wallClock(last.starts_at, timeZone).date } : {}),
+    };
+}
+
+/**
  * The appointments of one day, placed for a time grid: start and end in
  * minutes from midnight (cut at the day's edges) and a column, so that
  * appointments at the same time stand side by side. `columns` is how many
@@ -151,7 +267,8 @@ export function layoutDay(appointments, dayKey, timeZone) {
 
 /**
  * Ids of appointments that overlap another one of the same astrologer, for the
- * conflict marker. Cancelled appointments free their time and never conflict.
+ * conflict marker. Cancelled appointments free their time and never conflict;
+ * a booking request holds its time like a scheduled one (Phase 9b).
  */
 export function conflictingIds(appointments) {
     const active = appointments.filter((appointment) => appointment.status !== 'cancelled');

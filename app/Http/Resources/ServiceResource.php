@@ -27,6 +27,8 @@ class ServiceResource extends JsonResource
             'location_type' => $this->location_type->value,
             'color' => $this->color?->value,
             'requires_deposit' => $this->requires_deposit,
+            // Clients may book it in the client portal (Phase 9b), while it is also active.
+            'bookable_in_portal' => $this->bookable_in_portal,
             'is_active' => $this->is_active,
             'methods' => $this->whenLoaded('astrologyMethods', fn () => $this->astrologyMethods->map(
                 fn (AstrologyMethod $method) => [

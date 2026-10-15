@@ -8,7 +8,7 @@ AstroLabe — export of the practice ":practice"
 Made on :date (UTC). Format version :version.
 
 What is inside
-  practice.json        the practice's settings, members, methods and tags
+  practice.json        the practice's settings, members, methods, tags and booking rules
   clients.json         clients with their birth data, tags and methods
   related_people.json  partners, children, parents … with their birth data
   relationships.json   links between clients and related people or other clients
@@ -18,6 +18,7 @@ What is inside
   tasks.json           tasks and follow-ups
   payments.json        payments and refunds
   services.json        services and prices
+  availability.json    each member's working hours and time off for booking in the portal
   files.json           files and links; each file is in the files/ folder
   charts.json          calculated charts, as the app drew them
   portal_access.json   clients' access to the client portal (address and dates)

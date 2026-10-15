@@ -24,6 +24,7 @@ class ServiceFactory extends Factory
             'location_type' => LocationType::Online,
             'color' => ServiceColor::Indigo,
             'requires_deposit' => false,
+            'bookable_in_portal' => false,
             'is_active' => true,
         ];
     }
@@ -31,6 +32,12 @@ class ServiceFactory extends Factory
     public function inWorkspace(int $workspaceId): static
     {
         return $this->state(['workspace_id' => $workspaceId]);
+    }
+
+    /** Offered for booking in the client portal (Phase 9b). */
+    public function bookable(): static
+    {
+        return $this->state(['bookable_in_portal' => true]);
     }
 
     public function inactive(): static

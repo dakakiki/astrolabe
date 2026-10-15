@@ -9,7 +9,16 @@ import CalendarAgenda from '@/components/calendar/CalendarAgenda.vue';
 import CalendarGrid from '@/components/calendar/CalendarGrid.vue';
 import CalendarMonth from '@/components/calendar/CalendarMonth.vue';
 import { useLabels } from '@/composables/useLabels';
-import { conflictingIds, daysBetween, shiftDate, todayIn, VIEWS, viewRange, wallClock } from '@/lib/calendar';
+import {
+    APPOINTMENT_STATUSES,
+    conflictingIds,
+    daysBetween,
+    shiftDate,
+    todayIn,
+    VIEWS,
+    viewRange,
+    wallClock,
+} from '@/lib/calendar';
 import http from '@/lib/http';
 import { useAuthStore } from '@/stores/auth';
 
@@ -18,7 +27,8 @@ import { useAuthStore } from '@/stores/auth';
  * the same appointments, in the astrologer's own zone. View, date, filters and
  * the open appointment live in the URL, so a timeline entry can link straight
  * to an appointment and the back button works. The agenda is the default on a
- * phone.
+ * phone. Booking requests from the client portal (Phase 9b) hold their time,
+ * show as awaiting confirmation and are answered in the side panel.
  */
 const { t, locale } = useI18n();
 const labels = useLabels();
@@ -231,7 +241,7 @@ onBeforeUnmount(() => clearInterval(clock));
             ›
         </button>
         <input
-            class="input w-auto"
+            class="input w-auto max-w-full"
             type="date"
             :value="date"
             :aria-label="t('calendar.date')"
@@ -239,7 +249,7 @@ onBeforeUnmount(() => clearInterval(clock));
         />
         <select
             v-if="services.length"
-            class="input w-auto"
+            class="input w-auto max-w-full"
             :aria-label="t('calendar.filters.service')"
             :value="filters.service_id"
             @change="go({ service_id: $event.target.value || undefined })"
@@ -250,18 +260,18 @@ onBeforeUnmount(() => clearInterval(clock));
             </option>
         </select>
         <select
-            class="input w-auto"
+            class="input w-auto max-w-full"
             :aria-label="t('calendar.filters.status')"
             :value="filters.status"
             @change="go({ status: $event.target.value || undefined })"
         >
             <option value="">{{ t('calendar.filters.anyStatus') }}</option>
-            <option v-for="status in ['scheduled', 'completed', 'cancelled', 'no_show']" :key="status" :value="status">
+            <option v-for="status in APPOINTMENT_STATUSES" :key="status" :value="status">
                 {{ t(`appointmentStatuses.${status}`) }}
             </option>
         </select>
         <select
-            class="input w-auto"
+            class="input w-auto max-w-full"
             :aria-label="t('calendar.filters.place')"
             :value="filters.location_type"
             @change="go({ location_type: $event.target.value || undefined })"
@@ -285,8 +295,10 @@ onBeforeUnmount(() => clearInterval(clock));
                 @saved="saved"
                 @cancel="closeForm"
             />
+            <!-- A fresh panel for each appointment: nothing typed for one carries over to another. -->
             <AppointmentDetail
                 v-else-if="selectedId"
+                :key="selectedId"
                 :appointment-id="selectedId"
                 :overlaps="overlaps"
                 @edit="edit"

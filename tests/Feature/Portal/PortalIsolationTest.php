@@ -2,17 +2,22 @@
 
 namespace Tests\Feature\Portal;
 
+use App\Enums\AppointmentStatus;
 use App\Enums\AttachmentKind;
+use App\Enums\AuditEvent;
 use App\Enums\ClientStatus;
 use App\Enums\Visibility;
 use App\Models\Appointment;
 use App\Models\Attachment;
+use App\Models\AuditLog;
 use App\Models\Client;
 use App\Models\Note;
 use App\Models\PortalUser;
+use App\Models\Service;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Tests\Concerns\InteractsWithPortal;
 use Tests\TestCase;
@@ -26,7 +31,7 @@ use Tests\TestCase;
  */
 class PortalIsolationTest extends TestCase
 {
-    use InteractsWithPortal, RefreshDatabase;
+    use BookingFixtures, InteractsWithPortal, RefreshDatabase;
 
     private User $vega;
 
@@ -118,6 +123,50 @@ class PortalIsolationTest extends TestCase
         $this->assertStringNotContainsString('Other Practice', $this->portal('GET', 'session')->getContent());
     }
 
+    /** Booking (Phase 9b): no id from the request opens another client's appointment or another practice's service. */
+    public function test_booking_opens_only_the_clients_own_appointments_and_their_practices_services(): void
+    {
+        Notification::fake();
+        $other = User::factory()->withWorkspace(['name' => 'Other Practice'])->create();
+        $carla = Client::factory()->inWorkspace($other->current_workspace_id)->create(['first_name' => 'Carla', 'email' => 'carla@example.com']);
+        $carlaItems = $this->sharedItemsFor($carla, $other);
+        $ours = Service::factory()->bookable()->inWorkspace($this->vega->current_workspace_id)->create(['name' => 'Natal reading']);
+        $theirs = Service::factory()->bookable()->inWorkspace($other->current_workspace_id)->create(['name' => 'Their reading']);
+        foreach ([$this->vega, $other] as $owner) {
+            $this->bookingPolicy($owner);
+            $this->workingWeek($owner, array_fill(1, 7, [['00:00', '24:00']]));
+        }
+        $others = [$this->borisItems['appointment'], $carlaItems['appointment']];
+        $before = Appointment::withoutGlobalScopes()->whereKey($others)->orderBy('id')->get()->toArray();
+        $start = now()->addDays(5)->startOfDay()->utc()->format('Y-m-d\TH:i:s\Z');
+
+        $this->signInToPortal($this->user);
+
+        foreach ($others as $id) {
+            $this->portal('GET', "booking/slots?appointment_id={$id}")->assertNotFound();
+            $this->portal('POST', "appointments/{$id}/reschedule", ['starts_at' => $start])->assertNotFound();
+            $this->portal('POST', "appointments/{$id}/cancel", ['reason' => 'Not mine'])->assertNotFound();
+        }
+        $this->portal('GET', "booking/slots?service_id={$theirs->id}")->assertNotFound();
+        $this->portal('POST', 'appointments', ['service_id' => $theirs->id, 'starts_at' => $start])->assertNotFound();
+
+        // Nothing of theirs changed; the booking screen lists this practice's service only.
+        $this->assertSame($before, Appointment::withoutGlobalScopes()->whereKey($others)->orderBy('id')->get()->toArray());
+        $this->assertSame(0, Appointment::withoutGlobalScopes()->where('client_id', $this->ana->id)->count());
+        $this->assertSame(0, AuditLog::query()->whereIn('event', [
+            AuditEvent::PortalAppointmentBooked, AuditEvent::PortalAppointmentRescheduled, AuditEvent::PortalAppointmentCancelled,
+        ])->count());
+        $booking = $this->portal('GET', 'booking')->assertOk();
+        $this->assertSame(['Natal reading'], array_column($booking->json('data.services'), 'name'));
+        $this->assertStringNotContainsString('Their reading', $booking->getContent());
+
+        // The client's own practice and service do open.
+        $slots = $this->portal('GET', "booking/slots?service_id={$ours->id}")->assertOk();
+        $this->portal('POST', 'appointments', ['service_id' => $ours->id, 'starts_at' => $start])->assertCreated();
+        $this->assertSame(AppointmentStatus::Scheduled, Appointment::withoutGlobalScopes()->where('client_id', $this->ana->id)->sole()->status);
+        $this->assertStringNotContainsString('Room of', $slots->getContent());
+    }
+
     public function test_revoking_closes_the_portal_from_the_next_request(): void
     {
         $this->signInToPortal($this->user);
@@ -125,9 +174,12 @@ class PortalIsolationTest extends TestCase
 
         $this->actingAs($this->vega)->deleteJson("/api/v1/clients/{$this->ana->id}/portal")->assertOk();
 
-        foreach (['home', 'appointments', 'shared', 'profile'] as $screen) {
+        foreach (['home', 'appointments', 'shared', 'profile', 'booking'] as $screen) {
             $this->portal('GET', $screen)->assertForbidden()->assertJsonPath('code', 'portal_no_access');
         }
+        $this->portal('POST', 'appointments', ['service_id' => 1, 'starts_at' => '2026-12-01T09:00:00Z'])
+            ->assertForbidden()
+            ->assertJsonPath('code', 'portal_no_access');
         $this->portal('GET', 'session')->assertJsonPath('data.state', 'no_access')->assertJsonPath('data.practices', []);
     }
 

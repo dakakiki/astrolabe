@@ -24,18 +24,25 @@ use Illuminate\Notifications\Notifiable;
  *
  * @property CarbonImmutable|null $email_verified_at
  * @property CarbonImmutable|null $last_signed_in_at
+ * @property bool $appointment_reminders an email a day before each appointment (Phase 9b, Profile)
  */
-#[Fillable(['name', 'locale', 'timezone'])]
+#[Fillable(['name', 'locale', 'timezone', 'appointment_reminders'])]
 class PortalUser extends Model implements AuthenticatableContract, HasLocalePreference
 {
     /** @use HasFactory<PortalUserFactory> */
     use Authenticatable, HasFactory, Notifiable;
+
+    /** @var array<string, mixed> the column defaults, known before the row is read back */
+    protected $attributes = [
+        'appointment_reminders' => true,
+    ];
 
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'immutable_datetime',
             'last_signed_in_at' => 'immutable_datetime',
+            'appointment_reminders' => 'boolean',
         ];
     }
 

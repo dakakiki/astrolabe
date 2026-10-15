@@ -16,7 +16,9 @@ import { useToastStore } from '@/stores/toast';
  * The practice's services (docs/spec/02, "Usluge"): what is offered, how long
  * it takes, what it costs and where it is held. Everyone sees them; the owner
  * adds and edits them in a form above the list. A service in use is
- * deactivated, not deleted, so past consultations keep it.
+ * deactivated, not deleted, so past consultations keep it. Clients book only
+ * the active services marked "Bookable in the client portal" (Phase 9b,
+ * docs/spec/12), and only while portal booking is on in Settings → Booking.
  */
 const { t, locale } = useI18n();
 const labels = useLabels();
@@ -41,6 +43,7 @@ const blank = () => ({
     color: 'indigo',
     requires_deposit: false,
     is_active: true,
+    bookable_in_portal: false,
     method_ids: [],
 });
 const form = useForm(blank());
@@ -83,6 +86,7 @@ async function open(service = null) {
                   color: service.color,
                   requires_deposit: service.requires_deposit,
                   is_active: service.is_active,
+                  bookable_in_portal: Boolean(service.bookable_in_portal),
                   method_ids: (service.methods ?? []).map((method) => method.id),
               }
             : blank(),
@@ -119,6 +123,7 @@ async function save() {
                 color: data.color,
                 requires_deposit: data.requires_deposit,
                 is_active: data.is_active,
+                bookable_in_portal: data.bookable_in_portal,
                 method_ids: data.method_ids,
             };
 
@@ -318,6 +323,16 @@ async function remove() {
                         <span class="block text-xs text-ink-3">{{ t('services.form.activeHint') }}</span>
                     </span>
                 </label>
+                <label class="flex items-start gap-2">
+                    <input v-model="form.data.bookable_in_portal" type="checkbox" class="mt-1" />
+                    <span>
+                        <span class="block font-medium">{{ t('services.form.bookable') }}</span>
+                        <span class="block text-xs text-ink-3">{{ t('services.form.bookableHint') }}</span>
+                    </span>
+                </label>
+            </div>
+            <div v-if="form.errors.value.bookable_in_portal" class="mt-1 text-xs text-danger">
+                {{ form.errors.value.bookable_in_portal }}
             </div>
 
             <div class="mt-5 flex flex-wrap items-center gap-2">
@@ -400,8 +415,18 @@ async function remove() {
                             </div>
                         </td>
                         <td>
-                            <span v-if="service.is_active" class="badge b-ok">{{ t('services.active') }}</span>
-                            <span v-else class="badge">{{ t('services.inactive') }}</span>
+                            <div class="flex flex-wrap gap-1">
+                                <span v-if="service.is_active" class="badge b-ok">{{ t('services.active') }}</span>
+                                <span v-else class="badge">{{ t('services.inactive') }}</span>
+                                <span
+                                    v-if="service.bookable_in_portal"
+                                    class="badge b-info"
+                                    :title="t('services.form.bookable')"
+                                >
+                                    {{ t('services.columns.portal') }}
+                                    <span class="sr-only">— {{ t('services.form.bookable') }}</span>
+                                </span>
+                            </div>
                         </td>
                         <td v-if="auth.isOwner" class="text-right">
                             <button type="button" class="btn btn-sm" @click.stop="open(service)">

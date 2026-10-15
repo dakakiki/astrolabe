@@ -5,6 +5,7 @@ namespace Tests\Feature\Dashboard;
 use App\Astrology\Contracts\EphemerisEngine;
 use App\Astrology\Support\JulianDay;
 use App\Enums\AppointmentStatus;
+use App\Enums\BookingSource;
 use App\Enums\CelestialBody;
 use App\Enums\ClientStatus;
 use App\Models\Appointment;
@@ -68,6 +69,31 @@ class DashboardTest extends TestCase
         $this->assertSame([$tomorrow->id, $nextMonday->id], array_column($response->json('data.appointments.upcoming'), 'id'));
         $response->assertJsonPath('data.appointments.today.1.client.full_name', 'Ana Marković');
         $response->assertJsonMissingPath('data.appointments.today.0.notes');
+    }
+
+    public function test_the_viewers_portal_requests_waiting_for_an_answer(): void
+    {
+        $requested = ['status' => AppointmentStatus::Requested, 'booking_source' => BookingSource::Portal, 'client_note' => 'Career'];
+        $later = $this->appointment('2026-11-20 09:00', $requested);
+        $soon = $this->appointment('2026-10-06 09:00', $requested);
+        $this->appointment('2026-10-05 08:00', $requested); // already begun
+        $this->appointment('2026-10-07 09:00', $requested, $this->memberOf($this->user));
+        $this->appointment('2026-10-08 09:00', ['booking_source' => BookingSource::Portal]);
+        $this->appointment('2026-10-09 09:00', [
+            'status' => AppointmentStatus::Cancelled, 'declined_at' => now(), 'booking_source' => BookingSource::Portal,
+        ]);
+
+        $response = $this->actingAs($this->user)->getJson('/api/v1/dashboard')->assertOk();
+
+        // The viewer's own, still ahead, soonest first — however far ahead.
+        $this->assertSame([$soon->id, $later->id], array_column($response->json('data.requests'), 'id'));
+        $response->assertJsonPath('data.counts.appointments_requested', 2)
+            ->assertJsonPath('data.requests.0.status', 'requested')
+            ->assertJsonPath('data.requests.0.booking_source', 'portal')
+            ->assertJsonPath('data.requests.0.client.full_name', 'Ana Marković')
+            ->assertJsonMissingPath('data.requests.0.client_note')
+            // A request is not a scheduled appointment: the week ahead lists only those.
+            ->assertJsonPath('data.counts.appointments_upcoming', 1);
     }
 
     public function test_the_viewers_overdue_todays_and_upcoming_tasks(): void

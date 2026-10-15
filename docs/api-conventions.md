@@ -240,6 +240,70 @@ Pravila koja važe za sve tri:
 - Liste konsultacija ne vraćaju `internal_notes`, `client_summary` ni `next_steps` — samo pojedinačna konsultacija.
 - `download_url` u odgovoru je relativna putanja do autorizovane rute; disk, putanja u storage-u i checksum nikada ne napuštaju server.
 
+### Klijentski portal i zakazivanje — strana astrologa (Faze 9a–9b)
+
+| Metoda | Putanja | Namena |
+|---|---|---|
+| GET | `/clients/{id}/portal` | kartica „Client portal“ (9a): `status` (`none`, `invited`, `active`, `revoked`), `paused` (aktivan pristup arhiviranog klijenta), `email` (adresa poziva), `account_email`, `invited_at`, `invitation` (`sent_at`, `expires_at`, `expired` ili `null`), `accepted_at`, `last_seen_at`, `revoked_at`, `client_email`, `can_invite`, `portal_url` |
+| POST | `/clients/{id}/portal/invitation` | poziv ili ponovni poziv na e-mail klijenta (nov link poništava stari); 30 na sat; isti oblik odgovora |
+| DELETE | `/clients/{id}/portal` | povlačenje poziva ili opoziv pristupa; isti oblik odgovora |
+| GET / POST / DELETE | `/workspace/logo` | logo prakse za portal (9a): slika (svi članovi) / `logo` multipart, PNG, WebP ili SVG do 1 MB, 20 na sat (vlasnik) / uklanjanje (vlasnik); POST i DELETE vraćaju workspace. Ime za klijente i boja su `display_name` i `brand_color` u `PATCH /workspace` |
+| GET / PUT | `/availability` | sopstveno radno vreme (9b, svako svoje) |
+| POST | `/availability/exceptions` | novo odsustvo ili dodatno vreme; **201** |
+| DELETE | `/availability/exceptions/{id}` | uklanjanje sopstvenog; **204**; tuđe (drugi član, druga praksa) je 404 |
+| GET / PUT | `/booking-policy` | pravila zakazivanja prakse; GET svi članovi, PUT samo vlasnik (član 403) |
+| POST | `/appointments/{id}/confirm` | potvrda zahteva iz portala → `scheduled`; termin kao `GET /appointments/{id}` |
+| POST | `/appointments/{id}/decline` | odbijanje zahteva, opciono `reason` (do 500, poruka za klijenta) → `cancelled` sa `declined_at`; termin kao `GET /appointments/{id}` |
+
+Pravila (9b):
+
+- **`GET /availability`:** `timezone` (zona pravila, inače zona korisnika), `rules` (`weekday` 1–7 po ISO, `start_time` / `end_time` kao „HH:MM“, kraj „24:00“ = ponoć; po danu i početku), `exceptions` koje se još nisu završile, najranije prve: `id`, `kind` (`unavailable` / `available`), `starts_at` / `ends_at` (UTC), `timezone`, `all_day`, `note`, `starts_local` / `ends_local` (kako je uneto: „YYYY-MM-DD“ za cele dane — poslednji dan uključen — inače „YYYY-MM-DDTHH:MM“).
+- **`PUT /availability`** `{timezone, rules: [{weekday, start_time, end_time}]}` zamenjuje celu nedelju (transakcija pod zaključanim redom `workspace_user`, isto kao rezervacija); `rules: []` briše nedelju. Kraj posle početka, delovi istog dana se ne preklapaju (dodir je dozvoljen), najviše 10 po danu. Greške po delu su na `rules.{i}.start_time` / `rules.{i}.end_time` (preklapanje na početku kasnijeg dela), previše delova u danu na `rules`. Vraća oblik kao GET. Ne beleži se u audit.
+- **`POST /availability/exceptions`** `{kind, all_day, starts_at, ends_at, timezone, note}`: uz `all_day: true` datumi „YYYY-MM-DD“ (prvi i poslednji dan, uključeno; čuva se od ponoći prvog do ponoći posle poslednjeg dana u toj zoni), inače lokalno „YYYY-MM-DDTHH:MM“. Kraj posle početka, najviše 366 dana, `note` do 500; ono što je već prošlo se odbija (422).
+- **`/booking-policy`:** `enabled`, `min_notice_minutes` (0–20.160), `max_days_ahead` (1–365), `buffer_before_minutes` / `buffer_after_minutes` (0–240), `slot_step_minutes` (5, 10, 15, 20, 30, 45, 60, 90, 120), `requires_confirmation`, `client_reschedule_until_hours` / `client_cancel_until_hours` (`null` = ne u portalu, ili 0–336), `client_note` (običan tekst do 2.000); uz to samo za čitanje `astrologer` (`{id, name}` — vlasnik prakse, ili `null`), `bookable_services` (broj aktivnih usluga za portal), `has_availability` (astrolog ima radno vreme ili dodatno vreme koje predstoji) i `portal_url`. Bez sačuvanog reda vraća podrazumevane vrednosti. PUT menja samo poslata polja i uvek vraća **200** (i kada prvi put pravi red); audit `practice_settings_changed` sa nazivima promenjenih polja `booking.*`.
+- **Zahtev (`requested`):** `confirm` i `decline` na terminu koji nije zahtev daju **409** `not_requested`. `PATCH` sa `status` na zahtevu je **422** („A booking request is confirmed or declined first.“), a `POST /cancel` na zahtevu **422** („A booking request is declined, not cancelled.“); pomeranje zahteva i izmena beleški rade. Konsultacija se iz zahteva ne beleži dok ne bude potvrđen. Filter kalendara `status` prima i `requested`.
+- **`notify_client`** (bool, podrazumevano `true`) na `PATCH /appointments/{id}` (pomeranje) i `POST /appointments/{id}/cancel`: da li klijent sa pristupom portalu dobija mejl. Mejl ide samo za otvoren termin koji je još pred klijentom; razlog otkazivanja prakse nikad. Otkazivanje i pomeranje zaključavaju red termina i ponovo proveravaju status; izmena beleški ili mesta ne treba da šalje vreme termina.
+- **Termin** u odgovoru nosi i `booking_source` (`manual`, `portal` …), `cancelled_by` (`practice`, `client` ili `null`) i `declined_at`; samo pojedinačan termin (`GET /appointments/{id}` i odgovori na izmene) i `client_note` (poruka klijenta iz portala) i `client_portal` (bool — klijent sada može da koristi portal, pa mejl ima kome da ode). Liste kalendara ih nemaju.
+- **`/dashboard`** nosi i `requests` (zahtevi korisnika koji počinju posle sada, najbliži prvi, najviše 8; nisu u `appointments.upcoming`) i `counts.appointments_requested`.
+- **Usluga** prima i vraća `bookable_in_portal` (bool, podrazumevano `false`).
+- **`PUT /notification-preferences`** prima i `portal_bookings` (bool, podrazumevano `true`).
+- **Izvoz prakse:** `availability.json` (po osobi: `name`, `email`, `timezone`, `rules`, `exceptions` sa beleškom, i prošli), `booking_policy` u `practice.json`, termini sa `portal_user_id`, `client_note`, `cancelled_by`, `declined_at`, usluge sa `bookable_in_portal`.
+
+## Klijentski portal (`/api/portal/v1`, Faze 9a–9b)
+
+Portal je ista aplikacija na svom hostu (`PORTAL_DOMAIN`, dokument 12). Rute postoje samo tamo (`routes/portal.php`, imena `portal.*`), a rute aplikacije, Fortify-a i Sanctum-a na portal hostu daju 404. Prijava je sesija portala (kolačić `astrolabe_portal_session`, tabela `portal_sessions`) sa sopstvenim CSRF kolačićem — ne Sanctum. Ostale konvencije važe kao gore: omotač `data`, `snake_case`, UTC ISO 8601, 404 za tuđe.
+
+| Metoda | Putanja | Zaštita | Namena |
+|---|---|---|---|
+| GET | `/practices/{id}/logo` | potpisan link | logo prakse za strane pre otvaranja prakse (poziv, prijava) |
+| GET | `/session` | — | stanje: `state` (`guest`, `choose`, `ready`, `no_access`), `user`, `practices` (`id` veze, ime, `logo_url`, `brand_color`, `timezone`), `current_practice_id` |
+| POST | `/invitations/preview` | — | `{token}` → `status` poziva, `practice`, maskirana adresa (`email`), `for_signed_in`; nepoznat token 404; 30 na sat |
+| POST | `/invitations/accept` | — | `{token}` → prihvatanje i prijava; vraća stanje kao `/session` |
+| POST | `/sign-in` | — | `{email}` → **202**, uvek ista poruka; link i kod mejlom |
+| POST | `/sign-in/link`, `/sign-in/code` | — | `{token}` / `{email, code}` → prijava; vraća stanje kao `/session` |
+| POST | `/sign-out` | `portal.auth` | odjava; **204** |
+| PUT | `/practice` | `portal.auth` | `{practice_id}` (id veze iz `practices`) — izbor prakse za sesiju |
+| GET / DELETE | `/sessions` | `portal.auth` | gde je nalog prijavljen / „Sign out everywhere“ (i ovaj uređaj); **204** |
+| GET | `/home` | `portal.access` | `practice`, `next_appointment` (zahtev se računa), `upcoming_count`, `new_shared`, `shared_total`, `booking` (`enabled`, `services` — broj usluga za portal) |
+| GET | `/appointments` | `portal.access` | `when=upcoming` (podrazumevano; otvoreni — zakazani i zahtevi — koji se nisu završili, najraniji prvi, 50 po strani) ili `past` (završeni ili zatvoreni, najnoviji prvi, 20 po strani) |
+| GET | `/booking` | `portal.access` | pravila za klijenta: `enabled`, `requires_confirmation`, `client_note`, `reschedule_until_hours`, `cancel_until_hours`, `max_days_ahead`, `min_notice_minutes`, `services` (aktivne usluge za portal po nazivu: `id`, `name`, `description`, `duration_minutes`, `location_type`, `requires_deposit`, `price` `{amount, currency, decimals}` ili `null`); dok je zakazivanje zatvoreno `enabled: false` i `services: []` (i dalje 200) |
+| GET | `/booking/slots` | `portal.access` | `?service_id=` ili `?appointment_id=` (pomeranje: trajanje termina, bez njegovog trenutnog početka) → `duration_minutes`, `from` / `to` (najraniji i najkasniji početak), `slots` (`starts_at`, `ends_at`, UTC, rastuće, ceo prozor) |
+| POST | `/appointments` | `portal.access`, `portal-booking`, `idempotent` | `{service_id, starts_at, location_type?, message?}` → **201**, termin |
+| POST | `/appointments/{id}/reschedule` | `portal.access`, `portal-booking`, `idempotent` | `{starts_at}` → termin |
+| POST | `/appointments/{id}/cancel` | `portal.access`, `portal-booking`, `idempotent` | `{reason?}` (do 500, poruka praksi) → termin; otkazuje i zahtev |
+| GET | `/shared` | `portal.access` | beleške, fajlovi i linkovi `shared_with_client`, najnovije prvo; `meta.seen_before` |
+| GET | `/files/{id}/download` | `portal.access` | deljen fajl (audit `portal_file_downloaded`) |
+| GET / PUT | `/profile` | `portal.access` | `name`, `timezone`, `locale`, `phone` (menja zapis klijenta), od 9b `appointment_reminders`; e-mail samo za čitanje |
+
+Pravila:
+
+- **Pristup:** `portal.auth` = prijavljen nalog portala; `portal.access` = i otvorena praksa iz upotrebljive veze (aktivna, klijent nije arhiviran, praksa se ne zatvara), proverava se na svakom zahtevu i postavlja tenant scope. Nijedan id prakse, klijenta ili astrologa se ne čita iz zahteva. Termini se traže samo među terminima klijenta iz otvorene veze, a usluge među aktivnim uslugama za portal — sve ostalo je **404**, bez obzira na telo zahteva (`appointment_id` iz putanje je broj, bez model binding-a).
+- **Ograničenja:** ceo portal API 120 u minuti po nalogu (pre prijave po IP-u); prijava 3 na 15 minuta po adresi i 10 na sat po IP-u, link i kod 10 na 15 minuta po IP-u, prihvatanje poziva 10 na sat po IP-u; rezervacija, pomeranje i otkazivanje zajedno **10 na 10 minuta po nalogu** (`portal-booking`; vrednosti su u `config/portal.php`, `limits`). Odgovor 429 nosi `message`.
+- **`starts_at`** je trenutak iz liste slobodnih vremena: ISO 8601 sa zonom (`2026-10-20T08:30:00Z` ili sa pomakom); vreme bez zone je 422. `location_type` (`online` / `in_person`) važi samo za uslugu „either“, inače se izostavlja; `message` do 1.000 znakova — vidi ga samo astrolog.
+- **`Idempotency-Key`** (8–100 znakova) na sve tri POST rute zakazivanja: kao u aplikaciji (ponovljen zahtev dobija prvi uspešan odgovor uz `Idempotent-Replayed: true`, isti ključ sa drugim telom je 422, 409 i 422 se ne pamte, dan dana), ali se ključevi pamte po nalogu portala, odvojeno od ključeva astrologa.
+- **Greške zakazivanja** su `{message, code}`: **409** `slot_taken` (vreme je u međuvremenu zauzeto; uz novu listu `slots` na vrhu odgovora, ne pod `data` — za pomeranje lista za taj termin), `too_many_open` (klijent već ima najviše otvorenih termina unapred — `PORTAL_BOOKING_MAX_OPEN`, podrazumevano 10; ne važi za pomeranje), `change_too_late` (prošao je rok za pomeranje ili otkazivanje), `not_changeable` (termin nije otvoren, ili pomeranje termina drugog astrologa); **403** `booking_disabled` (zakazivanje je isključeno, praksa nema vlasnika ili je nalog vlasnika suspendovan). Redosled provera: 404 (red ili usluga), 403, `not_changeable`, `change_too_late`. Razlog zbog kog vreme nije slobodno se nikad ne navodi.
+- **Termin u portalu:** `id`, `starts_at`, `ends_at`, `duration_minutes`, `status` (`requested`, `scheduled`, `completed`, `cancelled`, `no_show`), `upcoming` (otvoren i nije se završio), `service` (naziv ili `null`), `location_type`, `location_details` (samo za zakazan termin koji predstoji), `booked_in_portal`, `cancelled_by` (samo za otkazan), `declined`, `decline_reason` (poruka prakse, samo za odbijen zahtev), `can_reschedule`, `can_cancel`, `reschedule_until` / `cancel_until` (rok, i kada je prošao, dok termin predstoji; `null` kada izmena u portalu nije moguća — zakazivanje isključeno, „Not in the portal“, termin drugog astrologa za pomeranje). **Nikad:** interne beleške, poruka klijenta astrologu (`client_note`), razlog otkazivanja prakse, novac.
+
 ## Odgovori
 
 Uspešan odgovor uvek ima omotač `data` (Laravel API Resources):
@@ -261,7 +325,7 @@ Liste su paginirane na serveru i nose `links` i `meta` kako ih generiše Laravel
 | 401 | nije prijavljen |
 | 403 | prijavljen, ali nema pravo (Policy) |
 | 404 | resurs ne postoji **ili pripada drugom workspace-u** — ne otkriva se razlika |
-| 409 | sukob sa postojećim stanjem: usluga u upotrebi ne može da se obriše; termin se preklapa (`conflicts`, vidi „Kalendar“) |
+| 409 | sukob sa postojećim stanjem: usluga u upotrebi ne može da se obriše; termin se preklapa (`conflicts`, vidi „Kalendar“); zakazivanje — `{message, code}` sa kodom `not_requested` (astrolog) ili `slot_taken`, `too_many_open`, `change_too_late`, `not_changeable` (portal, vidi „Klijentski portal“) |
 | 419 | istekao CSRF token |
 | 422 | validacija (Form Request) |
 | 423 | potrebna je ponovna potvrda lozinke (izmene 2FA) |

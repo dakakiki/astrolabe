@@ -24,6 +24,8 @@ enum ActivityType: string
     case Appointment = 'appointment';
     case AppointmentRescheduled = 'appointment_rescheduled';
     case AppointmentCancelled = 'appointment_cancelled';
+    /** A request booked in the portal, confirmed by the astrologer (Phase 9b). */
+    case AppointmentConfirmed = 'appointment_confirmed';
     case Task = 'task';
     case TaskCompleted = 'task_completed';
     case Payment = 'payment';
@@ -44,7 +46,8 @@ enum ActivityType: string
             self::Consultation => 'consultations',
             self::Note => 'notes',
             self::File => 'files',
-            self::Appointment, self::AppointmentRescheduled, self::AppointmentCancelled => 'appointments',
+            self::Appointment, self::AppointmentRescheduled, self::AppointmentCancelled,
+            self::AppointmentConfirmed => 'appointments',
             self::Task, self::TaskCompleted => 'tasks',
             self::Payment => 'payments',
             self::ChartCalculated, self::BirthDetailsUpdated => 'charts',

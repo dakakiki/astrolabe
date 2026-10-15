@@ -4,13 +4,14 @@ import { useI18n } from 'vue-i18n';
 
 import AppointmentStatusBadge from '@/components/calendar/AppointmentStatusBadge.vue';
 import { useLabels } from '@/composables/useLabels';
-import { groupByDay, wallClock } from '@/lib/calendar';
+import { bookedInPortal, groupByDay, wallClock } from '@/lib/calendar';
 import { formatDate, initials } from '@/lib/format';
 import { serviceColorClass } from '@/lib/services';
 
 /**
  * The agenda: appointments as a list by day. The default on a phone and the
- * view that reads best with a screen reader (docs/spec/10).
+ * view that reads best with a screen reader (docs/spec/10). What the client
+ * booked in the portal says so under the service (Phase 9b).
  */
 const props = defineProps({
     appointments: { type: Array, required: true },
@@ -53,7 +54,7 @@ function span(appointment) {
                         :class="{ 'bg-brand-050': selectedId === appointment.id }"
                         @click="emit('select', appointment)"
                     >
-                        <td class="w-32 font-mono text-xs whitespace-nowrap">
+                        <td class="font-mono text-xs whitespace-nowrap sm:w-32">
                             <button type="button" class="hover:underline" @click.stop="emit('select', appointment)">
                                 {{ span(appointment) }}
                             </button>
@@ -81,6 +82,20 @@ function span(appointment) {
                                         />{{ appointment.service.name }} ·
                                         {{ t('calendar.minutes', { n: appointment.duration_minutes }) }}
                                     </span>
+                                    <span v-if="bookedInPortal(appointment)" class="block text-xs text-ink-3">
+                                        <span class="cal-src" aria-hidden="true">◇</span>{{ t('calendar.portal') }}
+                                    </span>
+                                    <!-- On a phone the marks sit here, so a long status never widens the row. -->
+                                    <span class="mt-1 flex flex-wrap items-center gap-1 sm:hidden">
+                                        <span
+                                            v-if="conflicts.has(appointment.id)"
+                                            class="badge b-warn"
+                                            :title="t('calendar.conflict')"
+                                            ><span aria-hidden="true">⚠</span
+                                            ><span class="sr-only">{{ t('calendar.conflict') }}</span></span
+                                        >
+                                        <AppointmentStatusBadge :status="appointment.status" />
+                                    </span>
                                 </span>
                             </div>
                         </td>
@@ -91,12 +106,13 @@ function span(appointment) {
                                 {{ appointment.timezone }}
                             </div>
                         </td>
-                        <td class="text-right whitespace-nowrap">
+                        <td class="hidden text-right whitespace-nowrap sm:table-cell">
                             <span
                                 v-if="conflicts.has(appointment.id)"
                                 class="badge b-warn mr-1"
                                 :title="t('calendar.conflict')"
-                                >⚠</span
+                                ><span aria-hidden="true">⚠</span
+                                ><span class="sr-only">{{ t('calendar.conflict') }}</span></span
                             >
                             <AppointmentStatusBadge :status="appointment.status" />
                         </td>

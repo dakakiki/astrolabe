@@ -83,6 +83,67 @@ before starting a phase. The user communicates in Serbian.
   use the database driver in tests (phpunit.xml). A new table holding a client's portal data belongs in
   `DeleteClient`, `DeletePractice`, `Retention` and `PracticeExport`.
 
+## Portal booking (Phase 9b)
+
+- Plan, decisions and what was built: `docs/spec/12-client-portal-and-pwa.md` ("Zakazivanje (9b)",
+  "Stanje posle 9b"). Bookings go to the practice's owner (`BookingPolicy::astrologer()`) until teams;
+  members may keep their own hours, unused by the portal for now. Booking is closed while the policy is
+  off, the practice has no active owner, or the owner is suspended (403 `booking_disabled`).
+- Free times come from `App\Support\Booking`. `Intervals`, `WeeklyHours` and `SlotSearch` are pure — no
+  database, no clock — and tested on made-up weeks (`tests/Unit/Booking/SlotSearchTest.php`); keep them
+  that way. Free = (working hours − time off) + extra time − appointments (every status but cancelled,
+  requests included) with the buffers (at least `after` + `before` between two appointments); the start
+  grid begins at each stretch of working time and the whole appointment must fit. `BookingAvailability`
+  reads the rows inside the tenant scope and asks `SlotSearch`; `BookingAvailability::for()` is null
+  without an owner.
+- Working hours are wall-clock `start_time` / `end_time` in the rule's own zone ("24:00" ends a day at
+  midnight), so 9–17 stays 9–17 across a clock change; exceptions are UTC with their zone and `all_day`.
+  Never store the week in UTC.
+- Booking, moving, cancelling, confirming and declining go through `App\Actions\Booking` only. Lock the
+  astrologer's `workspace_user` row first (`BookAppointment::lockAstrologer` — the lock the calendar and
+  the availability endpoints take too), then check `BookingAvailability::isFree()` again. The portal never
+  allows an overlap; there is no `allow_overlap` there. A refused step throws `BookingConflict`, which
+  renders itself: 409 `slot_taken` (with a fresh `slots` list), `too_many_open`, `change_too_late`,
+  `not_changeable`, `not_requested`; 403 `booking_disabled`. Never tell the client why a time is not free.
+- `requested` (`AppointmentStatus::isOpen()` / `openValues()`) holds time like `scheduled` and is answered
+  only by `ConfirmAppointment` / `DeclineAppointment` (409 `not_requested` on anything else): the calendar's
+  PATCH refuses a status change on it, `/cancel` refuses it, and no consultation is recorded from it. A
+  declined request is cancelled with `declined_at`; its `cancellation_reason` is written for the client.
+- Practice-side cancelling and moving (`CancelAppointment`, `SaveAppointment`) lock the appointment row and
+  check its status again — the client may change the same appointment at the same moment. An edit of
+  notes or place must not send the appointment's time.
+- Appointment changes dispatch `App\Events\Appointments\*` (`ShouldDispatchAfterCommit`; who acted is an
+  `AppointmentActor`, practice moves and cancels carry `notifyClient`). Two listeners send the mail:
+  `NotifyClientOfAppointmentChange` (`Client*` notifications) and `NotifyAstrologerOfPortalBooking`
+  (`PortalBookingNotice`). Dispatch the event from the action; never send booking mail from a controller.
+- Client email goes only to the portal account of a usable link (`ClientRecipient::access()` —
+  `PortalAccess::usable()`), checked again in `shouldSend()`; a client without the portal gets nothing.
+  It names the practice (`Workspace::portalName()`), shows times in the client's zone
+  (`portal_users.timezone`, else the practice's) with the zone written out, links to
+  `config('portal.url').'/appointments'`, and never carries notes, `client_note` or the practice's own
+  cancellation reason. Astrologer email never names the client or quotes their message, and waits for
+  quiet hours.
+- Portal resources (`PortalAppointmentResource`, `PortalServiceResource`) never expose `notes`,
+  `client_note`, the practice's cancellation reason or money beyond the informational service price.
+  Read the policy and the astrologer once per request through `App\Support\Portal\PortalBooking` — a list
+  must not ask per row (`PortalOverviewTest` counts queries). Look ids up among the client's own
+  (`AppointmentController::forClient($context)`, `PortalBooking::services()`), never by model binding;
+  anything else is 404 whatever the body says.
+- The portal's booking POSTs (book, reschedule, cancel) carry `idempotent` — `EnsureIdempotency` keys them
+  per portal account, apart from the app's keys — and `throttle:portal-booking`. `starts_at` is ISO 8601
+  with a zone; a time without one is refused. A client may hold at most
+  `config('portal.booking.max_open_per_client')` open appointments ahead (`PORTAL_BOOKING_MAX_OPEN`).
+- `availability_rules`, `availability_exceptions` and `booking_policies` are in `DeletePractice` and
+  `PracticeExport` (`availability.json`, `booking_policy` in `practice.json`); the new appointment columns
+  (`portal_user_id`, `client_note`, `cancelled_by`, `declined_at`) travel with the appointment. A new
+  booking table belongs in both. Policy changes audit as `practice_settings_changed` with `booking.*`
+  field names; working hours are personal and not audited.
+- Tests: `tests/Feature/Portal/BookingFixtures` (policy, working week, exceptions, `starts()`,
+  `portalWithKey()`) and `tests/Feature/Notifications/BooksInThePortal` (practice, hours, a portal client in
+  New York, booking through the actions). Cover DST with the astrologer and the client in different zones.
+  When several agents run PHPUnit at once, each uses its own test database (`DB_DATABASE=…`); never run
+  two suites in parallel on one database.
+
 ## SPA shell
 
 - `App.vue` picks the layout with `layoutOf(route.meta)` (`resources/js/lib/layout.js`):
@@ -321,6 +382,10 @@ before starting a phase. The user communicates in Serbian.
 - Overlaps are checked in `SaveAppointment::guardOverlaps` inside the transaction, after locking
   the astrologer's `workspace_user` row. They are refused with 409 (`OverlappingAppointments`)
   unless the request sends `allow_overlap: true` — never silently allowed or silently refused.
+  This is the astrologer's calendar only: a portal booking never overlaps (see "Portal booking").
+  A `requested` appointment occupies time like a scheduled one, here and in the portal.
+- A move (`PATCH`) and `/cancel` take `notify_client` (default true): whether a client who can use
+  the portal is emailed. The UI offers it only when the email would really go (open, still ahead).
 - Creating endpoints that must not run twice use the `idempotent` middleware
   (`Idempotency-Key`); only successful responses are remembered.
 - At most one consultation per appointment (`consultations.appointment_id`), checked again under
@@ -366,19 +431,27 @@ before starting a phase. The user communicates in Serbian.
 
 ## Notifications
 
-- Email goes only to the astrologer, never to clients (until the portal), and stays generic: times,
-  zones and links — never a client's name, a task title or anything private. Tests assert that.
+- Email stays generic: times, zones and links — never a client's name in the astrologer's email, a
+  task title, notes or anything private. Tests assert that. Since Phase 9b clients get email too, but
+  only while they have a usable portal link (`ClientRecipient`): booked or request received, confirmed,
+  declined, moved, cancelled (`portal.mail.*`) and a reminder a day before, which they switch off in
+  Portal → Profile (`portal_users.appointment_reminders`). Astrologers get "New portal booking"
+  (`notification_preferences.portal_bookings`, default on) about the client's actions, held back by
+  quiet hours (see "Portal booking").
 - Preferences are per user (`users.notification_preferences`, `NotificationPreferences` laid over
   the defaults; `UserResource` always sends them complete). Times are wall-clock on the user's clock.
 - Nothing is computed when sending. When an email goes out is planned ahead as a UTC moment:
   `appointments.remind_at` (`AppointmentReminders::plan`, from `Appointment::booted` whenever the
-  start, lead time, status or astrologer changes) and `users.next_digest_at` (`TaskDigest::nextAt`,
+  start, lead time, status or astrologer changes), `appointments.client_remind_at` (`ClientReminders::plan`,
+  a day before a scheduled appointment) and `users.next_digest_at` (`TaskDigest::nextAt`,
   from `User::booted`). A change to someone's preferences or zone replans their unsent reminders.
 - Quiet hours (`QuietHours::shift`): a reminder inside them goes when they end, or the minute before
   they began if the appointment starts first; a moment already past is not planned at all.
-- The scheduled commands (`notifications:send-reminders`, `notifications:send-digests`, every minute)
+- The scheduled commands (`notifications:send-reminders`, `notifications:send-digests`,
+  `notifications:send-client-reminders` — Phase 9b, claims `appointments.client_remind_at`; every minute)
   claim each item with one conditional update before queueing it, so nothing is sent twice. Keep
-  that pattern for any new scheduled email. Queued notifications re-check their subject in
+  that pattern for any new scheduled email. The client reminder claims rows without a recipient too
+  (`client_reminder_sent_at` means handled), so the set of due rows stays small. Queued notifications re-check their subject in
   `shouldSend()` (a moved or cancelled appointment gets no stale reminder).
 - Commands run outside a request: query across workspaces with
   `withoutGlobalScope(WorkspaceScope::class)` (keeps soft deletes), and count tenant rows inside

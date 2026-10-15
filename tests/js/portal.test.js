@@ -97,12 +97,28 @@ describe('portal guard', () => {
     });
 
     it('needs a practice open for the practice screens', () => {
-        for (const path of ['/', '/appointments', '/shared', '/profile']) {
+        for (const path of ['/', '/appointments', '/shared', '/profile', '/book', '/appointments/12/reschedule']) {
             expect(decide(resolve(path), ready)).toBe(true);
             expect(decide(resolve(path), noAccess)).toEqual({ name: 'no-access' });
         }
         expect(decide(resolve('/'), choose)).toEqual({ name: 'choose', query: undefined });
         expect(decide(resolve('/shared'), choose)).toEqual({ name: 'choose', query: { redirect: '/shared' } });
+        expect(decide(resolve('/book?service=3'), guest)).toEqual({
+            name: 'sign-in',
+            query: { redirect: '/book?service=3' },
+        });
+    });
+
+    it('opens booking and rescheduling under "Appointments"', () => {
+        expect(resolve('/book').name).toBe('book');
+        expect(resolve('/appointments/12/reschedule').name).toBe('reschedule');
+        expect(resolve('/appointments/12/reschedule').params.id).toBe('12');
+        expect(resolve('/appointments/abc/reschedule').name).toBe('not-found');
+
+        for (const path of ['/book', '/appointments/12/reschedule']) {
+            expect(resolve(path).meta.section).toBe('appointments');
+            expect(resolve(path).meta.layout).toBeUndefined();
+        }
     });
 
     it('keeps the account screens open without a practice', () => {

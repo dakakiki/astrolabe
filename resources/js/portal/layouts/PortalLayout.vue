@@ -1,6 +1,7 @@
 <script setup>
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { RouterLink, useRouter } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 
 import BrandMark from '@/components/BrandMark.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
@@ -12,10 +13,13 @@ import { useSessionStore } from '@/portal/stores/session';
  * "Brend prakse u portalu"), five sections, "Powered by AstroLabe" below.
  */
 const { t } = useI18n();
+const route = useRoute();
 const router = useRouter();
 const session = useSessionStore();
 
 const sections = ['home', 'appointments', 'shared', 'profile', 'security'];
+// A screen inside a section (booking, rescheduling) names it in `meta.section`.
+const active = computed(() => route.meta.section ?? route.name);
 
 async function signOut() {
     await session.signOut();
@@ -50,9 +54,13 @@ async function signOut() {
             </div>
             <nav class="portal-nav" :aria-label="t('portal.nav.label')">
                 <div class="portal-nav-inner">
-                    <RouterLink v-for="section in sections" :key="section" :to="{ name: section }">{{
-                        t(`portal.nav.${section}`)
-                    }}</RouterLink>
+                    <RouterLink
+                        v-for="section in sections"
+                        :key="section"
+                        :to="{ name: section }"
+                        :aria-current="section === active ? 'page' : undefined"
+                        >{{ t(`portal.nav.${section}`) }}</RouterLink
+                    >
                 </div>
             </nav>
         </header>

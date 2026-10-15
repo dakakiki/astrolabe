@@ -289,6 +289,20 @@ Korisnik: „Kreni sa Fazom 9a“ — sve odluke iz plana (dokument 12) važe; b
 
 Odluke donete usput (detalji u dokumentu 12): tokeni posle `#` i POST na dugme; kod kao HMAC, nov zahtev poništava stari, ista poruka i vreme za svaku adresu; mejl za prijavu samo adresi sa praksom koja se otvara; dodati `portal_invitations.revoked_at`, `portal_access.last_seen_at` i `shared_seen_at`, događaj `portal_profile_updated`; telefon iz portala ide na zapis klijenta uz stavku na vremenskoj liniji; ponovni poziv posle opoziva = nova veza; svetle boje zadržavaju boju uz tamni tekst na dugmetu; logo kroz potpisan link; portal ima svoj fajl prevoda; admin vidi samo broj naloga portala.
 
+## Faza 9b — klijentski portal: zakazivanje (15. 10. 2026)
+
+Korisnik: „Kreni sa Fazom 9b — zakazivanje u klijentskom portalu.“ — podrazumevane vrednosti iz dokumenta 12 važe; odgovori: (1) podsetnik klijentu mejlom 24 h pre termina — da, podrazumevano uključen, klijent ga isključuje u Profile; (2) astrolog dobija mejl o svakoj rezervaciji, pomeranju i otkazivanju iz portala — da, nova kategorija u Settings → Notifications, uključena, uz tihe sate; (3) klijent pri zakazivanju vidi cenu usluge — da, samo informativno, bez plaćanja; beta i dalje čeka. Izmene:
+
+- 02: „Usluge“ — „Bookable in the client portal“; „Kalendar“ — upućivanje na 9b, „Posle MVP-a“: radno vreme, sprečavanje duplih termina (za portal) i klijentsko pomeranje i otkazivanje urađeni; „Obaveštenja“ — mejlovi klijentima i „New portal booking“; nova sekcija „Klijentski portal — zakazivanje (Faza 9b), implementirano“ (strana astrologa, portal, obaveštenja).
+- 04: status 9b; sledi 9c.
+- 05: „Klijentski portal — zakazivanje (Faza 9b, implementirano)“ — `availability_rules`, `availability_exceptions`, `booking_policies` (sa podrazumevanim vrednostima), izmene `services`, `appointments` (status `requested`, nove kolone), `portal_users`, `users.notification_preferences`, `audit_logs`, `activity_events`, izvoz.
+- 06: zakazivanje u „Bezbednosti i privatnosti“ (bez preklapanja, zaključavanje i ponovna provera, 409 sa novim vremenima, `Idempotency-Key`, ograničenja, izolacija, opšti mejlovi), DST testovi u „Vremenskim zonama“, podsetnik klijentu u „Pouzdanosti“, pitanja za pravnika i čuvanje u „Pravnoj pripremi“.
+- 09: Faza 9b urađena; Settings dobija Availability i Booking; „New portal booking“ urađen (uključen); zakazivanje, pomeranje i otkazivanje u „Dozvoljenim funkcijama“ urađeni.
+- 10: status 9b (izbor astrologa ostaje za kasnije); strogo pravilo za portal u „Konfliktima“ urađeno; „Notifikacije“ — mejlovi obema stranama i podsetnik klijentu; P2 lista urađena.
+- 12: status, „Odluke za 9b“ i „Stanje posle 9b“ (kako je napravljeno; 27 odluka donetih usput, od toga 10 iz pregleda koda; šta je provereno; šta ostaje).
+
+Odluke donete usput (detalji u dokumentu 12): rezervacije idu vlasniku prakse; radno vreme kao vreme na satu u zoni unosa („24:00“ za ponoć), odsustva u UTC-u; mreža početaka od početka svakog dela radnog vremena; buffer kao „posle“ + „pre“ i oko termina koje je upisao astrolog; dodatno vreme važi i preko odsustva; zahtev zauzima vreme i samo se potvrđuje ili odbija (ni konsultacija iz njega); pomeranje zadržava status, trajanje i zonu, isto vreme ne radi ništa; „Not in the portal“ isključuje izmene klijenta; termin iz portala čuva zonu klijenta; podsetnik klijentu i za termine koje je upisao astrolog, komanda „uzima“ i redove bez primaoca; mejl klijentu o izmeni prakse samo uz „Email the client“, bez internog razloga; mejl astrologu čeka kraj tihih sati; `Idempotency-Key` na sve tri POST rute portala, 10 izmena na 10 minuta i najviše 10 otvorenih termina po klijentu; suspendovan vlasnik zatvara zakazivanje; mejlovi astrologu bez imena i poruke klijenta; izmene pravila u audit-u kao `booking.*`, radno vreme ne; izvoz `availability.json`; otkazivanje i pomeranje iz kalendara zaključavaju red termina.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

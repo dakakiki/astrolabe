@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { layoutDay, slotStart, visibleHours, wallClock } from '@/lib/calendar';
+import { bookedInPortal, layoutDay, slotStart, visibleHours, wallClock } from '@/lib/calendar';
 import { formatDate } from '@/lib/format';
 import { serviceEdgeClass } from '@/lib/services';
 
@@ -10,6 +10,8 @@ import { serviceEdgeClass } from '@/lib/services';
  * The day and week views: a column per day, a row per half hour, appointments
  * placed by their time on the astrologer's clock. Overlapping appointments
  * stand side by side; clicking an empty half hour starts a new one there.
+ * A booking request waiting for an answer is drawn dashed, and what the client
+ * booked in the portal carries a small mark (Phase 9b).
  */
 const props = defineProps({
     days: { type: Array, required: true },
@@ -78,9 +80,22 @@ function label(item) {
         appointment.client?.full_name,
         appointment.service?.name,
         t(`appointmentStatuses.${appointment.status}`),
+        bookedInPortal(appointment) ? t('calendar.portal') : null,
     ]
         .filter(Boolean)
         .join(', ');
+}
+
+// The tooltip: what the marks on the event mean.
+function hint(appointment) {
+    return (
+        [
+            props.conflicts.has(appointment.id) ? t('calendar.conflict') : null,
+            bookedInPortal(appointment) ? t('calendar.portal') : null,
+        ]
+            .filter(Boolean)
+            .join(' · ') || undefined
+    );
 }
 </script>
 
@@ -117,6 +132,7 @@ function label(item) {
                             :class="[
                                 serviceEdgeClass(item.appointment.service?.color),
                                 {
+                                    'is-requested': item.appointment.status === 'requested',
                                     'is-cancelled': item.appointment.status === 'cancelled',
                                     'is-conflict': conflicts.has(item.appointment.id),
                                     'is-selected': selectedId === item.appointment.id,
@@ -124,11 +140,13 @@ function label(item) {
                             ]"
                             :style="position(item)"
                             :aria-label="label(item)"
-                            :title="conflicts.has(item.appointment.id) ? t('calendar.conflict') : undefined"
+                            :title="hint(item.appointment)"
                             @click="emit('select', item.appointment)"
                         >
                             <span class="n"
                                 ><template v-if="conflicts.has(item.appointment.id)">⚠ </template
+                                ><span v-if="bookedInPortal(item.appointment)" class="cal-src" aria-hidden="true"
+                                    >◇</span
                                 >{{ item.appointment.client?.full_name }}</span
                             >
                             <span class="t"

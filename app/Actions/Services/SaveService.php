@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\DB;
  */
 class SaveService
 {
-    private const FIELDS = ['name', 'description', 'duration_minutes', 'location_type', 'color', 'requires_deposit', 'is_active'];
+    private const FIELDS = [
+        'name', 'description', 'duration_minutes', 'location_type', 'color', 'requires_deposit', 'bookable_in_portal', 'is_active',
+    ];
 
     public function __construct(private readonly CurrentWorkspace $current) {}
 

@@ -52,5 +52,67 @@ return [
             'expires' => 'The link and the code work once, for :minutes minutes.',
             'ignore' => 'If you did not ask to sign in, you can ignore this email — nobody can sign in without it.',
         ],
+
+        // About the client's appointments (Phase 9b): generic on purpose — the practice,
+        // the time on the client's clock, the service and a link; never notes or messages.
+        'booking' => [
+            'greeting' => 'Hello :name,',
+            'greeting_anonymous' => 'Hello,',
+            'when' => ':day, :start – :end (:zone)',
+            'service' => 'Service: :service',
+            'where' => [
+                'online' => 'Where: online',
+                'in_person' => 'Where: in person',
+            ],
+            'was' => 'It was on :when.',
+            'pending' => 'It still waits for :practice to confirm it. The time is held for you meanwhile.',
+            'change_until' => 'You can move or cancel it in your portal until :when.',
+            'move_until' => 'You can move it in your portal until :when.',
+            'cancel_until' => 'You can cancel it in your portal until :when.',
+            'action' => 'Open your appointments',
+            'private' => 'Everything else about it is in your portal, after you sign in.',
+            'booked' => [
+                'subject' => 'Booked: your appointment on :when',
+                'line' => 'Your appointment with :practice is booked for :when.',
+            ],
+            'requested' => [
+                'subject' => 'Request received: your appointment on :when',
+                'line' => ':practice received your request for an appointment on :when.',
+                'next' => 'The time is held for you until :practice confirms it. You will get an email either way.',
+            ],
+            'confirmed' => [
+                'subject' => 'Confirmed: your appointment on :when',
+                'line' => ':practice confirmed your appointment on :when.',
+            ],
+            'declined' => [
+                'subject' => 'Not accepted: your request for :when',
+                'line' => ':practice could not accept your request for an appointment on :when.',
+                'message' => 'Message from :practice: :message',
+                'again' => 'You can choose another time in your portal, or contact :practice.',
+            ],
+            'moved' => [
+                'subject' => 'Moved: your appointment is now on :when',
+                'line' => ':practice moved your appointment to :when.',
+            ],
+            'moved_by_you' => [
+                'subject' => 'Moved: your appointment is now on :when',
+                'line' => 'As you asked, your appointment with :practice is now on :when.',
+            ],
+            'cancelled' => [
+                'subject' => 'Cancelled: your appointment on :when',
+                'line' => ':practice cancelled your appointment on :when.',
+                'next' => 'If you have any questions about it, please contact :practice.',
+            ],
+            'cancelled_by_you' => [
+                'subject' => 'Cancelled: your appointment on :when',
+                'line' => 'As you asked, your appointment with :practice on :when is cancelled.',
+                'next' => 'Thank you for letting :practice know.',
+            ],
+        ],
+        'reminder' => [
+            'subject' => 'Reminder: your appointment on :when',
+            'line' => 'This is a reminder of your appointment with :practice on :when.',
+            'off' => 'You get this reminder a day before each appointment. You can switch it off in your portal, under Profile.',
+        ],
     ],
 ];

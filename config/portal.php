@@ -64,7 +64,8 @@ return [
     |--------------------------------------------------------------------------
     |
     | Sign-in requests per address and per IP, codes per IP, accepting
-    | invitations per IP, and every portal API call per signed-in person.
+    | invitations per IP, every portal API call per signed-in person, and
+    | booking, moving and cancelling appointments per portal account (Phase 9b).
     |
     */
 
@@ -74,6 +75,23 @@ return [
         'code_per_ip' => [10, 15],
         'invitation_per_ip' => [10, 60],
         'api_per_minute' => 120,
+        'booking_per_account' => [10, 10],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Booking in the portal (Phase 9b)
+    |--------------------------------------------------------------------------
+    |
+    | How many open appointments (scheduled, or requests waiting for the
+    | practice) that have not ended yet one client may hold before the portal
+    | stops taking new bookings from them — one account cannot fill the whole
+    | booking window. Moving an appointment is not counted as a new one.
+    |
+    */
+
+    'booking' => [
+        'max_open_per_client' => (int) env('PORTAL_BOOKING_MAX_OPEN', 10),
     ],
 
     /*

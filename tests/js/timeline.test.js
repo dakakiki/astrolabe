@@ -115,6 +115,115 @@ describe('describeEvent', () => {
         expect(describeEvent(event('payment', { kind: 'payment' })).to).toBeNull();
     });
 
+    it('words an appointment by its status and leads it to the calendar', () => {
+        const entry = describeEvent(event('appointment', { status: 'completed', service: 'Natal reading' }));
+
+        expect(entry).toMatchObject({
+            tone: 'appointment',
+            title: ['timeline.appointment.completed', { title: 'Natal reading' }],
+            titled: true,
+            detail: null,
+            cancelled: false,
+            to: { name: 'calendar', query: { appointment: 7 } },
+        });
+        expect(describeEvent(event('appointment', { status: 'cancelled' })).cancelled).toBe(true);
+    });
+
+    it('says what the client booked in the portal (Phase 9b)', () => {
+        const portal = (status) =>
+            describeEvent(event('appointment', { status, service: 'Natal reading', booking_source: 'portal' }));
+
+        // Waiting for the astrologer, then booked.
+        expect(portal('requested')).toMatchObject({
+            title: ['timeline.appointment.requested', { title: 'Natal reading' }],
+            detail: null,
+        });
+        expect(portal('scheduled')).toMatchObject({
+            title: ['timeline.bookedInPortal', { title: 'Natal reading' }],
+            titled: true,
+            detail: null,
+        });
+        // Held or ended: the status leads, the source follows.
+        expect(portal('completed')).toMatchObject({
+            title: ['timeline.appointment.completed', { title: 'Natal reading' }],
+            detail: ['timeline.bookedInPortal', {}],
+        });
+        expect(portal('cancelled').cancelled).toBe(true);
+
+        // Entered by the practice: no source line.
+        expect(describeEvent(event('appointment', { status: 'scheduled', booking_source: 'manual' }))).toMatchObject({
+            title: ['timeline.appointment.scheduled', { title: '' }],
+            detail: null,
+        });
+    });
+
+    it('tells a move by the client in the portal from one by the practice', () => {
+        const meta = { from: '2026-10-20T08:00:00Z', to: '2026-10-21T09:00:00Z' };
+
+        expect(describeEvent(event('appointment_rescheduled', meta))).toMatchObject({
+            title: ['timeline.appointmentMoved', {}],
+            moved: { from: '2026-10-20T08:00:00Z', to: '2026-10-21T09:00:00Z' },
+            to: { name: 'calendar', query: { appointment: 7 } },
+        });
+        expect(describeEvent(event('appointment_rescheduled', { ...meta, source: 'portal' })).title).toEqual([
+            'timeline.appointmentMovedByClient',
+            {},
+        ]);
+    });
+
+    it('tells who cancelled, and shows a declined request’s message as sent to the client', () => {
+        const startsAt = '2026-10-20T08:00:00Z';
+
+        expect(
+            describeEvent(event('appointment_cancelled', { starts_at: startsAt, reason: 'Ill, sorry' })),
+        ).toMatchObject({
+            title: ['timeline.appointmentCancelled', {}],
+            body: 'Ill, sorry',
+            detail: null,
+            wasAt: startsAt,
+        });
+
+        // The client cancelled in the portal: the body is their own message, if any.
+        expect(
+            describeEvent(
+                event('appointment_cancelled', { starts_at: startsAt, reason: 'Travelling', source: 'portal' }),
+            ),
+        ).toMatchObject({ title: ['timeline.appointmentCancelledByClient', {}], body: 'Travelling', detail: null });
+        expect(
+            describeEvent(event('appointment_cancelled', { starts_at: startsAt, source: 'portal' })).body,
+        ).toBeNull();
+
+        // The astrologer declined a request: the reason went to the client.
+        expect(
+            describeEvent(
+                event('appointment_cancelled', { starts_at: startsAt, reason: 'Away that week', declined: true }),
+            ),
+        ).toMatchObject({
+            title: ['timeline.requestDeclined', {}],
+            body: 'Away that week',
+            detail: ['timeline.declineSent', {}],
+            wasAt: startsAt,
+        });
+        expect(describeEvent(event('appointment_cancelled', { starts_at: startsAt, declined: true }))).toMatchObject({
+            title: ['timeline.requestDeclined', {}],
+            body: null,
+            detail: null,
+        });
+    });
+
+    it('notes a confirmed booking request with the time it is for', () => {
+        expect(
+            describeEvent(
+                event('appointment_confirmed', { starts_at: '2026-10-20T08:00:00Z', timezone: 'Europe/Belgrade' }),
+            ),
+        ).toEqual({
+            tone: 'appointment',
+            title: ['timeline.appointmentConfirmed', {}],
+            at: '2026-10-20T08:00:00Z',
+            to: { name: 'calendar', query: { appointment: 7 } },
+        });
+    });
+
     it('never fails on an entry type it does not know', () => {
         expect(describeEvent(event('invoice')).title).toEqual(['timeline.unknown', {}]);
     });

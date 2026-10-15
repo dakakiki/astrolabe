@@ -34,6 +34,7 @@ class NotificationPreferencesTest extends TestCase
                 'reminder_minutes' => 1440,
                 'task_digest' => true,
                 'digest_time' => '08:00',
+                'portal_bookings' => true,
                 'quiet_hours' => ['start' => '22:00', 'end' => '08:00'],
             ]);
     }
@@ -56,6 +57,20 @@ class NotificationPreferencesTest extends TestCase
             ->assertJsonPath('data.notification_preferences.reminder_minutes', 120);
 
         $this->assertSame('2026-10-03T05:15:00Z', $this->user->fresh()->next_digest_at->toIso8601ZuluString());
+    }
+
+    public function test_portal_booking_emails_can_be_switched_off(): void
+    {
+        $this->actingAs($this->user)->putJson('/api/v1/notification-preferences', ['portal_bookings' => false])
+            ->assertOk()
+            ->assertJsonPath('data.notification_preferences.portal_bookings', false)
+            ->assertJsonPath('data.notification_preferences.task_digest', true);
+
+        $this->assertFalse($this->user->fresh()->notificationPreferences()->portalBookings);
+
+        $this->actingAs($this->user)->putJson('/api/v1/notification-preferences', ['portal_bookings' => 'often'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('portal_bookings');
     }
 
     public function test_invalid_preferences_are_rejected(): void

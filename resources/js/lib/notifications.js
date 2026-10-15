@@ -1,8 +1,9 @@
 /**
  * Email notifications to the astrologer (docs/spec/10, "Notifikacije"): the
- * reminder before an appointment and the morning task email. The server plans
- * when a reminder goes out (`remind_at`, moved out of quiet hours); this words
- * lead times and says what an appointment's reminder is doing.
+ * reminder before an appointment, the morning task email and, since Phase 9b,
+ * what clients do in the client portal. The server plans when a reminder goes
+ * out (`remind_at`, moved out of quiet hours); this words lead times and says
+ * what an appointment's reminder is doing.
  */
 
 /** Lead times offered for reminders, in minutes (NotificationPreferences::REMINDER_CHOICES). */
@@ -72,6 +73,7 @@ export function preferencesPayload(form) {
         reminder_minutes: form.reminder_minutes,
         task_digest: form.task_digest,
         digest_time: form.digest_time,
+        portal_bookings: form.portal_bookings,
         quiet_hours: form.quiet_enabled ? { start: form.quiet_start, end: form.quiet_end } : null,
     };
 }

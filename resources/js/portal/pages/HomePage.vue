@@ -11,9 +11,10 @@ import { useSessionStore } from '@/portal/stores/session';
 import { useToastStore } from '@/stores/toast';
 
 /**
- * Portal → Home (docs/spec/12): the next appointment, how much was shared
- * since the last visit, and — until the client picks a zone — an offer to
- * show times on their device's clock.
+ * Portal → Home (docs/spec/12): the next appointment (and, since 9b, "Book
+ * an appointment" while the practice takes bookings here), how much was
+ * shared since the last visit, and — until the client picks a zone — an
+ * offer to show times on their device's clock.
  */
 const { t } = useI18n();
 const session = useSessionStore();
@@ -23,6 +24,8 @@ const home = ref(null);
 const zone = computed(() => displayZone(session.user, session.practice));
 const deviceZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const offerZone = computed(() => suggestedZone(session.user, session.practice, deviceZone));
+// Phase 9b: while the practice takes bookings in the portal and has a service to book.
+const canBook = computed(() => Boolean(home.value?.booking?.enabled) && home.value.booking.services > 0);
 
 onMounted(() =>
     loadScreen(async () => {
@@ -69,6 +72,10 @@ async function useDeviceZone() {
                 <p v-if="home.upcoming_count > 1" class="mt-3 text-xs text-ink-3">
                     {{ t('portal.home.moreUpcoming', { count: home.upcoming_count - 1 }, home.upcoming_count - 1) }}
                 </p>
+            </div>
+            <div v-if="canBook" class="card-body flex flex-wrap items-center gap-3 border-t border-line-soft">
+                <RouterLink :to="{ name: 'book' }" class="btn btn-primary">{{ t('portal.home.book') }}</RouterLink>
+                <span class="min-w-0 flex-1 text-xs text-ink-3">{{ t('portal.home.bookHint') }}</span>
             </div>
         </section>
 

@@ -2,6 +2,7 @@
 
 namespace App\Support\DataExport;
 
+use App\Models\BookingPolicy;
 use App\Models\Payment;
 use App\Models\Workspace;
 use App\Support\Billing\PaymentsCsv;
@@ -65,6 +66,7 @@ final class PracticeExport
                 'tasks' => $this->tasks($id),
                 'payments' => $this->payments($id),
                 'services' => $this->services($id),
+                'availability' => $this->availability($id),
                 'files' => $files->map(fn (array $file) => $file['entry'])->all(),
                 'charts' => $this->charts($id),
                 'portal_access' => $this->portalAccess($id),
@@ -153,6 +155,34 @@ final class PracticeExport
                 ->all(),
             'tags' => DB::table('tags')->where('workspace_id', $id)->orderBy('name')
                 ->get(['name', 'color'])->map(fn (object $tag) => (array) $tag)->all(),
+            'booking_policy' => $this->bookingPolicy($id),
+        ];
+    }
+
+    /**
+     * How clients book in the portal (Phase 9b): the saved rules, or the
+     * defaults the practice has while it never saved them.
+     *
+     * @return array<string, mixed>
+     */
+    private function bookingPolicy(int $workspaceId): array
+    {
+        $policy = DB::table('booking_policies')->where('workspace_id', $workspaceId)->first();
+        $value = fn (string $field) => $policy === null ? BookingPolicy::DEFAULTS[$field] : $policy->{$field};
+        $hours = fn (string $field) => $value($field) === null ? null : (int) $value($field);
+
+        return [
+            'enabled' => (bool) $value('enabled'),
+            'min_notice_minutes' => (int) $value('min_notice_minutes'),
+            'max_days_ahead' => (int) $value('max_days_ahead'),
+            'buffer_before_minutes' => (int) $value('buffer_before_minutes'),
+            'buffer_after_minutes' => (int) $value('buffer_after_minutes'),
+            'slot_step_minutes' => (int) $value('slot_step_minutes'),
+            'requires_confirmation' => (bool) $value('requires_confirmation'),
+            'client_reschedule_until_hours' => $hours('client_reschedule_until_hours'),
+            'client_cancel_until_hours' => $hours('client_cancel_until_hours'),
+            'client_note' => $value('client_note'),
+            'updated_at' => $this->time($policy?->updated_at),
         ];
     }
 
@@ -363,10 +393,15 @@ final class PracticeExport
                 'location_type' => $appointment->location_type,
                 'location_details' => $appointment->location_details,
                 'booking_source' => $appointment->booking_source,
+                // Booked in the client portal (Phase 9b): the account's number, never its sign-in data.
+                'portal_user_id' => $appointment->portal_user_id === null ? null : (int) $appointment->portal_user_id,
                 'notes' => $appointment->notes,
+                'client_note' => $appointment->client_note,
                 'reminder_minutes' => $appointment->reminder_minutes,
                 'cancellation_reason' => $appointment->cancellation_reason,
                 'cancelled_at' => $this->time($appointment->cancelled_at),
+                'cancelled_by' => $appointment->cancelled_by,
+                'declined_at' => $this->time($appointment->declined_at),
                 'created_at' => $this->time($appointment->created_at),
             ])
             ->all();
@@ -430,9 +465,6 @@ final class PracticeExport
     }
 
     /**
-     * @return list<array<string, mixed>>
-     */
-    /**
      * Clients' links to the portal (Phase 9a): the address invited, the state and
      * its dates — no sessions, tokens or invitation links.
      *
@@ -457,6 +489,9 @@ final class PracticeExport
             ->all();
     }
 
+    /**
+     * @return list<array<string, mixed>>
+     */
     private function services(int $workspaceId): array
     {
         $methods = DB::table('service_astrology_method')
@@ -479,8 +514,60 @@ final class PracticeExport
                 'location_type' => $service->location_type,
                 'color' => $service->color,
                 'requires_deposit' => (bool) $service->requires_deposit,
+                'bookable_in_portal' => (bool) $service->bookable_in_portal,
                 'is_active' => (bool) $service->is_active,
                 'methods' => ($methods[$service->id] ?? collect())->pluck('name')->all(),
+            ])
+            ->all();
+    }
+
+    /**
+     * Each member's working week and time off or extra time for booking in the
+     * portal (Phase 9b), past exceptions included: the week as wall-clock
+     * "HH:MM" in its zone, exceptions in UTC with the zone they were entered in.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function availability(int $workspaceId): array
+    {
+        $rules = DB::table('availability_rules')
+            ->where('workspace_id', $workspaceId)
+            ->orderBy('weekday')
+            ->orderBy('start_time')
+            ->get()
+            ->groupBy('user_id');
+
+        $exceptions = DB::table('availability_exceptions')
+            ->where('workspace_id', $workspaceId)
+            ->orderBy('starts_at')
+            ->orderBy('id')
+            ->get()
+            ->groupBy('user_id');
+
+        $people = $rules->keys()->merge($exceptions->keys())->unique()->all();
+
+        return DB::table('users')
+            ->whereIn('id', $people)
+            ->orderBy('id')
+            ->get(['id', 'name', 'email', 'timezone'])
+            ->map(fn (object $user) => [
+                'name' => $user->name,
+                'email' => $user->email,
+                // The zone the week was entered in; the person's own before there is one.
+                'timezone' => $rules->get($user->id)?->first()?->timezone ?? $user->timezone,
+                'rules' => ($rules[$user->id] ?? collect())->map(fn (object $rule) => [
+                    'weekday' => (int) $rule->weekday,
+                    'start_time' => substr($rule->start_time, 0, 5),
+                    'end_time' => substr($rule->end_time, 0, 5),
+                ])->values()->all(),
+                'exceptions' => ($exceptions[$user->id] ?? collect())->map(fn (object $exception) => [
+                    'kind' => $exception->kind,
+                    'starts_at' => $this->time($exception->starts_at),
+                    'ends_at' => $this->time($exception->ends_at),
+                    'timezone' => $exception->timezone,
+                    'all_day' => (bool) $exception->all_day,
+                    'note' => $exception->note,
+                ])->values()->all(),
             ])
             ->all();
     }

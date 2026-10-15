@@ -90,6 +90,7 @@ class QuietHoursTest extends TestCase
             'reminder_minutes' => 1440,
             'task_digest' => true,
             'digest_time' => '08:00',
+            'portal_bookings' => true,
             'quiet_hours' => ['start' => '22:00', 'end' => '08:00'],
         ], $defaults);
 

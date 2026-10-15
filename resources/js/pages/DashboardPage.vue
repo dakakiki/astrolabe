@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 
@@ -8,7 +8,7 @@ import TaskList from '@/components/TaskList.vue';
 import BillingBadge from '@/components/BillingBadge.vue';
 import { useLabels } from '@/composables/useLabels';
 import { useMoney } from '@/composables/useMoney';
-import { wallClock } from '@/lib/calendar';
+import { requestsAgenda, wallClock } from '@/lib/calendar';
 import { ASPECT_GLYPHS, formatOrb } from '@/lib/chart';
 import { formatDateTime, isFuture } from '@/lib/datetime';
 import { fileKind } from '@/lib/files';
@@ -27,6 +27,10 @@ import { useToastStore } from '@/stores/toast';
  * charts of the clients coming this week, and the money: received this month,
  * outstanding, and the consultations waiting on payment. A new practice sees
  * its setup steps first.
+ *
+ * Booking requests from the client portal come before everything else that
+ * is booked (Phase 9b): each holds its time until it is confirmed or declined,
+ * which can be done right here.
  */
 const { t, locale } = useI18n();
 const labels = useLabels();
@@ -61,6 +65,9 @@ onMounted(async () => {
 });
 
 const counts = computed(() => board.value?.counts ?? {});
+// Booking requests from the portal waiting for an answer (Phase 9b), the soonest first.
+const requests = computed(() => board.value?.requests ?? []);
+const requested = computed(() => counts.value.appointments_requested ?? requests.value.length);
 const firstName = computed(() => auth.user?.name.split(/\s+/)[0] ?? '');
 
 const greeting = computed(() => {
@@ -90,6 +97,7 @@ const summary = computed(() => {
 
     return [
         t('dashboard.sub.appointments', { count: booked }, booked),
+        requested.value ? t('dashboard.requests.summary', { count: requested.value }, requested.value) : null,
         overdue ? t('dashboard.sub.overdue', { count: overdue }, overdue) : null,
         due ? t('dashboard.sub.dueToday', { count: due }, due) : null,
     ]
@@ -185,9 +193,76 @@ function when(appointment, isToday) {
     );
 }
 
-// Held, and not yet written up: offer to record the consultation.
+// Held, and not yet written up: offer to record the consultation (a request is answered first).
 const canRecord = (appointment) =>
-    !appointment.consultation && appointment.status !== 'cancelled' && !isFuture(appointment.starts_at);
+    !appointment.consultation &&
+    appointment.status !== 'cancelled' &&
+    appointment.status !== 'requested' &&
+    !isFuture(appointment.starts_at);
+
+// Booking requests from the portal (Phase 9b): confirmed or declined from the list.
+const answering = ref(null);
+const declining = ref(null);
+const declineMessage = ref('');
+const declineError = ref(null);
+
+async function openDecline(request) {
+    declining.value = declining.value === request.id ? null : request.id;
+    declineMessage.value = '';
+    declineError.value = null;
+    if (declining.value) {
+        await nextTick();
+        document.getElementById(`decline-${request.id}`)?.focus();
+    }
+}
+
+// Answered meanwhile (409 not_requested — in the calendar, by a colleague, or the client cancelled): say so.
+function answerFailed(error) {
+    if (error.response?.status === 409) {
+        toast.error(error.response.data?.message ?? t('appointments.notRequested'));
+    } else {
+        toast.error(t(error.response?.status === 403 ? 'errors.forbidden' : 'errors.generic'));
+    }
+}
+
+async function confirmRequest(request) {
+    answering.value = request.id;
+    try {
+        await http.post(`/appointments/${request.id}/confirm`);
+        toast.success(t('appointments.confirmed'));
+    } catch (error) {
+        answerFailed(error);
+    } finally {
+        answering.value = null;
+    }
+    if (declining.value === request.id) declining.value = null;
+    await load();
+}
+
+async function declineRequest(request) {
+    declineError.value = null;
+    const message = declineMessage.value.trim();
+    answering.value = request.id;
+
+    try {
+        // The message is optional and goes to the client with the answer.
+        await http.post(`/appointments/${request.id}/decline`, message ? { reason: message } : {});
+        toast.success(t('appointments.declined'));
+    } catch (error) {
+        if (error.response?.status === 422) {
+            declineError.value =
+                error.response.data?.errors?.reason?.[0] ?? error.response.data?.message ?? t('errors.generic');
+            return;
+        }
+        answerFailed(error);
+    } finally {
+        answering.value = null;
+    }
+
+    declining.value = null;
+    declineMessage.value = '';
+    await load();
+}
 
 // Tasks: overdue, due today, then the rest of the week.
 const taskGroups = computed(() =>
@@ -319,6 +394,118 @@ const steps = computed(() => [
                             <RouterLink :to="step.to" class="flex-1 hover:underline">{{ step.label }}</RouterLink>
                         </li>
                     </ul>
+                </section>
+
+                <!-- Booking requests from the portal, waiting for an answer -->
+                <section v-if="requests.length" class="card">
+                    <div class="card-head">
+                        <h2>{{ t('dashboard.requests.title') }}</h2>
+                        <span class="right font-mono">{{ requested }}</span>
+                    </div>
+                    <p class="border-b border-line-soft px-4 py-2 text-xs text-ink-3">
+                        {{ t('dashboard.requests.hint') }}
+                    </p>
+                    <ul class="divide-y divide-line-soft">
+                        <li v-for="request in requests" :key="request.id" class="px-4 py-3">
+                            <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                                <div class="person min-w-0 flex-1 basis-52">
+                                    <span class="ini" aria-hidden="true">{{
+                                        initials(request.client?.full_name)
+                                    }}</span>
+                                    <span class="min-w-0">
+                                        <RouterLink
+                                            :to="{ name: 'clients.show', params: { id: request.client_id } }"
+                                            class="nm block truncate hover:underline"
+                                            >{{ request.client?.full_name }}</RouterLink
+                                        >
+                                        <span class="block font-mono text-xs text-ink-2">{{
+                                            when(request, false)
+                                        }}</span>
+                                        <span
+                                            v-if="request.service"
+                                            class="flex items-center gap-1.5 text-xs text-ink-3"
+                                        >
+                                            <span
+                                                class="inline-block size-2 shrink-0 rounded-sm"
+                                                :class="serviceColorClass(request.service.color)"
+                                                aria-hidden="true"
+                                            /><span class="truncate">{{ request.service.name }}</span>
+                                        </span>
+                                    </span>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <button
+                                        type="button"
+                                        class="btn btn-primary btn-sm"
+                                        :disabled="answering !== null"
+                                        @click="confirmRequest(request)"
+                                    >
+                                        {{ t('dashboard.requests.confirm') }}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm"
+                                        :disabled="answering !== null"
+                                        :aria-expanded="declining === request.id"
+                                        @click="openDecline(request)"
+                                    >
+                                        {{ t('dashboard.requests.decline') }}
+                                    </button>
+                                    <RouterLink
+                                        :to="{ name: 'calendar', query: { appointment: request.id } }"
+                                        class="btn btn-ghost btn-sm"
+                                        >{{ t('dashboard.requests.open') }}</RouterLink
+                                    >
+                                </div>
+                            </div>
+                            <form
+                                v-if="declining === request.id"
+                                class="mt-3"
+                                novalidate
+                                @submit.prevent="declineRequest(request)"
+                            >
+                                <div class="field">
+                                    <label class="label" :for="`decline-${request.id}`">{{
+                                        t('dashboard.requests.message')
+                                    }}</label>
+                                    <textarea
+                                        :id="`decline-${request.id}`"
+                                        v-model="declineMessage"
+                                        class="input min-h-16"
+                                        rows="2"
+                                        maxlength="500"
+                                        :aria-invalid="declineError ? 'true' : undefined"
+                                        :aria-describedby="`decline-${request.id}-${declineError ? 'error' : 'hint'}`"
+                                    />
+                                    <div
+                                        v-if="declineError"
+                                        :id="`decline-${request.id}-error`"
+                                        class="error"
+                                        role="alert"
+                                    >
+                                        {{ declineError }}
+                                    </div>
+                                    <div v-else :id="`decline-${request.id}-hint`" class="hint">
+                                        {{ t('dashboard.requests.messageHint') }}
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="submit" class="btn btn-danger btn-sm" :disabled="answering !== null">
+                                        {{ t('dashboard.requests.send') }}
+                                    </button>
+                                    <button type="button" class="btn btn-ghost btn-sm" @click="declining = null">
+                                        {{ t('dashboard.requests.keep') }}
+                                    </button>
+                                </div>
+                            </form>
+                        </li>
+                    </ul>
+                    <!-- The ones left out come later: the agenda opens on the day of the last one listed. -->
+                    <p v-if="requested > requests.length" class="border-t border-line-soft px-4 py-2 text-xs">
+                        <RouterLink :to="{ name: 'calendar', query: requestsAgenda(requests, zone) }">{{
+                            t('dashboard.requests.more', { count: requested - requests.length })
+                        }}</RouterLink>
+                    </p>
                 </section>
 
                 <!-- Appointments -->

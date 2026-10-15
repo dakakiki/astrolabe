@@ -380,6 +380,10 @@ Vidljivost:
 - „Potreban avans“ je za sada samo oznaka; uplate dolaze u Fazi 7. „Dozvoljene metode“ su predlog: nova konsultacija sa uslugom dobija te metode ako nijedna nije izabrana, ali ih astrolog može promeniti.
 - Konsultacija ima opcionu uslugu; nova konsultacija preuzima trajanje usluge ako trajanje nije uneto. Bez naslova, konsultacija se na listi, u zaglavlju i na vremenskoj liniji zove po usluzi, a preimenovanje usluge osvežava vremensku liniju.
 
+### Implementirano u Fazi 9b
+
+- **„Bookable in the client portal“** (podrazumevano isključeno): klijent u portalu može da zakaže samo aktivnu uslugu sa ovom oznakom. U listi usluga takva usluga nosi oznaku „Portal“. Menja je vlasnik, kao i ostala polja usluge. Klijent vidi naziv, opis, trajanje, način održavanja, cenu (samo informativno, „· paid to the practice“) i napomenu da usluga traži avans — vidi „Klijentski portal — zakazivanje“.
+
 ## Kalendar i termini
 
 ### MVP
@@ -410,12 +414,16 @@ Vidljivost:
 - Podsetnik ide astrologu koji vodi termin, na njegovom satu i sa nazivom zone. Mejl je opšti: dan, vreme od–do i zona, i dugme ka terminu u kalendaru — bez imena klijenta i bilo kakvog podatka o njemu (dokument 10: privatni detalji se učitavaju tek posle prijave).
 - Detalj termina kaže šta je sa podsetnikom: kada ide („1 day before · email Sep 29, 2:00 PM“), da je pomeren iz tihih sati, da je poslat, da ga nema, da su podsetnici isključeni ili da je njegovo vreme već prošlo.
 
+### Implementirano u Fazi 9b
+
+Termini iz klijentskog portala u kalendaru (oznaka ◇ i „Booked in the portal“), status „Awaiting confirmation“ za zahtev koji čeka potvrdu (filter, isprekidan termin), „Confirm“ / „Decline“ u detalju termina i na dashboardu, i „Email the client …“ pri otkazivanju i pomeranju — vidi „Klijentski portal — zakazivanje (Faza 9b)“ na kraju dokumenta.
+
 ### Posle MVP-a
 
 - javna booking stranica;
-- radno vreme i dostupnost;
-- sprečavanje duplih termina;
-- klijentsko pomeranje i otkazivanje;
+- ~~radno vreme i dostupnost~~ — urađeno u Fazi 9b (Settings → Availability, vidi ispod);
+- ~~sprečavanje duplih termina~~ — urađeno u Fazi 9b za zakazivanje u portalu (strogo, bez preklapanja); u kalendaru astrologa preklapanje ostaje upozorenje uz svesno čuvanje (Faza 6b);
+- ~~klijentsko pomeranje i otkazivanje~~ — urađeno u Fazi 9b, u rokovima iz pravila zakazivanja (vidi ispod);
 - Google Calendar integracija;
 - lista čekanja.
 
@@ -475,8 +483,8 @@ Posle MVP-a: avansi, računi, paketi konsultacija i automatske potvrde. Naplata 
 
 ## Obaveštenja (Faza 7c)
 
-- Obaveštenja idu samo astrologu, emailom; klijentima tek sa portalom i brendingom (Faza 9). Notification Center (zvonce u aplikaciji) i push dolaze kasnije.
-- **Settings → Notifications** (lično podešavanje, ne workspace): podsetnici pred termine uključeni / isključeni i uobičajeno vreme podsetnika; jutarnji mejl o zadacima i njegovo vreme; tihi sati (podrazumevano 22:00–08:00). Vremena su po zoni iz Regional.
+- Obaveštenja idu emailom. Astrologu od Faze 7c; **klijentima od Faze 9b**, samo dok imaju aktivan pristup portalu — mejlovi o rezervaciji, potvrdi, odbijanju, pomeranju i otkazivanju termina i podsetnik dan pre termina (vidi „Klijentski portal — zakazivanje“). Klijent bez portala ne dobija mejlove od AstroLabe-a. Notification Center (zvonce u aplikaciji) i push dolaze kasnije.
+- **Settings → Notifications** (lično podešavanje, ne workspace): podsetnici pred termine uključeni / isključeni i uobičajeno vreme podsetnika; jutarnji mejl o zadacima i njegovo vreme; od Faze 9b **„New portal booking“** — mejl kada klijent u portalu rezerviše, pomeri ili otkaže termin ili traži potvrdu (podrazumevano uključeno, odluka korisnika 15. 10. 2026); tihi sati (podrazumevano 22:00–08:00, važe i za mejlove o rezervacijama iz portala). Vremena su po zoni iz Regional.
 - **Tihi sati:** u tom periodu ne ide nijedan mejl. Podsetnik koji bi pao u tihe sate ide kada se oni završe, a ako termin počinje pre toga — minut pre nego što počnu (npr. podsetnik sat vremena pre termina u 07:30 ide u 21:59 prethodne večeri). Jutarnji mejl ne može biti postavljen u tihe sate.
 - Isključeni podsetnici važe odmah i za već zakazane termine; ponovo uključeni planiraju se iznova. Promena zone ili tihih sati ponovo računa sve neposlate buduće podsetnike.
 - **„Send a test email“** šalje probni mejl istim putem kao podsetnici (queue, worker, mail server) — za proveru slanja na produkcionom serveru; najviše 3 u 10 minuta.
@@ -537,3 +545,29 @@ Plan i odluke: dokument 12. Portal je ista aplikacija na posebnoj adresi (`porta
 - **Security:** gde je klijent prijavljen (pregledač i sistem, poslednja aktivnost, „This device“) i „Sign out everywhere“ (i ovaj uređaj).
 - Zaglavlje sa logom (ili inicijalima na boji prakse) i imenom prakse, pet sekcija u jednom redu i na telefonu, „Powered by AstroLabe“ u dnu; noćna i dnevna tema; 390 px bez bočnog pomeranja.
 - Opoziv, arhiviranje klijenta i zatvaranje prakse zatvaraju portal te prakse od sledećeg zahteva („Your portal is not open at the moment“).
+
+## Klijentski portal — zakazivanje (Faza 9b), implementirano
+
+Plan, odluke i provera: dokument 12 („Zakazivanje (9b)“, „Odluke za 9b“, „Stanje posle 9b“). Klijent sa aktivnim pristupom portalu sam zakazuje, pomera i otkazuje termine u okviru pravila prakse, a astrolog to vidi u kalendaru i kontroliše. Rezervacije idu vlasniku prakse (jedan astrolog dok ne dođu timovi); u portalu se ništa ne plaća.
+
+**Strana astrologa**
+
+- **Settings → Availability** (svako za sebe): vremenska zona i radno vreme po danima u nedelji — dan uključen ili „Not working“, jedan ili više delova (npr. 09:00–13:00 i 15:00–19:00; delovi se ne preklapaju, najviše 10 u danu, ponoć kao kraj znači kraj dana), „Add hours“ i „Copy Monday to Tuesday–Friday“ (prepisuje utorak–petak; ništa se ne čuva do „Save“). Radno vreme prati sat izabrane zone i kada se sat pomera. Ispod je **„Time off and extra time“**: odsustvo ili dodatno vreme kao celi dani (prvi i poslednji dan) ili od–do, u izabranoj zoni, sa beleškom koju vidi samo ta osoba (najviše 366 dana odjednom; ono što je već prošlo se ne dodaje), i lista planiranih sa uklanjanjem. Dodatno vreme važi i kada se poklapa sa odsustvom. Član vidi napomenu da klijenti za sada zakazuju kod vlasnika — njegovo radno vreme važi kada klijenti budu birali astrologa.
+- **Settings → Booking** (vlasnik menja, članovi čitaju): „Clients can book in the client portal“; „Confirm each booking myself“ (rezervacija stiže kao zahtev i zauzima vreme dok je astrolog ne potvrdi ili odbije); „Earliest booking“ (podrazumevano dan unapred), „How far ahead“ (60 dana), „Start times every“ (30 min, računato od početka svakog dela radnog vremena), slobodno vreme pre (0) i posle (15 min) svakog termina; do kada klijent sme da pomeri i otkaže termin (podrazumevano dan pre; „Until it starts“; „Not in the portal“ — tada ga portal upućuje na praksu); „Note for clients“ (običan tekst, npr. uslovi avansa i otkazivanja — klijent ga vidi pri zakazivanju). Iznad forme je pregled „Booking at a glance“: da li klijenti sada mogu da zakazuju, a ako ne — šta nedostaje (niko ne prima rezervacije, nijedna usluga za portal, nema radnog vremena), kome idu rezervacije, broj usluga za portal, radno vreme i adresa portala. Dok je nalog vlasnika suspendovan (Faza 8c1), zakazivanje u portalu je zatvoreno.
+- **Usluge:** „Bookable in the client portal“ i oznaka „Portal“ (vidi „Usluge“).
+- **Kalendar:** termin iz portala nosi oznaku ◇ i „Booked in the portal“. Zahtev ima status **„Awaiting confirmation“** (filter po statusu, isprekidan termin u danu, nedelji i mesecu) i zauzima vreme. Detalj termina pokazuje ko je rezervisao („By the client, in the portal“, sa vremenom rezervacije) i poruku klijenta kao običan tekst. Zahtev se samo **potvrđuje** („Confirm“) ili **odbija** („Decline“, uz opcionu poruku koja ide klijentu) — ne može ručno da dobije drugi status ni da se otkaže, a ni konsultacija se iz njega ne beleži dok ne bude potvrđen; odbijen zahtev oslobađa vreme i nema „Schedule again“. Otkazan termin kaže kako je završio: odbijen zahtev (sa porukom poslatom klijentu), otkazao klijent u portalu (sa onim što je napisao) ili otkazala praksa. Pri otkazivanju i pri promeni vremena nudi se **„Email the client about the cancellation“** / **„Email the client about the new time“** (podrazumevano štiklirano) — samo kada mejl zaista ide: klijent ima portal, a termin je otvoren i još pred njim; interni razlog otkazivanja nikad ne ide klijentu. Izmena beleški ili mesta ne dira vreme termina, pa ne poništava pomeranje koje je klijent u međuvremenu napravio.
+- **Dashboard:** kartica **„Booking requests“** pre „Next up“ — zahtevi astrologa koji tek predstoje, najbliži prvi (klijent, vreme u zoni astrologa, usluga), sa „Confirm“, „Decline“ (opciona poruka) i „Open“; broj zahteva je u zaglavlju kartice i u pozdravu („N booking requests waiting“), a „and N more in the calendar“ vodi na agendu filtriranu na zahteve.
+- **Vremenska linija klijenta:** „Booked in the client portal“, „Booking request“, „Booking request confirmed“, „Request declined“ (sa porukom poslatom klijentu), „Moved by the client in the portal“, „Cancelled by the client in the portal“ (sa porukom klijenta).
+
+**Portal (klijent)**
+
+- **„Book an appointment“** na Home i Appointments, kada praksa prima rezervacije i ima bar jednu uslugu za portal.
+- **Zakazivanje u tri koraka** (svaki korak je u adresi, pa dugme „nazad“ na telefonu vraća korak): (1) usluga — naziv, trajanje, online / uživo, opis, cena „· paid to the practice“ (samo informativno: „Nothing is paid here“), napomena da praksa traži avans, i napomena prakse; (2) vreme — dani sa slobodnim vremenima i vremena izabranog dana, u zoni klijenta uz naziv zone (tačno i preko promene sata) i link za promenu zone; (3) potvrda — pregled, izbor „Online“ / „In person“ za uslugu koja može oba, opciona poruka praksi („Only the practice sees it“, do 1.000 znakova), pravila izmena i dugme „Book“ ili, uz ručnu potvrdu, „Send request“. Ako je vreme u međuvremenu zauzeto, portal to kaže i prikazuje nova slobodna vremena (isti ili sledeći dan), bez razloga. U noći vraćanja sata dva ista vremena nose oznaku zone. Uspeh: „You're booked.“ ili „Request sent — the practice will confirm it by email.“ Ako se odgovor izgubi pa ponovljen zahtev ne prođe, portal kaže „This booking may already have gone through“. Klijent može imati najviše 10 otvorenih termina (zakazanih ili zahteva) unapred.
+- **Appointments → Upcoming:** zahtev sa oznakom „Awaiting confirmation“; „Reschedule“ (posebna strana sa istim izborom vremena, bez trenutnog vremena termina; usluga, trajanje i mesto ostaju) i „Cancel“ / „Cancel request“ (potvrda na licu mesta, opciona poruka praksi do 500 znakova), uz rečenicu „You can reschedule or cancel here until …“; posle roka ili kada praksa to ne dozvoljava — „To change this appointment, please contact the practice.“ Mesto ili link za online termin vide se tek za potvrđen termin.
+- **Appointments → Past:** odbijen zahtev je „Not confirmed“ uz „Message from the practice: …“; termin koji je klijent otkazao je „Cancelled by you“.
+- **Profile:** „Email me a reminder a day before each appointment“ (podrazumevano uključeno); mejlovi o rezervaciji, pomeranju i otkazivanju stižu i bez toga.
+
+**Obaveštenja**
+
+- **Klijentu** (samo dok ima aktivan pristup portalu, na adresu naloga portala): rezervisano ili „request received“, potvrđeno, odbijeno (sa porukom prakse ako je napisana), pomereno (kada pomeri praksa — samo uz štikliranu opciju), otkazano (kada otkaže klijent — potvrda; kada otkaže praksa — samo uz štikliranu opciju i bez internog razloga) i podsetnik 24 h pre zakazanog termina, i za termine koje je upisao astrolog. Mejl navodi praksu, uslugu, online / uživo, dan i vreme u zoni klijenta sa nazivom zone i, dok važi, rok do kada klijent može da pomeri ili otkaže termin u portalu; link vodi na Appointments u portalu. Tihi sati se na klijenta ne primenjuju.
+- **Astrologu** („New portal booking“, podrazumevano uključeno): nova rezervacija, zahtev za potvrdu (dugme „Confirm or decline“ vodi na termin u kalendaru), pomeranje (staro i novo vreme) i otkazivanje od strane klijenta. Mejl je opšti — dan, vreme i zona, usluga — bez imena klijenta i njegove poruke; čeka kraj tihih sati (najkasnije do početka termina; kod pomeranja do ranijeg od starog i novog početka), a zahtev koji je u međuvremenu potvrđen ili odbijen se više ne javlja. Ono što astrolog sam uradi ne javlja mu se mejlom.

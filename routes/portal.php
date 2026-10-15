@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Portal\AppointmentController;
+use App\Http\Controllers\Portal\BookingController;
 use App\Http\Controllers\Portal\DeviceController;
 use App\Http\Controllers\Portal\HomeController;
 use App\Http\Controllers\Portal\InvitationController;
@@ -53,6 +54,28 @@ Route::prefix('api/portal/v1')->name('portal.')->group(function () {
             Route::middleware('portal.access')->group(function () {
                 Route::get('/home', HomeController::class)->name('home');
                 Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
+
+                // Booking (Phase 9b): the practice's terms and services, and free times for a
+                // service or for moving one of the client's appointments.
+                Route::get('/booking', [BookingController::class, 'show'])->name('booking.show');
+                Route::get('/booking/slots', [BookingController::class, 'slots'])->name('booking.slots');
+
+                // Booking, moving and cancelling: limited per account; safe to repeat with an
+                // Idempotency-Key. Ids are looked up among the client's own appointments.
+                Route::middleware('throttle:portal-booking')->group(function () {
+                    Route::post('/appointments', [BookingController::class, 'store'])
+                        ->middleware('idempotent')
+                        ->name('appointments.store');
+                    Route::post('/appointments/{appointment}/reschedule', [AppointmentController::class, 'reschedule'])
+                        ->whereNumber('appointment')
+                        ->middleware('idempotent')
+                        ->name('appointments.reschedule');
+                    Route::post('/appointments/{appointment}/cancel', [AppointmentController::class, 'cancel'])
+                        ->whereNumber('appointment')
+                        ->middleware('idempotent')
+                        ->name('appointments.cancel');
+                });
+
                 Route::get('/shared', [SharedController::class, 'index'])->name('shared.index');
                 Route::get('/files/{attachment}/download', [SharedController::class, 'download'])
                     ->whereNumber('attachment')

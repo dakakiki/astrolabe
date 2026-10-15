@@ -61,9 +61,9 @@ describe('reminderState', () => {
     it('has nothing to say about a held or cancelled appointment unless a reminder went out', () => {
         expect(reminderState(appointment({ status: 'completed', remind_at: null }))).toBeNull();
         expect(reminderState(appointment({ status: 'cancelled', remind_at: null }))).toBeNull();
-        expect(reminderState(appointment({ status: 'completed', reminder_sent_at: '2026-10-04T13:00:10Z' })).state).toBe(
-            'sent',
-        );
+        expect(
+            reminderState(appointment({ status: 'completed', reminder_sent_at: '2026-10-04T13:00:10Z' })).state,
+        ).toBe('sent');
     });
 });
 
@@ -81,6 +81,7 @@ describe('the settings form', () => {
             reminder_minutes: 120,
             task_digest: false,
             digest_time: '08:00',
+            portal_bookings: false,
             quiet_enabled: false,
             quiet_start: '22:00',
             quiet_end: '08:00',
@@ -90,11 +91,13 @@ describe('the settings form', () => {
             reminder_minutes: 120,
             task_digest: false,
             digest_time: '08:00',
+            portal_bookings: false,
             quiet_hours: null,
         });
         expect(preferencesPayload({ ...form, quiet_enabled: true }).quiet_hours).toEqual({
             start: '22:00',
             end: '08:00',
         });
+        expect(preferencesPayload({ ...form, portal_bookings: true }).portal_bookings).toBe(true);
     });
 });

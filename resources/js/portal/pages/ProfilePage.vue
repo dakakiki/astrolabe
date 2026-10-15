@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 
 import FormField from '@/components/FormField.vue';
 import PhoneInput from '@/components/PhoneInput.vue';
+import ToggleRow from '@/components/ToggleRow.vue';
 import http, { validationErrors } from '@/portal/http';
 import { loadScreen } from '@/portal/load';
 import { useSessionStore } from '@/portal/stores/session';
@@ -11,8 +12,10 @@ import { useToastStore } from '@/stores/toast';
 
 /**
  * Portal → Profile (docs/spec/12): the name the portal greets with, the phone
- * number the practice has, and the zone and language times and text are
- * shown in. The address is the practice's to change.
+ * number the practice has, the zone and language times and text are shown in,
+ * and the email reminder a day before each appointment (Phase 9b; on until the
+ * client switches it off, for every practice). The address is the practice's
+ * to change.
  */
 const { t } = useI18n();
 const session = useSessionStore();
@@ -36,6 +39,7 @@ async function loadProfile() {
         phone: profile.value.phone,
         timezone: profile.value.timezone ?? '',
         locale: profile.value.locale ?? '',
+        appointment_reminders: profile.value.appointment_reminders ?? true,
     };
 }
 
@@ -49,6 +53,7 @@ async function save() {
             phone: form.value.phone || null,
             timezone: form.value.timezone || null,
             locale: form.value.locale || null,
+            appointment_reminders: form.value.appointment_reminders,
         });
         profile.value = response.data.data;
         session.setUser({ name: profile.value.name, timezone: profile.value.timezone, locale: profile.value.locale });
@@ -117,6 +122,13 @@ async function save() {
                     <option v-for="item in profile.locales" :key="item.code" :value="item.code">{{ item.name }}</option>
                 </select>
             </FormField>
+            <div class="field">
+                <ToggleRow
+                    v-model="form.appointment_reminders"
+                    :label="t('portal.profile.reminders')"
+                    :description="t('portal.profile.remindersHint', { email: profile.email })"
+                />
+            </div>
             <button class="btn btn-primary" type="submit" :disabled="busy">{{ t('common.save') }}</button>
         </form>
     </section>

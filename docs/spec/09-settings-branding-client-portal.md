@@ -19,6 +19,8 @@ Ovaj dokument je detaljno specificiran, ali ta detaljnost **ne sme povlačiti ra
 
 > **Faza 9a — urađeno 9. 10. 2026:** Settings → Branding (ime koje klijenti vide, jedna boja sa proverom kontrasta, logo PNG / WebP / SVG uz čišćenje SVG-a, pregled u obe teme) i klijentski portal — pristup i pregled (dokument 12, „Stanje posle 9a“; dokument 02, „Klijentski portal“). Boja: dugmad sa belim tekstom kada ga boja ili nijansa najviše četvrtinu tamnija nosi na WCAG AA, inače tamni tekst na boji prakse (svetle boje), a tek ako ni to ne prolazi — tamnija nijansa; linkovi se posebno usklađuju sa podlogom noćne i dnevne teme. Statusne boje ostaju sistemske. Varijante loga, do pet boja, izvezena karta i brendirani mejlovi i dalje dolaze kasnije.
 
+> **Faza 9b — urađeno 15. 10. 2026:** zakazivanje u klijentskom portalu (dokument 12, „Stanje posle 9b“; dokument 02, „Klijentski portal — zakazivanje“). Nove sekcije Settings: **Availability** (svako svoje radno vreme, odsustva i dodatno vreme) i **Booking** (pravila zakazivanja prakse — vlasnik menja, članovi čitaju); u **Notifications** kategorija „New portal booking“ (podrazumevano uključena, uz tihe sate); usluga dobija „Bookable in the client portal“. Klijent u portalu zakazuje, pomera i otkazuje u okviru pravila, vidi cenu usluge samo informativno, a u Profile isključuje podsetnik dan pre termina. Rezervacije idu vlasniku prakse dok ne dođu timovi.
+
 ### Napomena o portal autentifikaciji
 
 Google OIDC + email magic link/OTP nije „samo login". To je **drugi, nezavisan auth sistem** sa sopstvenom sesijom, sopstvenim rate limitingom i sopstvenom napadnom površinom, koji koegzistira sa Sanctum sesijom astrologa u istoj aplikaciji.
@@ -40,13 +42,15 @@ Klijentski portal je zaštićen, invite-only prostor. Ne pretvara svaki klijents
 | Branding | Logo, boje i pregled klijentskih površina |
 | Regional | Jezik, vremenska zona, format datuma/vremena i valuta |
 | Notifications | Email/push kanali, kategorije, podsetnici, quiet hours i uređaji |
+| Availability | Lično radno vreme po danima (više delova u danu, zona), odsustva i dodatno vreme sa privatnom beleškom — Faza 9b |
+| Booking | Zakazivanje u klijentskom portalu: uključeno, ručna potvrda, najranije i najkasnije zakazivanje, korak početaka, slobodno vreme pre i posle termina, rokovi za klijentovo pomeranje i otkazivanje, napomena za klijente, pregled stanja; vlasnik menja, članovi čitaju — Faza 9b |
 | Team & Access | Članovi, uloge i pozivnice kada timski rad bude dostupan |
 | Billing | paket (Freemius), status pretplate i Customer Portal |
 | Security & Data | Lozinka, aktivne sesije (prijave na drugim uređajima), izvoz, retencija i brisanje — implementirano kao dve sekcije: **Security** (lozinka, sesije, 2FA; Faza 8a) i **Your data** (izvoz prakse, koliko se šta čuva, brisanje prakse i naloga; Faza 8b) |
 
 Poslovna polja su opciona. Svako polje namenjeno klijentu ima eksplicitnu vidljivost, na primer `internal`, `client_visible` ili `public_booking_visible`.
 
-> Notifications — implementirano u Fazi 7c (25. 9. 2026): lično podešavanje svakog korisnika (ne workspace-a), samo email kanal. Podsetnici pred termine (uključeni / isključeni, uobičajeno vreme — podrazumevano dan ranije), jutarnji mejl o zadacima dospelim tog dana (uključen / isključen, vreme — podrazumevano 08:00), tihi sati (podrazumevano 22:00–08:00) i dugme „Send a test email“. Vremena su po zoni korisnika iz Regional. Kategorije iz prototipa „New portal booking“ (Faza 9), „Payment recorded“ i „Weekly summary“, push kanal i uređaji (PWA) dolaze kasnije. Detalji u dokumentu 02, „Obaveštenja“.
+> Notifications — implementirano u Fazi 7c (25. 9. 2026): lično podešavanje svakog korisnika (ne workspace-a), samo email kanal. Podsetnici pred termine (uključeni / isključeni, uobičajeno vreme — podrazumevano dan ranije), jutarnji mejl o zadacima dospelim tog dana (uključen / isključen, vreme — podrazumevano 08:00), tihi sati (podrazumevano 22:00–08:00) i dugme „Send a test email“. Vremena su po zoni korisnika iz Regional. Kategorija iz prototipa „New portal booking“ urađena je u Fazi 9b (mejl kada klijent u portalu rezerviše, pomeri ili otkaže termin ili traži potvrdu; podrazumevano **uključena** — odluka korisnika 15. 10. 2026, u prototipu je bila isključena; tihi sati važe). „Payment recorded“ i „Weekly summary“, push kanal i uređaji (PWA) dolaze kasnije. Detalji u dokumentu 02, „Obaveštenja“.
 
 ## Branding
 
@@ -99,8 +103,8 @@ Ista email adresa nije dovoljan dokaz da dva klijentska zapisa pripadaju istoj o
 Klijent može da:
 
 - vidi sopstvene prošle i buduće konsultacije;
-- zakaže novi termin iz dozvoljene dostupnosti;
-- pomeri ili otkaže termin kada booking politika to dozvoljava;
+- zakaže novi termin iz dozvoljene dostupnosti — urađeno u Fazi 9b;
+- pomeri ili otkaže termin kada booking politika to dozvoljava — urađeno u Fazi 9b;
 - vidi sadržaj označen kao `shared_with_client`;
 - preuzme eksplicitno deljeni dokument;
 - ažurira ograničene kontakt i regionalne podatke;

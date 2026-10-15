@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ActivityType;
+use App\Enums\AppointmentActor;
 use App\Enums\AppointmentStatus;
 use App\Enums\BookingSource;
 use App\Enums\LocationType;
@@ -10,6 +11,7 @@ use App\Models\Concerns\BelongsToWorkspace;
 use App\Models\Concerns\ProjectsActivity;
 use App\Support\Activity\ActivityProjection;
 use App\Support\Notifications\AppointmentReminders;
+use App\Support\Notifications\ClientReminders;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Database\Factories\AppointmentFactory;
@@ -37,6 +39,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int|null $reminder_minutes
  * @property CarbonImmutable|null $remind_at UTC
  * @property CarbonImmutable|null $reminder_sent_at UTC
+ * @property BookingSource $booking_source
+ * @property AppointmentActor|null $cancelled_by
+ * @property CarbonImmutable|null $declined_at UTC
+ * @property CarbonImmutable|null $client_remind_at UTC
+ * @property CarbonImmutable|null $client_reminder_sent_at UTC
+ *
+ * Booked in the portal (Phase 9b): `booking_source` portal, `portal_user_id` and the
+ * client's message (`client_note`, for the astrologer's eyes only). A practice that
+ * confirms bookings by hand keeps them `requested` until it confirms or declines;
+ * a declined request is cancelled with `declined_at`, and its reason goes to the client.
+ * The client's own reminder a day before is `client_remind_at` (ClientReminders).
  */
 class Appointment extends Model
 {
@@ -58,12 +71,16 @@ class Appointment extends Model
             'reminder_minutes' => 'integer',
             'remind_at' => 'immutable_datetime',
             'reminder_sent_at' => 'immutable_datetime',
+            'cancelled_by' => AppointmentActor::class,
+            'declined_at' => 'immutable_datetime',
+            'client_remind_at' => 'immutable_datetime',
+            'client_reminder_sent_at' => 'immutable_datetime',
         ];
     }
 
     /**
-     * The reminder follows the appointment: moving, cancelling, a new lead
-     * time or another astrologer plans it again.
+     * The reminders follow the appointment: moving, cancelling, a new lead
+     * time or another astrologer plans them again.
      */
     protected static function booted(): void
     {
@@ -72,7 +89,27 @@ class Appointment extends Model
                 || $appointment->isDirty(['starts_at', 'reminder_minutes', 'status', 'assigned_user_id'])) {
                 AppointmentReminders::plan($appointment);
             }
+
+            if (! $appointment->exists || $appointment->isDirty(['starts_at', 'status'])) {
+                ClientReminders::plan($appointment);
+            }
         });
+    }
+
+    /**
+     * The client's portal account that booked it (Phase 9b); null for the astrologer's own.
+     *
+     * @return BelongsTo<PortalUser, $this>
+     */
+    public function portalUser(): BelongsTo
+    {
+        return $this->belongsTo(PortalUser::class);
+    }
+
+    /** A request booked in the portal that the practice turned down (Phase 9b). */
+    public function isDeclined(): bool
+    {
+        return $this->declined_at !== null;
     }
 
     /**
@@ -182,6 +219,7 @@ class Appointment extends Model
                 'duration_minutes' => $this->durationMinutes(),
                 'timezone' => $this->timezone,
                 'location_type' => $this->location_type->value,
+                'booking_source' => $this->booking_source?->value,
             ],
         );
     }

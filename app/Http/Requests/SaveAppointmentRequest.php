@@ -20,6 +20,11 @@ use Illuminate\Validation\Validator;
  * which defaults to the astrologer's zone. The length is `duration_minutes`,
  * or the service's for a new appointment. The client is chosen once.
  * Cancelling has its own endpoint, since it needs a reason.
+ *
+ * Booking in the portal (Phase 9b): `requested` is the client's to set, never the
+ * astrologer's, and a request waiting for an answer is confirmed or declined
+ * (their own endpoints) before it can take another status. `notify_client`
+ * (default yes) says whether a client who can use the portal hears about a move.
  */
 class SaveAppointmentRequest extends FormRequest
 {
@@ -57,7 +62,7 @@ class SaveAppointmentRequest extends FormRequest
             ],
             'status' => $creating
                 ? ['prohibited']
-                : ['sometimes', Rule::enum(AppointmentStatus::class)->except([AppointmentStatus::Cancelled])],
+                : ['sometimes', Rule::enum(AppointmentStatus::class)->except([AppointmentStatus::Cancelled, AppointmentStatus::Requested])],
             'location_type' => ['nullable', Rule::enum(LocationType::class)->only([LocationType::Online, LocationType::InPerson])],
             'location_details' => ['nullable', 'string', 'max:500'],
             'notes' => ['nullable', 'string', 'max:5000'],
@@ -71,11 +76,13 @@ class SaveAppointmentRequest extends FormRequest
                     ->where('status', MembershipStatus::Active->value),
             ],
             'allow_overlap' => ['sometimes', 'boolean'],
+            'notify_client' => ['sometimes', 'boolean'],
         ];
     }
 
     /**
-     * An inactive service stays on an appointment but is not chosen anew.
+     * An inactive service stays on an appointment but is not chosen anew; a
+     * request booked in the portal keeps its status until it is answered.
      *
      * @return array<int, callable>
      */
@@ -90,6 +97,11 @@ class SaveAppointmentRequest extends FormRequest
                 && ! Service::query()->whereKey($serviceId)->value('is_active')) {
                 $validator->errors()->add('service_id', __('consultations.service_inactive'));
             }
+
+            if ($appointment instanceof Appointment && $appointment->status === AppointmentStatus::Requested
+                && $this->has('status') && ! $validator->errors()->has('status')) {
+                $validator->errors()->add('status', __('appointments.request_status'));
+            }
         }];
     }
 
@@ -98,7 +110,13 @@ class SaveAppointmentRequest extends FormRequest
      */
     public function appointmentAttributes(): array
     {
-        return collect($this->validated())->except('allow_overlap')->all();
+        return collect($this->validated())->except(['allow_overlap', 'notify_client'])->all();
+    }
+
+    /** Whether the client hears about a move by email (Phase 9b); yes unless the request says no. */
+    public function notifyClient(): bool
+    {
+        return $this->boolean('notify_client', true);
     }
 
     public function messages(): array

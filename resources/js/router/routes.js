@@ -174,6 +174,17 @@ const routes = [
                 name: 'settings.notifications',
                 component: () => import('@/pages/settings/NotificationSettings.vue'),
             },
+            // Booking in the client portal (Phase 9b): everyone's own working week, the practice's rules.
+            {
+                path: 'availability',
+                name: 'settings.availability',
+                component: () => import('@/pages/settings/AvailabilitySettings.vue'),
+            },
+            {
+                path: 'booking',
+                name: 'settings.booking',
+                component: () => import('@/pages/settings/BookingSettings.vue'),
+            },
             {
                 path: 'security',
                 name: 'settings.security',

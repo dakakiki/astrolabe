@@ -27,6 +27,34 @@ return [
         'action' => 'Notification settings',
     ],
 
+    // What a client did in the client portal (Phase 9b, "New portal booking"):
+    // the time, the service and a link — never the client's name or their message.
+    'portal_booking' => [
+        'span' => ':day, :start – :end',
+        'service' => 'Service: :service',
+        'action' => 'Open in the calendar',
+        'private' => 'For privacy, these emails never name your client or repeat their message. The details open after you sign in.',
+        'settings' => 'Emails about portal bookings and quiet hours are in [Settings → Notifications](:url).',
+        'booked' => [
+            'subject' => 'New booking: :when',
+            'line' => 'A client booked an appointment in your client portal: :when (:zone).',
+        ],
+        'requested' => [
+            'subject' => 'Booking request: :when',
+            'line' => 'A client asked for an appointment in your client portal: :when (:zone).',
+            'confirm' => 'The time is held until you confirm or decline the request in the calendar.',
+            'action' => 'Confirm or decline',
+        ],
+        'moved' => [
+            'subject' => 'Appointment moved to :when',
+            'line' => 'A client moved their appointment in your client portal from :from to :when (:zone).',
+        ],
+        'cancelled' => [
+            'subject' => 'Appointment cancelled: :when',
+            'line' => 'A client cancelled their appointment in your client portal: :when (:zone). The time is free again.',
+        ],
+    ],
+
     // The data lifecycle (Phase 8b): exports and deleting a practice.
     'export_ready' => [
         'subject' => 'Your practice export is ready',

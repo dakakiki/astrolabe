@@ -4,7 +4,19 @@ import { RouterLink, RouterView } from 'vue-router';
 
 const { t } = useI18n();
 
-const sections = ['profile', 'practice', 'branding', 'chart', 'regional', 'notifications', 'security', 'data'];
+// Availability and Booking (Phase 9b) sit with the other things that shape the working day.
+const sections = [
+    'profile',
+    'practice',
+    'branding',
+    'chart',
+    'regional',
+    'notifications',
+    'availability',
+    'booking',
+    'security',
+    'data',
+];
 </script>
 
 <template>

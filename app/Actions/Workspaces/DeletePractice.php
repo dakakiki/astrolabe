@@ -30,10 +30,12 @@ final class DeletePractice
 {
     /**
      * Practice data in the order it is deleted. Pivots, birth data and other
-     * rows owned by these go with their parents (foreign keys).
+     * rows owned by these go with their parents (foreign keys). The members'
+     * availability and the booking policy (Phase 9b) go before the accounts do.
      */
     private const TABLES = [
         'activity_events', 'attachments', 'notes', 'payments', 'tasks', 'consultations', 'appointments',
+        'availability_exceptions', 'availability_rules', 'booking_policies',
         'portal_access', 'chart_calculations', 'client_relationships', 'related_people', 'clients', 'tags',
         'services', 'astrology_methods', 'workspace_exports',
     ];

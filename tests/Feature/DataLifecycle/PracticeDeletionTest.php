@@ -162,6 +162,22 @@ class PracticeDeletionTest extends TestCase
         $elsewhere = User::factory()->withWorkspace()->create();
         $this->workspace->users()->attach($elsewhere, ['role' => WorkspaceRole::Member->value, 'status' => MembershipStatus::Active->value]);
 
+        // Booking in the portal (Phase 9b): each member's week and time off, and the practice's rules.
+        $week = fn (User $person, int $workspace) => DB::table('availability_rules')->insert([
+            'workspace_id' => $workspace, 'user_id' => $person->id, 'weekday' => 1,
+            'start_time' => '09:00', 'end_time' => '17:00', 'timezone' => 'Europe/Belgrade',
+        ]);
+        foreach ([$this->owner, $member, $elsewhere] as $person) {
+            $week($person, $this->workspace->id);
+            DB::table('availability_exceptions')->insert([
+                'workspace_id' => $this->workspace->id, 'user_id' => $person->id, 'kind' => 'unavailable',
+                'starts_at' => '2026-12-24 00:00:00', 'ends_at' => '2026-12-27 00:00:00', 'timezone' => 'UTC', 'all_day' => true,
+            ]);
+        }
+        DB::table('booking_policies')->insert(['workspace_id' => $this->workspace->id, 'enabled' => true]);
+        // The week in their other practice stays with them.
+        $week($elsewhere, $elsewhere->current_workspace_id);
+
         $this->schedule()->assertOk();
         $this->travel(30)->days();
         $this->travel(1)->minutes();
@@ -173,15 +189,19 @@ class PracticeDeletionTest extends TestCase
         $this->assertModelMissing($this->owner);
         $this->assertModelMissing($member);
         $this->assertModelExists($elsewhere);
-        foreach (['clients', 'consultations', 'appointments', 'payments', 'tasks', 'attachments', 'services', 'activity_events', 'workspace_user'] as $table) {
-            $this->assertSame($table === 'workspace_user' ? 1 : 0, DB::table($table)->count(), $table);
+        foreach (['clients', 'consultations', 'appointments', 'payments', 'tasks', 'attachments', 'services', 'activity_events', 'availability_exceptions', 'booking_policies'] as $table) {
+            $this->assertSame(0, DB::table($table)->count(), $table);
         }
+        $this->assertSame(1, DB::table('workspace_user')->count());
+        $this->assertSame([$elsewhere->current_workspace_id], DB::table('availability_rules')->pluck('workspace_id')->all());
         Storage::disk('attachments')->assertMissing($path);
 
         $entry = AuditLog::query()->where('event', AuditEvent::PracticeErased)->sole();
         $this->assertNull($entry->user_id);
         $this->assertSame($this->workspace->id, $entry->subject_id);
         $this->assertSame(2, $entry->properties['accounts']);
+        $this->assertSame(3, $entry->properties['availability_rules']);
+        $this->assertSame(1, $entry->properties['booking_policies']);
         // Earlier entries stay until the log's own retention, without the practice.
         $this->assertSame(0, AuditLog::query()->where('workspace_id', $this->workspace->id)->count());
 
@@ -197,6 +217,11 @@ class PracticeDeletionTest extends TestCase
     {
         $other = User::factory()->withWorkspace()->create();
         $theirs = Client::factory()->inWorkspace($other->current_workspace_id)->create();
+        $this->actingAs($other)->putJson('/api/v1/booking-policy', ['enabled' => true])->assertOk();
+        $this->actingAs($other)->putJson('/api/v1/availability', [
+            'timezone' => 'Europe/Belgrade',
+            'rules' => [['weekday' => 1, 'start_time' => '09:00', 'end_time' => '17:00']],
+        ])->assertOk();
         $this->schedule()->assertOk();
         $this->travel(31)->days();
 
@@ -204,5 +229,7 @@ class PracticeDeletionTest extends TestCase
 
         $this->assertModelExists($other);
         $this->assertModelExists($theirs);
+        $this->assertSame(1, DB::table('booking_policies')->where('workspace_id', $other->current_workspace_id)->count());
+        $this->assertSame(1, DB::table('availability_rules')->where('user_id', $other->id)->count());
     }
 }

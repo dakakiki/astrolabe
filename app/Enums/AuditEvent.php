@@ -72,6 +72,11 @@ enum AuditEvent: string
     case PortalFileDownloaded = 'portal_file_downloaded';
     case PortalProfileUpdated = 'portal_profile_updated';
 
+    // Booking in the portal (Phase 9b): the client books, moves or cancels an appointment.
+    case PortalAppointmentBooked = 'portal_appointment_booked';
+    case PortalAppointmentRescheduled = 'portal_appointment_rescheduled';
+    case PortalAppointmentCancelled = 'portal_appointment_cancelled';
+
     /**
      * Events that may mean someone else is trying an account; the admin's audit
      * log shows them on their own and highlights them (Phase 8c).

@@ -105,7 +105,9 @@
             "moreUpcoming": "and {count} more upcoming appointment | and {count} more upcoming appointments",
             "shared": "Shared with you",
             "newShared": "new since your last visit | new since your last visit",
-            "openShared": "Open"
+            "openShared": "Open",
+            "book": "Book an appointment",
+            "bookHint": "Choose a service and a free time that suits you."
         },
         "appointments": {
             "zone": "Times in {zone}",
@@ -119,7 +121,10 @@
                 "scheduled": "Past",
                 "completed": "Held",
                 "cancelled": "Cancelled",
-                "no_show": "Missed"
+                "no_show": "Missed",
+                "requested": "Awaiting confirmation",
+                "declined": "Not confirmed",
+                "cancelled_by_client": "Cancelled by you"
             },
             "location": {
                 "online": "Online",
@@ -127,7 +132,105 @@
                 "either": "Online or in person"
             },
             "minutes": "{count} min",
-            "join": "Join online"
+            "join": "Join online",
+            "book": "Book an appointment",
+            "declineReason": "Message from the practice: {reason}",
+            "reschedule": "Reschedule",
+            "cancel": "Cancel",
+            "cancelRequest": "Cancel request",
+            "cancelTitle": "Cancel this appointment?",
+            "cancelRequestTitle": "Cancel this booking request?",
+            "cancelMessage": "Message for the practice (optional)",
+            "cancelConfirm": "Cancel appointment",
+            "cancelRequestConfirm": "Cancel request",
+            "keep": "Keep appointment",
+            "keepRequest": "Keep request",
+            "cancelled": "Appointment cancelled",
+            "requestCancelled": "Booking request cancelled",
+            "contact": "To change this appointment, please contact the practice.",
+            "until": {
+                "both": "You can reschedule or cancel here until {when}.",
+                "reschedule": "You can reschedule here until {when}.",
+                "cancel": "You can cancel here until {when}."
+            },
+            "tooLate": "This appointment can no longer be changed here. Please contact the practice.",
+            "notChangeable": "This appointment cannot be changed any more.",
+            "closed": "Changes in the portal are not open at the moment. Please contact the practice.",
+            "missing": "This appointment cannot be found among your upcoming appointments.",
+            "back": "Back to appointments",
+            "rescheduleTitle": "Reschedule",
+            "rescheduleSub": "Choose a new time. The service, length and place stay as they are.",
+            "now": "Booked now",
+            "newTime": "Choose a new time",
+            "keepTime": "Keep this time",
+            "from": "From",
+            "to": "To",
+            "move": "Move appointment",
+            "moved": "Your appointment was moved.",
+            "movedRequested": "It still waits for the practice to confirm it.",
+            "unchanged": "Nothing changed — your appointment already has this time.",
+            "maybeMoved": "This change may already have gone through — please check your appointments."
+        },
+        "booking": {
+            "title": "Book an appointment",
+            "sub": {
+                "service": "Choose what you would like to book.",
+                "time": "Choose a free time that suits you.",
+                "confirm": "Check the details, then confirm."
+            },
+            "steps": {
+                "label": "Booking steps",
+                "service": "Service",
+                "time": "Time",
+                "confirm": "Confirm"
+            },
+            "price": "{price} · paid to the practice",
+            "priceNote": "Prices are shown for information. Nothing is paid here.",
+            "deposit": "The practice asks for a deposit for this service.",
+            "fromPractice": "From the practice",
+            "disabled": "Booking in the portal is not open at the moment. Please contact the practice to make an appointment.",
+            "noServices": "There is nothing to book in the portal at the moment. Please contact the practice.",
+            "backHome": "Back to your portal",
+            "changeService": "Change service",
+            "changeZone": "Change time zone",
+            "days": "Days with free times",
+            "dayCount": "{count} time | {count} times",
+            "noTimes": "No free times in the next {count} day. | No free times in the next {count} days.",
+            "noTimesHint": "Please look again later, or contact the practice.",
+            "retry": "Try again",
+            "continue": "Continue",
+            "changeTime": "Change time",
+            "summary": {
+                "title": "Check and confirm",
+                "service": "Service",
+                "day": "Day",
+                "time": "Time",
+                "where": "Where",
+                "price": "Price"
+            },
+            "where": "How would you like to meet?",
+            "whereRequired": "Please choose online or in person.",
+            "message": "Message for the practice (optional)",
+            "messageHint": "Only the practice sees it.",
+            "rules": {
+                "none": "Changes are made only through the practice.",
+                "both": "You can reschedule or cancel here until the appointment starts. | You can reschedule or cancel here until {count} hour before the appointment. | You can reschedule or cancel here until {count} hours before the appointment.",
+                "reschedule": "You can reschedule here until the appointment starts. | You can reschedule here until {count} hour before the appointment. | You can reschedule here until {count} hours before the appointment.",
+                "cancel": "You can cancel here until the appointment starts. | You can cancel here until {count} hour before the appointment. | You can cancel here until {count} hours before the appointment.",
+                "rescheduleNone": "To reschedule, please contact the practice.",
+                "cancelNone": "To cancel, please contact the practice."
+            },
+            "requestHint": "The practice confirms the time first. You will get an email when they do.",
+            "book": "Book",
+            "request": "Send request",
+            "slotTaken": "That time was just taken — please pick another.",
+            "serviceGone": "This service can no longer be booked here. Please choose another one.",
+            "tooMany": "Too many attempts. Please wait a few minutes and try again.",
+            "tooManyOpen": "You already have several upcoming appointments. Please contact the practice to book more.",
+            "maybeBooked": "This booking may already have gone through — please check your appointments.",
+            "booked": "You're booked.",
+            "requested": "Request sent — the practice will confirm it by email.",
+            "seeAppointments": "See your appointments"
         },
         "shared": {
             "sub": "Notes, files and links {practice} shared with you.",
@@ -150,6 +253,8 @@
             "timezoneHint": "Appointment times are shown in this zone.",
             "practiceZone": "The practice's zone ({zone})",
             "defaultLanguage": "Automatic (English)",
+            "reminders": "Email me a reminder a day before each appointment",
+            "remindersHint": "Sent to {email}. Emails about booking, moving and cancelling come either way.",
             "saved": "Profile saved"
         },
         "security": {

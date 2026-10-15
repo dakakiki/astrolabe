@@ -13,8 +13,9 @@ import { useToastStore } from '@/stores/toast';
 
 /**
  * The signed-in person's email notifications (docs/spec/09): reminders before
- * appointments, the morning email about tasks due today, and quiet hours. All
- * on their own clock; the server plans when each email goes out.
+ * appointments, the morning email about tasks due today, what clients do in
+ * the client portal (Phase 9b, "New portal booking"), and quiet hours. All on
+ * their own clock; the server plans when each email goes out.
  */
 const { t } = useI18n();
 const auth = useAuthStore();
@@ -29,6 +30,7 @@ const form = useForm({
     reminder_minutes: stored.reminder_minutes,
     task_digest: stored.task_digest,
     digest_time: stored.digest_time,
+    portal_bookings: stored.portal_bookings ?? true,
     quiet_enabled: quiet.enabled,
     quiet_start: quiet.start,
     quiet_end: quiet.end,
@@ -120,6 +122,14 @@ async function sendTest() {
                             required
                         />
                     </FormField>
+                </div>
+
+                <div>
+                    <ToggleRow
+                        v-model="form.data.portal_bookings"
+                        :label="t('settings.notifications.portalBookings')"
+                        :description="t('settings.notifications.portalBookingsHint')"
+                    />
                 </div>
 
                 <div>
