@@ -195,6 +195,27 @@ class BackupTest extends TestCase
         $this->assertArrayNotHasKey('backup', app(HealthCheck::class)->run());
     }
 
+    public function test_the_health_check_watches_the_off_site_copy_once_its_marker_is_set(): void
+    {
+        $this->assertArrayNotHasKey('backup_offsite', app(HealthCheck::class)->run());
+
+        // deploy/bin/backup-offsite.sh touches this file after each copy to the Storage Box.
+        $marker = $this->path.'/../offsite-'.basename($this->path).'.ok';
+        config(['astrolabe.backup.offsite_marker' => $marker]);
+
+        try {
+            $this->assertFalse(app(HealthCheck::class)->run()['backup_offsite']);
+
+            touch($marker, now()->subHours(2)->getTimestamp());
+            $this->assertTrue(app(HealthCheck::class)->run()['backup_offsite']);
+
+            touch($marker, now()->subHours(27)->getTimestamp());
+            $this->assertFalse(app(HealthCheck::class)->run()['backup_offsite']);
+        } finally {
+            File::delete($marker);
+        }
+    }
+
     /**
      * The real tools against the test database: dump, encrypt, restore into a
      * scratch database, compare, drop. Skipped where MariaDB's tools are not

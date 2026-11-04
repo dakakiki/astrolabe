@@ -1,0 +1,4 @@
+// AstroLabe (deploy/files/apt/20auto-upgrades): security updates every day.
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+APT::Periodic::AutocleanInterval "7";

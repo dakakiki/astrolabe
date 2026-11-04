@@ -1,6 +1,6 @@
 # Status projekta — AstroLabe
 
-Stanje na dan **15. 10. 2026** — Faze 0–7 su završene; u **Fazi 8 (zatvorena beta)** urađeni su **8a — bezbednost i audit**, **8b — životni ciklus podataka**, **8c1 — admin operatera i Feedback** i **8c2 — pravni dokumenti, performanse i Linux `swetest` u CI-ju**. **Beta (8d produkcija, 8e testeri) za sada čeka** (korisnik, 9. 10. 2026; potvrđeno 15. 10. 2026). U **Fazi 9** urađeni su **9a — klijentski portal: pristup i pregled** (9. 10. 2026), **9b — zakazivanje u portalu** i **9c — PWA za klijente** (oba 15. 10. 2026) — plan iz `docs/spec/12-client-portal-and-pwa.md` je završen; sledeći korak bira korisnik (vidi „Sledeće“). Ovaj dokument je polazna tačka za svaku novu radnu sesiju: šta je gotovo, gde se šta nalazi, šta je odlučeno i šta sledi.
+Stanje na dan **15. 10. 2026** — Faze 0–7 su završene; u **Fazi 8 (zatvorena beta)** urađeni su **8a — bezbednost i audit**, **8b — životni ciklus podataka**, **8c1 — admin operatera i Feedback** i **8c2 — pravni dokumenti, performanse i Linux `swetest` u CI-ju**. **Beta (8d produkcija, 8e testeri) za sada čeka** (korisnik, 9. 10. 2026; potvrđeno 15. 10. 2026). U **Fazi 9** urađeni su **9a — klijentski portal: pristup i pregled** (9. 10. 2026), **9b — zakazivanje u portalu** i **9c — PWA za klijente** (oba 15. 10. 2026) — plan iz `docs/spec/12-client-portal-and-pwa.md` je završen; sledeći korak bira korisnik (vidi „Sledeće“). **4. 11. 2026:** hosting i produkcija se vode u posebnoj sesiji; odluke za 8d su donete i skripte za server su u `deploy/` (vidi „Plan 8d“), a server još nije spreman. Ovaj dokument je polazna tačka za svaku novu radnu sesiju: šta je gotovo, gde se šta nalazi, šta je odlučeno i šta sledi.
 
 ## Gde je šta
 
@@ -219,7 +219,7 @@ Testovi posle Faze 9c: **761 PHP** (7109 provera) i **400 Vitest** — za PWA i 
 1. **Validacioni razgovori sa 5 astrologa** (dokument 01). Korisnik je odlučio da se Faza 6 gradi pre njih, kao predlog; razgovori i dalje mogu promeniti redosled i podrazumevane vrednosti. U razgovore idu i pitanja 3–5 iz dokumenta 11 (sistem kuća po metodi, orbi, značaj PDF-a), a iz 6a: da li su usluge sa cenom i avansom korisne pre uplata, i koje vrste veza astrolozi koriste.
 2. **Hiron:** rešeno 25. 9. 2026 — `seas_18.se1` preuzet uz odobrenje; na produkciju ide zajedno sa ostalim fajlovima efemerida.
 3. **Srpski prevod interfejsa:** infrastruktura je spremna, dodaje se na zahtev.
-4. **Produkcija (8d — čeka; beta je odložena 9. 10. 2026, server još nije spreman):** server izabran 6. 10. 2026 (Hetzner Cloud CX33 za aplikaciju, Webhosting za WordPress i mejl); plan podizanja je u `docs/deployment.md` (server, `.env`, redosled, cron i worker, mejl preko porta 587 sa SPF / DKIM / DMARC, backup, deploy, upload granice). Pre podizanja: licenca i Linux `swetest`; Webhosting M i fajlovi klijenata na disku CX33 su odlučeni 6. 10. 2026. Lokalno još prelazak na MariaDB 11.8.
+4. **Produkcija (8d — čeka server; beta je odložena 9. 10. 2026):** odluke 4. 11. 2026 i redosled su u „Plan 8d“ (Claude preko SSH-a, Storage Box odmah, UptimeRobot, skripte `deploy/` urađene); od korisnika čeka Hetzner (još ništa), DNS i adrese. Server izabran 6. 10. 2026 (Hetzner Cloud CX33 za aplikaciju, Webhosting za WordPress i mejl); plan podizanja je u `docs/deployment.md` (server, `.env`, redosled, cron i worker, mejl preko porta 587 sa SPF / DKIM / DMARC, backup, deploy, upload granice). Pre podizanja: licenca i Linux `swetest`; Webhosting M i fajlovi klijenata na disku CX33 su odlučeni 6. 10. 2026. Lokalno još prelazak na MariaDB 11.8.
 5. **Linux build `swetest`-a:** rešeno 9. 10. 2026 — `scripts/build-swetest.sh`, radi u CI-ju; na serveru isti postupak (8d).
 6. **Dokument 08** nedostaje u specifikaciji.
 7. Odloženo iz Faze 4: oznake, prilozi i istorija izmena na beleškama; thumbnail-ovi i antivirus (ako ih beta zatraži). Uklanjanje EXIF podataka je urađeno u 8a, brisanje fajlova sa diska posle 30 dana u 8b.
@@ -236,7 +236,7 @@ Testovi posle Faze 9c: **761 PHP** (7109 provera) i **400 Vitest** — za PWA i 
 18. **Freemius (Faza 9):** korisnik daje putanju do projekta sa postojećom Freemius integracijom; pre toga proveriti u nalogu da li se može dodati SaaS proizvod i da li javni trial može bez kartice (dokument 07, „Otvorene provere“).
 19. Lokalno: stara baza `astrolabe.online__10.2026` (sa tačkom) može da se obriše; test workspace je podešen na **sidereal/Lahiri i Whole Sign** (iz testa u Fazi 1) — menja se u Settings → Chart & methods. Tri test klijenta iz Faze 5 mogu da se arhiviraju.
 20. Odloženo iz Faze 8a: pregled događaja prakse za vlasnika (timovi); (rok čuvanja audit log-a — 12 meseci — rešen u 8b); obavezan 2FA za praksu (ako beta pokaže potrebu); passkeys; `npm audit` prijava u razvojnom alatu `concurrently` (čeka verziju bez ranjivog `shell-quote`). Napomena: testovi pišu u isti `storage/logs/laravel.log` kao lokalni sajt (npr. „Health check failed“ iz testova) — nije greška.
-21. Odloženo iz Faze 8b: kopija backup-a van servera (Storage Box) i restore na novoj mašini (8d, postupak je u `docs/deployment.md`); u adminu (8c ili Faza 9) pregled zakazanih brisanja prakse i izvoza (samo metapodaci); brisanje sopstvenog naloga člana koji nije vlasnik i prenos vlasništva (timovi); uvoz izvoza nazad u aplikaciju (nije planiran — izvoz je za prelazak i čuvanje); pravnik treba da potvrdi rokove (30 dana, 12 meseci, 14 dana backup-a) za Privacy Policy (8c).
+21. Odloženo iz Faze 8b: kopija backup-a van servera i restore na novoj mašini (8d) — **odlučeno 4. 11. 2026:** Storage Box BX11 odmah, `deploy/bin/backup-offsite.sh` + health stavka `backup_offsite`, probni restore na privremenom serveru pre bete (postupak u `docs/deployment.md`); u adminu (8c ili Faza 9) pregled zakazanih brisanja prakse i izvoza (samo metapodaci); brisanje sopstvenog naloga člana koji nije vlasnik i prenos vlasništva (timovi); uvoz izvoza nazad u aplikaciju (nije planiran — izvoz je za prelazak i čuvanje); pravnik treba da potvrdi rokove (30 dana, 12 meseci, 14 dana backup-a) za Privacy Policy (8c).
 22. Odloženo iz Faze 8c1: mejl astrologu „nova prijava sa novog uređaja“; pregled zakazanih brisanja i izvoza u adminu; više admin naloga sa ulogama (sada svi admini jednaki, uklanjaju se samo kroz bazu); obaveštenje svim korisnicima (baner), pretplate, zbirna statistika (Faza 9); uklanjanje admin naloga komandom (`admin:delete`) ako zatreba. Lokalno: ugrađeni Claude browser i dalje ne učitava `/build/assets`, pa admin proveravamo u Chrome-u preko `php artisan serve` na `127.0.0.1:8099` (vidi „Ključne odluke“, 8c1).
 23. **Licenca Swiss Ephemeris — izmenjen ugovor (29. 9. 2026, izdanje „September 2026“, pročitan 9. 10. 2026):** cena ista (CHF 700, neograničen broj projekata), ali **važi 6 godina** pa se obnavlja (ranije 99 godina); nova tačka 3 — API usluge drugim firmama traže njihovu licencu i prijavu korisnika (AstroLabe nije pogođen dok API služi samo sopstvenom interfejsu); tačka 9 sada imenom navodi firmu i autore. Korisnik potpisuje ovo izdanje. Spec 11 i STATUS i dalje pominju nosioca prava kao davaoca licence (planiranje kupovine) — repo postaje privatan na kraju razvoja; README više nema link sa imenom autora.
 24. Odloženo iz Faze 8c2: pravnik (tekstovi i pitanja iz `docs/legal-review.md`), konačna verzija kao nov fajl bez `draft`; prevod pravnih tekstova ako beta bude na srpskom; šablon obaveštenja za klijente astrologa (ako pravnik kaže); brži CSV za vrlo velike prakse (danas ~1,7 s za 7.832 uplate — čitanje bez Eloquent modela); merenje na CX33 (8d); `AGENTS.md` nije ažuriran od Faze 5 (CLAUDE.md je merodavan).
@@ -250,9 +250,68 @@ Testovi posle Faze 9c: **761 PHP** (7109 provera) i **400 Vitest** — za PWA i 
 
 **Faza 9c je završena (15. 10. 2026; commit `7761c55`) — time je plan klijentskog portala iz `docs/spec/12-client-portal-and-pwa.md` (9a, 9b, 9c) završen.** Sledeći korak bira korisnik; mogućnosti: **8d — produkcija** (kada server bude spreman; vidi ispod), ostatak Faze 9 (Freemius — stavka 18, PDF karte, javna booking stranica, Google prijava u portalu, srpski prevod), validacioni razgovori, ili pregled celog portala na telefonu (pravi push — stavka 29). Otvoreno iz 9b i 9c (stavke 28 i 29): pravnik (pitanja 16–22), prezentacioni sajt, pitanja za validacione razgovore.
 
-Faze 0–7 su završene (Faza 6 u tri dela: 6a, 6b, 6c; Faza 7 u pet delova: 7a tranziti, 7b uplate, 7c obaveštenja, 7d kalendar neba, 7e sinastrija i kompozit). U **Fazi 8 — zatvorena beta** urađeni su **8a — bezbednost i audit**, **8b — životni ciklus podataka**, **8c1 — admin operatera i Feedback** (8. 10. 2026) i **8c2 — pravni dokumenti, performanse i Linux `swetest` u CI-ju** (9. 10. 2026). **Na čekanju (beta odložena): 8d — podizanje produkcije** po `docs/deployment.md` (Hetzner Cloud CX33, Ubuntu 24.04, MariaDB 11.8, Nginx + PHP 8.3-FPM, `scripts/build-swetest.sh`, cron i worker, mejl preko porta 587 sa SPF / DKIM / DMARC, backup sa ključem van servera i Storage Box, restore na novoj mašini, admin nalog, monitor na `/api/v1/health`). Za 8d korisnik daje pristup (Hetzner projekat i SSH, DNS za `astrolabe.online`, SMTP sandučić) — podaci servera se ne upisuju u repo. Na početku 8d korisniku dati 2–3 odluke sa preporukom (npr. ko radi korake na serveru — korisnik po uputstvu ili Claude preko SSH-a; Storage Box odmah ili posle; spoljni monitor dostupnosti), pa krenuti. Posle 8d: **8e — beta** (licenca kupljena, konačni pravni tekstovi, prvi testeri).
+Faze 0–7 su završene (Faza 6 u tri dela: 6a, 6b, 6c; Faza 7 u pet delova: 7a tranziti, 7b uplate, 7c obaveštenja, 7d kalendar neba, 7e sinastrija i kompozit). U **Fazi 8 — zatvorena beta** urađeni su **8a — bezbednost i audit**, **8b — životni ciklus podataka**, **8c1 — admin operatera i Feedback** (8. 10. 2026) i **8c2 — pravni dokumenti, performanse i Linux `swetest` u CI-ju** (9. 10. 2026). **Na čekanju (beta odložena): 8d — podizanje produkcije** po `docs/deployment.md` (Hetzner Cloud CX33, Ubuntu 24.04, MariaDB 11.8, Nginx + PHP 8.3-FPM, `scripts/build-swetest.sh`, cron i worker, mejl preko porta 587 sa SPF / DKIM / DMARC, backup sa ključem van servera i Storage Box, restore na novoj mašini, admin nalog, monitor na `/api/v1/health`). Za 8d korisnik daje pristup (Hetzner projekat i SSH, DNS za `astrolabe.online`, SMTP sandučić) — podaci servera se ne upisuju u repo. Odluke za 8d su donete 4. 11. 2026, a skripte su spremne — vidi „Plan 8d“ (redosled kada server bude spreman); 8d se vodi u posebnoj sesiji za hosting. Posle 8d: **8e — beta** (licenca kupljena, konačni pravni tekstovi, prvi testeri).
 
 Paralelno (korisnik): narudžba Swiss Ephemeris licence (izdanje ugovora iz septembra 2026 — 6 godina), Hetzner nalog i AVV, dogovaranje razgovora sa astrolozima, pravnik za Privacy / Terms / ugovor o obradi (`docs/legal-review.md`), WAMP vhost za portal (otvoreno 26).
+
+### Plan 8d — produkcija (odluke korisnika 4. 11. 2026; server još nije spreman)
+
+Hosting i produkcija se od 4. 11. 2026 vode u **posebnoj sesiji**, odvojeno od funkcionalnosti. Ceo postupak: `docs/deployment.md`; skripte: `deploy/` (`deploy/README.md`).
+
+**Odluke korisnika (sve preporuke):**
+
+1. Korake na serveru radi **Claude preko SSH-a**, sa posebnim ed25519 ključem (privatni deo ostaje na računaru korisnika). Korisnik u svojim konzolama pravi server, firewall, Storage Box, DNS i sandučić. Tajne nikad ne idu u chat. Na kraju `PermitRootLogin no`, a Claudov ključ ostaje samo na korisniku `deploy`, bez `sudo`-a.
+2. **Storage Box BX11 odmah** (Falkenstein): `rsync` ogledalo šifrovanih backup-a, istih 14 noći kao na serveru, bez snapshot-a za betu.
+3. **UptimeRobot Free** na `https://app.astrolabe.online/api/v1/health` (i `https://portal.astrolabe.online/manifest.webmanifest`), alarm na adresu van domena.
+4. **`deploy/` odmah**, sa shellcheck-om i proverom Nginx-a u CI-ju.
+
+**Još nije spremno — korisnik javlja:** Hetzner (još ništa: Cloud projekat, Webhosting M, Storage Box, AVV); gde su DNS zapisi za `astrolabe.online`; adrese — pošiljalac, operater i UptimeRobot, admin nalog, Let's Encrypt (predlog je u `docs/deployment.md`, „Šta korisnik priprema“). I dalje važi **„nemoj pokretati deployment, server nije spreman“**: ništa na serveru, DNS-u ni u konzolama dok korisnik ne kaže da je server spreman i ne da pristup.
+
+**Urađeno bez servera (4. 11. 2026):**
+
+- `deploy/provision.sh`: 13 koraka, `system` … `check`;
+- `deploy/deploy.sh`, `deploy/bin/set-env.sh` (tajne kuca samo vlasnik), `deploy/bin/backup-offsite.sh`, šabloni u `deploy/files`;
+- CI posao „Deploy scripts“: shellcheck i `deploy/ci/check.sh`. Ta skripta pokreće Nginx sa pravim fajlovima i zamenom za PHP i proverava:
+  - PWA putanje portala idu u aplikaciju;
+  - pokreće se samo `index.php`;
+  - dot-fajlovi su skriveni;
+  - `/build/` se kešira;
+  - preusmerenje na HTTPS, provera Let's Encrypt-a;
+  - druga imena ne dobijaju ništa;
+  - systemd jedinice, šabloni i `.env` pomoćnici;
+- u aplikaciji health stavka `backup_offsite` (`BACKUP_OFFSITE_MARKER`, test u `BackupTest`, labela u adminu);
+- prepisan `docs/deployment.md`; dokument 06 i changelog.
+
+**Moje odluke u skriptama:**
+
+- systemd umesto Supervisor-a;
+- korisnici `ops` / `deploy` / `astrolabe`: PHP-FPM, worker i cron pišu samo u `storage/` i `bootstrap/cache` i ne mogu da menjaju kod;
+- `swetest` u `/opt/swisseph`;
+- jedan sertifikat (`certbot certonly --webroot`);
+- restart posle ažuriranja kernela u 04:30 UTC;
+- 2 GB swap i `fail2ban`;
+- svi serverski logovi 14 dana;
+- PECL `timezonedb` nije potreban: Ubuntu PHP koristi sistemske zone;
+- MariaDB ključ se proverava po otisku;
+- skripta za kopiju odbija prazno ogledalo.
+
+**Redosled kada server bude spreman.** Svako preuzimanje ide uz odobrenje, sa izvorom i veličinom; uslovi Let's Encrypt-a uz izričit OK.
+
+0. Korisnik: spisak „Šta korisnik priprema“ u `docs/deployment.md` (Hetzner i AVV, adrese, sandučić, DNS, lični SSH ključ, menadžer lozinki).
+1. Claude (uz OK) pravi deploy ključ na računaru korisnika. Korisnik pravi CX33 sa oba ključa i Cloud Firewall, IP javlja u chatu, a DNS zapisi A/AAAA za `app.` i `portal.` se postavljaju odmah.
+2. `system` → `users`; korisnik `passwd ops` i proveri svoju prijavu.
+3. `mariadb` → `tools` → `app`; korisnik čuva `APP_KEY` i `BACKUP_KEY` u menadžeru lozinki.
+4. `swetest` → `database` → `places` (u pozadini) → `web` → `ephemeris:benchmark` (merenje na CX33, stavka 24).
+5. `tls` (uz OK korisnika).
+6. Mejl: `set-env.sh`, lozinku kuca korisnik; SPF / DKIM / DMARC; probni mejl.
+7. Admin nalog (lozinku i 2FA postavlja korisnik), prvi nalog astrologa i provera funkcija; portal i pravi push na telefonu (stavka 29).
+8. Ručni `backup:run` i `backup:restore --verify`; zatim `offsite`, ključ na Storage Box-u i prva kopija.
+9. `check` (sve `ok`); UptimeRobot (korisnik).
+10. `finish` — root više ne može da se prijavi.
+11. Serverski deo sigurnosne provere: TLS ocena (uz OK) i zaglavlja.
+12. Probni restore na privremenom serveru (stavka 21), pa brisanje tog servera.
+
+Posle 8d: **8e** (licenca, konačni pravni tekstovi, testeri). Niži prioritet, u istoj sesiji: prezentacioni sajt na Webhosting M (stavka 25).
 
 ### Plan Faze 9 — klijentski portal i PWA za klijente (prihvaćen 9. 10. 2026)
 

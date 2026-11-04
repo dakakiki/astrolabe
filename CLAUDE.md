@@ -521,6 +521,18 @@ npm run build
   `.env` contents into the repo.
 - `SESSION_DOMAIN` stays the app's own host, never the parent domain (the WordPress site lives there).
 - Mail goes through a Webhosting mailbox on port 587; the cloud server cannot send on 25 or 465.
+- The server files live in `deploy/` (Phase 8d): `provision.sh <step>` sets a fresh Ubuntu 24.04 up as
+  root, `deploy.sh` puts a new version live as the `deploy` user, `bin/set-env.sh` edits `.env`
+  (secrets only with `--secret`, typed by the owner), `bin/backup-offsite.sh` mirrors the backups to
+  the Storage Box; templates in `deploy/files` use `__PLACEHOLDERS__` filled by `lib.sh`'s `render`.
+  CI job "Deploy scripts" runs shellcheck and `deploy/ci/check.sh`. Only public host names, paths and
+  user names may appear there.
+- On the server PHP-FPM, the worker and cron run as `astrolabe`, which writes only `storage/` and
+  `bootstrap/cache`; the code belongs to `deploy`. Run artisan commands that read backups or client
+  files as `astrolabe` (`sudo -u astrolabe php artisan backup:list`).
+- Nginx sends only `/build/*` as static `.js`; `/sw.js`, `/manifest.webmanifest` and `/offline` must
+  reach PHP — `deploy/ci/check.sh` fails otherwise. A new health item needs a label in
+  `admin.system.checkNames`.
 
 ## API
 

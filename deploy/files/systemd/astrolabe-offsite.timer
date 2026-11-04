@@ -1,0 +1,12 @@
+# AstroLabe (deploy/files/systemd/astrolabe-offsite.timer): every night after
+# `php artisan backup:run` (02:00 UTC, routes/console.php).
+[Unit]
+Description=Nightly AstroLabe off-site copy of the backups
+
+[Timer]
+OnCalendar=*-*-* 03:15:00 UTC
+RandomizedDelaySec=10min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

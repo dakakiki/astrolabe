@@ -1,0 +1,7 @@
+// AstroLabe (deploy/files/apt/52astrolabe-unattended-upgrades)
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+// A kernel update needs a restart: at 04:30 UTC, after backup:run (02:00) and the
+// off-site copy (03:15). Everything starts again by itself.
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "04:30";

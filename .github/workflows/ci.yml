@@ -113,3 +113,19 @@ jobs:
           EPHEMERIS_ENGINE: swiss
           CACHE_STORE: array
         run: php artisan ephemeris:benchmark --runs=5
+
+  # The production server files (deploy/, Phase 8d), checked without a server.
+  deploy-scripts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check shell scripts (shellcheck)
+        run: shellcheck --external-sources scripts/*.sh deploy/*.sh deploy/bin/*.sh deploy/ci/*.sh
+
+      - name: Install Nginx where the runner has none
+        run: command -v nginx >/dev/null || { sudo apt-get update && sudo apt-get install -y --no-install-recommends nginx; }
+
+      - name: Check Nginx routes, systemd units and templates
+        run: bash deploy/ci/check.sh

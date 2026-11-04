@@ -22,7 +22,10 @@ use Throwable;
  * - queue: no job has waited longer than QUEUE_STUCK_SECONDS (the worker runs);
  * - scheduler: the heartbeat the scheduler writes every minute is recent (cron runs);
  * - backup (once BACKUP_KEY is set): the newest encrypted backup is younger than
- *   astrolabe.backup.max_age_hours (Phase 8b).
+ *   astrolabe.backup.max_age_hours (Phase 8b);
+ * - backup_offsite (once BACKUP_OFFSITE_MARKER is set): the copy on the Storage Box
+ *   was made within the same hours — deploy/bin/backup-offsite.sh touches the marker
+ *   file after every successful copy (Phase 8d).
  */
 final class HealthCheck
 {
@@ -56,6 +59,11 @@ final class HealthCheck
         // Only where backups are set up (BACKUP_KEY): a dev machine has none.
         if (filled(config('astrolabe.backup.key'))) {
             $checks['backup'] = $this->check('backup', fn () => $this->backupIsRecent());
+        }
+
+        // Only on the server that copies its backups away (docs/deployment.md, "Backup").
+        if (filled(config('astrolabe.backup.offsite_marker'))) {
+            $checks['backup_offsite'] = $this->check('backup_offsite', fn () => $this->offsiteCopyIsRecent());
         }
 
         return $checks;
@@ -126,5 +134,14 @@ final class HealthCheck
 
         return $made !== null
             && CarbonImmutable::parse($made)->greaterThan(CarbonImmutable::now()->subHours(config('astrolabe.backup.max_age_hours')));
+    }
+
+    private function offsiteCopyIsRecent(): bool
+    {
+        $marker = (string) config('astrolabe.backup.offsite_marker');
+        clearstatcache(true, $marker);
+
+        return is_file($marker)
+            && filemtime($marker) >= CarbonImmutable::now()->subHours(config('astrolabe.backup.max_age_hours'))->getTimestamp();
     }
 }

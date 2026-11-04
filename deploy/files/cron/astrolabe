@@ -1,0 +1,6 @@
+# AstroLabe (deploy/files/cron/astrolabe) → /etc/cron.d/astrolabe
+# Laravel's scheduler: reminders, digests and the health heartbeat every minute,
+# health:check every five, data:prune 01:30 and backup:run 02:00 (UTC).
+SHELL=/bin/sh
+PATH=/usr/local/bin:/usr/bin:/bin
+* * * * * __RUN_USER__ cd __APP_DIR__ && php artisan schedule:run >> /dev/null 2>&1

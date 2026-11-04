@@ -1,0 +1,27 @@
+# AstroLabe (deploy/files/systemd/astrolabe-worker.service): the queue worker —
+# emails, reminders, web push, practice exports.
+[Unit]
+Description=AstroLabe queue worker
+After=network-online.target mariadb.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__RUN_USER__
+Group=__RUN_USER__
+WorkingDirectory=__APP_DIR__
+# Ends after an hour, or when a deploy runs `php artisan queue:restart`; systemd
+# starts it again with the new code.
+ExecStart=/usr/bin/php __APP_DIR__/artisan queue:work --sleep=3 --max-time=3600
+Restart=always
+RestartSec=5
+# A job that is running may finish.
+KillSignal=SIGTERM
+TimeoutStopSec=90
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

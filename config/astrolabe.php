@@ -255,6 +255,9 @@ return [
         'structure_only' => ['places', 'place_names', 'sessions', 'cache', 'cache_locks'],
         // With a key set, a newest backup older than this fails the health check.
         'max_age_hours' => (int) env('BACKUP_MAX_AGE_HOURS', 26),
+        // The file deploy/bin/backup-offsite.sh touches after each copy to the Storage Box;
+        // when set, a marker older than max_age_hours fails the health check (Phase 8d).
+        'offsite_marker' => env('BACKUP_OFFSITE_MARKER'),
         'timeout' => (int) env('BACKUP_TIMEOUT', 1800),
     ],
 

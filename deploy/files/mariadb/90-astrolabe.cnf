@@ -1,0 +1,10 @@
+# AstroLabe (deploy/files/mariadb/90-astrolabe.cnf) → /etc/mysql/mariadb.conf.d/
+[mysqld]
+# Only the app on this server talks to the database.
+bind-address = 127.0.0.1
+# CX33 (8 GB): the whole database (~1.9 GB, almost all GeoNames) stays in memory.
+innodb_buffer_pool_size = 3G
+innodb_log_file_size = 512M
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+max_connections = 100

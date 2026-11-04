@@ -1,0 +1,19 @@
+# AstroLabe (deploy/files/systemd/astrolabe-offsite.service): copies the encrypted
+# backups to the Hetzner Storage Box (deploy/bin/backup-offsite.sh).
+[Unit]
+Description=AstroLabe off-site copy of the backups
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=__OFFSITE_ENV__
+
+[Service]
+Type=oneshot
+User=__RUN_USER__
+Group=__RUN_USER__
+EnvironmentFile=__OFFSITE_ENV__
+Environment=APP_DIR=__APP_DIR__
+ExecStart=__APP_DIR__/deploy/bin/backup-offsite.sh
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true

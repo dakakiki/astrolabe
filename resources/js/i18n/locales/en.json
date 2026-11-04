@@ -2104,7 +2104,8 @@
                 "storage": "File storage",
                 "queue": "Queue worker",
                 "scheduler": "Scheduler (cron)",
-                "backup": "Backup"
+                "backup": "Backup",
+                "backup_offsite": "Off-site backup copy"
             },
             "ok": "OK",
             "failing": "Failing",

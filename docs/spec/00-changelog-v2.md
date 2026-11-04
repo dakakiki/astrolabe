@@ -317,6 +317,14 @@ Korisnik: „Kreni sa Fazom 9c — PWA za klijente.“ — podrazumevane vrednos
 
 Odluke donete usput (detalji u dokumentu 12): push po uređaju posle prijave, vezan za sesiju portala; kanal mejl / push / oba, prvi uređaj menja mejl u oba, push bez uređaja ili bez isporuke ide mejlom, kanali po stanju u trenutku slanja u red; push za sve događaje iz 9b, opšti naslovi, „Today“ / „Tomorrow“ samo dok ne može da zastari, bez imena prakse; `renotify` za isti termin; samo HTTPS adrese poznatih push servisa; 404 / 410 briše pretplatu, 5 s po zahtevu i 40 s po obaveštenju; najviše 10 uređaja, ponovna prijava zadržava push, druga osoba ga gasi; opoziv gasi push samo bez druge aktivne veze; pretplata nepoznata portalu ili sa starim ključem se ukida u pregledaču; service worker samo u produkciji na bezbednom origin-u; AstroLabe kao instalabilna aplikacija; „Let the client know …“ u kalendaru; `portal:push-keys`; lokalno `OPENSSL_CONF` na Windows-u.
 
+## Plan 8d — produkcija, odluke o hostingu (4. 11. 2026)
+
+Hosting i produkcija se od 4. 11. 2026 vode u posebnoj sesiji, odvojeno od funkcionalnosti. Korisnik je izabrao sve preporuke: korake na serveru radi Claude preko SSH-a (poseban ed25519 ključ, tajne nikad u chatu, na kraju bez prijave kao `root`, Claudov ključ samo na korisniku `deploy` bez `sudo`-a); Hetzner Storage Box BX11 odmah za kopiju šifrovanih backup-a (`rsync`, istih 14 noći); UptimeRobot Free kao spoljni monitor na `/api/v1/health`; skripte i konfiguracija u repou (`deploy/`) sa proverom u CI-ju pre nego što server postoji. Server, DNS i adrese (pošiljalac, operater, admin nalog, Let's Encrypt) još nisu spremni — korisnik javlja. Izmene:
+
+- 06: „Pouzdanost“ — worker kao systemd jedinica (umesto „systemd ili Supervisor“); u 8b delu kopija van servera na Storage Box (ogledalo 14 noći, zaštita od praznog ogledala, stavka `backup_offsite` u `/api/v1/health`) i probni restore pre bete; „Posmatranje sistema“ — UptimeRobot kao spoljni monitor.
+
+Van specifikacije: `docs/deployment.md` (odluke, šta korisnik priprema, koraci `deploy/provision.sh`, `.env`, redosled, backup), `docs/STATUS.md` („Plan 8d“), `deploy/` (nov folder), CI posao „Deploy scripts“.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.
