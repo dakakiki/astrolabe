@@ -139,8 +139,7 @@ async function dismissPrivacyNotice() {
                         :exact-active-class="item.exact ? 'router-link-active' : ''"
                         :active-class="item.exact ? '' : 'router-link-active'"
                     >
-                        <span class="ico" aria-hidden="true">{{ item.icon }}</span
-                        >{{ t(item.label) }}
+                        <span class="ico" aria-hidden="true">{{ item.icon }}</span>{{ t(item.label) }}
                     </RouterLink>
                 </template>
             </nav>

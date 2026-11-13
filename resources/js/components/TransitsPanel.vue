@@ -266,8 +266,7 @@ const dateOf = (iso) => formatDateTime(iso, locale.value, report.value.timezone,
                                     <span
                                         class="mr-1.5 inline-block w-4 text-center text-base text-link"
                                         aria-hidden="true"
-                                        >{{ glyph(contact.transit) }}</span
-                                    >{{ labels.point(contact.transit) }}
+                                        >{{ glyph(contact.transit) }}</span>{{ labels.point(contact.transit) }}
                                     <abbr
                                         v-if="retrograde[contact.transit]"
                                         class="ml-0.5 font-mono text-warn no-underline"
@@ -287,8 +286,7 @@ const dateOf = (iso) => formatDateTime(iso, locale.value, report.value.timezone,
                                         class="mr-1.5 inline-block w-4 text-center text-ink-2"
                                         :class="isAngle(contact.natal) ? 'font-mono text-[10px]' : 'text-base'"
                                         aria-hidden="true"
-                                        >{{ glyph(contact.natal) }}</span
-                                    >{{ labels.point(contact.natal) }}
+                                        >{{ glyph(contact.natal) }}</span>{{ labels.point(contact.natal) }}
                                 </td>
                                 <td class="text-right font-mono whitespace-nowrap">{{ formatOrb(contact.orb) }}</td>
                                 <td class="text-xs text-ink-3">

@@ -47,8 +47,7 @@ const isAngle = (key) => !BODY_GLYPHS[key];
                         class="mr-1.5 inline-block w-4 text-center text-link"
                         :class="isAngle(contact.a) ? 'font-mono text-[10px]' : 'text-base'"
                         aria-hidden="true"
-                        >{{ glyph(contact.a) }}</span
-                    >{{ labels.point(contact.a) }}
+                        >{{ glyph(contact.a) }}</span>{{ labels.point(contact.a) }}
                 </th>
                 <td class="whitespace-nowrap" :class="`asp-${contact.type}`">
                     <span class="aspect-glyph mr-1.5 text-base" aria-hidden="true">{{
@@ -61,8 +60,7 @@ const isAngle = (key) => !BODY_GLYPHS[key];
                         class="mr-1.5 inline-block w-4 text-center text-ink-2"
                         :class="isAngle(contact.b) ? 'font-mono text-[10px]' : 'text-base'"
                         aria-hidden="true"
-                        >{{ glyph(contact.b) }}</span
-                    >{{ labels.point(contact.b) }}
+                        >{{ glyph(contact.b) }}</span>{{ labels.point(contact.b) }}
                 </td>
                 <td class="text-right font-mono whitespace-nowrap">{{ formatOrb(contact.orb) }}</td>
             </tr>

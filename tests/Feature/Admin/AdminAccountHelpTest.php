@@ -106,7 +106,10 @@ class AdminAccountHelpTest extends TestCase
         $this->assertTrue(AuditLog::query()->where('event', AuditEvent::LoginFailed)->where('user_id', $this->astrologer->id)->get()
             ->contains(fn (AuditLog $entry) => ($entry->properties['suspended'] ?? false) === true));
 
-        // A session that still existed somewhere is refused too.
+        // A session that still existed somewhere is refused too. It is the astrologer's own
+        // session, not the one the admin's requests above left behind: since Sanctum 4.4 a
+        // password hash stored for another user ends the session (401) before the check.
+        $this->flushSession();
         $this->actingAs($this->astrologer->refresh())->getJson('/api/v1/clients')->assertForbidden()->assertJsonPath('code', 'account_suspended');
 
         $this->asAdmin()->deleteJson("/api/v1/admin/astrologers/{$this->astrologer->id}/suspension")->assertOk()->assertJsonPath('data.suspended_at', null);
