@@ -265,7 +265,7 @@ Hosting i produkcija se od 4. 11. 2026 vode u **posebnoj sesiji**, odvojeno od f
 3. **UptimeRobot Free** na `https://app.astrolabe.online/api/v1/health` (i `https://portal.astrolabe.online/manifest.webmanifest`), alarm na adresu van domena.
 4. **`deploy/` odmah**, sa shellcheck-om i proverom Nginx-a u CI-ju.
 
-**Još nije spremno — korisnik javlja:** Hetzner (još ništa: Cloud projekat, Webhosting M, Storage Box, AVV); gde su DNS zapisi za `astrolabe.online`; adrese — pošiljalac, operater i UptimeRobot, admin nalog, Let's Encrypt (predlog je u `docs/deployment.md`, „Šta korisnik priprema“). I dalje važi **„nemoj pokretati deployment, server nije spreman“**: ništa na serveru, DNS-u ni u konzolama dok korisnik ne kaže da je server spreman i ne da pristup.
+**Još nije spremno — korisnik javlja (13. 11. 2026: „verovatno sledeće nedelje“):** Hetzner (još ništa: Cloud projekat, Webhosting M, Storage Box, AVV). **CX33** je 13. 11. 2026 na sajtu označen kao trenutno nedostupan, sada 8,99 EUR i samo Nürnberg / Helsinki. Preporuka: Nürnberg, a ako ga nema, CPX22 za betu (detalji: `docs/deployment.md`, „Dostupnost CX33“); gde su DNS zapisi za `astrolabe.online`; adrese — pošiljalac, operater i UptimeRobot, admin nalog, Let's Encrypt (predlog je u `docs/deployment.md`, „Šta korisnik priprema“). I dalje važi **„nemoj pokretati deployment, server nije spreman“**: ništa na serveru, DNS-u ni u konzolama dok korisnik ne kaže da je server spreman i ne da pristup.
 
 **Urađeno bez servera (4. 11. 2026):**
 

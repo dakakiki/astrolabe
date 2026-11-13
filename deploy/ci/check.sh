@@ -156,10 +156,13 @@ fi
 # --- 4. .env helpers ----------------------------------------------------------
 env_file="$work/test.env"
 printf 'APP_NAME=AstroLabe\nMAIL_PASSWORD=\nMAIL_PASSWORD_OLD=keep\n' >"$env_file"
-set_env "$env_file" MAIL_PASSWORD 'p@ss word#$1\x'
+# A literal dollar sign and backslash, on purpose.
+# shellcheck disable=SC2016
+tricky='p@ss word#$1\x'
+set_env "$env_file" MAIL_PASSWORD "$tricky"
 set_env "$env_file" BACKUP_KEY 'base64:AbC+/9=='
-check "a value with spaces and symbols is quoted" "MAIL_PASSWORD='p@ss word#\$1\\x'" "$(grep '^MAIL_PASSWORD=' "$env_file")"
-check "it reads back unchanged" 'p@ss word#$1\x' "$(get_env "$env_file" MAIL_PASSWORD)"
+check "a value with spaces and symbols is quoted" "MAIL_PASSWORD='$tricky'" "$(grep '^MAIL_PASSWORD=' "$env_file")"
+check "it reads back unchanged" "$tricky" "$(get_env "$env_file" MAIL_PASSWORD)"
 check "a similar name is left alone" "keep" "$(get_env "$env_file" MAIL_PASSWORD_OLD)"
 check "a new key is added once" "1 base64:AbC+/9==" "$(grep -c '^BACKUP_KEY=' "$env_file") $(get_env "$env_file" BACKUP_KEY)"
 
