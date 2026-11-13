@@ -200,7 +200,10 @@ class BackupTest extends TestCase
         $this->assertArrayNotHasKey('backup_offsite', app(HealthCheck::class)->run());
 
         // deploy/bin/backup-offsite.sh touches this file after each copy to the Storage Box.
-        $marker = $this->path.'/../offsite-'.basename($this->path).'.ok';
+        // Next to the backup folder, which this test never creates: on Linux a path through
+        // "backups-…/.." only resolves when that folder exists (Windows shortens it as text).
+        $marker = dirname($this->path).'/offsite-'.basename($this->path).'.ok';
+        File::ensureDirectoryExists(dirname($marker));
         config(['astrolabe.backup.offsite_marker' => $marker]);
 
         try {
