@@ -99,15 +99,18 @@ class LegalDocumentsTest extends TestCase
 
     public function test_an_earlier_version_stays_readable(): void
     {
+        $before = LegalDocuments::currentVersions()['terms'];
         $this->newTerms();
 
-        $this->getJson('/api/v1/legal/terms')
+        $versions = $this->getJson('/api/v1/legal/terms')
             ->assertJsonPath('data.version', '2026-12-01')
-            ->assertJsonPath('data.versions.*.version', ['2026-12-01', '2026-10-09']);
+            ->json('data.versions.*.version');
+        $this->assertSame(['2026-12-01', $before], array_slice($versions, 0, 2));
+        $this->assertContains('2026-10-09', $versions);
 
-        $this->getJson('/api/v1/legal/terms?version=2026-10-09')
+        $this->getJson('/api/v1/legal/terms?version='.$before)
             ->assertOk()
-            ->assertJsonPath('data.version', '2026-10-09')
+            ->assertJsonPath('data.version', $before)
             ->assertJsonPath('data.current', false);
     }
 
@@ -129,7 +132,7 @@ class LegalDocumentsTest extends TestCase
         $rows = LegalAcceptance::query()->where('user_id', $user->id)->orderBy('document')->get();
 
         $this->assertSame(['dpa', 'privacy', 'terms'], $rows->pluck('document')->all());
-        $this->assertSame(['2026-10-09'], $rows->pluck('version')->unique()->values()->all());
+        $this->assertEquals(LegalDocuments::currentVersions(), $rows->pluck('version', 'document')->all());
         $this->assertSame('203.0.113.9', $rows->first()->ip_address);
 
         $audit = AuditLog::query()->where('event', AuditEvent::LegalAccepted)->sole();
@@ -139,7 +142,7 @@ class LegalDocumentsTest extends TestCase
         $this->getJson('/api/v1/me')
             ->assertJsonPath('data.user.legal.pending', [])
             ->assertJsonPath('data.user.legal.updated', [])
-            ->assertJsonPath('data.user.legal.accepted.terms.version', '2026-10-09');
+            ->assertJsonPath('data.user.legal.accepted.terms.version', LegalDocuments::currentVersions()['terms']);
     }
 
     public function test_registration_needs_the_terms_accepted_in_the_current_versions(): void

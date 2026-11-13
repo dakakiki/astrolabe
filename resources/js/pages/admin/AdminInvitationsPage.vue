@@ -12,7 +12,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useToastStore } from '@/stores/toast';
 
 /**
- * Closed-beta invitations from the admin (Phase 8c) — the same as the
+ * Invitations to register from the admin (Phase 8c) — the same as the
  * `invitations:*` commands. A new invitation's link is shown once.
  */
 const { t, locale } = useI18n();

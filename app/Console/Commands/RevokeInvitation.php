@@ -15,7 +15,7 @@ class RevokeInvitation extends Command
 {
     protected $signature = 'invitations:revoke {email : The address the invitation was sent to}';
 
-    protected $description = 'Revoke an open closed-beta invitation';
+    protected $description = 'Revoke an open registration invitation';
 
     public function handle(): int
     {

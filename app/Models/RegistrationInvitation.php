@@ -9,9 +9,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 /**
- * An invitation to create an account during the closed beta (Phase 8a). The
- * operator sends it from the command line (`invitations:send`); the person
- * registers through the link with the same email address, once.
+ * An invitation to create an account (Phase 8a). The operator sends it from
+ * the command line (`invitations:send`) or the admin; the person registers
+ * through the link with the same email address, once. Required only while
+ * registration is "invite"; with "open" it just fills in the address.
  *
  * Only the token's SHA-256 hash is stored, so the database alone opens nothing.
  */

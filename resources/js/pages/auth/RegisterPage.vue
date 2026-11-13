@@ -25,11 +25,13 @@ const form = useForm({
 });
 
 /*
- * Closed beta: the server says whether accounts are by invitation and, for the
- * link in the invitation email, whether it still works and for which address.
+ * The server says whether accounts are by invitation ("invite" mode) and, for
+ * the link in the invitation email, whether it still works and for which
+ * address. With open registration a link that no longer works is simply ignored.
  */
 const mode = ref(null);
 const invitation = ref(null);
+const invited = computed(() => invitation.value?.status === 'valid');
 const loadFailed = ref(false);
 // The Terms, the DPA and the privacy policy in force, accepted in exactly these versions (Phase 8c).
 const legal = ref([]);
@@ -104,19 +106,21 @@ async function reloadLegal() {
 
     <template v-else-if="blocked">
         <div class="notice n-info mb-4">
-            <strong>{{ t('auth.register.closedBeta') }}</strong>
             {{ t(`auth.register.invitation.${blocked}`) }}
         </div>
     </template>
 
     <template v-else>
         <div class="sub">
-            {{ invitation ? t('auth.register.invitedSub') : t('auth.register.sub') }}
+            {{ invited ? t('auth.register.invitedSub') : t('auth.register.sub') }}
         </div>
 
         <form novalidate @submit.prevent="submit">
             <p v-if="form.errors.value.invitation" class="notice n-warn mb-4" role="alert">
                 {{ form.errors.value.invitation }}
+            </p>
+            <p v-if="form.errors.value.registration" class="notice n-warn mb-4" role="alert">
+                {{ form.errors.value.registration }}
             </p>
             <FormField v-slot="{ id, aria }" :label="t('auth.fields.name')" :error="form.errors.value.name">
                 <input :id="id" v-model="form.data.name" v-bind="aria" class="input" autocomplete="name" required />
@@ -125,7 +129,7 @@ async function reloadLegal() {
                 v-slot="{ id, aria }"
                 :label="t('auth.fields.email')"
                 :error="form.errors.value.email"
-                :hint="invitation ? t('auth.register.emailFromInvitation') : null"
+                :hint="invited ? t('auth.register.emailFromInvitation') : null"
             >
                 <input
                     :id="id"
@@ -134,7 +138,7 @@ async function reloadLegal() {
                     class="input"
                     type="email"
                     autocomplete="email"
-                    :readonly="Boolean(invitation)"
+                    :readonly="invited"
                     required
                 />
             </FormField>

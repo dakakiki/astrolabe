@@ -230,6 +230,8 @@ Izvođenje (dogovoreno 25. 9. 2026): tri dela sa commit-om, zelenim CI-jem i ta�
 
 Kriterijum završetka: proizvod je stabilan za ograničeni broj pravih korisnika i njihovih podataka.
 
+> **Izmena 13. 11. 2026 (korisnik): zatvorene bete nema.** 8e (testeri po pozivu) otpada; registracija je otvorena, a posle 8d (produkcija), licence, konačnih pravnih tekstova i naplate sa trialom od 14 dana (Faza 9, dokument 07 „Trial“) aplikacija se pušta javno. Prvih nekoliko nedelja bez reklama ima ulogu bete: dugme Feedback, admin i ispravke po povratnim informacijama.
+
 > Izmena 9. 10. 2026 (korisnik): posle 8c2 beta se za sada ostavlja po strani — 8d (podizanje produkcije) i 8e (testeri) čekaju. Prvo se radi klijentski portal iz Faze 9 (vidi ispod i dokument 12).
 
 Izvođenje (korisnik, 8. 10. 2026): prvo lokalno, bez produkcionog servera — **8a** bezbednost i audit, **8b** životni ciklus podataka (izvoz prakse, pravo brisanje klijenta, brisanje naloga, pravila čuvanja, backup i restore), **8c** admin i alati za betu (admin deo za operatera — pregled astrologa, audit log, pozivi, pomoć nalogu, stanje sistema, povratne informacije; dogovoreno 8. 10. 2026 posle 8a — zatim pravne strane, performanse, Linux `swetest` u CI-ju); zatim **8d** podizanje produkcije i **8e** beta sa testerima. Interfejs za betu ostaje na engleskom. Licenca, Hetzner nalog, razgovori i pravnik se pokreću paralelno.
@@ -257,6 +259,8 @@ Izvođenje (korisnik, 8. 10. 2026): prvo lokalno, bez produkcionog servera — *
 Ova faza se planira detaljno tek nakon bete. Obim se određuje prema tome šta su korisnici stvarno tražili.
 
 > Izmena 9. 10. 2026 (korisnik): klijentski portal i portal booking se rade **pre bete**, a posle njih PWA za klijente — plan, model podataka i kriterijumi su u dokumentu 12. Tri dela sa tačkom za pauzu: **9a** pristup i pregled (pozivnica, prijava linkom ili kodom, termini i deljeni sadržaj, brend prakse — ime, logo, jedna boja), **9b** zakazivanje (radno vreme, pravila, slobodni termini, rezervacija, pomeranje i otkazivanje), **9c** PWA za klijente (instalacija, service worker bez privatnih podataka, web push po izboru). Ostatak Faze 9 (Freemius, onboarding, PDF karte, javna booking stranica, integracije kalendara, analitika, jezici) planira se kasnije.
+
+> Izmena 13. 11. 2026 (korisnik): bez zatvorene bete, pa **naplata sa trialom (Freemius) ide pre puštanja** — trial od 14 dana bez kartice, sa ograničenjima (5 klijenata, 30 proračuna dnevno, bez snimka karte na konsultaciji i bez poziva u portal), posle njega praksa samo za čitanje dok se ne izabere paket (dokument 07, „Trial“). Za početak treba putanja do projekta sa postojećom Freemius integracijom.
 
 > **9a — urađeno 9. 10. 2026:** pozivnica sa profila klijenta, prijava linkom ili kodom, sesije portala odvojene od aplikacije, ekrani Home / Appointments / Shared / Profile / Security, izbor prakse, Settings → Branding (ime, logo, boja sa proverom kontrasta), audit, pravila čuvanja, izvoz. Detalji u dokumentu 12 („Stanje posle 9a“) i dokumentu 02. Sledi **9b — zakazivanje**.
 

@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 
 /**
  * What the registration page needs before showing the form: whether accounts
- * are by invitation (closed beta), and, for an invitation link, whether it
+ * are by invitation ("invite" mode), and, for an invitation link, whether it
  * still works and which address it is for. The address is told only to
  * whoever holds a working link.
  */

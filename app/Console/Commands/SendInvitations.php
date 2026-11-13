@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
 
 /**
- * Invites people to the closed beta (Phase 8a): one link per address, valid
+ * Invites people to register (Phase 8a): one link per address, valid
  * once and for a limited time. A new invitation replaces the address's
  * earlier open one. The link is printed too, in case the email does not arrive.
  * The admin's Invitations screen does the same (Phase 8c).
@@ -20,7 +20,7 @@ class SendInvitations extends Command
         {--days= : How long the link works (default: astrolabe.registration.invitation_days)}
         {--note= : A private note, e.g. who recommended the person}';
 
-    protected $description = 'Email closed-beta invitations to register';
+    protected $description = 'Email invitations to register';
 
     public function handle(SendInvitation $send): int
     {

@@ -75,7 +75,7 @@
             "forgot": "Forgot your password?",
             "noAccount": "No account yet?",
             "register": "Create one",
-            "closedBeta": "AstroLabe is in a closed beta: accounts are by invitation."
+            "invitationOnly": "Accounts are by invitation for now."
         },
         "register": {
             "title": "Create your account",
@@ -85,8 +85,7 @@
             "submit": "Create account",
             "haveAccount": "Already have an account?",
             "login": "Sign in",
-            "closedBeta": "Closed beta.",
-            "invitedSub": "You are invited to the closed beta. Set up your practice in a minute.",
+            "invitedSub": "You are invited to AstroLabe. Set up your practice in a minute.",
             "emailFromInvitation": "The address your invitation was sent to.",
             "invitation": {
                 "missing": "Accounts are by invitation for now. Please use the link from your invitation email.",
@@ -2051,7 +2050,7 @@
         },
         "invitations": {
             "title": "Invitations",
-            "sub": "The closed beta: an account only through an invitation. The same as `php artisan invitations:send`.",
+            "sub": "Invite someone personally: the link fills in their address on the registration page. The same as `php artisan invitations:send`.",
             "email": "Email address",
             "note": "Note",
             "noteHint": "Private, e.g. who recommended the person.",
@@ -2159,7 +2158,7 @@
         },
         "versionLine": "Version {version} · in force from {date}",
         "draftTitle": "Draft under legal review.",
-        "draftBody": "A lawyer is still reviewing this text, and it may change before the beta. The parts in [brackets] are filled in then.",
+        "draftBody": "A lawyer is still reviewing this text, and it may change before launch. The parts in [brackets] are filled in then.",
         "earlierVersion": "This is an earlier version.",
         "readCurrent": "Read the current one",
         "contents": "Contents",

@@ -14,7 +14,7 @@ Route::prefix('api/v1/auth')->middleware(['throttle:auth', 'auth'])->group(funct
         ->name('other-sessions.destroy');
 });
 
-// Before registering: open or by invitation (closed beta), and the invitation's state.
+// Before registering: open or by invitation, and the invitation's state.
 Route::get('/api/v1/auth/registration', [RegistrationController::class, 'show'])
     ->middleware('throttle:auth')
     ->name('registration.show');

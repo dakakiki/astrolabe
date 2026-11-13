@@ -38,10 +38,15 @@ before starting a phase. The user communicates in Serbian.
 - SPA auth is the Sanctum cookie session; `auth:sanctum` + `verified` + `workspace` protect
   practice data. Session-based helper routes live in `routes/web.php` under the same prefix.
 - Mail goes to `storage/logs/laravel.log` locally (`MAIL_MAILER=log`).
-- Closed beta: with `REGISTRATION_MODE=invite` (the default) `CreateNewUser` needs a valid
-  `RegistrationInvitation` for the same address and uses it up under `lockForUpdate`. Invitations
-  come only from `php artisan invitations:send`; only the token's hash is stored. Tests that
-  register create one with `RegistrationInvitation::issue()`.
+- Registration is open (`REGISTRATION_MODE=open`, the default since the closed beta was dropped on
+  13 Nov 2026); a working invitation for the same address is still used up, any other is ignored.
+  With `REGISTRATION_MODE=invite` (a server not open to the public yet) `CreateNewUser` needs a
+  valid `RegistrationInvitation` for the same address and uses it up under `lockForUpdate`.
+  Invitations come from `php artisan invitations:send` or the admin; only the token's hash is
+  stored. A test of invite-only behaviour sets the mode itself. One IP address makes at most
+  `REGISTRATION_PER_IP_HOUR` accounts an hour (refused forms do not count).
+- The trial (14 days, limited) and paid plans come with the billing phase; the agreed rules are in
+  `docs/spec/07-sales-and-billing.md` ("Trial"). Until then nothing limits a practice.
 - Two-factor sign-in is Fortify's TOTP (`confirm` + `confirmPassword`). The SPA gets
   `two_factor: true` from login and then posts the code to `/auth/two-factor-challenge`; Fortify
   takes each code once, so a test that signs in twice in one window uses the next code.

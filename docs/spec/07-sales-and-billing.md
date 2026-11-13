@@ -3,18 +3,20 @@
 > Verzija 2. Izmene: billing je pomeren na Fazu 9, iza zatvorene bete; granice paketa vezane su za astrološke funkcije; dodata napomena o validaciji cena.
 >
 > **Izmena 25. 9. 2026 (odluka korisnika): Freemius umesto Paddle-a.** Freemius se već koristi za drugi proizvod iste radnje, pa su nalog i isplate na jednom mestu. Postavka se ne menja: provajder je Merchant of Record, aplikacija vodi sopstvenu projekciju pretplate potvrđenu događajima provajdera. Poređenje troškova je u sekciji „Troškovi“.
+>
+> **Izmena 13. 11. 2026 (odluka korisnika): bez zatvorene bete.** Pozivi i beta se uklanjaju; aplikacija se pušta odmah, sa otvorenom registracijom i ograničenim trialom od 14 dana bez kartice, posle kog je praksa samo za čitanje dok se ne izabere paket. Nema besplatnog paketa. Pravila su u sekciji „Trial“.
 
 ## Kada se ovo implementira
 
 Integracija naplate je **P2 prioritet i pripada Fazi 9** prema izmenjenom dokumentu 04.
 
-Razlog pomeranja: naplata nema smisla pre nego što se potvrdi da neko želi da plati. Zatvorena beta (Faza 8) radi bez naplate i bez kartice, što je već predviđeno ovim dokumentom. Tek nakon bete se zna:
+Prvobitni razlog pomeranja: naplata nema smisla pre nego što se potvrdi da neko želi da plati, pa je zatvorena beta (Faza 8) trebalo da radi bez naplate i bez kartice. **Od 13. 11. 2026 zatvorene bete nema**, pa trial i naplata moraju biti gotovi **pre puštanja** — bez njih trial istekne, a niko ne može da plati. Na pitanja koja je trebalo da reši beta sada odgovaraju prvi korisnici:
 
 - da li su paketi ispravno postavljeni;
 - koje funkcije stvarno razdvajaju Solo od Professional korisnika;
 - da li je raspon cena realan za ovo tržište.
 
-Koraci pre lansiranja sa kraja ovog dokumenta izvršavaju se u Fazi 9, ne ranije. Rano se proverava samo da li postojeći Freemius nalog može da doda SaaS proizvod (vidi „Otvorene provere“).
+Koraci pre lansiranja sa kraja ovog dokumenta izvršavaju se u Fazi 9, pre puštanja. Rano se proverava da li postojeći Freemius nalog može da doda SaaS proizvod i da li trial može bez kartice (vidi „Otvorene provere“).
 
 ## Potvrđena poslovna postavka
 
@@ -50,10 +52,23 @@ Proizvod se prodaje kao periodična SaaS pretplata:
 - mesečni billing;
 - godišnji billing;
 - godišnja cena odgovara približno deset mesečnih uplata;
-- 14-dnevni besplatni trial;
-- nema trajnog free paketa;
-- zatvorena beta može biti bez naplate i bez kartice;
-- tokom javnog triala zahtev za karticom može biti konfigurabilan na osnovu rezultata bete.
+- 14-dnevni besplatni trial, ograničen, **bez kartice** (odluka 13. 11. 2026; vidi „Trial“);
+- nema trajnog free paketa — posle triala praksa je samo za čitanje dok se ne izabere paket.
+
+## Trial
+
+Odluka korisnika, 13. 11. 2026 (sve preporuke prihvaćene):
+
+- **Trajanje:** 14 dana od registracije prakse. Bez kartice i bez ikakvih podataka za plaćanje; kada trial istekne, ništa se ne naplaćuje.
+- **Šta radi tokom triala:** sve funkcije, uz ograničenja:
+  - najviše **5 klijenata** po praksi;
+  - najviše **30 proračuna dnevno** — broji se samo pokretanje engine-a (nova ili izmenjena karta, drugi sistem kuća, tranziti, kalendar neba); otvaranje već izračunate karte se ne broji;
+  - **bez snimanja:** nema snimka karte na konsultaciji (a kasnije ni izvoza karte u PDF);
+  - **bez poziva klijenata u portal** (pa ni zakazivanja kroz portal) — mejlovi trećim licima idu tek sa plaćenim paketom.
+- **Posle triala, bez plaćenog paketa:** praksa je **samo za čitanje** (status `expired`): prijava, pregled svega, izvoz svih podataka i brisanje prakse rade; dodavanje i izmene ne. Izbor paketa otvara praksu ponovo, sa svim podacima. Podaci se ne brišu zato što je trial istekao.
+- **Otvoreno (odlučuje se pri implementaciji, uz korisnika):** koliko dugo se čuva praksa bez paketa posle triala i kada joj se šalju podsetnici; da li se broje i arhivirani klijenti (predlog: da — inače arhiva zaobilazi ograničenje); da kartica tranzita na dashboardu ne troši dnevni broj proračuna (predlog: ne broji se ili se kešira); dan za brojanje (predlog: kalendarski dan astrologa); šta se dešava sa podsetnicima i mejlovima u praksi koja je samo za čitanje; da li admin može da produži trial (npr. ličnim pozivom).
+
+Pozivi za registraciju ostaju (admin → Invitations, `invitations:send`), ali nisu uslov: popunjavaju adresu i beleže ko je pozvan. Registracija je otvorena (`REGISTRATION_MODE=open`); jedna IP adresa pravi najviše 5 naloga na sat.
 
 ## Početni paketi
 
@@ -82,7 +97,7 @@ Sa uvođenjem proračunskog modula, funkcije koje prirodno razdvajaju pakete su:
 
 Osnovna karta namerno ostaje u najjeftinijem paketu. Ona je razlog zašto se proizvod bira; naplaćuju se dubina i organizacija oko nje.
 
-Tabela je nastala pre Faze 7. Kalendar neba, sinastrija i kompozit, uplate i email podsetnici (7a–7e) još nisu raspoređeni po paketima — to je pitanje za validacione razgovore i betu.
+Tabela je nastala pre Faze 7. Kalendar neba, sinastrija i kompozit, uplate i email podsetnici (7a–7e) još nisu raspoređeni po paketima — to je pitanje za validacione razgovore i prve korisnike.
 
 ### Rizik cena i Studio paketa
 
@@ -147,7 +162,7 @@ Konkretni Freemius event nazivi potvrđuju se prema aktuelnoj API dokumentaciji 
 
 Potrebno je definisati dozvoljene statuse i njihov uticaj na workspace, na primer:
 
-- `trialing` — pun pristup tokom triala;
+- `trialing` — sve funkcije uz ograničenja triala (vidi „Trial“);
 - `active` — pun pristup prema paketu;
 - `past_due` — ograničeni grace period i upozorenje;
 - `paused` — pristup prema definisanoj politici;
@@ -171,7 +186,7 @@ Finalna grace-period, read-only i data-retention pravila moraju biti potvrđena 
 Pre Faze 9, u postojećem Freemius nalogu:
 
 1. da li nalog može da doda proizvod tipa SaaS (ne WordPress dodatak) i sa kojim uslovima;
-2. da li javni trial za SaaS može bez kartice, ako se posle bete tako odluči;
+2. da li trial za SaaS može bez kartice (odlučeno 13. 11. 2026: trial je bez kartice);
 3. kako se proverava autentičnost webhook događaja i koji su tačni nazivi događaja za pretplate — odgovor je verovatno već u integraciji drugog projekta.
 
 ## Koraci pre lansiranja

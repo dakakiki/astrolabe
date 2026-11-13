@@ -51,7 +51,7 @@ Ovo je konceptualni model, ne konačna lista migracija. Nazivi i kolone se potvr
 
 ### `registration_invitations` (nije tenant)
 
-Poziv za registraciju u zatvorenoj beti (Faza 8a); pravi ga operater komandom `invitations:send`.
+Poziv za registraciju (Faza 8a); pravi ga operater komandom `invitations:send` ili iz admina. Obavezan samo dok je `REGISTRATION_MODE=invite`; sa otvorenom registracijom (od 13. 11. 2026) popunjava adresu i beleži se kao iskorišćen.
 
 - `id`
 - `email` — mala slova; registracija mora biti na tu adresu

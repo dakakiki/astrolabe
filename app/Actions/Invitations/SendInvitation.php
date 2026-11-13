@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Notification;
 use Throwable;
 
 /**
- * Invites one address to the closed beta (Phase 8a), from `invitations:send` or
+ * Invites one address to register (Phase 8a), from `invitations:send` or
  * the admin's Invitations screen (Phase 8c): a new link replaces the address's
  * open one, the email goes out at once, and the link comes back too — in case
  * the email does not arrive.

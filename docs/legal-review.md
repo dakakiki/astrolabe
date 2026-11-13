@@ -1,14 +1,14 @@
 # Pravni tekstovi — za pregled pravnika
 
-Stanje **9. 10. 2026** (Faza 8c2). Nacrti su na engleskom (interfejs bete je engleski) i u aplikaciji su označeni kao nacrt („Draft under legal review“). Ovaj dokument kaže šta pravnik dobija, šta treba popuniti i koja pitanja su otvorena.
+Stanje **9. 10. 2026** (Faza 8c2), dopunjeno **13. 11. 2026** (bez zatvorene bete — otvorena registracija i trial; pitanja 23–27). Nacrti su na engleskom (interfejs je za sada engleski) i u aplikaciji su označeni kao nacrt („Draft under legal review“). Ovaj dokument kaže šta pravnik dobija, šta treba popuniti i koja pitanja su otvorena.
 
 ## Šta postoji
 
 | Dokument | Fajl | U aplikaciji |
 |---|---|---|
-| Terms of Service | `resources/legal/terms/2026-10-09.md` | `/legal/terms` |
+| Terms of Service | `resources/legal/terms/2026-11-13.md` (prethodna: `2026-10-09.md`, za zatvorenu betu) | `/legal/terms` |
 | Data Processing Agreement (ugovor o obradi, čl. 28 GDPR / čl. 45 ZZPL) | `resources/legal/dpa/2026-10-09.md` | `/legal/dpa` |
-| Privacy Policy | `resources/legal/privacy/2026-10-09.md` | `/legal/privacy` |
+| Privacy Policy | `resources/legal/privacy/2026-11-13.md` (prethodna: `2026-10-09.md`; razlika je samo red o pozivu) | `/legal/privacy` |
 
 Strane su javne (bez prijave) i mogu se linkovati sa prezentacionog sajta. Svaka verzija ostaje čitljiva (`/legal/terms?version=2026-10-09`).
 
@@ -21,7 +21,7 @@ Strane su javne (bez prijave) i mogu se linkovati sa prezentacionog sajta. Svaka
 - Ako se tekst promenio dok je formular bio otvoren, registracija se odbija i traži ponovno čitanje.
 - **Nova verzija Terms ili DPA:** praksa se zatvara dok je astrolog ne prihvati (ekran „Please review the updated terms“). Izvoz podataka i brisanje prakse ostaju dostupni i bez prihvatanja.
 - **Nova verzija Privacy Policy:** samo obaveštenje u aplikaciji („Our Privacy Policy changed on …“). Ništa se ne zatvara, a čuva se ko ju je video.
-- Nova verzija se objavljuje kao nov fajl sa datumom u nazivu, pregleda se kao kod i ide uz deploy. Pravnikova konačna verzija biće nova verzija, pa je svi beta testeri prihvataju ponovo.
+- Nova verzija se objavljuje kao nov fajl sa datumom u nazivu, pregleda se kao kod i ide uz deploy. Pravnikova konačna verzija biće nova verzija, pa je svi korisnici prihvataju ponovo.
 
 ## Šta treba popuniti (u tekstu u `[uglastim zagradama]`)
 
@@ -70,6 +70,16 @@ Portal se može instalirati kao aplikacija; ništa o klijentu se ne čuva na ure
 20. **Tekst obaveštenja na zaključanom ekranu:** push je opšti — naslov kao „Appointment reminder“ ili „Booking confirmed“ i vreme („Tomorrow at 2:00 PM“), **bez imena prakse**, usluge i poruka; dodir otvara portal. Da li je to dovoljno diskretno, ili i vreme treba izostaviti? Da li se sme dodati ime prakse (dokument 12 je to ostavio pravniku)?
 21. **Push servisi pregledača kao primaoci:** poruka ide preko servisa proizvođača pregledača (Google FCM za Chrome / Android, Apple za Safari, Mozilla, Microsoft za Edge). Sadržaj je šifrovan za uređaj (servis ga ne može pročitati), ali servis vidi adresu pretplate, vreme i veličinu poruke. Da li su ti servisi podobrađivači koje treba navesti u DPA (Prilog 2) i u obaveštenju za korisnike portala, ili je to prenos koji klijent sam bira uključivanjem obaveštenja u svom pregledaču?
 22. **Podaci o uređaju:** za svaki uređaj sa uključenim obaveštenjima čuvamo adresu pretplate i ključeve pregledača, opis pregledača (user agent) i vreme poslednjeg slanja; brišu se odjavom, „Sign out everywhere“, istekom sesije (30 dana), opozivom pristupa bez druge prakse i brisanjem naloga. Ne ulaze u izvoz prakse. Da li ih treba navesti u DPA Prilogu 1 (uz podatke naloga portala, pitanje 11)?
+
+### Otvorena registracija i trial (13. 11. 2026)
+
+Zatvorene bete nema: svako može da napravi nalog i dobija trial od 14 dana bez kartice, sa ograničenjima (5 klijenata, 30 proračuna dnevno, bez snimka karte na konsultaciji i bez poziva klijenata u portal); posle triala bez paketa praksa je samo za čitanje (pregled, izvoz, brisanje). Naplata ide preko Freemius-a kao prodavca (merchant of record) — pravila naplate se upisuju u Terms kada naplata bude napravljena. Nova verzija Terms (`2026-11-13`, tačke 2, 6, 7 i 8) to opisuje.
+
+23. **Potrošač ili privrednik:** Terms kažu da astrolog koristi AstroLabe u svom poslu, ne kao potrošač. Sa otvorenom registracijom može se registrovati i potrošač (npr. astrolog-hobista). Da li je izjava dovoljna, treba li polje „koristim u poslovne svrhe“, i šta važi za pravo na odustanak od ugovora na daljinu (14 dana u EU) ako se registruje potrošač?
+24. **Trial bez kartice i prelazak na plaćanje:** trial se završava bez naplate i bez automatskog produženja; plaćeni paket bira astrolog sam kroz checkout prodavca. Šta Terms moraju da kažu o trialu, ceni, obnovi, otkazivanju i povraćaju, i kako to podeliti sa uslovima prodavca (Freemius kao merchant of record prema kupcu)?
+25. **Čuvanje prakse posle triala:** praksa bez paketa ostaje samo za čitanje. Koliko dugo smemo da je čuvamo pre brisanja (predlog za razgovor: 90 dana, uz mejl 30 i 7 dana ranije), i da li to treba da piše u Terms, DPA i Privacy Policy? U njoj su podaci klijenata astrologa.
+26. **Ograničenje registracija po IP adresi:** IP adresa se čuva sat vremena u kešu da bi jedna adresa napravila najviše 5 naloga na sat. Da li je postojeći red o bezbednosnim zapisima u Privacy Policy dovoljan?
+27. **Više naloga za duži trial:** Terms (tačka 6) zabranjuju otvaranje više naloga radi dužeg triala. Da li je to u redu formulisano i šta smemo da uradimo kada to primetimo (suspenzija, brisanje)?
 
 ## Šta tekst ne sme da sadrži
 

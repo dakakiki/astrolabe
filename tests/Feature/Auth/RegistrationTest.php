@@ -28,9 +28,9 @@ class RegistrationTest extends TestCase
         return $token;
     }
 
-    private function register(array $overrides = []): TestResponse
+    private function register(array $overrides = [], array $server = []): TestResponse
     {
-        return $this->postJson('/api/v1/auth/register', $overrides + [
+        return $this->withServerVariables($server)->postJson('/api/v1/auth/register', $overrides + [
             'name' => 'Mila Vega',
             'email' => 'mila@example.com',
             'password' => 'correct-horse-battery',
@@ -103,11 +103,21 @@ class RegistrationTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_the_closed_beta_needs_an_invitation(): void
+    public function test_registration_is_open_by_default(): void
     {
+        $this->register()->assertCreated();
+
+        $this->assertDatabaseCount('users', 1);
+        $this->getJson('/api/v1/auth/registration')->assertJsonPath('data.mode', 'open');
+    }
+
+    public function test_invite_mode_needs_an_invitation(): void
+    {
+        config(['astrolabe.registration.mode' => 'invite']);
+
         $this->register()
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['invitation' => 'closed beta']);
+            ->assertJsonValidationErrors(['invitation' => 'by invitation']);
 
         $this->assertGuest();
         $this->assertDatabaseCount('users', 0);
@@ -115,6 +125,7 @@ class RegistrationTest extends TestCase
 
     public function test_the_invitation_is_used_up_and_recorded(): void
     {
+        config(['astrolabe.registration.mode' => 'invite']);
         $token = $this->invite('Mila@Example.com');
 
         // Addresses compare without regard to case.
@@ -138,6 +149,8 @@ class RegistrationTest extends TestCase
 
     public function test_an_invitation_that_does_not_work_is_refused_with_the_reason(): void
     {
+        config(['astrolabe.registration.mode' => 'invite']);
+
         $this->register(['invitation' => 'not-a-real-token'])
             ->assertJsonValidationErrors(['invitation' => 'not valid']);
 
@@ -156,17 +169,62 @@ class RegistrationTest extends TestCase
         $this->assertDatabaseCount('users', 0);
     }
 
-    public function test_open_registration_needs_no_invitation(): void
+    public function test_open_registration_uses_up_a_working_invitation_and_ignores_any_other(): void
     {
-        config(['astrolabe.registration.mode' => 'open']);
+        $token = $this->invite();
 
-        $this->register()->assertCreated();
+        $this->register(['invitation' => $token])->assertCreated();
 
-        $this->assertDatabaseCount('users', 1);
+        $invitation = RegistrationInvitation::firstOrFail();
+        $this->assertSame(RegistrationInvitation::USED, $invitation->status());
+        $this->assertSame(User::firstOrFail()->id, $invitation->user_id);
+        $this->assertTrue(AuditLog::where('event', AuditEvent::InvitationAccepted)->exists());
+
+        // A used link, a link for someone else or a made-up one does not stop anyone.
+        $this->post('/api/v1/auth/logout');
+        $this->register(['invitation' => $token, 'email' => 'second@example.com'])->assertCreated();
+        $this->post('/api/v1/auth/logout');
+        $other = $this->invite('someone.else@example.com');
+        $this->register(['invitation' => $other, 'email' => 'third@example.com'])->assertCreated();
+        $this->post('/api/v1/auth/logout');
+        $this->register(['invitation' => 'not-a-real-token', 'email' => 'fourth@example.com'])->assertCreated();
+
+        $this->assertDatabaseCount('users', 4);
+        $this->assertSame(
+            RegistrationInvitation::VALID,
+            RegistrationInvitation::where('email', 'someone.else@example.com')->firstOrFail()->status(),
+        );
+    }
+
+    public function test_one_connection_makes_only_a_few_accounts_an_hour(): void
+    {
+        config(['astrolabe.registration.accounts_per_ip_per_hour' => 2]);
+
+        // A refused form does not count.
+        $this->register(['password' => 'short'])->assertUnprocessable()->assertJsonValidationErrors('password');
+
+        foreach (['one@example.com', 'two@example.com'] as $email) {
+            $this->register(['email' => $email])->assertCreated();
+            $this->post('/api/v1/auth/logout');
+        }
+
+        $this->register(['email' => 'three@example.com'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['registration' => 'Too many new accounts']);
+        $this->assertDatabaseCount('users', 2);
+
+        // Another connection is not affected, and this one may again after an hour.
+        $this->register(['email' => 'elsewhere@example.com'], ['REMOTE_ADDR' => '203.0.113.7'])->assertCreated();
+        $this->post('/api/v1/auth/logout');
+
+        $this->travel(61)->minutes();
+        $this->register(['email' => 'three@example.com'])->assertCreated();
     }
 
     public function test_the_registration_page_learns_the_mode_and_the_invitation(): void
     {
+        config(['astrolabe.registration.mode' => 'invite']);
+
         $this->getJson('/api/v1/auth/registration')
             ->assertOk()
             ->assertJsonPath('data.mode', 'invite')

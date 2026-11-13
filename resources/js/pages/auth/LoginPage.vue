@@ -23,7 +23,7 @@ const useRecovery = ref(false);
 const code = useForm({ code: '', recovery_code: '' });
 const codeInput = ref(null);
 
-/* Closed beta: no "create one" link when accounts are by invitation. */
+/* No "create one" link when accounts are by invitation ("invite" mode). */
 const registrationOpen = ref(true);
 onMounted(async () => {
     try {
@@ -123,7 +123,7 @@ function startOver() {
             {{ t('auth.login.noAccount') }}
             <RouterLink :to="{ name: 'register' }">{{ t('auth.login.register') }}</RouterLink>
         </div>
-        <div v-else class="auth-alt">{{ t('auth.login.closedBeta') }}</div>
+        <div v-else class="auth-alt">{{ t('auth.login.invitationOnly') }}</div>
     </template>
 
     <template v-else>

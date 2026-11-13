@@ -32,7 +32,7 @@ Podaci rođenja su osetljiv lični podatak. Tretiraju se istim režimom kao zdra
 
 > Faza 8a — sigurnosna provera (implementirano 8. 10. 2026):
 >
-> - **Zatvorena registracija:** nalog samo uz poziv operatera (`REGISTRATION_MODE=invite`, dokument 02).
+> - **Registracija:** od 13. 11. 2026 otvorena (`REGISTRATION_MODE=open`), najviše 5 naloga na sat sa jedne IP adrese i potvrda mejla pre rada sa podacima; `REGISTRATION_MODE=invite` (nalog samo uz poziv operatera) ostaje za server koji još nije otvoren za javnost (dokument 02).
 > - **Prijava u dva koraka (TOTP)** po izboru, uz potvrdu lozinke za svaku promenu i rezervne kodove; isti kod se ne prihvata dvaput.
 > - **Rate limiting:** prijava 5 u minuti po adresi i IP-u (blokada se beleži jednom po minutu), sve auth rute 30 u minuti po IP-u, kod za 2FA 5 u minuti po prijavi; ceo API 300 zahteva u minuti po osobi (`RATE_LIMIT_API`), a rute koje mogu pokrenuti ephemeris engine (karta, tranziti, sinastrija, kalendar neba, dashboard, prilaganje karte konsultaciji) 40 u minuti (`RATE_LIMIT_ENGINE`); `/api/v1/health` 30 u minuti po IP-u. Test (`RouteProtectionTest`) zahteva da svaka API ruta ima prijavu, workspace i potvrđen mejl (osim spiska javnih) i da sve rute engine-a imaju svoje ograničenje.
 > - **Zaglavlja:** na stranici aplikacije Content Security Policy — skripte samo sa istog domena ili sa nonce-om po odgovoru (inline skripta za temu), bez `eval`, bez plugin-a, `frame-ancestors 'self'`, `form-action 'self'`; stilovi smeju inline (fontovi i Vue). Na svim odgovorima `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: same-origin`, `Cross-Origin-Opener-Policy`, `Permissions-Policy` (kamera, mikrofon, lokacija, plaćanje isključeni), bez `X-Powered-By`; HSTS samo preko HTTPS-a. Preuzimanje fajla zadržava svoju strožu politiku (`sandbox`). CORS je isključen (SPA je na istom domenu; ranije je API odgovarao `Access-Control-Allow-Origin: *`).
@@ -202,7 +202,7 @@ Pre javnog lansiranja:
 
 ## Pravna priprema
 
-Pre beta rada sa stvarnim podacima pripremiti:
+Pre rada sa stvarnim podacima (puštanje) pripremiti:
 
 - Privacy Policy;
 - Terms of Service;

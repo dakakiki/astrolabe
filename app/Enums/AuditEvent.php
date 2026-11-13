@@ -27,7 +27,7 @@ enum AuditEvent: string
     // Terms, DPA or privacy policy versions accepted or seen (Phase 8c).
     case LegalAccepted = 'legal_accepted';
 
-    // Closed beta: invitations to register (the operator, from the command line).
+    // Invitations to register (the operator, from the command line or the admin).
     case InvitationSent = 'invitation_sent';
     case InvitationRevoked = 'invitation_revoked';
     case InvitationAccepted = 'invitation_accepted';

@@ -106,15 +106,20 @@ return [
     | Registration
     |--------------------------------------------------------------------------
     |
-    | "invite" (the closed beta): an account is created only through a link
-    | from `php artisan invitations:send`, for the address it was sent to.
-    | "open": anyone may register. Invitation links work for `invitation_days`.
+    | "open" (the default since 13 Nov 2026, when the closed beta was dropped):
+    | anyone may register; an invitation link still fills in the address and is
+    | marked used. "invite": an account is created only through a link from
+    | `php artisan invitations:send` or the admin, for the address it was sent
+    | to — for a server that is not open to the public yet. Invitation links
+    | work for `invitation_days`. One connection (IP address) may create at
+    | most `accounts_per_ip_per_hour` accounts.
     |
     */
 
     'registration' => [
-        'mode' => env('REGISTRATION_MODE', 'invite'),
+        'mode' => env('REGISTRATION_MODE', 'open'),
         'invitation_days' => (int) env('INVITATION_DAYS', 14),
+        'accounts_per_ip_per_hour' => (int) env('REGISTRATION_PER_IP_HOUR', 5),
     ],
 
     /*

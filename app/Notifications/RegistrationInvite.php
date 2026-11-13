@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
- * The closed-beta invitation (`php artisan invitations:send`). Sent at once,
+ * The invitation to register (`php artisan invitations:send`). Sent at once,
  * not through the queue, so the command can say whether it went out.
  */
 class RegistrationInvite extends Notification

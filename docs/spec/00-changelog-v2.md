@@ -325,6 +325,18 @@ Hosting i produkcija se od 4. 11. 2026 vode u posebnoj sesiji, odvojeno od funkc
 
 Van specifikacije: `docs/deployment.md` (odluke, šta korisnik priprema, koraci `deploy/provision.sh`, `.env`, redosled, backup), `docs/STATUS.md` („Plan 8d“), `deploy/` (nov folder), CI posao „Deploy scripts“.
 
+## Bez zatvorene bete — otvorena registracija i trial (13. 11. 2026)
+
+Korisnik je odustao od zatvorene bete: pozivi i beta se uklanjaju, aplikacija se pušta odmah. Odluke (sve preporuke prihvaćene): **nema besplatnog paketa**; trial od **14 dana bez kartice**, ograničen — najviše **5 klijenata**, **30 proračuna dnevno** (samo pokretanje engine-a), bez snimka karte na konsultaciji i bez poziva klijenata u portal, sve ostalo radi; posle triala bez paketa praksa je **samo za čitanje** (pregled, izvoz, brisanje), podaci se ne brišu. Pozivi ostaju kao lični poziv iz admina, ali nisu uslov. Izmene:
+
+- 07: nova sekcija „Trial“; „Kada se ovo implementira“ — naplata sa trialom pre puštanja (ranije posle bete); prodajni model bez kartice; status `trialing` sa ograničenjima; otvorena provera o kartici zatvorena.
+- 04: Faza 8 — 8e (testeri) otpada; Faza 9 — naplata sa trialom pre puštanja.
+- 02: „Registracija i bezbednost naloga“ — otvorena registracija podrazumevana, 5 naloga na sat po IP adresi, poziv opcion; režim samo uz poziv ostaje za server koji još nije otvoren.
+- 05: `registration_invitations` obavezan samo u režimu `invite`.
+- 06: registracija otvorena uz ograničenje po IP adresi; „pre bete“ → „pre puštanja“.
+
+Van specifikacije: aplikacija (podrazumevano `REGISTRATION_MODE=open`, tekstovi bez „closed beta“, nova verzija Terms i Privacy Policy — nacrti), `docs/deployment.md` (sekcija „Puštanje“, `invite` na serveru do puštanja), `docs/legal-review.md` (pitanja o trialu), prezentacioni sajt (umesto prijave za betu — trial).
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

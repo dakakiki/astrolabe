@@ -11,6 +11,7 @@ use App\Support\Audit\Audit;
 use App\Support\Legal\LegalDocuments;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -29,9 +30,12 @@ class CreateNewUser implements CreatesNewUsers
      * Register an astrologer together with the workspace they will own.
      * The SPA sends the browser's time zone and language so both start sensible.
      *
-     * In the closed beta (`astrolabe.registration.mode` = "invite") the request
-     * must carry a valid invitation for the same email address; it is used up
-     * here, under a row lock, so one link makes exactly one account.
+     * With `astrolabe.registration.mode` = "invite" the request must carry a
+     * valid invitation for the same email address; it is used up here, under a
+     * row lock, so one link makes exactly one account. With "open" (the default)
+     * an invitation is optional: a working one for the same address is marked
+     * used, any other is ignored. One connection may make only a few accounts an
+     * hour (`accounts_per_ip_per_hour`); a refused form does not count.
      *
      * The person accepts the Terms of Service and the Data Processing Agreement
      * and sees the Privacy Policy in the versions the page showed; a document
@@ -44,6 +48,13 @@ class CreateNewUser implements CreatesNewUsers
     public function create(array $input): User
     {
         $byInvitation = self::invitationsOnly();
+
+        $limiterKey = 'registrations:'.request()->ip();
+        if (RateLimiter::tooManyAttempts($limiterKey, config('astrolabe.registration.accounts_per_ip_per_hour'))) {
+            throw ValidationException::withMessages(['registration' => __('registration.too_many', [
+                'minutes' => (int) ceil(RateLimiter::availableIn($limiterKey) / 60),
+            ])]);
+        }
 
         $validated = Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
@@ -74,8 +85,12 @@ class CreateNewUser implements CreatesNewUsers
             throw ValidationException::withMessages(['accept_terms' => __('legal.changed')]);
         }
 
-        return DB::transaction(function () use ($validated, $byInvitation, $shown) {
-            $invitation = $byInvitation ? $this->claim($validated['invitation'], $validated['email']) : null;
+        $user = DB::transaction(function () use ($validated, $byInvitation, $shown) {
+            $invitation = match (true) {
+                $byInvitation => $this->claim($validated['invitation'], $validated['email']),
+                filled($validated['invitation'] ?? null) => $this->claimIfValid($validated['invitation'], $validated['email']),
+                default => null,
+            };
 
             $user = User::create([
                 'name' => $validated['name'],
@@ -96,8 +111,13 @@ class CreateNewUser implements CreatesNewUsers
 
             return $user;
         });
+
+        RateLimiter::hit($limiterKey, 3600);
+
+        return $user;
     }
 
+    /** Accounts only through an invitation; anything but "open" counts as that. */
     public static function invitationsOnly(): bool
     {
         return config('astrolabe.registration.mode') !== 'open';
@@ -127,5 +147,15 @@ class CreateNewUser implements CreatesNewUsers
         }
 
         return $invitation;
+    }
+
+    /** Open registration: the invitation behind the link if it still works for this address, else none. */
+    private function claimIfValid(string $token, string $email): ?RegistrationInvitation
+    {
+        try {
+            return $this->claim($token, $email);
+        } catch (ValidationException) {
+            return null;
+        }
     }
 }

@@ -7,13 +7,13 @@ use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 
 /**
- * The closed beta at a glance: who was invited, and who has an account now.
+ * Invitations at a glance: who was invited, and who has an account now.
  */
 class ListInvitations extends Command
 {
     protected $signature = 'invitations:list {--open : Only invitations that still work}';
 
-    protected $description = 'List closed-beta invitations';
+    protected $description = 'List registration invitations';
 
     public function handle(): int
     {
