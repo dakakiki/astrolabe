@@ -1293,8 +1293,13 @@
             "contact": "Contact",
             "noContact": "No contact details.",
             "belongsWith": "Linked to",
-            "edit": "Edit",
-            "delete": "Delete",
+            "edit": "Edit profile",
+            "delete": "Delete person",
+            "manage": {
+                "title": "Manage person",
+                "editHint": "Name, contact details and birth data.",
+                "deleteHint": "Deletes the person and every link to them. It cannot be undone."
+            },
             "confirmDelete": "Delete {name} and every link to them?",
             "deleted": "Person deleted",
             "makeClient": "Make a client",

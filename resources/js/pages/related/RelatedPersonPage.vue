@@ -143,16 +143,9 @@ async function remove() {
                     </div>
                 </div>
             </div>
+            <!-- Up here only what starts new work; editing and deleting are at the end of the
+                 right column ("Manage person"), as on a client. -->
             <div class="ml-auto flex flex-wrap gap-2">
-                <RouterLink
-                    :to="{ name: 'related-people.edit', params: { id: person.id } }"
-                    class="btn"
-                    v-tip="t('tips.related.person.edit')"
-                    ><AppIcon name="edit" />{{ t('related.person.edit') }}</RouterLink
-                >
-                <button type="button" class="btn btn-danger" @click="remove" v-tip="t('tips.related.person.delete')">
-                    <AppIcon name="delete" />{{ t('related.person.delete') }}
-                </button>
                 <button
                     type="button"
                     class="btn btn-primary"
@@ -266,6 +259,34 @@ async function remove() {
                             >
                         </li>
                     </ul>
+                </section>
+
+                <section class="card">
+                    <div class="card-head">
+                        <h2>{{ t('related.person.manage.title') }}</h2>
+                    </div>
+                    <div class="card-body manage-actions">
+                        <div>
+                            <RouterLink
+                                :to="{ name: 'related-people.edit', params: { id: person.id } }"
+                                class="btn btn-sm"
+                                v-tip="t('tips.related.person.edit')"
+                                ><AppIcon name="edit" />{{ t('related.person.edit') }}</RouterLink
+                            >
+                            <p>{{ t('related.person.manage.editHint') }}</p>
+                        </div>
+                        <div class="danger">
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-danger"
+                                @click="remove"
+                                v-tip="t('tips.related.person.delete')"
+                            >
+                                <AppIcon name="delete" />{{ t('related.person.delete') }}
+                            </button>
+                            <p>{{ t('related.person.manage.deleteHint') }}</p>
+                        </div>
+                    </div>
                 </section>
             </div>
         </div>
