@@ -438,18 +438,6 @@ const otherZone = computed(() => {
                     >
                 </div>
             </div>
-            <div class="ml-auto flex gap-2">
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    :disabled="form.processing.value"
-                    @click="save"
-                    v-tip="id ? t('tips.consultations.form.save') : t('tips.consultations.form.create')"
-                >
-                    <AppIcon name="save" />
-                    {{ id ? t('consultations.form.save') : t('consultations.form.create') }}
-                </button>
-            </div>
         </div>
 
         <!-- Page-wide tabs, as on the client profile; the choice is kept in ?tab=. Until the
@@ -733,24 +721,6 @@ const otherZone = computed(() => {
                     </div>
                 </form>
 
-                <!-- Deleting is out of the header: at the end of Details, red, with what it does. -->
-                <section v-if="id" v-show="tab === 'details'" class="card mt-4">
-                    <div class="card-body manage-actions">
-                        <div>
-                            <button
-                                type="button"
-                                class="btn btn-sm btn-danger"
-                                @click="remove"
-                                v-tip="t('tips.consultations.form.delete')"
-                            >
-                                <AppIcon name="delete" />
-                                {{ t('consultations.form.delete') }}
-                            </button>
-                            <p>{{ t('consultations.form.deleteHint') }}</p>
-                        </div>
-                    </div>
-                </section>
-
                 <template v-if="id">
                     <NotesPanel
                         v-show="tab === 'notes'"
@@ -836,6 +806,24 @@ const otherZone = computed(() => {
                                 v-tip="t('tips.transits.onDate')"
                                 ><AppIcon name="transits" />{{ t('transits.onDate') }}</RouterLink
                             >
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Deleting the consultation: under the chart, red, with what it removes. -->
+                <section v-if="id" class="card">
+                    <div class="card-body manage-actions">
+                        <div>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-danger"
+                                @click="remove"
+                                v-tip="t('tips.consultations.form.delete')"
+                            >
+                                <AppIcon name="delete" />
+                                {{ t('consultations.form.delete') }}
+                            </button>
+                            <p>{{ t('consultations.form.deleteHint') }}</p>
                         </div>
                     </div>
                 </section>
