@@ -113,6 +113,14 @@ fetch() {
     printf ' %s' "$(cat "$work/body" 2>/dev/null || true)"
 }
 
+# Prints only the status code. The body of an error page has several lines, so cutting the
+# output of fetch line by line gave "404" plus the rest of the page, never just "404".
+status() {
+    local answer
+    answer=$(fetch "$@")
+    printf '%s' "${answer%% *}"
+}
+
 for host in "$PORTAL_HOST" "$APP_HOST"; do
     for path in /sw.js /manifest.webmanifest /offline; do
         check "$host$path reaches the app" "200 php $path" "$(fetch "$host" "$path")"
@@ -122,10 +130,10 @@ check "an SPA route reaches the app with its query" "200 php /clients/12?tab=cha
 check "the API reaches the app" "200 php /api/v1/health" "$(fetch "$APP_HOST" /api/v1/health)"
 check "the start page reaches the app" "200 php /" "$(fetch "$PORTAL_HOST" /)"
 check "index.php itself runs" "200 php /index.php" "$(fetch "$APP_HOST" /index.php)"
-check "no other PHP file runs" "404" "$(fetch "$APP_HOST" /ci-check.php | cut -d' ' -f1)"
-check "dot files stay hidden" "404" "$(fetch "$APP_HOST" /.htaccess | cut -d' ' -f1)"
+check "no other PHP file runs" "404" "$(status "$APP_HOST" /ci-check.php)"
+check "dot files stay hidden" "404" "$(status "$APP_HOST" /.htaccess)"
 check "a built file is served as a file" '200 console.log("ci")' "$(fetch "$APP_HOST" /build/ci-check.js)"
-check "a missing built file is a 404, not the app" "404" "$(fetch "$APP_HOST" /build/missing.js | cut -d' ' -f1)"
+check "a missing built file is a 404, not the app" "404" "$(status "$APP_HOST" /build/missing.js)"
 check "built files are cached for a year" "public, max-age=31536000, immutable" \
     "$(curl -sk --resolve "$APP_HOST:$HTTPS_PORT:127.0.0.1" -D - -o /dev/null "https://$APP_HOST:$HTTPS_PORT/build/ci-check.js" |
         tr -d '\r' | sed -n 's/^[Cc]ache-[Cc]ontrol: //p')"
