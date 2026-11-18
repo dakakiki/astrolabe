@@ -1018,10 +1018,13 @@
         },
         "attachments": "Files and links",
         "notes": "Notes on this consultation",
-        "panels": {
+        "tabs": {
+            "details": "Details",
             "notes": "Notes",
             "files": "Files & links",
-            "followUps": "Follow-ups"
+            "followUps": "Follow-ups",
+            "billing": "Billing",
+            "unsaved": "Unsaved changes"
         },
         "saveFirst": "Save the consultation first; files and the chart can be attached after that.",
         "fromAppointment": "Recorded from the appointment on {date}"
@@ -2367,7 +2370,8 @@
                 "delete": "Delete this consultation",
                 "save": "Save the changes to this consultation",
                 "create": "Save the new consultation"
-            }
+            },
+            "saveFirst": "Save the consultation first — then notes, files, follow-ups and billing open"
         },
         "dashboard": {
             "addClient": "Add a new client",

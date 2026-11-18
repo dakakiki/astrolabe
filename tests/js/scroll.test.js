@@ -11,7 +11,7 @@ describe('scrollFor', () => {
     });
 
     it('stays where it is when only a tab changes', () => {
-        expect(scrollFor(at('/consultations/4', { panel: 'files' }), at('/consultations/4'))).toBe(false);
+        expect(scrollFor(at('/consultations/4', { tab: 'files' }), at('/consultations/4'))).toBe(false);
         expect(scrollFor(at('/clients/1', { tab: 'notes' }), at('/clients/1', { tab: 'overview' }))).toBe(false);
     });
 

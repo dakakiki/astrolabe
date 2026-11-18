@@ -36,8 +36,10 @@ before starting a phase. The user communicates in Serbian.
 - A section that folds away is `<AppAccordion>` (`#title` slot + content): a `<details
   class="accordion">` with the arrow on the right and the brand tint when open; it slides open
   and shut with a Web Animation of the content's height (CSS `::details-content` did not slide
-  shut in Chromium), not at all with reduced motion. Tabs that switch a block inside a page use
-  `.panel-tabs` (the consultation's notes / files / follow-ups).
+  shut in Chromium), not at all with reduced motion.
+- Page tabs are `<nav class="tabs">` with RouterLinks on `?tab=` (`aria-current="page"`), as on the
+  client profile and a consultation (Details · Notes · Files & links · Follow-ups · Billing, the
+  chart beside them). The router keeps the scroll position when only `?tab=` changes.
 
 ## Multi-tenancy
 

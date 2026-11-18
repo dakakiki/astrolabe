@@ -1,6 +1,6 @@
-// Query keys that only pick a tab inside the same page: the client profile's ?tab= and the
-// consultation page's ?panel= (notes / files / follow-ups, half-way down the page).
-const TAB_KEYS = ['tab', 'panel'];
+// The query key that only picks a tab inside the same page: ?tab= on the client profile and on
+// a consultation.
+const TAB_KEYS = ['tab'];
 
 /**
  * Where the window goes after a navigation: back to the top for a new page, but nowhere when only

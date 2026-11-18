@@ -5,6 +5,7 @@ import { onBeforeRouteLeave, onBeforeRouteUpdate, RouterLink, useRoute, useRoute
 
 import AppIcon from '@/components/AppIcon.vue';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
+import BillingBadge from '@/components/BillingBadge.vue';
 import ClientPicker from '@/components/ClientPicker.vue';
 import ConsultationStatusBadge from '@/components/ConsultationStatusBadge.vue';
 import FormField from '@/components/FormField.vue';
@@ -38,11 +39,19 @@ const labels = useLabels();
 const route = useRoute();
 const router = useRouter();
 
-// The right column's lower part: notes, files and links, follow-ups — one at a time.
-const PANELS = ['notes', 'files', 'followUps'];
-const panelIcons = { notes: 'notes', files: 'attach', followUps: 'tasks' };
-const panel = computed(() => (PANELS.includes(route.query.panel) ? route.query.panel : 'notes'));
-const panelCounts = ref({ notes: 0, files: 0, followUps: 0 });
+// Page-wide tabs (?tab=), the chart beside them. Before the first save only Details exists.
+// ?panel= is the address the notes / files / follow-ups switch had for a day; it still works.
+const TABS = ['details', 'notes', 'files', 'followUps', 'billing'];
+const tab = computed(() => {
+    const asked = route.query.tab ?? route.query.panel;
+    return id.value && TABS.includes(asked) ? asked : 'details';
+});
+const tabCounts = ref({ notes: 0, files: 0, followUps: 0 });
+
+function tabQuery(name) {
+    const { tab: _tab, panel: _panel, ...rest } = route.query;
+    return name === 'details' ? rest : { ...rest, tab: name };
+}
 const auth = useAuthStore();
 const toast = useToastStore();
 const money = useMoney();
@@ -438,366 +447,375 @@ const otherZone = computed(() => {
             </div>
         </div>
 
-        <div class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">
-            <form class="space-y-4" novalidate @submit.prevent="save">
-                <section class="card">
-                    <div class="card-head">
-                        <h2>{{ t('consultations.form.details') }}</h2>
-                    </div>
-                    <div class="card-body">
-                        <FormField
-                            v-if="!id"
-                            v-slot="{ id: fieldId, aria }"
-                            :label="t('consultations.form.client')"
-                            :error="form.errors.value.client_id"
-                        >
-                            <ClientPicker
-                                :input-id="fieldId"
-                                :aria="aria"
-                                :selected="client?.full_name"
-                                @select="selectClient"
-                            />
-                            <p v-if="client" class="mt-1.5 text-xs text-ink-3">✓ {{ client.full_name }}</p>
-                        </FormField>
-                        <div class="row">
-                            <FormField
-                                v-slot="{ id: fieldId, aria }"
-                                :label="t('consultations.form.service')"
-                                :error="form.errors.value.service_id"
-                            >
-                                <select :id="fieldId" v-model="form.data.service_id" v-bind="aria" class="input">
-                                    <option :value="null">{{ t('consultations.form.noService') }}</option>
-                                    <option v-for="service in serviceOptions" :key="service.id" :value="service.id">
-                                        {{
-                                            service.is_active
-                                                ? service.name
-                                                : t('consultations.form.inactiveService', { name: service.name })
-                                        }}
-                                    </option>
-                                </select>
-                            </FormField>
-                            <FormField
-                                v-slot="{ id: fieldId, aria }"
-                                :label="t('consultations.form.title')"
-                                :error="form.errors.value.title"
-                            >
-                                <input
-                                    :id="fieldId"
-                                    v-model="form.data.title"
-                                    v-bind="aria"
-                                    class="input"
-                                    :placeholder="
-                                        form.data.service_id
-                                            ? t('consultations.form.titleWithService')
-                                            : t('consultations.form.titlePlaceholder')
-                                    "
-                                    autocomplete="off"
-                                />
-                            </FormField>
-                            <FormField
-                                v-slot="{ id: fieldId, aria }"
-                                :label="t('consultations.form.status')"
-                                :error="form.errors.value.status"
-                            >
-                                <select :id="fieldId" v-model="form.data.status" v-bind="aria" class="input">
-                                    <option v-for="status in STATUSES" :key="status" :value="status">
-                                        {{ t(`consultationStatuses.${status}`) }}
-                                    </option>
-                                </select>
-                            </FormField>
-                        </div>
-                        <div class="row">
-                            <FormField
-                                v-slot="{ id: fieldId, aria }"
-                                :label="t('consultations.form.startsAt')"
-                                :error="form.errors.value.starts_at"
-                            >
-                                <input
-                                    :id="fieldId"
-                                    v-model="form.data.starts_at"
-                                    v-bind="aria"
-                                    class="input"
-                                    type="datetime-local"
-                                />
-                            </FormField>
-                            <FormField
-                                v-slot="{ id: fieldId, aria }"
-                                :label="t('consultations.form.timezone')"
-                                :error="form.errors.value.timezone"
-                                :hint="t('consultations.form.timezoneHint')"
-                            >
-                                <select :id="fieldId" v-model="form.data.timezone" v-bind="aria" class="input">
-                                    <option v-for="zone in zones" :key="zone" :value="zone">{{ zone }}</option>
-                                </select>
-                            </FormField>
-                            <FormField
-                                v-slot="{ id: fieldId, aria }"
-                                :label="t('consultations.form.duration')"
-                                :error="form.errors.value.duration_minutes"
-                            >
-                                <input
-                                    :id="fieldId"
-                                    v-model.number="form.data.duration_minutes"
-                                    v-bind="aria"
-                                    class="input"
-                                    type="number"
-                                    min="1"
-                                    max="1440"
-                                    step="5"
-                                />
-                            </FormField>
-                        </div>
+        <!-- Page-wide tabs, as on the client profile; the choice is kept in ?tab=. Until the
+             consultation is saved only Details opens. Every tab stays mounted, so the form keeps
+             its unsaved changes and a half-written note survives a switch. -->
+        <nav class="tabs" :aria-label="heading">
+            <template v-for="name in TABS" :key="name">
+                <RouterLink
+                    v-if="id || name === 'details'"
+                    :to="{ query: tabQuery(name) }"
+                    :aria-current="tab === name ? 'page' : undefined"
+                    replace
+                >
+                    {{ t(`consultations.tabs.${name}`) }}
+                    <span v-if="name === 'details' && dirty" class="unsaved-dot">
+                        <span class="sr-only">{{ t('consultations.tabs.unsaved') }}</span>
+                    </span>
+                    <span v-if="tabCounts[name]" class="count">{{ tabCounts[name] }}</span>
+                    <BillingBadge v-if="name === 'billing'" :status="consultation?.billing?.status" class="ml-1.5" />
+                </RouterLink>
+                <span v-else class="tab-off" aria-disabled="true" v-tip="t('tips.consultations.saveFirst')">{{
+                    t(`consultations.tabs.${name}`)
+                }}</span>
+            </template>
+        </nav>
 
-                        <div class="row items-start">
-                            <FormField
-                                v-slot="{ id: fieldId, aria }"
-                                :label="t('consultations.form.fee')"
-                                :error="feeError || form.errors.value['fee.amount'] || form.errors.value.fee"
-                                :hint="t('consultations.form.feeHint')"
-                            >
-                                <input
-                                    :id="fieldId"
-                                    v-model="form.data.fee_amount"
-                                    v-bind="aria"
-                                    class="input font-mono"
-                                    inputmode="decimal"
-                                    autocomplete="off"
-                                    :disabled="form.data.no_charge"
-                                />
-                            </FormField>
-                            <FormField
-                                v-slot="{ id: fieldId, aria }"
-                                :label="t('consultations.form.feeCurrency')"
-                                :error="form.errors.value['fee.currency']"
-                            >
-                                <select :id="fieldId" v-model="form.data.fee_currency" v-bind="aria" class="input">
-                                    <option
-                                        v-for="code in reference.data?.currencies ?? [form.data.fee_currency]"
-                                        :key="code"
-                                        :value="code"
-                                    >
-                                        {{ code }}
-                                    </option>
-                                </select>
-                            </FormField>
-                            <div class="field">
-                                <span class="label" aria-hidden="true">&nbsp;</span>
-                                <label class="flex h-10 items-center gap-2 text-sm">
-                                    <input v-model="form.data.no_charge" type="checkbox" />
-                                    {{ t('consultations.form.noCharge') }}
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="field">
-                            <span class="label">{{ t('consultations.form.methods') }}</span>
-                            <div class="flex flex-wrap items-center gap-2">
-                                <label
-                                    v-for="method in visibleMethods"
-                                    :key="method.id"
-                                    class="flex items-center gap-1.5 rounded-sm border border-line px-2 py-1 text-xs"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        :checked="form.data.method_ids.includes(method.id)"
-                                        @change="toggleMethod(method.id, $event.target.checked)"
-                                    />
-                                    {{ labels.method(method) }}
-                                </label>
-                                <button
-                                    v-if="!showAllMethods"
-                                    type="button"
-                                    class="btn btn-ghost btn-sm"
-                                    @click="showAllMethods = true"
-                                    v-tip="t('tips.clients.form.showAllMethods')"
-                                >
-                                    <AppIcon name="more" />
-                                    {{ t('clients.form.showAllMethods') }}
-                                </button>
-                            </div>
-                        </div>
-
-                        <FormField
-                            v-slot="{ id: fieldId, aria }"
-                            :label="t('consultations.form.topics')"
-                            :error="form.errors.value.topics"
-                        >
-                            <textarea
-                                :id="fieldId"
-                                v-model="form.data.topics"
-                                v-bind="aria"
-                                class="input min-h-20"
-                                :placeholder="t('consultations.form.topicsPlaceholder')"
-                            />
-                        </FormField>
-                    </div>
-                </section>
-
-                <section class="card">
-                    <div class="card-head">
-                        <h2>{{ t('consultations.form.internalNotes') }}</h2>
-                        <span class="right"><VisibilityBadge visibility="private" /></span>
-                    </div>
-                    <div class="card-body space-y-3">
-                        <RichTextEditor
-                            v-model="form.data.internal_notes"
-                            :label="t('consultations.form.internalNotes')"
-                            :invalid="Boolean(form.errors.value.internal_notes)"
-                            height="160px"
-                        />
-                        <div class="notice n-neutral">
-                            <span aria-hidden="true">⚿</span>
-                            <div>{{ t('consultations.form.internalNotesHint') }}</div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="card">
-                    <div class="card-head">
-                        <h2>{{ t('consultations.form.clientSummary') }}</h2>
-                        <span class="right"><VisibilityBadge visibility="shared_with_client" /></span>
-                    </div>
-                    <div class="card-body space-y-2">
-                        <RichTextEditor
-                            v-model="form.data.client_summary"
-                            :label="t('consultations.form.clientSummary')"
-                            :invalid="Boolean(form.errors.value.client_summary)"
-                            height="130px"
-                        />
-                        <p class="text-xs text-ink-3">{{ t('consultations.form.clientSummaryHint') }}</p>
-                    </div>
-                </section>
-
-                <section class="card">
-                    <div class="card-head">
-                        <h2>{{ t('consultations.form.nextSteps') }}</h2>
-                    </div>
-                    <div class="card-body">
-                        <RichTextEditor
-                            v-model="form.data.next_steps"
-                            :label="t('consultations.form.nextSteps')"
-                            :invalid="Boolean(form.errors.value.next_steps)"
-                        />
-                    </div>
-                </section>
-
-                <div class="flex justify-end">
-                    <button
-                        type="submit"
-                        class="btn btn-primary"
-                        :disabled="form.processing.value"
-                        v-tip="id ? t('tips.consultations.form.save') : t('tips.consultations.form.create')"
-                    >
-                        <AppIcon name="save" />
-                        {{ id ? t('consultations.form.save') : t('consultations.form.create') }}
-                    </button>
-                </div>
-            </form>
-
-            <div class="space-y-4">
-                <p v-if="!id" class="notice n-info">{{ t('consultations.saveFirst') }}</p>
-
-                <template v-else>
+        <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">
+            <div class="min-w-0">
+                <form v-show="tab === 'details'" class="space-y-4" novalidate @submit.prevent="save">
                     <section class="card">
                         <div class="card-head">
-                            <h2>{{ t('consultations.chart.title') }}</h2>
-                            <span v-if="consultation.chart" class="right font-mono">{{
-                                t('consultations.snapshot').toLowerCase()
-                            }}</span>
+                            <h2>{{ t('consultations.form.details') }}</h2>
                         </div>
-                        <div class="card-body space-y-3">
-                            <template v-if="consultation.chart">
-                                <NatalChart :chart="consultation.chart" :name="client?.full_name" compact />
-                                <p class="text-xs text-ink-3">{{ t('consultations.chart.snapshotNote') }}</p>
-                                <div class="flex flex-wrap gap-2">
-                                    <button
-                                        type="button"
-                                        class="btn btn-sm"
-                                        :disabled="chartBusy"
-                                        @click="attachChart"
-                                        v-tip="t('tips.consultations.chart.replace')"
+                        <div class="card-body">
+                            <FormField
+                                v-if="!id"
+                                v-slot="{ id: fieldId, aria }"
+                                :label="t('consultations.form.client')"
+                                :error="form.errors.value.client_id"
+                            >
+                                <ClientPicker
+                                    :input-id="fieldId"
+                                    :aria="aria"
+                                    :selected="client?.full_name"
+                                    @select="selectClient"
+                                />
+                                <p v-if="client" class="mt-1.5 text-xs text-ink-3">✓ {{ client.full_name }}</p>
+                            </FormField>
+                            <div class="row">
+                                <FormField
+                                    v-slot="{ id: fieldId, aria }"
+                                    :label="t('consultations.form.service')"
+                                    :error="form.errors.value.service_id"
+                                >
+                                    <select :id="fieldId" v-model="form.data.service_id" v-bind="aria" class="input">
+                                        <option :value="null">{{ t('consultations.form.noService') }}</option>
+                                        <option v-for="service in serviceOptions" :key="service.id" :value="service.id">
+                                            {{
+                                                service.is_active
+                                                    ? service.name
+                                                    : t('consultations.form.inactiveService', { name: service.name })
+                                            }}
+                                        </option>
+                                    </select>
+                                </FormField>
+                                <FormField
+                                    v-slot="{ id: fieldId, aria }"
+                                    :label="t('consultations.form.title')"
+                                    :error="form.errors.value.title"
+                                >
+                                    <input
+                                        :id="fieldId"
+                                        v-model="form.data.title"
+                                        v-bind="aria"
+                                        class="input"
+                                        :placeholder="
+                                            form.data.service_id
+                                                ? t('consultations.form.titleWithService')
+                                                : t('consultations.form.titlePlaceholder')
+                                        "
+                                        autocomplete="off"
+                                    />
+                                </FormField>
+                                <FormField
+                                    v-slot="{ id: fieldId, aria }"
+                                    :label="t('consultations.form.status')"
+                                    :error="form.errors.value.status"
+                                >
+                                    <select :id="fieldId" v-model="form.data.status" v-bind="aria" class="input">
+                                        <option v-for="status in STATUSES" :key="status" :value="status">
+                                            {{ t(`consultationStatuses.${status}`) }}
+                                        </option>
+                                    </select>
+                                </FormField>
+                            </div>
+                            <div class="row">
+                                <FormField
+                                    v-slot="{ id: fieldId, aria }"
+                                    :label="t('consultations.form.startsAt')"
+                                    :error="form.errors.value.starts_at"
+                                >
+                                    <input
+                                        :id="fieldId"
+                                        v-model="form.data.starts_at"
+                                        v-bind="aria"
+                                        class="input"
+                                        type="datetime-local"
+                                    />
+                                </FormField>
+                                <FormField
+                                    v-slot="{ id: fieldId, aria }"
+                                    :label="t('consultations.form.timezone')"
+                                    :error="form.errors.value.timezone"
+                                    :hint="t('consultations.form.timezoneHint')"
+                                >
+                                    <select :id="fieldId" v-model="form.data.timezone" v-bind="aria" class="input">
+                                        <option v-for="zone in zones" :key="zone" :value="zone">{{ zone }}</option>
+                                    </select>
+                                </FormField>
+                                <FormField
+                                    v-slot="{ id: fieldId, aria }"
+                                    :label="t('consultations.form.duration')"
+                                    :error="form.errors.value.duration_minutes"
+                                >
+                                    <input
+                                        :id="fieldId"
+                                        v-model.number="form.data.duration_minutes"
+                                        v-bind="aria"
+                                        class="input"
+                                        type="number"
+                                        min="1"
+                                        max="1440"
+                                        step="5"
+                                    />
+                                </FormField>
+                            </div>
+
+                            <div class="row items-start">
+                                <FormField
+                                    v-slot="{ id: fieldId, aria }"
+                                    :label="t('consultations.form.fee')"
+                                    :error="feeError || form.errors.value['fee.amount'] || form.errors.value.fee"
+                                    :hint="t('consultations.form.feeHint')"
+                                >
+                                    <input
+                                        :id="fieldId"
+                                        v-model="form.data.fee_amount"
+                                        v-bind="aria"
+                                        class="input font-mono"
+                                        inputmode="decimal"
+                                        autocomplete="off"
+                                        :disabled="form.data.no_charge"
+                                    />
+                                </FormField>
+                                <FormField
+                                    v-slot="{ id: fieldId, aria }"
+                                    :label="t('consultations.form.feeCurrency')"
+                                    :error="form.errors.value['fee.currency']"
+                                >
+                                    <select :id="fieldId" v-model="form.data.fee_currency" v-bind="aria" class="input">
+                                        <option
+                                            v-for="code in reference.data?.currencies ?? [form.data.fee_currency]"
+                                            :key="code"
+                                            :value="code"
+                                        >
+                                            {{ code }}
+                                        </option>
+                                    </select>
+                                </FormField>
+                                <div class="field">
+                                    <span class="label" aria-hidden="true">&nbsp;</span>
+                                    <label class="flex h-10 items-center gap-2 text-sm">
+                                        <input v-model="form.data.no_charge" type="checkbox" />
+                                        {{ t('consultations.form.noCharge') }}
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <span class="label">{{ t('consultations.form.methods') }}</span>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <label
+                                        v-for="method in visibleMethods"
+                                        :key="method.id"
+                                        class="flex items-center gap-1.5 rounded-sm border border-line px-2 py-1 text-xs"
                                     >
-                                        <AppIcon name="replace" />
-                                        {{ t('consultations.chart.replace') }}
-                                    </button>
+                                        <input
+                                            type="checkbox"
+                                            :checked="form.data.method_ids.includes(method.id)"
+                                            @change="toggleMethod(method.id, $event.target.checked)"
+                                        />
+                                        {{ labels.method(method) }}
+                                    </label>
                                     <button
+                                        v-if="!showAllMethods"
                                         type="button"
                                         class="btn btn-ghost btn-sm"
-                                        :disabled="chartBusy"
-                                        @click="detachChart"
-                                        v-tip="t('tips.consultations.chart.detach')"
+                                        @click="showAllMethods = true"
+                                        v-tip="t('tips.clients.form.showAllMethods')"
                                     >
-                                        <AppIcon name="unlink" />
-                                        {{ t('consultations.chart.detach') }}
+                                        <AppIcon name="more" />
+                                        {{ t('clients.form.showAllMethods') }}
                                     </button>
                                 </div>
-                            </template>
-                            <div v-else class="empty py-4!">
-                                <div class="e-glyph" aria-hidden="true">◌</div>
-                                <p class="font-medium text-ink">{{ t('consultations.chart.none') }}</p>
-                                <p class="mt-1 text-xs">{{ t('consultations.chart.attachHint') }}</p>
-                                <button
-                                    type="button"
-                                    class="btn btn-primary btn-sm mt-3"
-                                    :disabled="chartBusy"
-                                    @click="attachChart"
-                                    v-tip="t('tips.consultations.chart.attach')"
-                                >
-                                    <AppIcon name="attach" />
-                                    {{ t('consultations.chart.attach') }}
-                                </button>
                             </div>
-                            <div v-if="consultation.starts_at && client" class="border-t border-line-soft pt-3">
-                                <RouterLink
-                                    :to="transitsRoute(client.id, consultation.starts_at, auth.user?.timezone)"
-                                    class="btn btn-sm"
-                                    v-tip="t('tips.transits.onDate')"
-                                    ><AppIcon name="transits" />{{ t('transits.onDate') }}</RouterLink
-                                >
+
+                            <FormField
+                                v-slot="{ id: fieldId, aria }"
+                                :label="t('consultations.form.topics')"
+                                :error="form.errors.value.topics"
+                            >
+                                <textarea
+                                    :id="fieldId"
+                                    v-model="form.data.topics"
+                                    v-bind="aria"
+                                    class="input min-h-20"
+                                    :placeholder="t('consultations.form.topicsPlaceholder')"
+                                />
+                            </FormField>
+                        </div>
+                    </section>
+
+                    <section class="card">
+                        <div class="card-head">
+                            <h2>{{ t('consultations.form.internalNotes') }}</h2>
+                            <span class="right"><VisibilityBadge visibility="private" /></span>
+                        </div>
+                        <div class="card-body space-y-3">
+                            <RichTextEditor
+                                v-model="form.data.internal_notes"
+                                :label="t('consultations.form.internalNotes')"
+                                :invalid="Boolean(form.errors.value.internal_notes)"
+                                height="160px"
+                            />
+                            <div class="notice n-neutral">
+                                <span aria-hidden="true">⚿</span>
+                                <div>{{ t('consultations.form.internalNotesHint') }}</div>
                             </div>
                         </div>
                     </section>
 
-                    <BillingCard :consultation="consultation" @changed="reloadBilling" />
+                    <section class="card">
+                        <div class="card-head">
+                            <h2>{{ t('consultations.form.clientSummary') }}</h2>
+                            <span class="right"><VisibilityBadge visibility="shared_with_client" /></span>
+                        </div>
+                        <div class="card-body space-y-2">
+                            <RichTextEditor
+                                v-model="form.data.client_summary"
+                                :label="t('consultations.form.clientSummary')"
+                                :invalid="Boolean(form.errors.value.client_summary)"
+                                height="130px"
+                            />
+                            <p class="text-xs text-ink-3">{{ t('consultations.form.clientSummaryHint') }}</p>
+                        </div>
+                    </section>
 
-                    <!-- Notes, files and follow-ups share one place: one list at a time, the
-                         choice kept in the address (?panel=). All three stay loaded so the
-                         counts show and a half-written note survives a switch. -->
-                    <div>
-                        <nav class="panel-tabs" :aria-label="heading">
-                            <RouterLink
-                                v-for="name in PANELS"
-                                :key="name"
-                                :to="{ query: { ...route.query, panel: name } }"
-                                :aria-current="panel === name ? 'page' : undefined"
-                                replace
-                            >
-                                <AppIcon :name="panelIcons[name]" />
-                                <span class="label">{{ t(`consultations.panels.${name}`) }}</span>
-                                <span v-if="panelCounts[name]" class="count">{{ panelCounts[name] }}</span>
-                            </RouterLink>
-                        </nav>
+                    <section class="card">
+                        <div class="card-head">
+                            <h2>{{ t('consultations.form.nextSteps') }}</h2>
+                        </div>
+                        <div class="card-body">
+                            <RichTextEditor
+                                v-model="form.data.next_steps"
+                                :label="t('consultations.form.nextSteps')"
+                                :invalid="Boolean(form.errors.value.next_steps)"
+                            />
+                        </div>
+                    </section>
 
-                        <NotesPanel
-                            v-show="panel === 'notes'"
-                            :client-id="client.id"
-                            :consultation-id="id"
-                            compact
-                            @count="panelCounts.notes = $event"
-                        />
-                        <section v-show="panel === 'files'" class="card">
-                            <div class="card-body">
-                                <AttachmentsPanel :consultation-id="id" compact @count="panelCounts.files = $event" />
-                            </div>
-                        </section>
-                        <TasksPanel
-                            v-show="panel === 'followUps'"
-                            :client="client"
-                            :consultation="{ id, title: heading }"
-                            @count="panelCounts.followUps = $event"
-                        />
+                    <div class="flex justify-end">
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                            :disabled="form.processing.value"
+                            v-tip="id ? t('tips.consultations.form.save') : t('tips.consultations.form.create')"
+                        >
+                            <AppIcon name="save" />
+                            {{ id ? t('consultations.form.save') : t('consultations.form.create') }}
+                        </button>
                     </div>
+                </form>
+
+                <template v-if="id">
+                    <NotesPanel
+                        v-show="tab === 'notes'"
+                        :client-id="client.id"
+                        :consultation-id="id"
+                        compact
+                        @count="tabCounts.notes = $event"
+                    />
+                    <section v-show="tab === 'files'" class="card">
+                        <div class="card-head">
+                            <h2>{{ t('consultations.attachments') }}</h2>
+                        </div>
+                        <div class="card-body">
+                            <AttachmentsPanel :consultation-id="id" @count="tabCounts.files = $event" />
+                        </div>
+                    </section>
+                    <TasksPanel
+                        v-show="tab === 'followUps'"
+                        :client="client"
+                        :consultation="{ id, title: heading }"
+                        @count="tabCounts.followUps = $event"
+                    />
+                    <BillingCard v-show="tab === 'billing'" :consultation="consultation" @changed="reloadBilling" />
                 </template>
+            </div>
+
+            <!-- The chart stays in view whichever tab is open. -->
+            <div class="space-y-4">
+                <p v-if="!id" class="notice n-info">{{ t('consultations.saveFirst') }}</p>
+                <section v-else class="card">
+                    <div class="card-head">
+                        <h2>{{ t('consultations.chart.title') }}</h2>
+                        <span v-if="consultation.chart" class="right font-mono">{{
+                            t('consultations.snapshot').toLowerCase()
+                        }}</span>
+                    </div>
+                    <div class="card-body space-y-3">
+                        <template v-if="consultation.chart">
+                            <NatalChart :chart="consultation.chart" :name="client?.full_name" compact />
+                            <p class="text-xs text-ink-3">{{ t('consultations.chart.snapshotNote') }}</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button
+                                    type="button"
+                                    class="btn btn-sm"
+                                    :disabled="chartBusy"
+                                    @click="attachChart"
+                                    v-tip="t('tips.consultations.chart.replace')"
+                                >
+                                    <AppIcon name="replace" />
+                                    {{ t('consultations.chart.replace') }}
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn btn-ghost btn-sm"
+                                    :disabled="chartBusy"
+                                    @click="detachChart"
+                                    v-tip="t('tips.consultations.chart.detach')"
+                                >
+                                    <AppIcon name="unlink" />
+                                    {{ t('consultations.chart.detach') }}
+                                </button>
+                            </div>
+                        </template>
+                        <div v-else class="empty py-4!">
+                            <div class="e-glyph" aria-hidden="true">◌</div>
+                            <p class="font-medium text-ink">{{ t('consultations.chart.none') }}</p>
+                            <p class="mt-1 text-xs">{{ t('consultations.chart.attachHint') }}</p>
+                            <button
+                                type="button"
+                                class="btn btn-primary btn-sm mt-3"
+                                :disabled="chartBusy"
+                                @click="attachChart"
+                                v-tip="t('tips.consultations.chart.attach')"
+                            >
+                                <AppIcon name="attach" />
+                                {{ t('consultations.chart.attach') }}
+                            </button>
+                        </div>
+                        <div v-if="consultation.starts_at && client" class="border-t border-line-soft pt-3">
+                            <RouterLink
+                                :to="transitsRoute(client.id, consultation.starts_at, auth.user?.timezone)"
+                                class="btn btn-sm"
+                                v-tip="t('tips.transits.onDate')"
+                                ><AppIcon name="transits" />{{ t('transits.onDate') }}</RouterLink
+                            >
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
     </template>

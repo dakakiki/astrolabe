@@ -325,7 +325,7 @@ const glyph = { image: '▣', pdf: '▤', document: '▤', audio: '♫', video: 
                                                 :to="{
                                                     name: 'consultations.show',
                                                     params: { id: item.consultation_id },
-                                                    query: { panel: 'files' },
+                                                    query: { tab: 'files' },
                                                 }"
                                                 class="hover:underline"
                                                 >{{ t('files.onConsultation') }}</RouterLink
