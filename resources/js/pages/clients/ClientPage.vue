@@ -218,27 +218,21 @@ function deleted() {
                     </div>
                 </div>
             </div>
+            <!-- Only what starts new work sits up here; editing, archiving and deleting are at the
+                 end of the Overview's right column ("Manage client"). -->
             <div class="ml-auto flex flex-wrap gap-2">
-                <RouterLink :to="{ name: 'clients.edit', params: { id: client.id } }" class="btn"
-                    ><AppIcon name="edit" />{{ t('clients.edit') }}</RouterLink
-                >
-                <button type="button" class="btn btn-ghost" @click="toggleArchive">
-                    <AppIcon :name="client.status === 'archived' ? 'unarchive' : 'archive'" />
-                    {{ client.status === 'archived' ? t('clients.restore') : t('clients.archive') }}
-                </button>
-                <button
-                    v-if="auth.isOwner"
-                    type="button"
-                    class="btn btn-ghost text-danger"
-                    @click="deleteDialog.open()"
-                >
-                    <AppIcon name="delete" />
-                    {{ t('clients.deletePermanently') }}
-                </button>
-                <RouterLink :to="{ name: 'calendar', query: { new: 1, client: client.id } }" class="btn"
+                <RouterLink
+                    :to="{ name: 'calendar', query: { new: 1, client: client.id } }"
+                    class="btn"
+                    :aria-label="t('clients.newAppointment')"
+                    :title="t('clients.newAppointment')"
                     ><AppIcon name="addAppointment" />{{ t('clients.addAppointment') }}</RouterLink
                 >
-                <RouterLink :to="{ name: 'consultations.create', query: { client: client.id } }" class="btn btn-primary"
+                <RouterLink
+                    :to="{ name: 'consultations.create', query: { client: client.id } }"
+                    class="btn btn-primary"
+                    :aria-label="t('clients.newConsultation')"
+                    :title="t('clients.newConsultation')"
                     ><AppIcon name="addConsultation" />{{ t('clients.addConsultation') }}</RouterLink
                 >
             </div>
@@ -395,6 +389,40 @@ function deleted() {
                     <div class="card-body">
                         <p v-if="client.internal_notes" class="whitespace-pre-line">{{ client.internal_notes }}</p>
                         <p v-else class="text-ink-3">{{ t('clients.profile.noNotes') }}</p>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-head">
+                        <h2>{{ t('clients.manage.title') }}</h2>
+                    </div>
+                    <div class="card-body manage-actions">
+                        <div>
+                            <RouterLink :to="{ name: 'clients.edit', params: { id: client.id } }" class="btn btn-sm"
+                                ><AppIcon name="edit" />{{ t('clients.manage.edit') }}</RouterLink
+                            >
+                            <p>{{ t('clients.manage.editHint') }}</p>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sm" @click="toggleArchive">
+                                <AppIcon :name="client.status === 'archived' ? 'unarchive' : 'archive'" />
+                                {{ client.status === 'archived' ? t('clients.restore') : t('clients.archive') }}
+                            </button>
+                            <p>
+                                {{
+                                    client.status === 'archived'
+                                        ? t('clients.manage.restoreHint')
+                                        : t('clients.manage.archiveHint')
+                                }}
+                            </p>
+                        </div>
+                        <div v-if="auth.isOwner" class="danger">
+                            <button type="button" class="btn btn-sm btn-danger" @click="deleteDialog.open()">
+                                <AppIcon name="delete" />
+                                {{ t('clients.deletePermanently') }}
+                            </button>
+                            <p>{{ t('clients.manage.deleteHint') }}</p>
+                        </div>
                     </div>
                 </section>
             </div>

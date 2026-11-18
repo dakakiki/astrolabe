@@ -659,7 +659,6 @@
         "title": "Clients",
         "sub": "Everyone you work with, and their birth data.",
         "add": "Add client",
-        "edit": "Edit",
         "archive": "Archive",
         "restore": "Restore",
         "archived": "Client archived",
@@ -808,9 +807,19 @@
             "ambiguous": "This time happened twice: clocks went back that night. Check which of the two moments is meant.",
             "zoneHistory": "Time-zone records before 1970 are unreliable in some regions. Check the offset if the chart looks wrong."
         },
-        "addConsultation": "New consultation",
-        "addAppointment": "New appointment",
+        "addConsultation": "Consultation",
+        "newConsultation": "New consultation",
+        "addAppointment": "Appointment",
+        "newAppointment": "New appointment",
         "deletePermanently": "Delete permanently",
+        "manage": {
+            "title": "Manage client",
+            "edit": "Edit profile",
+            "editHint": "Name, contact details, birth data, methods and tags.",
+            "archiveHint": "Takes the client off your lists and pauses their portal access. Nothing is deleted.",
+            "restoreHint": "Brings the client back to your lists and opens their portal access again.",
+            "deleteHint": "Deletes the client and everything about them at once. It cannot be undone."
+        },
         "deleteDialog": {
             "title": "Delete {name} permanently?",
             "intro": "Use this when the client asks you to delete their data. It cannot be undone.",
