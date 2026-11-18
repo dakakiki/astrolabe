@@ -3,6 +3,7 @@ import { computed, defineAsyncComponent, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import RichText from '@/components/RichText.vue';
 import VisibilityBadge from '@/components/VisibilityBadge.vue';
@@ -137,9 +138,11 @@ const consultationLabel = (consultation) =>
                         >
                         <span v-if="note.can_edit" class="ml-auto flex gap-1">
                             <button type="button" class="btn btn-ghost btn-sm" @click="edit(note)">
+                                <AppIcon name="edit" />
                                 {{ t('common.edit') }}
                             </button>
                             <button type="button" class="btn btn-ghost btn-sm" @click="remove(note)">
+                                <AppIcon name="delete" />
                                 {{ t('common.delete') }}
                             </button>
                         </span>
@@ -154,6 +157,7 @@ const consultationLabel = (consultation) =>
                 class="btn btn-sm"
                 @click="load(meta.current_page + 1)"
             >
+                <AppIcon name="more" />
                 {{ t('common.more') }}
             </button>
         </div>
@@ -205,9 +209,11 @@ const consultationLabel = (consultation) =>
                 </FormField>
                 <div class="flex gap-2">
                     <button type="submit" class="btn btn-primary" :disabled="form.processing.value">
+                        <AppIcon name="save" />
                         {{ editing ? t('notes.update') : t('notes.save') }}
                     </button>
                     <button v-if="editing" type="button" class="btn btn-ghost" @click="cancel">
+                        <AppIcon name="cancel" />
                         {{ t('common.cancel') }}
                     </button>
                 </div>

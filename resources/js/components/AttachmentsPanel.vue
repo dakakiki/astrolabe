@@ -3,6 +3,7 @@ import { computed, onMounted, ref, useId } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import VisibilityBadge from '@/components/VisibilityBadge.vue';
 import { formatDateTime } from '@/lib/datetime';
 import { acceptAttribute, checkFile, fileKind, formatBytes } from '@/lib/files';
@@ -184,7 +185,9 @@ const glyph = { image: '▣', pdf: '▤', document: '▤', audio: '♫', video: 
                         {{ t(`visibility.${value}`) }}
                     </option>
                 </select>
-                <button type="button" class="btn btn-sm" @click="showLink = !showLink">{{ t('files.addLink') }}</button>
+                <button type="button" class="btn btn-sm" @click="showLink = !showLink">
+                    <AppIcon name="link" />{{ t('files.addLink') }}
+                </button>
             </div>
         </div>
 
@@ -211,7 +214,7 @@ const glyph = { image: '▣', pdf: '▤', document: '▤', audio: '♫', video: 
                     :placeholder="t('files.linkTitlePlaceholder')"
                 />
             </div>
-            <button type="submit" class="btn btn-primary">{{ t('files.linkSave') }}</button>
+            <button type="submit" class="btn btn-primary"><AppIcon name="save" />{{ t('files.linkSave') }}</button>
         </form>
 
         <!-- A narrow column (the consultation page) gets a list instead of the table. -->
@@ -259,9 +262,10 @@ const glyph = { image: '▣', pdf: '▤', document: '▤', audio: '♫', video: 
                             target="_blank"
                             rel="noopener"
                             class="btn btn-ghost btn-sm"
-                            >{{ t('files.open') }}</a
+                            ><AppIcon name="external" />{{ t('files.open') }}</a
                         >
                         <button v-if="item.can_edit" type="button" class="btn btn-ghost btn-sm" @click="remove(item)">
+                            <AppIcon name="delete" />
                             {{ t('files.remove') }}
                         </button>
                     </div>
@@ -350,7 +354,7 @@ const glyph = { image: '▣', pdf: '▤', document: '▤', audio: '♫', video: 
                                 target="_blank"
                                 rel="noopener"
                                 class="btn btn-ghost btn-sm"
-                                >{{ t('files.open') }}</a
+                                ><AppIcon name="external" />{{ t('files.open') }}</a
                             >
                             <button
                                 v-if="item.can_edit"
@@ -358,6 +362,7 @@ const glyph = { image: '▣', pdf: '▤', document: '▤', audio: '♫', video: 
                                 class="btn btn-ghost btn-sm"
                                 @click="remove(item)"
                             >
+                                <AppIcon name="delete" />
                                 {{ t('files.remove') }}
                             </button>
                         </td>

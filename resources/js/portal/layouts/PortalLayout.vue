@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import BrandMark from '@/components/BrandMark.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import PracticeMark from '@/portal/components/PracticeMark.vue';
@@ -19,6 +20,13 @@ const router = useRouter();
 const session = useSessionStore();
 
 const sections = ['home', 'appointments', 'shared', 'profile', 'security'];
+const sectionIcons = {
+    home: 'home',
+    appointments: 'calendar',
+    shared: 'shared',
+    profile: 'profile',
+    security: 'security',
+};
 // A screen inside a section (booking, rescheduling) names it in `meta.section`.
 const active = computed(() => route.meta.section ?? route.name);
 
@@ -48,10 +56,11 @@ async function signOut() {
                         v-if="session.practices.length > 1"
                         :to="{ name: 'choose' }"
                         class="btn btn-ghost btn-sm"
-                        >{{ t('portal.nav.switch') }}</RouterLink
+                        ><AppIcon name="switch" />{{ t('portal.nav.switch') }}</RouterLink
                     >
                     <ThemeToggle />
                     <button type="button" class="btn btn-ghost btn-sm" @click="signOut">
+                        <AppIcon name="signOut" />
                         {{ t('portal.nav.signOut') }}
                     </button>
                 </div>
@@ -63,8 +72,9 @@ async function signOut() {
                         :key="section"
                         :to="{ name: section }"
                         :aria-current="section === active ? 'page' : undefined"
-                        >{{ t(`portal.nav.${section}`) }}</RouterLink
                     >
+                        <AppIcon :name="sectionIcons[section]" />{{ t(`portal.nav.${section}`) }}
+                    </RouterLink>
                 </div>
             </nav>
         </header>

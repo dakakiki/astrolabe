@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import BirthDataFields from '@/components/BirthDataFields.vue';
 import FormField from '@/components/FormField.vue';
 import PhoneInput from '@/components/PhoneInput.vue';
@@ -196,9 +197,12 @@ const cancelRoute = computed(() =>
 
         <div class="flex gap-2">
             <button class="btn btn-primary" type="submit" :disabled="form.processing.value">
+                <AppIcon name="save" />
                 {{ t('related.form.save') }}
             </button>
-            <RouterLink :to="cancelRoute" class="btn btn-ghost">{{ t('related.form.cancel') }}</RouterLink>
+            <RouterLink :to="cancelRoute" class="btn btn-ghost"
+                ><AppIcon name="cancel" />{{ t('related.form.cancel') }}</RouterLink
+            >
         </div>
     </form>
     <p v-else class="text-ink-3">{{ t('common.loading') }}</p>

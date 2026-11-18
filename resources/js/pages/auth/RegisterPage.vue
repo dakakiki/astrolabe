@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import { useForm } from '@/composables/useForm';
 import http from '@/lib/http';
@@ -215,6 +216,7 @@ async function reloadLegal() {
                 </div>
             </div>
             <button class="btn btn-primary w-full" type="submit" :disabled="form.processing.value || !acceptTerms">
+                <AppIcon name="register" />
                 {{ t('auth.register.submit') }}
             </button>
         </form>

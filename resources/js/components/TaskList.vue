@@ -8,6 +8,8 @@ import { formatDate, formatTime } from '@/lib/format';
 import { describeDue } from '@/lib/tasks';
 import { useAuthStore } from '@/stores/auth';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * Tasks as rows with a tick box (docs/spec/02). The deadline reads relative to
  * the viewer's today; what a tick, an edit or a delete does is the parent's.
@@ -105,9 +107,11 @@ function followUpLabel(consultation) {
             >
             <span v-if="editable" class="flex shrink-0 gap-1">
                 <button type="button" class="btn btn-ghost btn-sm" @click="emit('edit', task)">
+                    <AppIcon name="edit" />
                     {{ t('common.edit') }}
                 </button>
                 <button type="button" class="btn btn-ghost btn-sm" @click="emit('remove', task)">
+                    <AppIcon name="delete" />
                     {{ t('common.delete') }}
                 </button>
             </span>

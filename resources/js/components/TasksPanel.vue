@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import TaskForm from '@/components/TaskForm.vue';
 import TaskList from '@/components/TaskList.vue';
 import { todayIn } from '@/lib/calendar';
@@ -147,7 +148,8 @@ const emptyText = computed(() => {
             <div class="card-head">
                 <h2>{{ t('tasks.followUps') }}</h2>
                 <button v-if="!formOpen" type="button" class="btn btn-sm right" @click="openForm()">
-                    + {{ t('tasks.addFollowUp') }}
+                    <AppIcon name="add" />
+                    {{ t('tasks.addFollowUp') }}
                 </button>
             </div>
             <div class="card-body">
@@ -222,6 +224,7 @@ const emptyText = computed(() => {
                     :disabled="loading"
                     @click="load(meta.current_page + 1)"
                 >
+                    <AppIcon name="more" />
                     {{ t('common.more') }}
                 </button>
             </div>

@@ -156,9 +156,8 @@
 
     .nav a .ico {
         width: 16px;
-        text-align: center;
+        height: 16px;
         opacity: 0.85;
-        font-size: 13px;
     }
 
     .main {
@@ -260,7 +259,9 @@
 
     .menu a,
     .menu button {
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: 9px;
         width: 100%;
         text-align: left;
         padding: 7px 10px;
@@ -426,6 +427,44 @@
         height: 28px;
         padding: 0 10px;
         font-size: 12.5px;
+    }
+
+    /* Icons (components/AppIcon.vue, lib/icons.js): line drawings in the text colour, sized
+       by what holds them. A button with words keeps them; the icon only leads the eye. */
+    .icon {
+        width: 1em;
+        height: 1em;
+        flex: none;
+        stroke-width: 1.75;
+    }
+
+    .btn .icon {
+        width: 15px;
+        height: 15px;
+    }
+
+    .btn-sm .icon {
+        width: 14px;
+        height: 14px;
+    }
+
+    .icon-btn .icon,
+    .menu .icon,
+    .subnav .icon,
+    .editor-toolbar .icon {
+        width: 15px;
+        height: 15px;
+    }
+
+    .menu .icon,
+    .subnav a:not(.router-link-active) .icon {
+        color: var(--ink-3);
+    }
+
+    .menu-btn .icon {
+        display: block;
+        width: 20px;
+        height: 20px;
     }
 
     .btn-danger {
@@ -824,7 +863,9 @@
     /* ---------------- Settings navigation ---------------- */
 
     .subnav a {
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: 9px;
         padding: 8px 12px;
         border-radius: 6px;
         color: var(--ink-2);
@@ -1536,6 +1577,8 @@
     }
 
     .editor-toolbar button {
+        display: inline-grid;
+        place-items: center;
         min-width: 28px;
         height: 26px;
         padding: 0 6px;

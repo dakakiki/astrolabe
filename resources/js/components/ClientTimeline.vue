@@ -11,6 +11,8 @@ import http from '@/lib/http';
 import { describeEvent, TIMELINE_FILTERS } from '@/lib/timeline';
 import { useAuthStore } from '@/stores/auth';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * The client's history, newest first (docs/spec/02). Entries lead to where the
  * record lives: a consultation's page, or a tab of the client profile.
@@ -172,6 +174,7 @@ function taskLine(task) {
                 :disabled="loading"
                 @click="load(meta.current_page + 1)"
             >
+                <AppIcon name="more" />
                 {{ t('timeline.loadMore') }}
             </button>
         </div>

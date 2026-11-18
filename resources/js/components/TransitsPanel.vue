@@ -3,6 +3,7 @@ import { computed, ref, useId, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import ChartWheel from '@/components/ChartWheel.vue';
 import PositionsTable from '@/components/PositionsTable.vue';
 import { useLabels } from '@/composables/useLabels';
@@ -158,6 +159,7 @@ const dateOf = (iso) => formatDateTime(iso, locale.value, report.value.timezone,
                         @change="pick($event.target.value)"
                     />
                     <button type="button" class="btn btn-sm" :disabled="busy" @click="now">
+                        <AppIcon name="now" />
                         {{ t('transits.now') }}
                     </button>
                 </span>
@@ -181,7 +183,9 @@ const dateOf = (iso) => formatDateTime(iso, locale.value, report.value.timezone,
                         {{ t('clients.missing.title') }}
                         {{ missing.map((key) => t(`clients.missing.${key}`)).join(', ') }}
                         <div class="mt-1.5">
-                            <RouterLink :to="editTo" class="btn btn-sm">{{ t('transits.complete') }}</RouterLink>
+                            <RouterLink :to="editTo" class="btn btn-sm"
+                                ><AppIcon name="addBirthData" />{{ t('transits.complete') }}</RouterLink
+                            >
                         </div>
                     </div>
                 </div>

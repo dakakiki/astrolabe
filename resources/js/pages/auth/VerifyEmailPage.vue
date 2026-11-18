@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import { useForm } from '@/composables/useForm';
 import http from '@/lib/http';
@@ -50,6 +51,7 @@ async function signOut() {
     <div class="sub">{{ t('auth.verify.sub', { email: auth.user?.email }) }}</div>
 
     <button class="btn btn-primary w-full" type="button" :disabled="resend.processing.value" @click="sendAgain">
+        <AppIcon name="send" />
         {{ t('auth.verify.resend') }}
     </button>
 
@@ -69,9 +71,12 @@ async function signOut() {
         </FormField>
         <div class="flex gap-2">
             <button class="btn" type="submit" :disabled="emailForm.processing.value">
+                <AppIcon name="send" />
                 {{ t('auth.verify.updateEmail') }}
             </button>
-            <button class="btn btn-ghost" type="button" @click="changingEmail = false">{{ t('common.cancel') }}</button>
+            <button class="btn btn-ghost" type="button" @click="changingEmail = false">
+                <AppIcon name="cancel" />{{ t('common.cancel') }}
+            </button>
         </div>
     </form>
 

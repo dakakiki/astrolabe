@@ -1,6 +1,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import { useForm } from '@/composables/useForm';
 import http from '@/lib/http';
@@ -42,6 +43,7 @@ async function save() {
                     <input :id="id" v-model="form.data.name" v-bind="aria" class="input" autocomplete="organization" />
                 </FormField>
                 <button class="btn btn-primary" type="submit" :disabled="form.processing.value">
+                    <AppIcon name="save" />
                     {{ t('common.save') }}
                 </button>
             </fieldset>

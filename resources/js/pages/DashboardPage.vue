@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import AppointmentStatusBadge from '@/components/calendar/AppointmentStatusBadge.vue';
 import TaskList from '@/components/TaskList.vue';
 import BillingBadge from '@/components/BillingBadge.vue';
@@ -347,12 +348,12 @@ const steps = computed(() => [
             <div class="sub">{{ summary || auth.workspace?.name }}</div>
         </div>
         <div class="ml-auto flex flex-wrap gap-2">
-            <RouterLink :to="{ name: 'calendar', query: { new: 1 } }" class="btn">{{
-                t('dashboard.newAppointment')
-            }}</RouterLink>
-            <RouterLink :to="{ name: 'clients.create' }" class="btn btn-primary">{{
-                t('dashboard.addClient')
-            }}</RouterLink>
+            <RouterLink :to="{ name: 'calendar', query: { new: 1 } }" class="btn"
+                ><AppIcon name="addAppointment" />{{ t('dashboard.newAppointment') }}</RouterLink
+            >
+            <RouterLink :to="{ name: 'clients.create' }" class="btn btn-primary"
+                ><AppIcon name="addClient" />{{ t('dashboard.addClient') }}</RouterLink
+            >
         </div>
     </div>
 
@@ -440,6 +441,7 @@ const steps = computed(() => [
                                         :disabled="answering !== null"
                                         @click="confirmRequest(request)"
                                     >
+                                        <AppIcon name="confirm" />
                                         {{ t('dashboard.requests.confirm') }}
                                     </button>
                                     <button
@@ -449,12 +451,13 @@ const steps = computed(() => [
                                         :aria-expanded="declining === request.id"
                                         @click="openDecline(request)"
                                     >
+                                        <AppIcon name="decline" />
                                         {{ t('dashboard.requests.decline') }}
                                     </button>
                                     <RouterLink
                                         :to="{ name: 'calendar', query: { appointment: request.id } }"
                                         class="btn btn-ghost btn-sm"
-                                        >{{ t('dashboard.requests.open') }}</RouterLink
+                                        ><AppIcon name="open" />{{ t('dashboard.requests.open') }}</RouterLink
                                     >
                                 </div>
                             </div>
@@ -491,9 +494,11 @@ const steps = computed(() => [
                                 </div>
                                 <div class="flex flex-wrap gap-2">
                                     <button type="submit" class="btn btn-danger btn-sm" :disabled="answering !== null">
+                                        <AppIcon name="decline" />
                                         {{ t('dashboard.requests.send') }}
                                     </button>
                                     <button type="button" class="btn btn-ghost btn-sm" @click="declining = null">
+                                        <AppIcon name="undo" />
                                         {{ t('dashboard.requests.keep') }}
                                     </button>
                                 </div>
@@ -573,7 +578,9 @@ const steps = computed(() => [
                                                 query: { appointment: appointment.id },
                                             }"
                                             class="btn btn-sm mr-1"
-                                            >{{ t('dashboard.nextUp.record') }}</RouterLink
+                                            ><AppIcon name="addConsultation" />{{
+                                                t('dashboard.nextUp.record')
+                                            }}</RouterLink
                                         >
                                         <RouterLink
                                             v-else-if="appointment.consultation"
@@ -582,12 +589,14 @@ const steps = computed(() => [
                                                 params: { id: appointment.consultation.id },
                                             }"
                                             class="btn btn-sm btn-ghost mr-1"
-                                            >{{ t('dashboard.nextUp.consultation') }}</RouterLink
+                                            ><AppIcon name="consultation" />{{
+                                                t('dashboard.nextUp.consultation')
+                                            }}</RouterLink
                                         >
                                         <RouterLink
                                             :to="{ name: 'calendar', query: { appointment: appointment.id } }"
                                             class="btn btn-sm"
-                                            >{{ t('dashboard.nextUp.open') }}</RouterLink
+                                            ><AppIcon name="open" />{{ t('dashboard.nextUp.open') }}</RouterLink
                                         >
                                     </td>
                                 </tr>
@@ -632,7 +641,9 @@ const steps = computed(() => [
                                             <RouterLink
                                                 :to="transitsRoute(entry.client.id, entry.appointment.starts_at, zone)"
                                                 class="btn btn-sm ml-auto"
-                                                >{{ t('dashboard.transits.open') }}</RouterLink
+                                                ><AppIcon name="transits" />{{
+                                                    t('dashboard.transits.open')
+                                                }}</RouterLink
                                             >
                                         </span>
                                     </th>
@@ -706,7 +717,7 @@ const steps = computed(() => [
                                         <RouterLink
                                             :to="{ name: 'consultations.show', params: { id: consultation.id } }"
                                             class="btn btn-sm"
-                                            >{{ t('dashboard.waiting.record') }}</RouterLink
+                                            ><AppIcon name="payment" />{{ t('dashboard.waiting.record') }}</RouterLink
                                         >
                                     </td>
                                 </tr>
@@ -822,7 +833,9 @@ const steps = computed(() => [
                                     <RouterLink
                                         :to="{ name: 'clients.edit', params: { id: client.id } }"
                                         class="btn btn-sm"
-                                        >{{ t('dashboard.attention.complete') }}</RouterLink
+                                        ><AppIcon name="addBirthData" />{{
+                                            t('dashboard.attention.complete')
+                                        }}</RouterLink
                                     >
                                 </div>
                             </div>

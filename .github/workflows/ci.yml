@@ -69,8 +69,10 @@ jobs:
       - name: Audit PHP dependencies
         run: composer audit --no-dev
 
+      # npm audit --omit=dev, high and critical fail — except advisories accepted in the script,
+      # each with a reason and a last day.
       - name: Audit Node dependencies
-        run: npm audit --omit=dev --audit-level=high
+        run: node scripts/npm-audit.mjs
 
       - name: Prepare environment
         run: |

@@ -1,6 +1,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import { priceText } from '@/portal/lib/booking';
 
 /**
@@ -24,7 +25,7 @@ const { t, locale } = useI18n();
             <button type="button" class="svc-card" @click="emit('choose', service)">
                 <span class="svc-top">
                     <span class="svc-name">{{ service.name }}</span>
-                    <span class="svc-go" aria-hidden="true">→</span>
+                    <AppIcon name="continue" class="svc-go" />
                 </span>
                 <span class="svc-meta">
                     {{ t('portal.appointments.minutes', { count: service.duration_minutes }) }} ·

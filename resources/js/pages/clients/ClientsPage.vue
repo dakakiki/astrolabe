@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import PaginationBar from '@/components/PaginationBar.vue';
 import StatusBadge from '@/components/StatusBadge.vue';
 import { useLabels } from '@/composables/useLabels';
@@ -86,7 +87,7 @@ function born(client) {
             <div class="sub">{{ t('clients.sub') }}</div>
         </div>
         <RouterLink :to="{ name: 'clients.create' }" class="btn btn-primary ml-auto"
-            >+ {{ t('clients.add') }}</RouterLink
+            ><AppIcon name="addClient" />{{ t('clients.add') }}</RouterLink
         >
     </div>
 

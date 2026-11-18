@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import ConsultationsTable from '@/components/ConsultationsTable.vue';
 import PaginationBar from '@/components/PaginationBar.vue';
 import http from '@/lib/http';
@@ -81,7 +82,7 @@ function clear() {
             <div class="sub">{{ t('consultations.sub') }}</div>
         </div>
         <RouterLink :to="{ name: 'consultations.create' }" class="btn btn-primary ml-auto"
-            >+ {{ t('consultations.add') }}</RouterLink
+            ><AppIcon name="addConsultation" />{{ t('consultations.add') }}</RouterLink
         >
     </div>
 
@@ -136,6 +137,7 @@ function clear() {
                 />
             </label>
             <button v-if="hasFilters" type="button" class="btn btn-ghost btn-sm" @click="clear">
+                <AppIcon name="clearFilter" />
                 {{ t('consultations.filters.clear') }}
             </button>
         </div>

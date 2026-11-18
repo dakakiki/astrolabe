@@ -2,6 +2,7 @@
 import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import { useForm } from '@/composables/useForm';
 import { timeZoneOptions, useLabels } from '@/composables/useLabels';
@@ -85,6 +86,7 @@ async function savePractice() {
                 </FormField>
             </div>
             <button class="btn btn-primary" type="submit" :disabled="mine.processing.value">
+                <AppIcon name="save" />
                 {{ t('common.save') }}
             </button>
         </form>
@@ -133,6 +135,7 @@ async function savePractice() {
                     </FormField>
                 </div>
                 <button class="btn btn-primary" type="submit" :disabled="practice.processing.value">
+                    <AppIcon name="save" />
                     {{ t('common.save') }}
                 </button>
             </fieldset>

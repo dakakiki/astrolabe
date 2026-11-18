@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, useId, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import { useForm } from '@/composables/useForm';
 import { timeZoneOptions } from '@/composables/useLabels';
@@ -317,7 +318,7 @@ async function removeException(item) {
                                     "
                                     @click="changeDay(day.weekday, (entry) => removeStretch(entry, index))"
                                 >
-                                    ×
+                                    <AppIcon name="close" />
                                 </button>
                             </div>
                             <div
@@ -337,7 +338,8 @@ async function removeException(item) {
                             class="btn btn-ghost btn-sm"
                             @click="changeDay(day.weekday, addStretch)"
                         >
-                            + {{ t('settings.availability.addHours') }}
+                            <AppIcon name="add" />
+                            {{ t('settings.availability.addHours') }}
                         </button>
                     </div>
                     <div v-else class="text-sm text-ink-3 sm:pt-2">{{ t('settings.availability.off') }}</div>
@@ -346,6 +348,7 @@ async function removeException(item) {
 
             <div class="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2">
                 <button type="button" class="btn btn-ghost btn-sm" @click="copyMonday">
+                    <AppIcon name="copy" />
                     {{ t('settings.availability.copyMonday') }}
                 </button>
                 <span class="text-xs text-ink-3">{{ t('settings.availability.midnight') }}</span>
@@ -356,6 +359,7 @@ async function removeException(item) {
             <p class="notice n-neutral mb-4">{{ t('settings.availability.private') }}</p>
 
             <button class="btn btn-primary" type="submit" :disabled="week.processing.value">
+                <AppIcon name="save" />
                 {{ t('common.save') }}
             </button>
         </form>
@@ -393,6 +397,7 @@ async function removeException(item) {
                         "
                         @click="removeException(item)"
                     >
+                        <AppIcon name="delete" />
                         {{ t('settings.availability.exceptions.remove') }}
                     </button>
                 </li>
@@ -523,6 +528,7 @@ async function removeException(item) {
                 </p>
 
                 <button class="btn btn-primary" type="submit" :disabled="exception.processing.value">
+                    <AppIcon name="add" />
                     {{ t('settings.availability.exceptions.add') }}
                 </button>
             </form>

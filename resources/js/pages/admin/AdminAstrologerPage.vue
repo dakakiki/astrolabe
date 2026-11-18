@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute } from 'vue-router';
 
 import AdminActionDialog from '@/components/admin/AdminActionDialog.vue';
+import AppIcon from '@/components/AppIcon.vue';
 import AuditLogTable from '@/components/admin/AuditLogTable.vue';
 import PaginationBar from '@/components/PaginationBar.vue';
 import { astrologerState, stateTone } from '@/lib/admin';
@@ -56,12 +57,20 @@ const actions = computed(() => {
 
     const list = [];
     if (a.two_factor_enabled)
-        list.push({ key: 'resetTwoFactor', path: 'two-factor-reset', method: 'post', required: true, danger: true });
-    if (!a.email_verified) list.push({ key: 'verification', path: 'verification', method: 'post', required: false });
+        list.push({
+            key: 'resetTwoFactor',
+            icon: 'securityOff',
+            path: 'two-factor-reset',
+            method: 'post',
+            required: true,
+            danger: true,
+        });
+    if (!a.email_verified)
+        list.push({ key: 'verification', icon: 'mail', path: 'verification', method: 'post', required: false });
     list.push(
         a.suspended_at
-            ? { key: 'restore', path: 'suspension', method: 'delete', required: false }
-            : { key: 'suspend', path: 'suspension', method: 'post', required: true, danger: true },
+            ? { key: 'restore', icon: 'reset', path: 'suspension', method: 'delete', required: false }
+            : { key: 'suspend', icon: 'ban', path: 'suspension', method: 'post', required: true, danger: true },
     );
 
     return list;
@@ -75,6 +84,7 @@ function start(action) {
         title: t(`admin.astrologer.actions.${action.key}.title`, { name }),
         body: t(`admin.astrologer.actions.${action.key}.body`),
         submit: t(`admin.astrologer.actions.${action.key}.button`),
+        icon: action.icon,
         reasonRequired: action.required,
         danger: action.danger,
         run: async (reason) => {
@@ -216,6 +226,7 @@ onMounted(async () => {
                         :class="{ 'btn-danger': action.danger }"
                         @click="start(action)"
                     >
+                        <AppIcon :name="action.icon" />
                         {{ t(`admin.astrologer.actions.${action.key}.button`) }}
                     </button>
                 </div>

@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import BrandMark from '@/components/BrandMark.vue';
 import FormField from '@/components/FormField.vue';
 import { useForm } from '@/composables/useForm';
@@ -132,6 +133,7 @@ async function removeLogo() {
                             class="btn btn-ghost btn-sm"
                             @click="form.data.brand_color = ''"
                         >
+                            <AppIcon name="reset" />
                             {{ t('settings.branding.useDefault') }}
                         </button>
                     </div>
@@ -155,6 +157,7 @@ async function removeLogo() {
                 </div>
 
                 <button class="btn btn-primary" type="submit" :disabled="form.processing.value">
+                    <AppIcon name="save" />
                     {{ t('common.save') }}
                 </button>
             </fieldset>
@@ -175,7 +178,8 @@ async function removeLogo() {
                 />
                 <p v-else class="text-sm text-ink-3">{{ t('settings.branding.noLogo') }}</p>
                 <div v-if="auth.isOwner" class="flex flex-wrap gap-2">
-                    <label class="btn btn-sm" :class="{ 'pointer-events-none opacity-60': uploading }">
+                    <label class="btn btn-sm" :class="{ 'pointer-events-none opacity-60': uploading }"
+                        ><AppIcon name="upload" />
                         {{
                             auth.workspace.logo_url
                                 ? t('settings.branding.replaceLogo')
@@ -189,6 +193,7 @@ async function removeLogo() {
                         class="btn btn-sm btn-ghost text-danger"
                         @click="removeLogo"
                     >
+                        <AppIcon name="delete" />
                         {{ t('settings.branding.removeLogo') }}
                     </button>
                 </div>
@@ -240,6 +245,7 @@ async function removeLogo() {
                             <a href="#" @click.prevent>{{ t('settings.branding.sampleLink') }}</a>
                         </p>
                         <button type="button" class="btn btn-primary btn-sm" tabindex="-1">
+                            <AppIcon name="confirm" />
                             {{ t('settings.branding.sampleButton') }}
                         </button>
                     </div>

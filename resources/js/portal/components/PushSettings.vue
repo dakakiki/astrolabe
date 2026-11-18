@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import ToggleRow from '@/components/ToggleRow.vue';
 import http from '@/portal/http';
 import { deviceLabel, madeWithOtherKey, pushDevices, pushProblem, sha256Hex, supportNotice } from '@/portal/lib/pwa';
@@ -282,12 +283,15 @@ function list(names) {
             </p>
             <div class="mt-3 flex flex-wrap gap-2">
                 <button v-if="on" type="button" class="btn" :disabled="busy" @click="turnOff">
+                    <AppIcon name="notificationsOff" />
                     {{ t('portal.notifications.turnOff') }}
                 </button>
                 <button v-else type="button" class="btn btn-primary" :disabled="busy" @click="turnOn">
+                    <AppIcon name="notificationsOn" />
                     {{ t('portal.notifications.turnOn') }}
                 </button>
                 <button v-if="on" type="button" class="btn btn-ghost" :disabled="busy" @click="test">
+                    <AppIcon name="send" />
                     {{ t('portal.notifications.test') }}
                 </button>
             </div>

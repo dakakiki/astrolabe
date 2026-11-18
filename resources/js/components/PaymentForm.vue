@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import ClientPicker from '@/components/ClientPicker.vue';
 import FormField from '@/components/FormField.vue';
 import { useForm } from '@/composables/useForm';
@@ -202,7 +203,7 @@ async function save() {
                 :aria-label="t('common.close')"
                 @click="emit('cancel')"
             >
-                ✕
+                <AppIcon name="close" />
             </button>
         </div>
         <div :class="{ 'card-body': !compact }">
@@ -346,9 +347,11 @@ async function save() {
 
             <div class="flex justify-end gap-2">
                 <button v-if="closable || editing" type="button" class="btn btn-ghost" @click="emit('cancel')">
+                    <AppIcon name="cancel" />
                     {{ t('common.cancel') }}
                 </button>
                 <button type="submit" class="btn btn-primary" :disabled="form.processing.value">
+                    <AppIcon name="save" />
                     {{ editing ? t('payments.form.save') : t('payments.form.create') }}
                 </button>
             </div>

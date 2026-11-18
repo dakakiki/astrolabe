@@ -9,6 +9,8 @@ import http from '@/lib/http';
 import { useAuthStore } from '@/stores/auth';
 import { useToastStore } from '@/stores/toast';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * The admin's System screen (Phase 8c): health checks, versions, sizes,
  * backups and the queue; failed jobs can be run again or dropped.
@@ -192,6 +194,7 @@ onMounted(load);
                                     :disabled="busy === job.uuid"
                                     @click="act(job, 'retry')"
                                 >
+                                    <AppIcon name="retry" />
                                     {{ t('admin.system.retry') }}
                                 </button>
                                 <button
@@ -200,6 +203,7 @@ onMounted(load);
                                     :disabled="busy === job.uuid"
                                     @click="act(job, 'forget')"
                                 >
+                                    <AppIcon name="delete" />
                                     {{ t('admin.system.forget') }}
                                 </button>
                             </td>

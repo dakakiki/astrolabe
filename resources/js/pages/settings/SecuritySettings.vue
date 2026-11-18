@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import TwoFactorSettings from '@/components/TwoFactorSettings.vue';
 import { useForm } from '@/composables/useForm';
@@ -96,6 +97,7 @@ async function signOutOthers() {
                 </FormField>
             </div>
             <button class="btn btn-primary" type="submit" :disabled="password.processing.value">
+                <AppIcon name="save" />
                 {{ t('common.save') }}
             </button>
         </form>
@@ -128,6 +130,7 @@ async function signOutOthers() {
                         </FormField>
                     </div>
                     <button class="btn btn-danger mb-3.5" type="submit" :disabled="sessions.processing.value">
+                        <AppIcon name="signOut" />
                         {{ t('settings.security.sessionsSubmit') }}
                     </button>
                 </div>

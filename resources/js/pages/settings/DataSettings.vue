@@ -3,6 +3,7 @@ import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import PracticeExportCard from '@/components/PracticeExportCard.vue';
 import { useForm } from '@/composables/useForm';
@@ -148,6 +149,7 @@ onMounted(() => reference.load().catch(() => {}));
                     type="submit"
                     :disabled="deletion.processing.value || !deletion.data.password"
                 >
+                    <AppIcon name="delete" />
                     {{ t('settings.data.deletion.submit') }}
                 </button>
             </div>

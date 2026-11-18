@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import PlaceAutocomplete from '@/components/PlaceAutocomplete.vue';
 import { timeZoneOptions, useLabels } from '@/composables/useLabels';
@@ -102,9 +103,11 @@ async function suggestTimezone() {
                 </div>
             </div>
             <button type="button" class="btn btn-ghost btn-sm" @click="chooseFromList">
+                <AppIcon name="edit" />
                 {{ t('clients.birth.change') }}
             </button>
             <button type="button" class="btn btn-ghost btn-sm" @click="enterManually">
+                <AppIcon name="keyboard" />
                 {{ t('clients.birth.enterManually') }}
             </button>
         </div>
@@ -162,11 +165,13 @@ async function suggestTimezone() {
                     :disabled="birth.latitude === '' || birth.longitude === ''"
                     @click="suggestTimezone"
                 >
+                    <AppIcon name="timezone" />
                     {{ t('clients.birth.suggestTimezone') }}
                 </button>
             </div>
         </FormField>
         <button type="button" class="btn btn-ghost btn-sm mb-3" @click="chooseFromList">
+            <AppIcon name="back" />
             {{ t('clients.birth.backToList') }}
         </button>
     </template>
@@ -177,6 +182,7 @@ async function suggestTimezone() {
             <PlaceAutocomplete :input-id="id" :aria="aria" @select="selectPlace" />
         </FormField>
         <button type="button" class="btn btn-ghost btn-sm -mt-2 mb-3" @click="enterManually">
+            <AppIcon name="keyboard" />
             {{ t('clients.birth.enterManually') }}
         </button>
     </template>

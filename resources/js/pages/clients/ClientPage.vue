@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
 import BirthDetailsCard from '@/components/BirthDetailsCard.vue';
 import ClientDeleteDialog from '@/components/ClientDeleteDialog.vue';
@@ -218,10 +219,11 @@ function deleted() {
                 </div>
             </div>
             <div class="ml-auto flex flex-wrap gap-2">
-                <RouterLink :to="{ name: 'clients.edit', params: { id: client.id } }" class="btn">{{
-                    t('clients.edit')
-                }}</RouterLink>
+                <RouterLink :to="{ name: 'clients.edit', params: { id: client.id } }" class="btn"
+                    ><AppIcon name="edit" />{{ t('clients.edit') }}</RouterLink
+                >
                 <button type="button" class="btn btn-ghost" @click="toggleArchive">
+                    <AppIcon :name="client.status === 'archived' ? 'unarchive' : 'archive'" />
                     {{ client.status === 'archived' ? t('clients.restore') : t('clients.archive') }}
                 </button>
                 <button
@@ -230,13 +232,14 @@ function deleted() {
                     class="btn btn-ghost text-danger"
                     @click="deleteDialog.open()"
                 >
+                    <AppIcon name="delete" />
                     {{ t('clients.deletePermanently') }}
                 </button>
                 <RouterLink :to="{ name: 'calendar', query: { new: 1, client: client.id } }" class="btn"
-                    >+ {{ t('clients.addAppointment') }}</RouterLink
+                    ><AppIcon name="addAppointment" />{{ t('clients.addAppointment') }}</RouterLink
                 >
                 <RouterLink :to="{ name: 'consultations.create', query: { client: client.id } }" class="btn btn-primary"
-                    >+ {{ t('clients.addConsultation') }}</RouterLink
+                    ><AppIcon name="addConsultation" />{{ t('clients.addConsultation') }}</RouterLink
                 >
             </div>
         </div>
@@ -453,7 +456,7 @@ function deleted() {
                 <RouterLink
                     :to="{ name: 'consultations.create', query: { client: client.id } }"
                     class="btn btn-sm btn-primary right"
-                    >+ {{ t('consultations.add') }}</RouterLink
+                    ><AppIcon name="addConsultation" />{{ t('consultations.add') }}</RouterLink
                 >
             </div>
             <div class="overflow-x-auto">

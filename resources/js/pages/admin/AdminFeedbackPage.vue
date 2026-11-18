@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import PaginationBar from '@/components/PaginationBar.vue';
 import { formatDateTime } from '@/lib/datetime';
 import http from '@/lib/http';
@@ -85,6 +86,7 @@ onMounted(() => load());
                         :class="{ 'btn-primary': !item.handled_at }"
                         @click="setHandled(item, !item.handled_at)"
                     >
+                        <AppIcon :name="item.handled_at ? 'reset' : 'confirm'" />
                         {{ item.handled_at ? t('admin.feedback.reopen') : t('admin.feedback.markHandled') }}
                     </button>
                 </span>

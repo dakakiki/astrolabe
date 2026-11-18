@@ -1,6 +1,8 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 defineProps({ meta: { type: Object, required: true } });
 const emit = defineEmits(['page']);
 
@@ -17,6 +19,7 @@ const { t } = useI18n();
                 :disabled="meta.current_page <= 1"
                 @click="emit('page', meta.current_page - 1)"
             >
+                <AppIcon name="previous" />
                 {{ t('clients.previous') }}
             </button>
             <button
@@ -25,7 +28,7 @@ const { t } = useI18n();
                 :disabled="meta.current_page >= meta.last_page"
                 @click="emit('page', meta.current_page + 1)"
             >
-                {{ t('clients.next') }}
+                {{ t('clients.next') }}<AppIcon name="next" />
             </button>
         </div>
     </div>

@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import RichText from '@/components/RichText.vue';
 import { formatBytes } from '@/lib/files';
 import { displayZone } from '@/portal/lib/portal';
@@ -89,11 +90,11 @@ function host(url) {
                         target="_blank"
                         rel="noopener noreferrer"
                         class="btn btn-sm"
-                        >{{ t('portal.shared.open') }}</a
+                        ><AppIcon name="external" />{{ t('portal.shared.open') }}</a
                     >
-                    <a v-else :href="`/api/portal/v1/files/${item.id}/download`" class="btn btn-sm">{{
-                        t('portal.shared.download')
-                    }}</a>
+                    <a v-else :href="`/api/portal/v1/files/${item.id}/download`" class="btn btn-sm"
+                        ><AppIcon name="download" />{{ t('portal.shared.download') }}</a
+                    >
                 </div>
             </div>
         </article>

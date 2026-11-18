@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import AppointmentDetail from '@/components/calendar/AppointmentDetail.vue';
 import AppointmentForm from '@/components/calendar/AppointmentForm.vue';
 import CalendarAgenda from '@/components/calendar/CalendarAgenda.vue';
@@ -208,7 +209,9 @@ onBeforeUnmount(() => clearInterval(clock));
                 {{ t('calendar.zoneNote', { zone }) }}
             </div>
         </div>
-        <button type="button" class="btn btn-primary ml-auto" @click="create()">+ {{ t('calendar.new') }}</button>
+        <button type="button" class="btn btn-primary ml-auto" @click="create()">
+            <AppIcon name="addAppointment" />{{ t('calendar.new') }}
+        </button>
     </div>
 
     <div class="mb-3 flex flex-wrap items-center gap-2">
@@ -223,14 +226,16 @@ onBeforeUnmount(() => clearInterval(clock));
                 {{ t(`calendar.views.${option}`) }}
             </button>
         </div>
-        <button type="button" class="btn btn-sm" @click="go({ date: undefined })">{{ t('calendar.today') }}</button>
+        <button type="button" class="btn btn-sm" @click="go({ date: undefined })">
+            <AppIcon name="today" />{{ t('calendar.today') }}
+        </button>
         <button
             type="button"
             class="btn btn-sm"
             :aria-label="t('calendar.previous')"
             @click="go({ date: shiftDate(view, date, -1) })"
         >
-            ‹
+            <AppIcon name="previous" />
         </button>
         <button
             type="button"
@@ -238,7 +243,7 @@ onBeforeUnmount(() => clearInterval(clock));
             :aria-label="t('calendar.next')"
             @click="go({ date: shiftDate(view, date, 1) })"
         >
-            ›
+            <AppIcon name="next" />
         </button>
         <input
             class="input w-auto max-w-full"

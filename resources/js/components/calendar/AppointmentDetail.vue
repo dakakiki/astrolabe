@@ -3,6 +3,7 @@ import { computed, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import AppointmentStatusBadge from '@/components/calendar/AppointmentStatusBadge.vue';
 import NatalChart from '@/components/NatalChart.vue';
 import PaymentForm from '@/components/PaymentForm.vue';
@@ -323,7 +324,7 @@ async function depositSaved() {
                 :aria-label="t('appointments.detail.close')"
                 @click="emit('close')"
             >
-                ✕
+                <AppIcon name="close" />
             </button>
         </div>
 
@@ -401,6 +402,7 @@ async function depositSaved() {
                     {{ t('appointments.detail.requested') }}
                     <div class="mt-2 flex flex-wrap gap-2">
                         <button type="button" class="btn btn-primary btn-sm" :disabled="busy" @click="confirmRequest">
+                            <AppIcon name="confirm" />
                             {{ t('appointments.detail.confirm') }}
                         </button>
                         <button
@@ -410,6 +412,7 @@ async function depositSaved() {
                             :aria-expanded="declining"
                             @click="openDecline"
                         >
+                            <AppIcon name="decline" />
                             {{ t('appointments.detail.decline') }}
                         </button>
                     </div>
@@ -442,9 +445,11 @@ async function depositSaved() {
                 </div>
                 <div class="flex flex-wrap gap-2">
                     <button type="submit" class="btn btn-danger btn-sm" :disabled="busy">
+                        <AppIcon name="decline" />
                         {{ t('appointments.detail.confirmDecline') }}
                     </button>
                     <button type="button" class="btn btn-ghost btn-sm" @click="declining = false">
+                        <AppIcon name="undo" />
                         {{ t('appointments.detail.keepRequest') }}
                     </button>
                 </div>
@@ -524,6 +529,7 @@ async function depositSaved() {
                         :disabled="busy"
                         @click="setStatus('scheduled', true)"
                     >
+                        <AppIcon name="warning" />
                         {{ t('appointments.form.saveAnyway') }}
                     </button>
                 </div>
@@ -534,18 +540,20 @@ async function depositSaved() {
                     v-if="appointment.consultation"
                     :to="{ name: 'consultations.show', params: { id: appointment.consultation.id } }"
                     class="btn btn-primary btn-sm"
-                    >{{ t('appointments.detail.openConsultation') }}</RouterLink
+                    ><AppIcon name="consultation" />{{ t('appointments.detail.openConsultation') }}</RouterLink
                 >
                 <RouterLink
                     v-else-if="appointment.status !== 'cancelled' && appointment.status !== 'requested'"
                     :to="{ name: 'consultations.create', query: { appointment: appointment.id } }"
                     class="btn btn-primary btn-sm"
-                    >{{ t('appointments.detail.recordConsultation') }}</RouterLink
+                    ><AppIcon name="addConsultation" />{{ t('appointments.detail.recordConsultation') }}</RouterLink
                 >
                 <button type="button" class="btn btn-sm" @click="emit('edit', appointment)">
+                    <AppIcon name="edit" />
                     {{ t('appointments.detail.edit') }}
                 </button>
                 <button type="button" class="btn btn-sm" :aria-expanded="chartState !== 'idle'" @click="toggleChart">
+                    <AppIcon :name="chartState === 'idle' ? 'chart' : 'hide'" />
                     {{
                         chartState === 'idle' ? t('appointments.detail.showChart') : t('appointments.detail.hideChart')
                     }}
@@ -556,13 +564,14 @@ async function depositSaved() {
                     class="btn btn-sm"
                     @click="depositOpen = true"
                 >
+                    <AppIcon name="payment" />
                     {{ t('appointments.detail.recordDeposit') }}
                 </button>
                 <RouterLink
                     v-if="appointment.client.chart_ready"
                     :to="transitsRoute(appointment.client.id, appointment.starts_at, zone)"
                     class="btn btn-sm"
-                    >{{ t('transits.forDate') }}</RouterLink
+                    ><AppIcon name="transits" />{{ t('transits.forDate') }}</RouterLink
                 >
             </div>
 
@@ -574,9 +583,11 @@ async function depositSaved() {
             >
                 <template v-if="appointment.status === 'scheduled'">
                     <button type="button" class="btn btn-ghost btn-sm" :disabled="busy" @click="setStatus('completed')">
+                        <AppIcon name="held" />
                         {{ t('appointments.detail.markHeld') }}
                     </button>
                     <button type="button" class="btn btn-ghost btn-sm" :disabled="busy" @click="setStatus('no_show')">
+                        <AppIcon name="noShow" />
                         {{ t('appointments.detail.markNoShow') }}
                     </button>
                     <button
@@ -585,6 +596,7 @@ async function depositSaved() {
                         :aria-expanded="cancelling"
                         @click="openCancel"
                     >
+                        <AppIcon name="cancelAppointment" />
                         {{ t('appointments.detail.cancel') }}
                     </button>
                 </template>
@@ -595,6 +607,7 @@ async function depositSaved() {
                     :disabled="busy"
                     @click="setStatus('scheduled')"
                 >
+                    <AppIcon name="reinstate" />
                     {{ t('appointments.detail.reinstate') }}
                 </button>
             </div>
@@ -629,9 +642,11 @@ async function depositSaved() {
                 </label>
                 <div class="flex flex-wrap gap-2">
                     <button type="submit" class="btn btn-danger btn-sm" :disabled="busy">
+                        <AppIcon name="cancelAppointment" />
                         {{ t('appointments.detail.confirmCancel') }}
                     </button>
                     <button type="button" class="btn btn-ghost btn-sm" @click="cancelling = false">
+                        <AppIcon name="undo" />
                         {{ t('appointments.detail.keep') }}
                     </button>
                 </div>

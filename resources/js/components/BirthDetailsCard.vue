@@ -5,6 +5,8 @@ import { RouterLink } from 'vue-router';
 import { useLabels } from '@/composables/useLabels';
 import { formatCoordinate, formatDate } from '@/lib/format';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * Birth data as entered, with what the server derived from it: the offset in
  * force at birth, clock-change and zone-history warnings, and what is still
@@ -102,7 +104,9 @@ const labels = useLabels();
 
             <div v-else class="flex items-center justify-between gap-3">
                 <span class="text-ink-3">{{ t('clients.profile.noBirth') }}</span>
-                <RouterLink :to="editTo" class="btn btn-sm">{{ t('clients.profile.addBirth') }}</RouterLink>
+                <RouterLink :to="editTo" class="btn btn-sm"
+                    ><AppIcon name="addBirthData" />{{ t('clients.profile.addBirth') }}</RouterLink
+                >
             </div>
         </div>
     </section>

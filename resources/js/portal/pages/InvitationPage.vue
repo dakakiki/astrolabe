@@ -8,6 +8,8 @@ import http from '@/portal/http';
 import { readToken } from '@/portal/lib/portal';
 import { useSessionStore } from '@/portal/stores/session';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * The page the invitation email opens (docs/spec/12, "Pozivnica", step 4): the
  * practice that invites, and "Accept and continue". Looking uses nothing up;
@@ -81,6 +83,7 @@ async function accept() {
             </div>
             <p class="mb-4 text-sm text-ink-3">{{ t('portal.invitation.forAddress', { email: invitation.email }) }}</p>
             <button type="button" class="btn btn-primary w-full justify-center" :disabled="busy" @click="accept">
+                <AppIcon name="confirm" />
                 {{ t('portal.invitation.accept') }}
             </button>
             <p class="mt-4 text-xs text-ink-3">
@@ -90,17 +93,17 @@ async function accept() {
         <template v-else>
             <h1>{{ t(`portal.invitation.states.${state}.title`) }}</h1>
             <p class="sub">{{ t(`portal.invitation.states.${state}.body`, { practice: invitation.practice.name }) }}</p>
-            <RouterLink :to="{ name: 'sign-in' }" class="btn w-full justify-center">{{
-                t('portal.invitation.signIn')
-            }}</RouterLink>
+            <RouterLink :to="{ name: 'sign-in' }" class="btn w-full justify-center"
+                ><AppIcon name="signIn" />{{ t('portal.invitation.signIn') }}</RouterLink
+            >
         </template>
     </template>
 
     <template v-else>
         <h1>{{ t('portal.invitation.states.missing.title') }}</h1>
         <p class="sub">{{ t('portal.invitation.states.missing.body') }}</p>
-        <RouterLink :to="{ name: 'sign-in' }" class="btn w-full justify-center">{{
-            t('portal.invitation.signIn')
-        }}</RouterLink>
+        <RouterLink :to="{ name: 'sign-in' }" class="btn w-full justify-center"
+            ><AppIcon name="signIn" />{{ t('portal.invitation.signIn') }}</RouterLink
+        >
     </template>
 </template>

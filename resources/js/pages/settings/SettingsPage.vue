@@ -2,6 +2,8 @@
 import { useI18n } from 'vue-i18n';
 import { RouterLink, RouterView } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 const { t } = useI18n();
 
 // Availability and Booking (Phase 9b) sit with the other things that shape the working day.
@@ -17,6 +19,18 @@ const sections = [
     'security',
     'data',
 ];
+const sectionIcons = {
+    profile: 'profile',
+    practice: 'practice',
+    branding: 'branding',
+    chart: 'chart',
+    regional: 'timezone',
+    notifications: 'notificationsOn',
+    availability: 'availability',
+    booking: 'booking',
+    security: 'security',
+    data: 'data',
+};
 </script>
 
 <template>
@@ -30,7 +44,7 @@ const sections = [
         <div>
             <nav class="card subnav p-2" :aria-label="t('settings.title')">
                 <RouterLink v-for="section in sections" :key="section" :to="{ name: `settings.${section}` }">
-                    {{ t(`settings.sections.${section}`) }}
+                    <AppIcon :name="sectionIcons[section]" />{{ t(`settings.sections.${section}`) }}
                 </RouterLink>
             </nav>
         </div>

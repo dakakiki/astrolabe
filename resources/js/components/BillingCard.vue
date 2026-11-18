@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import BillingBadge from '@/components/BillingBadge.vue';
 import PaymentForm from '@/components/PaymentForm.vue';
 import { useMoney } from '@/composables/useMoney';
@@ -125,6 +126,7 @@ const negate = (value) => (value ? { ...value, amount: -value.amount } : null);
                         </span>
                         <span class="ml-auto flex">
                             <button type="button" class="btn btn-ghost btn-sm" @click="open(payment)">
+                                <AppIcon name="edit" />
                                 {{ t('payments.edit') }}
                             </button>
                             <button
@@ -133,6 +135,7 @@ const negate = (value) => (value ? { ...value, amount: -value.amount } : null);
                                 :disabled="busyId === payment.id"
                                 @click="remove(payment)"
                             >
+                                <AppIcon name="delete" />
                                 {{ t('payments.delete') }}
                             </button>
                         </span>
@@ -141,7 +144,9 @@ const negate = (value) => (value ? { ...value, amount: -value.amount } : null);
                 <p v-else class="text-sm text-ink-3">{{ t('billing.noPayments') }}</p>
             </div>
 
-            <button v-if="!form" type="button" class="btn btn-sm" @click="open()">+ {{ t('payments.record') }}</button>
+            <button v-if="!form" type="button" class="btn btn-sm" @click="open()">
+                <AppIcon name="payment" />{{ t('payments.record') }}
+            </button>
 
             <div v-if="form" class="border-t border-line-soft pt-3">
                 <h3 class="mb-2 text-sm font-semibold">

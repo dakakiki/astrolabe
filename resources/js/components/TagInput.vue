@@ -2,6 +2,8 @@
 import { ref, useId } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 const model = defineModel({ type: Array, default: () => [] });
 
 defineProps({
@@ -46,7 +48,7 @@ function onKeydown(event) {
                 :aria-label="`× ${tag}`"
                 @click="remove(tag)"
             >
-                ×
+                <AppIcon name="close" />
             </button>
         </span>
         <input

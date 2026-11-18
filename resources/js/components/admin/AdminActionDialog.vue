@@ -2,6 +2,7 @@
 import { nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import http, { validationErrors } from '@/lib/http';
 import { useToastStore } from '@/stores/toast';
@@ -9,8 +10,9 @@ import { useToastStore } from '@/stores/toast';
 /**
  * An account-help action in the admin (Phase 8c): says what will happen, asks
  * for a reason, and — when the server answers 423 — for the operator's password
- * again, then repeats the action. `open({ title, body, submit, reasonRequired,
- * danger, run })`, where `run(reason)` makes the request.
+ * again, then repeats the action. `open({ title, body, submit, icon, reasonRequired,
+ * danger, run })`, where `run(reason)` makes the request and `icon` names the submit
+ * button's icon (lib/icons.js).
  */
 const emit = defineEmits(['done']);
 
@@ -117,13 +119,16 @@ defineExpose({ open });
                     />
                 </FormField>
                 <div class="flex justify-end gap-2">
-                    <button type="button" class="btn btn-ghost" @click="close">{{ t('common.cancel') }}</button>
+                    <button type="button" class="btn btn-ghost" @click="close">
+                        <AppIcon name="cancel" />{{ t('common.cancel') }}
+                    </button>
                     <button
                         type="submit"
                         class="btn"
                         :class="action.danger ? 'btn-danger' : 'btn-primary'"
                         :disabled="busy || (action.reasonRequired && !reason.trim()) || (needsPassword && !password)"
                     >
+                        <AppIcon :name="action.icon ?? 'confirm'" />
                         {{ action.submit }}
                     </button>
                 </div>

@@ -2,6 +2,7 @@
 import { computed, nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import { useForm } from '@/composables/useForm';
 import http from '@/lib/http';
@@ -199,9 +200,11 @@ function closeCodes() {
                         </FormField>
                     </div>
                     <button class="btn btn-primary mb-3.5" type="submit" :disabled="password.processing.value">
-                        {{ t('settings.security.twoFactor.continue') }}
+                        {{ t('settings.security.twoFactor.continue') }}<AppIcon name="continue" />
                     </button>
-                    <button class="btn mb-3.5" type="button" @click="step = 'idle'">{{ t('common.cancel') }}</button>
+                    <button class="btn mb-3.5" type="button" @click="step = 'idle'">
+                        <AppIcon name="cancel" />{{ t('common.cancel') }}
+                    </button>
                 </div>
             </form>
 
@@ -234,9 +237,11 @@ function closeCodes() {
                         </FormField>
                     </div>
                     <button class="btn btn-primary mb-3.5" type="submit" :disabled="confirmation.processing.value">
+                        <AppIcon name="confirm" />
                         {{ t('settings.security.twoFactor.confirm') }}
                     </button>
                     <button class="btn mb-3.5" type="button" :disabled="busy" @click="cancelSetup">
+                        <AppIcon name="cancel" />
                         {{ t('common.cancel') }}
                     </button>
                 </div>
@@ -249,23 +254,28 @@ function closeCodes() {
                     <li v-for="code in codes" :key="code">{{ code }}</li>
                 </ul>
                 <button class="btn btn-primary" type="button" @click="closeCodes">
+                    <AppIcon name="confirm" />
                     {{ t('settings.security.twoFactor.codesDone') }}
                 </button>
             </div>
 
             <div v-else-if="enabled" class="flex flex-wrap gap-2">
                 <button class="btn" type="button" :disabled="busy" @click="withPassword(loadCodes)">
+                    <AppIcon name="key" />
                     {{ t('settings.security.twoFactor.showCodes') }}
                 </button>
                 <button class="btn" type="button" :disabled="busy" @click="renewCodes">
+                    <AppIcon name="reload" />
                     {{ t('settings.security.twoFactor.newCodes') }}
                 </button>
                 <button class="btn btn-danger" type="button" :disabled="busy" @click="disable">
+                    <AppIcon name="securityOff" />
                     {{ t('settings.security.twoFactor.disable') }}
                 </button>
             </div>
 
             <button v-else class="btn btn-primary" type="button" :disabled="busy" @click="withPassword(start)">
+                <AppIcon name="security" />
                 {{ t('settings.security.twoFactor.enable') }}
             </button>
         </div>

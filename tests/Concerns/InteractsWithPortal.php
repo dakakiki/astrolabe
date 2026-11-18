@@ -178,8 +178,13 @@ trait InteractsWithPortal
         $cookie = collect($response->headers->getCookies())
             ->first(fn (Cookie $cookie) => $cookie->getName() === config('portal.session.cookie'));
 
+        // A browser drops a cookie once its expiry has passed — on the test clock (travelTo).
+        // Symfony's isCleared() reads the wall clock instead, so a session made "on 19 October"
+        // with a 30-day cookie counted as gone from 18 November on and every request was a 401.
         if ($cookie !== null) {
-            $this->portalCookie = $cookie->isCleared() ? null : $cookie->getValue();
+            $expires = $cookie->getExpiresTime();
+            $cleared = $expires !== 0 && $expires < now()->getTimestamp();
+            $this->portalCookie = $cleared ? null : $cookie->getValue();
         }
 
         // Relative URLs in later requests are built from the last request; the

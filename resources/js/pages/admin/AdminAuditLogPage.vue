@@ -2,6 +2,7 @@
 import { onMounted, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import AuditLogTable from '@/components/admin/AuditLogTable.vue';
 import PaginationBar from '@/components/PaginationBar.vue';
 import { cleanQuery } from '@/lib/admin';
@@ -81,8 +82,12 @@ onMounted(() => load());
                 <input v-model="filters.warnings" type="checkbox" />
                 {{ t('admin.audit.filters.warnings') }}
             </label>
-            <button type="submit" class="btn btn-primary">{{ t('admin.common.filter') }}</button>
-            <button type="button" class="btn btn-ghost" @click="clear">{{ t('admin.common.clear') }}</button>
+            <button type="submit" class="btn btn-primary">
+                <AppIcon name="filter" />{{ t('admin.common.filter') }}
+            </button>
+            <button type="button" class="btn btn-ghost" @click="clear">
+                <AppIcon name="clearFilter" />{{ t('admin.common.clear') }}
+            </button>
         </form>
 
         <p v-if="entries && entries.length === 0" class="card-body text-ink-3">{{ t('admin.audit.empty') }}</p>

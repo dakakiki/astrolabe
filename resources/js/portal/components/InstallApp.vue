@@ -4,6 +4,8 @@ import { useI18n } from 'vue-i18n';
 
 import { usePwaStore } from '@/portal/stores/pwa';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * Installing the portal on this device (Phase 9c, docs/spec/12, "Instalacija"):
  * the browser's own dialog where Chrome and Edge offer one, the Share → Add to
@@ -46,9 +48,11 @@ async function install() {
                 :disabled="busy"
                 @click="install"
             >
+                <AppIcon name="install" />
                 {{ t('portal.pwa.install.action') }}
             </button>
             <button type="button" class="btn btn-ghost btn-sm" @click="pwa.dismissInstallHint()">
+                <AppIcon name="close" />
                 {{ t('portal.pwa.install.notNow') }}
             </button>
         </div>
@@ -63,6 +67,7 @@ async function install() {
         <template v-else-if="pwa.installState === 'prompt'">
             <p class="mb-3 text-ink-2">{{ t('portal.pwa.install.lead') }}</p>
             <button type="button" class="btn btn-primary" :disabled="busy" @click="install">
+                <AppIcon name="install" />
                 {{ t('portal.pwa.install.action') }}
             </button>
         </template>

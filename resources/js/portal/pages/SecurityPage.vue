@@ -10,6 +10,8 @@ import { loadScreen } from '@/portal/load';
 import { unsubscribeLocally } from '@/portal/pwa/push';
 import { useSessionStore } from '@/portal/stores/session';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * Portal → Security (docs/spec/12): where the person is signed in, and
  * "Sign out everywhere" — this device too. There is no password to change.
@@ -90,6 +92,7 @@ async function signOutEverywhere() {
         <div class="card-body border-t border-line-soft">
             <p class="mb-3 text-sm text-ink-3">{{ t('portal.security.everywhereHint') }}</p>
             <button type="button" class="btn btn-danger" :disabled="busy" @click="signOutEverywhere">
+                <AppIcon name="signOut" />
                 {{ t('portal.security.everywhere') }}
             </button>
         </div>

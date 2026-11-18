@@ -3,6 +3,7 @@ import { computed, onMounted, ref, useId, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import AspectsTable from '@/components/AspectsTable.vue';
 import ChartWheel from '@/components/ChartWheel.vue';
 import ClientPicker from '@/components/ClientPicker.vue';
@@ -243,9 +244,12 @@ const incompleteName = computed(() => (report.value?.side === 'client' ? clientN
                 <p class="text-ink-3">{{ t('synastry.nobodyText') }}</p>
                 <div class="mt-4 flex flex-wrap justify-center gap-2">
                     <button type="button" class="btn btn-primary" @click="emit('open-tab', 'related')">
+                        <AppIcon name="addPerson" />
                         {{ t('synastry.addPerson') }}
                     </button>
-                    <button type="button" class="btn" @click="picking = true">{{ t('synastry.pickClient') }}</button>
+                    <button type="button" class="btn" @click="picking = true">
+                        <AppIcon name="compare" />{{ t('synastry.pickClient') }}
+                    </button>
                 </div>
             </div>
         </section>
@@ -301,6 +305,7 @@ const incompleteName = computed(() => (report.value?.side === 'client' ? clientN
                     <ClientPicker :input-id="`${id}-client`" @select="pickClient" />
                     <p v-if="pickError" class="error">{{ pickError }}</p>
                     <button type="button" class="btn btn-sm btn-ghost" @click="picking = false">
+                        <AppIcon name="cancel" />
                         {{ t('synastry.cancel') }}
                     </button>
                 </div>
@@ -323,7 +328,9 @@ const incompleteName = computed(() => (report.value?.side === 'client' ? clientN
                         {{ t('clients.missing.title') }}
                         {{ report.missing.map((key) => t(`clients.missing.${key}`)).join(', ') }}
                         <div v-if="completeTo" class="mt-1.5">
-                            <RouterLink :to="completeTo" class="btn btn-sm">{{ t('synastry.complete') }}</RouterLink>
+                            <RouterLink :to="completeTo" class="btn btn-sm"
+                                ><AppIcon name="addBirthData" />{{ t('synastry.complete') }}</RouterLink
+                            >
                         </div>
                     </div>
                 </div>
@@ -426,6 +433,7 @@ const incompleteName = computed(() => (report.value?.side === 'client' ? clientN
                     </div>
                     <div v-if="ready.contacts.length > CONTACTS_SHOWN" class="px-4 py-2">
                         <button type="button" class="btn btn-sm btn-ghost" @click="showAll = !showAll">
+                            <AppIcon :name="showAll ? 'less' : 'more'" />
                             {{
                                 showAll
                                     ? t('synastry.contacts.showFewer')

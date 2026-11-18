@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import BirthDetailsCard from '@/components/BirthDetailsCard.vue';
 import NatalChart from '@/components/NatalChart.vue';
 import TransitsPanel from '@/components/TransitsPanel.vue';
@@ -143,11 +144,14 @@ async function remove() {
                 </div>
             </div>
             <div class="ml-auto flex flex-wrap gap-2">
-                <RouterLink :to="{ name: 'related-people.edit', params: { id: person.id } }" class="btn">{{
-                    t('related.person.edit')
-                }}</RouterLink>
-                <button type="button" class="btn btn-ghost" @click="remove">{{ t('related.person.delete') }}</button>
+                <RouterLink :to="{ name: 'related-people.edit', params: { id: person.id } }" class="btn"
+                    ><AppIcon name="edit" />{{ t('related.person.edit') }}</RouterLink
+                >
+                <button type="button" class="btn btn-ghost" @click="remove">
+                    <AppIcon name="delete" />{{ t('related.person.delete') }}
+                </button>
                 <button type="button" class="btn btn-primary" :disabled="busy" @click="makeClient">
+                    <AppIcon name="addClient" />
                     {{ t('related.person.makeClient') }}
                 </button>
             </div>
@@ -246,7 +250,9 @@ async function remove() {
                                 v-if="person.birth?.chart.ready"
                                 :to="synastryRoute(link.client.id, 'person', person.id)"
                                 class="btn btn-sm mt-1.5"
-                                >{{ t('related.person.compareWith', { name: link.client.full_name }) }}</RouterLink
+                                ><AppIcon name="compare" />{{
+                                    t('related.person.compareWith', { name: link.client.full_name })
+                                }}</RouterLink
                             >
                         </li>
                     </ul>

@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import BillingBadge from '@/components/BillingBadge.vue';
 import ConsultationStatusBadge from '@/components/ConsultationStatusBadge.vue';
 import PaymentForm from '@/components/PaymentForm.vue';
@@ -209,9 +210,12 @@ const held = (consultation) =>
                 :title="t('payments.csvHint')"
                 @click="exportCsv"
             >
+                <AppIcon name="export" />
                 {{ t('payments.export') }}
             </button>
-            <button type="button" class="btn btn-primary" @click="openForm()">+ {{ t('payments.record') }}</button>
+            <button type="button" class="btn btn-primary" @click="openForm()">
+                <AppIcon name="payment" />{{ t('payments.record') }}
+            </button>
         </div>
     </div>
 
@@ -284,7 +288,9 @@ const held = (consultation) =>
                 </label>
                 <span v-if="clientId && clientName" class="tag mb-1 inline-flex items-center gap-1.5">
                     {{ clientName }}
-                    <button type="button" :aria-label="t('common.close')" @click="clearClient">✕</button>
+                    <button type="button" :aria-label="t('common.close')" @click="clearClient">
+                        <AppIcon name="close" />
+                    </button>
                 </span>
                 <label class="grid min-w-48 flex-1 gap-1 text-xs text-ink-3">
                     {{ t('payments.filters.search') }}
@@ -322,6 +328,7 @@ const held = (consultation) =>
                     :disabled="loading"
                     @click="loadPayments(meta.current_page + 1)"
                 >
+                    <AppIcon name="more" />
                     {{ t('common.more') }}
                 </button>
             </div>
@@ -390,6 +397,7 @@ const held = (consultation) =>
                             </td>
                             <td class="text-right">
                                 <button type="button" class="btn btn-sm" @click="openForm({ consultation })">
+                                    <AppIcon name="payment" />
                                     {{ t('payments.record') }}
                                 </button>
                             </td>

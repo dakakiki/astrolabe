@@ -7,6 +7,8 @@ import http from '@/lib/http';
 import { useAuthStore } from '@/stores/auth';
 import { useToastStore } from '@/stores/toast';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 const { t } = useI18n();
 const auth = useAuthStore();
 const toast = useToastStore();
@@ -47,6 +49,8 @@ onMounted(async () => {
                 {{ t('auth.verify.failedHint') }}
             </div>
         </div>
-        <RouterLink :to="{ name: 'verify-email' }" class="btn w-full">{{ t('auth.verify.resend') }}</RouterLink>
+        <RouterLink :to="{ name: 'verify-email' }" class="btn w-full"
+            ><AppIcon name="send" />{{ t('auth.verify.resend') }}</RouterLink
+        >
     </template>
 </template>

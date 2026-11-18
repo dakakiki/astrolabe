@@ -12,6 +12,8 @@ import { usePwaStore } from '@/portal/stores/pwa';
 import { useSessionStore } from '@/portal/stores/session';
 import { useToastStore } from '@/stores/toast';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * Portal → Home (docs/spec/12): the next appointment (and, since 9b, "Book
  * an appointment" while the practice takes bookings here), how much was
@@ -57,7 +59,9 @@ async function useDeviceZone() {
         <span class="min-w-0 flex-1">{{
             t('portal.home.zoneOffer', { practice: session.practice.timezone, device: offerZone })
         }}</span>
-        <button type="button" class="btn btn-sm" @click="useDeviceZone">{{ t('portal.home.zoneUse') }}</button>
+        <button type="button" class="btn btn-sm" @click="useDeviceZone">
+            <AppIcon name="timezone" />{{ t('portal.home.zoneUse') }}
+        </button>
     </div>
 
     <p v-if="!home" class="text-ink-3">{{ t('common.loading') }}</p>
@@ -78,7 +82,9 @@ async function useDeviceZone() {
                 </p>
             </div>
             <div v-if="canBook" class="card-body flex flex-wrap items-center gap-3 border-t border-line-soft">
-                <RouterLink :to="{ name: 'book' }" class="btn btn-primary">{{ t('portal.home.book') }}</RouterLink>
+                <RouterLink :to="{ name: 'book' }" class="btn btn-primary"
+                    ><AppIcon name="addAppointment" />{{ t('portal.home.book') }}</RouterLink
+                >
                 <span class="min-w-0 flex-1 text-xs text-ink-3">{{ t('portal.home.bookHint') }}</span>
             </div>
         </section>
@@ -92,9 +98,9 @@ async function useDeviceZone() {
                 <p class="text-sm text-ink-3">
                     {{ t('portal.home.newShared', { count: home.new_shared }, home.new_shared) }}
                 </p>
-                <RouterLink :to="{ name: 'shared' }" class="btn btn-sm mt-3">{{
-                    t('portal.home.openShared')
-                }}</RouterLink>
+                <RouterLink :to="{ name: 'shared' }" class="btn btn-sm mt-3"
+                    ><AppIcon name="shared" />{{ t('portal.home.openShared') }}</RouterLink
+                >
             </div>
         </section>
     </div>

@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import BirthDataFields from '@/components/BirthDataFields.vue';
 import FormField from '@/components/FormField.vue';
 import PhoneInput from '@/components/PhoneInput.vue';
@@ -282,6 +283,7 @@ async function save() {
                         class="btn btn-ghost btn-sm mt-1"
                         @click="showAllMethods = true"
                     >
+                        <AppIcon name="more" />
                         {{ t('clients.form.showAllMethods') }}
                     </button>
                     <div class="hint">{{ t('clients.form.methodsHint') }}</div>
@@ -313,12 +315,13 @@ async function save() {
 
         <div class="flex gap-2">
             <button class="btn btn-primary" type="submit" :disabled="form.processing.value">
+                <AppIcon name="save" />
                 {{ t('clients.form.save') }}
             </button>
             <RouterLink
                 :to="clientId ? { name: 'clients.show', params: { id: clientId } } : { name: 'clients.index' }"
                 class="btn btn-ghost"
-                >{{ t('clients.form.cancel') }}</RouterLink
+                ><AppIcon name="cancel" />{{ t('clients.form.cancel') }}</RouterLink
             >
         </div>
     </form>

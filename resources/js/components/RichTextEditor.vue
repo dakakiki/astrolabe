@@ -5,6 +5,8 @@ import { EditorContent, useEditor } from '@tiptap/vue-3';
 import { onBeforeUnmount, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * Formatted text for notes and consultations. Emits HTML ('' when empty); the
  * server keeps only an allowlist of it (App\Support\RichText), so the toolbar
@@ -80,24 +82,23 @@ function setLink() {
 }
 
 const buttons = [
-    { key: 'bold', label: 'editor.bold', glyph: 'B', class: 'font-bold', command: (c) => c.toggleBold() },
-    { key: 'italic', label: 'editor.italic', glyph: 'I', class: 'italic', command: (c) => c.toggleItalic() },
+    { key: 'bold', label: 'editor.bold', icon: 'bold', command: (c) => c.toggleBold() },
+    { key: 'italic', label: 'editor.italic', icon: 'italic', command: (c) => c.toggleItalic() },
     {
         key: 'heading',
         label: 'editor.heading',
-        glyph: 'H',
-        class: 'font-semibold',
+        icon: 'heading',
         active: ['heading', { level: 3 }],
         command: (c) => c.toggleHeading({ level: 3 }),
     },
     { sep: true },
-    { key: 'bulletList', label: 'editor.bulletList', glyph: '•', command: (c) => c.toggleBulletList() },
-    { key: 'orderedList', label: 'editor.orderedList', glyph: '1.', command: (c) => c.toggleOrderedList() },
-    { key: 'blockquote', label: 'editor.quote', glyph: '❝', command: (c) => c.toggleBlockquote() },
-    { key: 'link', label: 'editor.link', glyph: '↗', custom: setLink },
+    { key: 'bulletList', label: 'editor.bulletList', icon: 'bulletList', command: (c) => c.toggleBulletList() },
+    { key: 'orderedList', label: 'editor.orderedList', icon: 'orderedList', command: (c) => c.toggleOrderedList() },
+    { key: 'blockquote', label: 'editor.quote', icon: 'quote', command: (c) => c.toggleBlockquote() },
+    { key: 'link', label: 'editor.link', icon: 'link', custom: setLink },
     { sep: true },
-    { key: 'undo', label: 'editor.undo', glyph: '↶', command: (c) => c.undo(), stateless: true },
-    { key: 'redo', label: 'editor.redo', glyph: '↷', command: (c) => c.redo(), stateless: true },
+    { key: 'undo', label: 'editor.undo', icon: 'undo', command: (c) => c.undo(), stateless: true },
+    { key: 'redo', label: 'editor.redo', icon: 'redo', command: (c) => c.redo(), stateless: true },
 ];
 
 function isActive(button) {
@@ -115,7 +116,6 @@ function isActive(button) {
                 <button
                     v-else
                     type="button"
-                    :class="button.class"
                     :title="t(button.label)"
                     :aria-label="t(button.label)"
                     :aria-pressed="isActive(button)"
@@ -123,7 +123,7 @@ function isActive(button) {
                     @mousedown.prevent
                     @click="button.custom ? button.custom() : run(button.command)"
                 >
-                    {{ button.glyph }}
+                    <AppIcon :name="button.icon" />
                 </button>
             </template>
         </div>

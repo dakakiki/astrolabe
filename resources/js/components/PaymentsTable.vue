@@ -8,6 +8,8 @@ import { formatDate } from '@/lib/format';
 import { signedAmount } from '@/lib/payments';
 import { useAuthStore } from '@/stores/auth';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * Payments as a table, newest first as the API sends them: the day, the
  * client, what it was for, the amount (a refund negative), how it came and
@@ -114,6 +116,7 @@ const amount = (payment) => money.format({ amount: signedAmount(payment), curren
                         class="btn btn-ghost btn-sm"
                         @click="emit('edit', payment)"
                     >
+                        <AppIcon name="edit" />
                         {{ t('payments.edit') }}
                     </button>
                     <button
@@ -122,6 +125,7 @@ const amount = (payment) => money.format({ amount: signedAmount(payment), curren
                         :disabled="busyId === payment.id"
                         @click="emit('remove', payment)"
                     >
+                        <AppIcon name="delete" />
                         {{ t('payments.delete') }}
                     </button>
                 </td>

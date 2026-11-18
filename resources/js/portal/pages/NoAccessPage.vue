@@ -4,6 +4,8 @@ import { RouterLink, useRouter } from 'vue-router';
 
 import { useSessionStore } from '@/portal/stores/session';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * Signed in, but no practice opens now: the access was revoked, the client
  * archived, or the practice is closing (docs/spec/12, criterion 4). The page
@@ -23,7 +25,11 @@ async function signOut() {
     <h1>{{ t('portal.noAccess.title') }}</h1>
     <p class="sub">{{ t('portal.noAccess.body') }}</p>
     <div class="flex flex-wrap gap-2">
-        <RouterLink :to="{ name: 'security' }" class="btn">{{ t('portal.nav.security') }}</RouterLink>
-        <button type="button" class="btn btn-primary" @click="signOut">{{ t('portal.nav.signOut') }}</button>
+        <RouterLink :to="{ name: 'security' }" class="btn"
+            ><AppIcon name="security" />{{ t('portal.nav.security') }}</RouterLink
+        >
+        <button type="button" class="btn btn-primary" @click="signOut">
+            <AppIcon name="signOut" />{{ t('portal.nav.signOut') }}
+        </button>
     </div>
 </template>

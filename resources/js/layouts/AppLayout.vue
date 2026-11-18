@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import BrandMark from '@/components/BrandMark.vue';
 import FeedbackDialog from '@/components/FeedbackDialog.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
@@ -19,22 +20,22 @@ const practiceNav = [
     {
         label: 'nav.practice',
         items: [
-            { to: { name: 'dashboard' }, label: 'nav.dashboard', icon: '◈', exact: true },
-            { to: '/clients', label: 'nav.clients', icon: '◉' },
-            { to: '/consultations', label: 'nav.consultations', icon: '☉' },
-            { to: '/calendar', label: 'nav.calendar', icon: '▦' },
-            { to: '/sky', label: 'nav.sky', icon: '✷' },
+            { to: { name: 'dashboard' }, label: 'nav.dashboard', icon: 'dashboard', exact: true },
+            { to: '/clients', label: 'nav.clients', icon: 'clients' },
+            { to: '/consultations', label: 'nav.consultations', icon: 'consultation' },
+            { to: '/calendar', label: 'nav.calendar', icon: 'calendar' },
+            { to: '/sky', label: 'nav.sky', icon: 'sky' },
         ],
     },
     {
         label: 'nav.business',
         items: [
-            { to: '/services', label: 'nav.services', icon: '◇' },
-            { to: '/payments', label: 'nav.payments', icon: '¤' },
-            { to: '/tasks', label: 'nav.tasks', icon: '✓' },
+            { to: '/services', label: 'nav.services', icon: 'services' },
+            { to: '/payments', label: 'nav.payments', icon: 'payments' },
+            { to: '/tasks', label: 'nav.tasks', icon: 'tasks' },
         ],
     },
-    { label: 'nav.workspace', items: [{ to: '/settings', label: 'nav.settings', icon: '⚙' }] },
+    { label: 'nav.workspace', items: [{ to: '/settings', label: 'nav.settings', icon: 'settings' }] },
 ];
 
 // The operator's admin (Phase 8c): the same frame, its own screens, no practice.
@@ -42,14 +43,14 @@ const adminNav = [
     {
         label: 'nav.admin',
         items: [
-            { to: { name: 'admin.astrologers' }, label: 'nav.astrologers', icon: '◉' },
-            { to: { name: 'admin.audit' }, label: 'nav.auditLog', icon: '☰' },
-            { to: { name: 'admin.invitations' }, label: 'nav.invitations', icon: '✉' },
-            { to: { name: 'admin.feedback' }, label: 'nav.inbox', icon: '✎' },
-            { to: { name: 'admin.system' }, label: 'nav.system', icon: '◈' },
+            { to: { name: 'admin.astrologers' }, label: 'nav.astrologers', icon: 'clients' },
+            { to: { name: 'admin.audit' }, label: 'nav.auditLog', icon: 'auditLog' },
+            { to: { name: 'admin.invitations' }, label: 'nav.invitations', icon: 'invitations' },
+            { to: { name: 'admin.feedback' }, label: 'nav.inbox', icon: 'inbox' },
+            { to: { name: 'admin.system' }, label: 'nav.system', icon: 'system' },
         ],
     },
-    { label: 'nav.operator', items: [{ to: { name: 'admin.security' }, label: 'nav.security', icon: '⚙' }] },
+    { label: 'nav.operator', items: [{ to: { name: 'admin.security' }, label: 'nav.security', icon: 'security' }] },
 ];
 
 const navGroups = computed(() => (auth.isAdmin ? adminNav : practiceNav));
@@ -139,7 +140,7 @@ async function dismissPrivacyNotice() {
                         :exact-active-class="item.exact ? 'router-link-active' : ''"
                         :active-class="item.exact ? '' : 'router-link-active'"
                     >
-                        <span class="ico" aria-hidden="true">{{ item.icon }}</span>{{ t(item.label) }}
+                        <AppIcon :name="item.icon" class="ico" />{{ t(item.label) }}
                     </RouterLink>
                 </template>
             </nav>
@@ -164,11 +165,12 @@ async function dismissPrivacyNotice() {
                     :aria-expanded="sidebarOpen"
                     @click="sidebarOpen = !sidebarOpen"
                 >
-                    ☰
+                    <AppIcon name="menu" />
                 </button>
                 <span v-if="auth.isAdmin" class="badge b-warn">{{ t('admin.badge') }}</span>
                 <div class="flex-1" />
                 <button v-if="!auth.isAdmin" type="button" class="btn btn-ghost btn-sm" @click="feedbackDialog.open()">
+                    <AppIcon name="feedback" />
                     {{ t('nav.feedback') }}
                 </button>
                 <span class="tz-chip">{{ auth.user?.timezone }} · {{ localTime }}</span>
@@ -189,11 +191,15 @@ async function dismissPrivacyNotice() {
                             <div class="font-medium text-ink">{{ auth.user?.name }}</div>
                             <div class="truncate text-xs text-ink-3">{{ auth.user?.email }}</div>
                         </div>
-                        <RouterLink v-if="auth.isAdmin" :to="{ name: 'admin.security' }" role="menuitem">{{
-                            t('nav.security')
-                        }}</RouterLink>
-                        <RouterLink v-else to="/settings" role="menuitem">{{ t('nav.settings') }}</RouterLink>
-                        <button type="button" role="menuitem" @click="signOut">{{ t('nav.signOut') }}</button>
+                        <RouterLink v-if="auth.isAdmin" :to="{ name: 'admin.security' }" role="menuitem">
+                            <AppIcon name="security" />{{ t('nav.security') }}
+                        </RouterLink>
+                        <RouterLink v-else to="/settings" role="menuitem">
+                            <AppIcon name="settings" />{{ t('nav.settings') }}
+                        </RouterLink>
+                        <button type="button" role="menuitem" @click="signOut">
+                            <AppIcon name="signOut" />{{ t('nav.signOut') }}
+                        </button>
                     </div>
                 </div>
             </header>
@@ -206,6 +212,7 @@ async function dismissPrivacyNotice() {
                         }}</RouterLink>
                     </div>
                     <button type="button" class="btn btn-ghost btn-sm" @click="dismissPrivacyNotice">
+                        <AppIcon name="confirm" />
                         {{ t('legal.privacyDismiss') }}
                     </button>
                 </div>

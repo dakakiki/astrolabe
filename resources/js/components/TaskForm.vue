@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import ClientPicker from '@/components/ClientPicker.vue';
 import FormField from '@/components/FormField.vue';
 import ToggleRow from '@/components/ToggleRow.vue';
@@ -108,7 +109,7 @@ async function save() {
                 :aria-label="t('common.close')"
                 @click="emit('cancel')"
             >
-                ✕
+                <AppIcon name="close" />
             </button>
         </div>
         <div class="card-body">
@@ -136,6 +137,7 @@ async function save() {
                 <p v-if="chosen" class="mt-1.5 flex items-center gap-2 text-xs text-ink-3">
                     ✓ {{ chosen.full_name }}
                     <button type="button" class="btn btn-ghost btn-sm" @click="chosen = null">
+                        <AppIcon name="close" />
                         {{ t('tasks.form.removeClient') }}
                     </button>
                 </p>
@@ -206,9 +208,11 @@ async function save() {
 
             <div class="flex justify-end gap-2">
                 <button v-if="closable || editing" type="button" class="btn btn-ghost" @click="emit('cancel')">
+                    <AppIcon name="cancel" />
                     {{ t('common.cancel') }}
                 </button>
                 <button type="submit" class="btn btn-primary" :disabled="form.processing.value">
+                    <AppIcon name="save" />
                     {{ editing ? t('tasks.form.save') : t('tasks.form.create') }}
                 </button>
             </div>

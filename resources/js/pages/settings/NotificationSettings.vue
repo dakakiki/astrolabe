@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import ToggleRow from '@/components/ToggleRow.vue';
 import { useForm } from '@/composables/useForm';
@@ -176,6 +177,7 @@ async function sendTest() {
             <p class="notice n-neutral mt-3 mb-4">{{ t('settings.notifications.private') }}</p>
 
             <button class="btn btn-primary" type="submit" :disabled="form.processing.value">
+                <AppIcon name="save" />
                 {{ t('common.save') }}
             </button>
         </form>
@@ -188,6 +190,7 @@ async function sendTest() {
         <div class="card-body">
             <p class="mb-3 text-ink-3">{{ t('settings.notifications.testIntro', { email: auth.user.email }) }}</p>
             <button type="button" class="btn" :disabled="testing" @click="sendTest">
+                <AppIcon name="send" />
                 {{ t('settings.notifications.testSend') }}
             </button>
         </div>

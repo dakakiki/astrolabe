@@ -4,6 +4,8 @@ import { useI18n } from 'vue-i18n';
 
 import { usePwaStore } from '@/portal/stores/pwa';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * "A new version is available — Reload" (Phase 9c, docs/spec/12): the new
  * service worker waits until the person presses Reload, so nothing changes
@@ -31,6 +33,7 @@ function reload() {
                 >
                     <span class="min-w-0 flex-1 text-sm">{{ t('portal.pwa.update.available') }}</span>
                     <button type="button" class="btn btn-primary btn-sm shrink-0" :disabled="busy" @click="reload">
+                        <AppIcon name="reload" />
                         {{ t('portal.pwa.update.reload') }}
                     </button>
                 </div>

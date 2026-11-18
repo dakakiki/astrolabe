@@ -3,6 +3,7 @@ import { nextTick, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import { useForm } from '@/composables/useForm';
 import http from '@/lib/http';
@@ -115,6 +116,7 @@ function startOver() {
                 <RouterLink :to="{ name: 'forgot-password' }">{{ t('auth.login.forgot') }}</RouterLink>
             </div>
             <button class="btn btn-primary w-full" type="submit" :disabled="form.processing.value">
+                <AppIcon name="signIn" />
                 {{ t('auth.login.submit') }}
             </button>
         </form>
@@ -168,6 +170,7 @@ function startOver() {
                 />
             </FormField>
             <button class="btn btn-primary w-full" type="submit" :disabled="code.processing.value">
+                <AppIcon name="signIn" />
                 {{ t('auth.twoFactor.submit') }}
             </button>
         </form>

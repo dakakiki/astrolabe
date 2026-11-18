@@ -9,6 +9,8 @@ import { safeRedirect } from '@/router/guard';
 import { useAuthStore } from '@/stores/auth';
 import { useToastStore } from '@/stores/toast';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * A new version of the Terms of Service or the Data Processing Agreement
  * (Phase 8c): the practice stays closed until the person accepts it. Someone
@@ -104,6 +106,7 @@ onMounted(loadDocuments);
             }}</span>
         </label>
         <button class="btn btn-primary mb-5 w-full" type="submit" :disabled="!agreed || busy || !documents.length">
+            <AppIcon name="confirm" />
             {{ t('legal.accept.submit') }}
         </button>
     </form>
@@ -113,5 +116,7 @@ onMounted(loadDocuments);
         <RouterLink v-if="auth.isOwner" :to="{ name: 'settings.data' }">{{ t('legal.accept.yourData') }}</RouterLink>
     </p>
 
-    <button class="btn btn-ghost w-full" type="button" @click="signOut">{{ t('practiceDeletion.signOut') }}</button>
+    <button class="btn btn-ghost w-full" type="button" @click="signOut">
+        <AppIcon name="signOut" />{{ t('practiceDeletion.signOut') }}
+    </button>
 </template>

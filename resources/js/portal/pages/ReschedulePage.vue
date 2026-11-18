@@ -23,6 +23,8 @@ import { loadScreen } from '@/portal/load';
 import { useSessionStore } from '@/portal/stores/session';
 import { useToastStore } from '@/stores/toast';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * Portal → Reschedule (docs/spec/12, "Zakazivanje (9b)"): a new time for an
  * upcoming appointment, from the same free times as a new booking (its own
@@ -213,17 +215,17 @@ const problems = {
 
     <section v-if="problem" class="card card-body">
         <div class="notice n-warn" role="alert">{{ t(problems[problem]) }}</div>
-        <RouterLink :to="{ name: 'appointments' }" class="btn btn-sm mt-4">{{
-            t('portal.appointments.back')
-        }}</RouterLink>
+        <RouterLink :to="{ name: 'appointments' }" class="btn btn-sm mt-4"
+            ><AppIcon name="back" />{{ t('portal.appointments.back') }}</RouterLink
+        >
     </section>
 
     <template v-else>
         <div v-if="notice" class="notice mb-4 flex-wrap items-center" :class="notice.tone" role="alert">
             <span class="min-w-0 flex-1">{{ notice.text }}</span>
-            <RouterLink v-if="notice.appointments" :to="{ name: 'appointments' }" class="btn btn-sm">{{
-                t('portal.booking.seeAppointments')
-            }}</RouterLink>
+            <RouterLink v-if="notice.appointments" :to="{ name: 'appointments' }" class="btn btn-sm"
+                ><AppIcon name="calendar" />{{ t('portal.booking.seeAppointments') }}</RouterLink
+            >
         </div>
 
         <!-- The appointment as it is now. -->
@@ -247,7 +249,9 @@ const problems = {
             <div class="card-body">
                 <div v-if="slots === null && slotsFailed" class="flex flex-wrap items-center gap-3">
                     <span class="text-sm text-ink-3">{{ t('portal.errors.generic') }}</span>
-                    <button type="button" class="btn btn-sm" @click="loadSlots">{{ t('portal.booking.retry') }}</button>
+                    <button type="button" class="btn btn-sm" @click="loadSlots">
+                        <AppIcon name="retry" />{{ t('portal.booking.retry') }}
+                    </button>
                 </div>
                 <p v-else-if="slots === null" class="text-ink-3">{{ t('common.loading') }}</p>
                 <SlotPicker v-else v-model="selected" :slots="offered" :time-zone="zone" :days="reach" />
@@ -257,7 +261,7 @@ const problems = {
                 class="card-body book-next flex flex-wrap items-center gap-3 border-t border-line-soft"
             >
                 <button type="button" class="btn btn-primary" :disabled="!chosen" @click="next">
-                    {{ t('portal.booking.continue') }}
+                    {{ t('portal.booking.continue') }}<AppIcon name="continue" />
                 </button>
                 <span v-if="pickedWhen" class="text-sm text-ink-2"
                     >{{ pickedWhen.day }} · {{ pickedWhen.time }}
@@ -290,6 +294,7 @@ const problems = {
                     </dd>
                 </dl>
                 <button type="submit" class="btn btn-primary" :disabled="busy">
+                    <AppIcon name="reschedule" />
                     {{ t('portal.appointments.move') }}
                 </button>
             </form>
@@ -308,9 +313,9 @@ const problems = {
                     </div>
                 </div>
                 <AppointmentItem :appointment="moved" :time-zone="zone" />
-                <RouterLink :to="{ name: 'appointments' }" class="btn btn-primary mt-4">{{
-                    t('portal.booking.seeAppointments')
-                }}</RouterLink>
+                <RouterLink :to="{ name: 'appointments' }" class="btn btn-primary mt-4"
+                    ><AppIcon name="calendar" />{{ t('portal.booking.seeAppointments') }}</RouterLink
+                >
             </div>
         </section>
     </template>

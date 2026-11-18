@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import { normaliseCode } from '@/lib/security';
 import { home, safeRedirect } from '@/portal/guard';
@@ -86,6 +87,7 @@ function restart() {
                 />
             </FormField>
             <button class="btn btn-primary w-full justify-center" type="submit" :disabled="busy || !email">
+                <AppIcon name="mail" />
                 {{ t('portal.signIn.send') }}
             </button>
         </form>
@@ -110,6 +112,7 @@ function restart() {
                 />
             </FormField>
             <button class="btn btn-primary w-full justify-center" type="submit" :disabled="busy || code.length !== 6">
+                <AppIcon name="signIn" />
                 {{ t('portal.signIn.verify') }}
             </button>
         </form>

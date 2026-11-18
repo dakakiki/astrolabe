@@ -3,6 +3,7 @@ import { nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import { useForm } from '@/composables/useForm';
 import http from '@/lib/http';
@@ -76,12 +77,15 @@ defineExpose({ open });
                     />
                 </FormField>
                 <div class="flex justify-end gap-2">
-                    <button type="button" class="btn btn-ghost" @click="close">{{ t('common.cancel') }}</button>
+                    <button type="button" class="btn btn-ghost" @click="close">
+                        <AppIcon name="cancel" />{{ t('common.cancel') }}
+                    </button>
                     <button
                         type="submit"
                         class="btn btn-primary"
                         :disabled="form.processing.value || form.data.message.trim().length < 3"
                     >
+                        <AppIcon name="send" />
                         {{ t('feedback.submit') }}
                     </button>
                 </div>

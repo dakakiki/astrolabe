@@ -10,6 +10,8 @@ import { displayZone, zoneLabel } from '@/portal/lib/portal';
 import { loadScreen } from '@/portal/load';
 import { useSessionStore } from '@/portal/stores/session';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * Portal → Appointments (docs/spec/12): upcoming (soonest first) and past —
  * held, cancelled, missed — on the client's clock. Since 9b: "Book an
@@ -72,9 +74,9 @@ onMounted(async () => {
             <h1>{{ t('portal.nav.appointments') }}</h1>
             <div class="sub">{{ t('portal.appointments.zone', { zone: zoneLabel(zone, null, locale) }) }}</div>
         </div>
-        <RouterLink v-if="canBook" :to="{ name: 'book' }" class="btn btn-primary">{{
-            t('portal.appointments.book')
-        }}</RouterLink>
+        <RouterLink v-if="canBook" :to="{ name: 'book' }" class="btn btn-primary"
+            ><AppIcon name="addAppointment" />{{ t('portal.appointments.book') }}</RouterLink
+        >
     </div>
 
     <nav class="tabs mb-4" :aria-label="t('portal.nav.appointments')">
@@ -104,5 +106,7 @@ onMounted(async () => {
             />
         </div>
     </div>
-    <button v-if="items && page < lastPage" type="button" class="btn mt-4" @click="more">{{ t('common.more') }}</button>
+    <button v-if="items && page < lastPage" type="button" class="btn mt-4" @click="more">
+        <AppIcon name="more" />{{ t('common.more') }}
+    </button>
 </template>

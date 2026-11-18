@@ -24,6 +24,7 @@
         "@laravel/multiplex": "^0.4.1"
     },
     "dependencies": {
+        "@lucide/vue": "^1.68.0",
         "@tiptap/extensions": "^3.31.3",
         "@tiptap/pm": "^3.31.3",
         "@tiptap/starter-kit": "^3.31.3",

@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import { useForm } from '@/composables/useForm';
 import { ASPECT_GLYPHS } from '@/lib/chart';
@@ -151,9 +152,11 @@ async function save() {
 
                 <div class="flex flex-wrap gap-2">
                     <button class="btn btn-primary" type="submit" :disabled="orbs.processing.value">
+                        <AppIcon name="save" />
                         {{ t('common.save') }}
                     </button>
                     <button class="btn btn-ghost" type="button" :disabled="!defaults" @click="restore">
+                        <AppIcon name="reset" />
                         {{ t('settings.orbs.reset') }}
                     </button>
                 </div>

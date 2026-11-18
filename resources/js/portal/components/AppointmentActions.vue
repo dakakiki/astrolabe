@@ -3,6 +3,7 @@ import { computed, nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import { formatDateTime } from '@/lib/datetime';
 import http, { validationErrors } from '@/portal/http';
@@ -99,9 +100,10 @@ async function cancel() {
                 v-if="options.reschedule"
                 :to="{ name: 'reschedule', params: { id: appointment.id }, state }"
                 class="btn btn-sm"
-                >{{ t('portal.appointments.reschedule') }}</RouterLink
+                ><AppIcon name="reschedule" />{{ t('portal.appointments.reschedule') }}</RouterLink
             >
             <button v-if="options.cancel" type="button" class="btn btn-sm btn-danger" @click="ask">
+                <AppIcon name="cancelAppointment" />
                 {{ request ? t('portal.appointments.cancelRequest') : t('portal.appointments.cancel') }}
             </button>
         </div>
@@ -120,11 +122,13 @@ async function cancel() {
             </FormField>
             <div class="flex flex-wrap gap-2">
                 <button type="submit" class="btn btn-sm btn-danger" :disabled="busy">
+                    <AppIcon name="cancelAppointment" />
                     {{
                         request ? t('portal.appointments.cancelRequestConfirm') : t('portal.appointments.cancelConfirm')
                     }}
                 </button>
                 <button type="button" class="btn btn-sm btn-ghost" :disabled="busy" @click="keep">
+                    <AppIcon name="undo" />
                     {{ request ? t('portal.appointments.keepRequest') : t('portal.appointments.keep') }}
                 </button>
             </div>

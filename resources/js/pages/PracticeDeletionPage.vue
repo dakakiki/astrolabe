@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import PracticeExportCard from '@/components/PracticeExportCard.vue';
 import { formatDateTime } from '@/lib/datetime';
 import http from '@/lib/http';
@@ -58,11 +59,14 @@ async function signOut() {
     <template v-if="auth.isOwner">
         <p class="mb-3">{{ t('practiceDeletion.ownerHint') }}</p>
         <button class="btn btn-primary mb-5 w-full" type="button" :disabled="busy" @click="cancel">
+            <AppIcon name="reset" />
             {{ t('practiceDeletion.cancel') }}
         </button>
         <PracticeExportCard class="mb-5" />
     </template>
     <p v-else class="mb-5 text-ink-3">{{ t('practiceDeletion.memberHint') }}</p>
 
-    <button class="btn btn-ghost w-full" type="button" @click="signOut">{{ t('practiceDeletion.signOut') }}</button>
+    <button class="btn btn-ghost w-full" type="button" @click="signOut">
+        <AppIcon name="signOut" />{{ t('practiceDeletion.signOut') }}
+    </button>
 </template>

@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import ClientPicker from '@/components/ClientPicker.vue';
 import FormField from '@/components/FormField.vue';
 import { useForm } from '@/composables/useForm';
@@ -152,7 +153,7 @@ const when = (appointment) =>
                 :aria-label="t('appointments.detail.close')"
                 @click="emit('cancel')"
             >
-                ✕
+                <AppIcon name="close" />
             </button>
         </div>
         <div class="card-body">
@@ -312,12 +313,15 @@ const when = (appointment) =>
                     :disabled="form.processing.value"
                     @click="save(true)"
                 >
+                    <AppIcon name="warning" />
                     {{ t('appointments.form.saveAnyway') }}
                 </button>
                 <button v-else class="btn btn-primary" type="submit" :disabled="form.processing.value">
+                    <AppIcon name="save" />
                     {{ editing ? t('appointments.form.save') : t('appointments.form.create') }}
                 </button>
                 <button type="button" class="btn btn-ghost" @click="emit('cancel')">
+                    <AppIcon name="cancel" />
                     {{ t('appointments.form.cancel') }}
                 </button>
             </div>

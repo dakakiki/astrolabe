@@ -46,6 +46,7 @@ Provereno u Fazi 0 (24. 9. 2026): Laravel 13 je aktuelna stabilna verzija i tra�
 - Axios;
 - Vue I18n;
 - Tailwind CSS 4 — utility klase se razrešavaju u CSS varijable (design tokeni iz prototipa), pa tema i brending menjaju samo varijable;
+- ikonice Lucide (`@lucide/vue`, ISC licenca, od 18. 11. 2026) — svako dugme ima ikonicu uz tekst (dugme samo sa ikonicom zadržava `aria-label`), a levi meni, podmeni podešavanja i navigacija portala imaju ikonicu ispred naziva; ikonice se biraju po značenju iz jednog spiska (`resources/js/lib/icons.js` — „save“ je uvek kvačica, „delete“ korpa), crtaju se bojom teksta i u build ulaze samo korišćene;
 - Composition API.
 
 Točak natalne karte se crta kao **inline SVG Vue komponenta**, bez Canvas-a i bez spoljne biblioteke za karte. Razlozi:

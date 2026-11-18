@@ -8,6 +8,8 @@ import http from '@/portal/http';
 import { readToken } from '@/portal/lib/portal';
 import { useSessionStore } from '@/portal/stores/session';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * The page the sign-in email opens. The token is after "#" and leaves the
  * address bar at once; it is used only when the person presses the button
@@ -47,14 +49,15 @@ async function signIn() {
         <h1>{{ t('portal.link.title') }}</h1>
         <p class="sub">{{ t('portal.link.sub') }}</p>
         <button type="button" class="btn btn-primary w-full justify-center" :disabled="busy" @click="signIn">
+            <AppIcon name="signIn" />
             {{ t('portal.link.action') }}
         </button>
     </template>
     <template v-else>
         <h1>{{ t('portal.link.invalidTitle') }}</h1>
         <p class="sub">{{ t('portal.link.invalid') }}</p>
-        <RouterLink :to="{ name: 'sign-in' }" class="btn btn-primary w-full justify-center">{{
-            t('portal.link.again')
-        }}</RouterLink>
+        <RouterLink :to="{ name: 'sign-in' }" class="btn btn-primary w-full justify-center"
+            ><AppIcon name="mail" />{{ t('portal.link.again') }}</RouterLink
+        >
     </template>
 </template>

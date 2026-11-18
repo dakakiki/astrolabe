@@ -9,6 +9,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useReferenceStore } from '@/stores/reference';
 import { useToastStore } from '@/stores/toast';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * The practice export (Phase 8b; owner only): ask for one, wait while the queue
  * builds it (the list refreshes itself meanwhile), download it until it is
@@ -96,7 +98,7 @@ onBeforeUnmount(() => clearTimeout(timer));
                         class="btn btn-sm"
                         :href="`/api/v1/workspace/exports/${item.id}/download`"
                         download
-                        >{{ t('settings.data.export.download') }}</a
+                        ><AppIcon name="download" />{{ t('settings.data.export.download') }}</a
                     >
                 </li>
             </ul>
@@ -104,6 +106,7 @@ onBeforeUnmount(() => clearTimeout(timer));
 
             <div class="flex flex-wrap items-center gap-3">
                 <button type="button" class="btn btn-primary" :disabled="busy || pending" @click="request">
+                    <AppIcon name="exportArchive" />
                     {{ t('settings.data.export.request') }}
                 </button>
                 <span class="text-ink-3">{{ t('settings.data.export.emailHint', { hours: linkHours }) }}</span>

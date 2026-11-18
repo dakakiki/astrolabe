@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import OrbSettingsCard from '@/components/OrbSettingsCard.vue';
 import { useForm } from '@/composables/useForm';
@@ -176,6 +177,7 @@ async function deleteMethod(method) {
                     </FormField>
                 </div>
                 <button class="btn btn-primary" type="submit" :disabled="defaults.processing.value">
+                    <AppIcon name="save" />
                     {{ t('common.save') }}
                 </button>
             </fieldset>
@@ -225,6 +227,7 @@ async function deleteMethod(method) {
                             class="btn btn-ghost btn-sm"
                             @click="applySuggestion(method)"
                         >
+                            <AppIcon name="suggest" />
                             {{ t('settings.methods.applySuggestion') }}
                         </button>
                         <label v-if="selected.includes(method.id)" class="flex items-center gap-1 text-xs text-ink-2">
@@ -237,6 +240,7 @@ async function deleteMethod(method) {
                             class="btn btn-ghost btn-sm text-danger"
                             @click="deleteMethod(method)"
                         >
+                            <AppIcon name="delete" />
                             {{ t('common.delete') }}
                         </button>
                     </li>
@@ -252,6 +256,7 @@ async function deleteMethod(method) {
                     :disabled="selection.processing.value"
                     @click="saveMethods"
                 >
+                    <AppIcon name="save" />
                     {{ t('common.save') }}
                 </button>
 
@@ -274,6 +279,7 @@ async function deleteMethod(method) {
                         </FormField>
                     </div>
                     <button class="btn mb-3.5" type="submit" :disabled="addForm.processing.value || !addForm.data.name">
+                        <AppIcon name="add" />
                         {{ t('common.add') }}
                     </button>
                 </form>

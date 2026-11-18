@@ -8,6 +8,8 @@ import http from '@/lib/http';
 import { useAuthStore } from '@/stores/auth';
 import { useToastStore } from '@/stores/toast';
 
+import AppIcon from '@/components/AppIcon.vue';
+
 /**
  * The client's access to the practice's portal (docs/spec/12, "Pozivnica"):
  * not invited, invited (until when), active (last visit), paused while
@@ -149,6 +151,7 @@ defineExpose({ reload: load });
                         :disabled="busy"
                         @click="invite"
                     >
+                        <AppIcon name="send" />
                         {{ portal.status === 'invited' ? t('clientPortal.resend') : t('clientPortal.invite') }}
                     </button>
                     <button
@@ -158,6 +161,7 @@ defineExpose({ reload: load });
                         :disabled="busy"
                         @click="revoke"
                     >
+                        <AppIcon name="ban" />
                         {{ portal.status === 'invited' ? t('clientPortal.withdraw') : t('clientPortal.revoke') }}
                     </button>
                 </div>

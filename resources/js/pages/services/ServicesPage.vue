@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import { useForm } from '@/composables/useForm';
 import { useLabels } from '@/composables/useLabels';
@@ -161,7 +162,8 @@ async function remove() {
             <div class="sub">{{ t('services.sub') }}</div>
         </div>
         <button v-if="auth.isOwner" type="button" class="btn btn-primary ml-auto" @click="open()">
-            + {{ t('services.add') }}
+            <AppIcon name="add" />
+            {{ t('services.add') }}
         </button>
     </div>
 
@@ -302,6 +304,7 @@ async function remove() {
                         class="btn btn-ghost btn-sm"
                         @click="showAllMethods = true"
                     >
+                        <AppIcon name="more" />
                         {{ t('clients.form.showAllMethods') }}
                     </button>
                 </div>
@@ -337,12 +340,16 @@ async function remove() {
 
             <div class="mt-5 flex flex-wrap items-center gap-2">
                 <button class="btn btn-primary" type="submit" :disabled="form.processing.value">
+                    <AppIcon name="save" />
                     {{ editing === 'new' ? t('services.form.create') : t('services.form.save') }}
                 </button>
-                <button type="button" class="btn btn-ghost" @click="close">{{ t('services.form.cancel') }}</button>
+                <button type="button" class="btn btn-ghost" @click="close">
+                    <AppIcon name="cancel" />{{ t('services.form.cancel') }}
+                </button>
                 <template v-if="editing !== 'new'">
                     <span v-if="editing.in_use" class="ml-auto text-xs text-ink-3">{{ t('services.form.inUse') }}</span>
                     <button v-else type="button" class="btn btn-ghost ml-auto" @click="remove">
+                        <AppIcon name="delete" />
                         {{ t('services.form.delete') }}
                     </button>
                 </template>
@@ -430,6 +437,7 @@ async function remove() {
                         </td>
                         <td v-if="auth.isOwner" class="text-right">
                             <button type="button" class="btn btn-sm" @click.stop="open(service)">
+                                <AppIcon name="edit" />
                                 {{ t('services.edit') }}
                             </button>
                         </td>

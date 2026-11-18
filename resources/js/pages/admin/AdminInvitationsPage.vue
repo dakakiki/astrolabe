@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import PaginationBar from '@/components/PaginationBar.vue';
 import { useForm } from '@/composables/useForm';
@@ -101,6 +102,7 @@ onMounted(() => load().catch(() => toast.error(t('errors.generic'))));
                 </FormField>
             </div>
             <button type="submit" class="btn btn-primary" :disabled="form.processing.value || !form.data.email">
+                <AppIcon name="send" />
                 {{ t('admin.invitations.send') }}
             </button>
 
@@ -157,6 +159,7 @@ onMounted(() => load().catch(() => toast.error(t('errors.generic'))));
                                 class="btn btn-ghost btn-sm text-danger"
                                 @click="revoke(invitation)"
                             >
+                                <AppIcon name="ban" />
                                 {{ t('admin.invitations.revoke') }}
                             </button>
                         </td>

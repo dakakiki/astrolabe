@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import ClientPicker from '@/components/ClientPicker.vue';
 import FormField from '@/components/FormField.vue';
 import { useForm } from '@/composables/useForm';
@@ -125,10 +126,11 @@ const birthLine = (birth) =>
             <h2>{{ t('related.title') }}</h2>
             <span class="right flex flex-wrap gap-2">
                 <button type="button" class="btn btn-sm" :aria-expanded="linking" @click="startLinking">
+                    <AppIcon name="link" />
                     {{ t('related.linkClient') }}
                 </button>
                 <RouterLink :to="{ name: 'related-people.create', params: { clientId } }" class="btn btn-sm btn-primary"
-                    >+ {{ t('related.add') }}</RouterLink
+                    ><AppIcon name="addPerson" />{{ t('related.add') }}</RouterLink
                 >
             </span>
         </div>
@@ -160,9 +162,11 @@ const birthLine = (birth) =>
             </FormField>
             <div class="flex gap-2">
                 <button class="btn btn-primary btn-sm" type="submit" :disabled="!chosen || linkForm.processing.value">
+                    <AppIcon name="save" />
                     {{ t('related.linkForm.save') }}
                 </button>
                 <button type="button" class="btn btn-ghost btn-sm" @click="linking = false">
+                    <AppIcon name="cancel" />
                     {{ t('related.cancel') }}
                 </button>
             </div>
@@ -242,9 +246,11 @@ const birthLine = (birth) =>
                                     :disabled="editForm.processing.value"
                                     @click="saveEditing(link)"
                                 >
+                                    <AppIcon name="save" />
                                     {{ t('related.save') }}
                                 </button>
                                 <button type="button" class="btn btn-sm btn-ghost" @click="editing = null">
+                                    <AppIcon name="cancel" />
                                     {{ t('related.cancel') }}
                                 </button>
                             </template>
@@ -254,12 +260,14 @@ const birthLine = (birth) =>
                                     :to="synastryRoute(clientId, link.kind, link.party.id)"
                                     class="btn btn-sm"
                                     replace
-                                    >{{ t('related.compare') }}</RouterLink
+                                    ><AppIcon name="compare" />{{ t('related.compare') }}</RouterLink
                                 >
                                 <button type="button" class="btn btn-sm" @click="startEditing(link)">
+                                    <AppIcon name="edit" />
                                     {{ t('related.edit') }}
                                 </button>
                                 <button type="button" class="btn btn-sm btn-ghost" @click="remove(link)">
+                                    <AppIcon name="unlink" />
                                     {{ t('related.remove') }}
                                 </button>
                             </template>

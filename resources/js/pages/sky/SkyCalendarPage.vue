@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import PositionsTable from '@/components/PositionsTable.vue';
 import { useLabels } from '@/composables/useLabels';
 import { addDays, todayIn } from '@/lib/calendar';
@@ -130,9 +131,15 @@ const body = (key) => ({ glyph: BODY_GLYPHS[key], name: t(`bodies.${key}`) });
             />
         </label>
         <div class="flex gap-1">
-            <button type="button" class="btn btn-sm h-9" :aria-label="t('sky.previous')" @click="shift(-1)">‹</button>
-            <button type="button" class="btn btn-sm h-9" @click="go({ from: null })">{{ t('sky.today') }}</button>
-            <button type="button" class="btn btn-sm h-9" :aria-label="t('sky.next')" @click="shift(1)">›</button>
+            <button type="button" class="btn btn-sm h-9" :aria-label="t('sky.previous')" @click="shift(-1)">
+                <AppIcon name="previous" />
+            </button>
+            <button type="button" class="btn btn-sm h-9" @click="go({ from: null })">
+                <AppIcon name="today" />{{ t('sky.today') }}
+            </button>
+            <button type="button" class="btn btn-sm h-9" :aria-label="t('sky.next')" @click="shift(1)">
+                <AppIcon name="next" />
+            </button>
         </div>
         <label class="grid gap-1 text-xs text-ink-3">
             {{ t('sky.period') }}

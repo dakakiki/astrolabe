@@ -2,6 +2,7 @@
 import { computed, nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import { useForm } from '@/composables/useForm';
 import http from '@/lib/http';
@@ -82,8 +83,11 @@ defineExpose({ open });
                     />
                 </FormField>
                 <div class="flex justify-end gap-2">
-                    <button type="button" class="btn btn-ghost" @click="close">{{ t('common.cancel') }}</button>
+                    <button type="button" class="btn btn-ghost" @click="close">
+                        <AppIcon name="cancel" />{{ t('common.cancel') }}
+                    </button>
                     <button type="submit" class="btn btn-danger" :disabled="!matches || form.processing.value">
+                        <AppIcon name="delete" />
                         {{ t('clients.deleteDialog.submit') }}
                     </button>
                 </div>

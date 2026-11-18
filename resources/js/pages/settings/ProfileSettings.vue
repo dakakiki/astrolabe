@@ -2,6 +2,7 @@
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import { useForm } from '@/composables/useForm';
 import http from '@/lib/http';
@@ -61,6 +62,7 @@ async function save() {
                 />
             </FormField>
             <button class="btn btn-primary" type="submit" :disabled="form.processing.value">
+                <AppIcon name="save" />
                 {{ t('common.save') }}
             </button>
         </form>

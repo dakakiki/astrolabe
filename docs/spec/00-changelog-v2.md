@@ -337,6 +337,14 @@ Korisnik je odustao od zatvorene bete: pozivi i beta se uklanjaju, aplikacija se
 
 Van specifikacije: aplikacija (podrazumevano `REGISTRATION_MODE=open`, tekstovi bez „closed beta“, nova verzija Terms i Privacy Policy — nacrti), `docs/deployment.md` (sekcija „Puštanje“, `invite` na serveru do puštanja), `docs/legal-review.md` (pitanja o trialu), prezentacioni sajt (umesto prijave za betu — trial).
 
+## Ikonice na dugmadima (18. 11. 2026)
+
+Korisnik: „za sve buttone dodaj odgovarajuće ikonice“; izabrao Lucide i obuhvat „sva dugmad + levi meni“ (preporuke). Prototip nije imao ikonice na dugmadima, a levi meni je koristio Unicode znake (◈ ◉ ☉ ▦).
+
+- 03: Frontend — ikonice Lucide (`@lucide/vue`, ISC), jedan spisak značenja u `resources/js/lib/icons.js`.
+
+Van specifikacije: sva dugmad u aplikaciji, adminu i portalu (oko 250) dobijaju ikonicu ispred teksta („+ “ ispred naziva otpada); dugmad samo sa znakom (✕, ‹ ›, ☰, ☾/☀) i traka alatki editora prelaze na ikonice uz postojeći `aria-label`; levi meni, meni naloga, podmeni podešavanja i navigacija portala imaju ikonice — na telefonu je navigacija portala pet jednakih kartica sa ikonicom iznad naziva. Bez ikonice ostaju izbori koji nisu radnja: segmentni prekidači (Day / Week / Month, filteri vremenske linije), tabovi, tekstualni linkovi, termini u kalendaru, ponuđena vremena za zakazivanje i izbor prakse u portalu. Vitest proverava da svako dugme sa klasom `.btn` ima ikonicu i da sva imena postoje u spisku.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

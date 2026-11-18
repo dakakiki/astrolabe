@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import AppointmentItem from '@/portal/components/AppointmentItem.vue';
 import ServiceChoice from '@/portal/components/ServiceChoice.vue';
@@ -281,7 +282,9 @@ function rule(line) {
         <p class="text-sm text-ink-2">
             {{ booking.enabled ? t('portal.booking.noServices') : t('portal.booking.disabled') }}
         </p>
-        <RouterLink :to="{ name: 'home' }" class="btn btn-sm mt-4">{{ t('portal.booking.backHome') }}</RouterLink>
+        <RouterLink :to="{ name: 'home' }" class="btn btn-sm mt-4"
+            ><AppIcon name="home" />{{ t('portal.booking.backHome') }}</RouterLink
+        >
     </section>
 
     <template v-else>
@@ -299,9 +302,9 @@ function rule(line) {
 
         <div v-if="notice" class="notice mb-4 flex-wrap items-center" :class="notice.tone" role="alert">
             <span class="min-w-0 flex-1">{{ notice.text }}</span>
-            <RouterLink v-if="notice.appointments" :to="{ name: 'appointments' }" class="btn btn-sm">{{
-                t('portal.booking.seeAppointments')
-            }}</RouterLink>
+            <RouterLink v-if="notice.appointments" :to="{ name: 'appointments' }" class="btn btn-sm"
+                ><AppIcon name="calendar" />{{ t('portal.booking.seeAppointments') }}</RouterLink
+            >
         </div>
 
         <!-- Step 1: the service. -->
@@ -328,6 +331,7 @@ function rule(line) {
                 <div v-if="listed === null && slotsFailed" class="flex flex-wrap items-center gap-3">
                     <span class="text-sm text-ink-3">{{ t('portal.errors.generic') }}</span>
                     <button type="button" class="btn btn-sm" @click="loadSlots(service.id)">
+                        <AppIcon name="retry" />
                         {{ t('portal.booking.retry') }}
                     </button>
                 </div>
@@ -345,7 +349,7 @@ function rule(line) {
                 class="card-body book-next flex flex-wrap items-center gap-3 border-t border-line-soft"
             >
                 <button type="button" class="btn btn-primary" :disabled="!chosen" @click="next">
-                    {{ t('portal.booking.continue') }}
+                    {{ t('portal.booking.continue') }}<AppIcon name="continue" />
                 </button>
                 <span v-if="pickedWhen" class="text-sm text-ink-2"
                     >{{ pickedWhen.day }} · {{ pickedWhen.time }}
@@ -420,6 +424,7 @@ function rule(line) {
                 </ul>
 
                 <button type="submit" class="btn btn-primary" :disabled="busy">
+                    <AppIcon :name="booking.requires_confirmation ? 'send' : 'confirm'" />
                     {{ booking.requires_confirmation ? t('portal.booking.request') : t('portal.booking.book') }}
                 </button>
             </form>
@@ -434,9 +439,9 @@ function rule(line) {
                     }}</strong>
                 </div>
                 <AppointmentItem :appointment="booked" :time-zone="zone" />
-                <RouterLink :to="{ name: 'appointments' }" class="btn btn-primary mt-4">{{
-                    t('portal.booking.seeAppointments')
-                }}</RouterLink>
+                <RouterLink :to="{ name: 'appointments' }" class="btn btn-primary mt-4"
+                    ><AppIcon name="calendar" />{{ t('portal.booking.seeAppointments') }}</RouterLink
+                >
             </div>
         </section>
     </template>

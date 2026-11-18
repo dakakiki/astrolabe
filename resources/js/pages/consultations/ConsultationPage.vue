@@ -3,6 +3,7 @@ import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch 
 import { useI18n } from 'vue-i18n';
 import { onBeforeRouteLeave, onBeforeRouteUpdate, RouterLink, useRoute, useRouter } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import AttachmentsPanel from '@/components/AttachmentsPanel.vue';
 import ClientPicker from '@/components/ClientPicker.vue';
 import ConsultationStatusBadge from '@/components/ConsultationStatusBadge.vue';
@@ -408,9 +409,11 @@ const otherZone = computed(() => {
             </div>
             <div class="ml-auto flex gap-2">
                 <button v-if="id" type="button" class="btn btn-ghost" @click="remove">
+                    <AppIcon name="delete" />
                     {{ t('consultations.form.delete') }}
                 </button>
                 <button type="button" class="btn btn-primary" :disabled="form.processing.value" @click="save">
+                    <AppIcon name="save" />
                     {{ id ? t('consultations.form.save') : t('consultations.form.create') }}
                 </button>
             </div>
@@ -588,6 +591,7 @@ const otherZone = computed(() => {
                                     class="btn btn-ghost btn-sm"
                                     @click="showAllMethods = true"
                                 >
+                                    <AppIcon name="more" />
                                     {{ t('clients.form.showAllMethods') }}
                                 </button>
                             </div>
@@ -659,6 +663,7 @@ const otherZone = computed(() => {
 
                 <div class="flex justify-end">
                     <button type="submit" class="btn btn-primary" :disabled="form.processing.value">
+                        <AppIcon name="save" />
                         {{ id ? t('consultations.form.save') : t('consultations.form.create') }}
                     </button>
                 </div>
@@ -681,6 +686,7 @@ const otherZone = computed(() => {
                                 <p class="text-xs text-ink-3">{{ t('consultations.chart.snapshotNote') }}</p>
                                 <div class="flex flex-wrap gap-2">
                                     <button type="button" class="btn btn-sm" :disabled="chartBusy" @click="attachChart">
+                                        <AppIcon name="replace" />
                                         {{ t('consultations.chart.replace') }}
                                     </button>
                                     <button
@@ -689,6 +695,7 @@ const otherZone = computed(() => {
                                         :disabled="chartBusy"
                                         @click="detachChart"
                                     >
+                                        <AppIcon name="unlink" />
                                         {{ t('consultations.chart.detach') }}
                                     </button>
                                 </div>
@@ -703,6 +710,7 @@ const otherZone = computed(() => {
                                     :disabled="chartBusy"
                                     @click="attachChart"
                                 >
+                                    <AppIcon name="attach" />
                                     {{ t('consultations.chart.attach') }}
                                 </button>
                             </div>
@@ -710,7 +718,7 @@ const otherZone = computed(() => {
                                 <RouterLink
                                     :to="transitsRoute(client.id, consultation.starts_at, auth.user?.timezone)"
                                     class="btn btn-sm"
-                                    >{{ t('transits.onDate') }}</RouterLink
+                                    ><AppIcon name="transits" />{{ t('transits.onDate') }}</RouterLink
                                 >
                             </div>
                         </div>

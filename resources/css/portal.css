@@ -95,12 +95,43 @@
     }
 
     .portal-nav a {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
         padding: 11px 8px;
         color: var(--ink-3);
         text-decoration: none;
         font-size: 13.5px;
         white-space: nowrap;
         border-bottom: 2px solid transparent;
+    }
+
+    .portal-nav a .icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* On a phone the five sections share the row as tabs: icon above a short label. */
+    @media (max-width: 560px) {
+        .portal-nav-inner {
+            gap: 0;
+            padding-left: 4px;
+            padding-right: 4px;
+        }
+
+        .portal-nav a {
+            flex: 1 1 0;
+            min-width: 0;
+            flex-direction: column;
+            gap: 3px;
+            padding: 8px 2px 7px;
+            font-size: 11px;
+        }
+
+        .portal-nav a .icon {
+            width: 18px;
+            height: 18px;
+        }
     }
 
     .portal-nav a:hover {
@@ -318,6 +349,9 @@
     }
 
     .svc-card .svc-go {
+        align-self: center;
+        width: 18px;
+        height: 18px;
         color: var(--link);
     }
 

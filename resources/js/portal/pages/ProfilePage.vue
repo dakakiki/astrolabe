@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import PhoneInput from '@/components/PhoneInput.vue';
 import InstallApp from '@/portal/components/InstallApp.vue';
@@ -122,7 +123,9 @@ async function save() {
                     <option v-for="item in profile.locales" :key="item.code" :value="item.code">{{ item.name }}</option>
                 </select>
             </FormField>
-            <button class="btn btn-primary" type="submit" :disabled="busy">{{ t('common.save') }}</button>
+            <button class="btn btn-primary" type="submit" :disabled="busy">
+                <AppIcon name="save" />{{ t('common.save') }}
+            </button>
         </form>
     </section>
 
