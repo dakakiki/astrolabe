@@ -1298,6 +1298,7 @@
             "manage": {
                 "title": "Manage person",
                 "editHint": "Name, contact details and birth data.",
+                "makeClientHint": "Copies the details and birth data into a new client of their own; every link moves to them.",
                 "deleteHint": "Deletes the person and every link to them. It cannot be undone."
             },
             "confirmDelete": "Delete {name} and every link to them?",

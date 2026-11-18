@@ -143,20 +143,8 @@ async function remove() {
                     </div>
                 </div>
             </div>
-            <!-- Up here only what starts new work; editing and deleting are at the end of the
-                 right column ("Manage person"), as on a client. -->
-            <div class="ml-auto flex flex-wrap gap-2">
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    :disabled="busy"
-                    @click="makeClient"
-                    v-tip="t('tips.related.person.makeClient')"
-                >
-                    <AppIcon name="addClient" />
-                    {{ t('related.person.makeClient') }}
-                </button>
-            </div>
+            <!-- No buttons up here: editing, making a client and deleting are at the end of the
+                 right column ("Manage person"). -->
         </div>
 
         <nav class="tabs" :aria-label="person.full_name">
@@ -274,6 +262,19 @@ async function remove() {
                                 ><AppIcon name="edit" />{{ t('related.person.edit') }}</RouterLink
                             >
                             <p>{{ t('related.person.manage.editHint') }}</p>
+                        </div>
+                        <div>
+                            <button
+                                type="button"
+                                class="btn btn-sm"
+                                :disabled="busy"
+                                @click="makeClient"
+                                v-tip="t('tips.related.person.makeClient')"
+                            >
+                                <AppIcon name="addClient" />
+                                {{ t('related.person.makeClient') }}
+                            </button>
+                            <p>{{ t('related.person.manage.makeClientHint') }}</p>
                         </div>
                         <div class="danger">
                             <button
