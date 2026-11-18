@@ -284,8 +284,8 @@ describe('change rules', () => {
 });
 
 describe('status badges', () => {
-    it('shows none for a confirmed appointment ahead, and marks a request waiting', () => {
-        expect(statusBadge({ status: 'scheduled', upcoming: true })).toBeNull();
+    it('marks a confirmed appointment ahead in green, and a request waiting', () => {
+        expect(statusBadge({ status: 'scheduled', upcoming: true })).toEqual({ key: 'confirmed', tone: 'b-ok' });
         expect(statusBadge({ status: 'requested', upcoming: true })).toEqual({ key: 'requested', tone: 'b-warn' });
     });
 

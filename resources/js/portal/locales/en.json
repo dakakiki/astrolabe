@@ -122,6 +122,7 @@
                 "completed": "Held",
                 "cancelled": "Cancelled",
                 "no_show": "Missed",
+                "confirmed": "Confirmed",
                 "requested": "Awaiting confirmation",
                 "declined": "Not confirmed",
                 "cancelled_by_client": "Cancelled by you"
