@@ -153,13 +153,13 @@ export function installView({ standalone = false, installed = false, canInstall 
 }
 
 /**
- * Home offers installing once, discreetly, until the person says "Not now": where the browser's
- * dialog is ready, and on a phone (iPhone, iPad, Android), which has steps to show.
+ * Home offers installing once, discreetly, until the person says "Not now" — only on a phone
+ * (iPhone, iPad, Android): there is no reason to install the portal on a computer.
  */
 export function showInstallCard({ view, dismissed = false, platform = 'desktop' } = {}) {
-    if (dismissed) return false;
+    if (dismissed || (platform !== 'ios' && platform !== 'android')) return false;
 
-    return view === 'prompt' || view === 'ios' || (view === 'hint' && platform === 'android');
+    return view === 'prompt' || view === 'ios' || view === 'hint';
 }
 
 /** Whether to ask the server for a new service worker again (on returning to the page). */

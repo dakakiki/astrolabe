@@ -1,15 +1,16 @@
 <script setup>
-import { onBeforeUnmount, ref, useId, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, useId, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import AppIcon from '@/components/AppIcon.vue';
 import { usePwaStore } from '@/portal/stores/pwa';
 
 /**
- * Installing the portal, the same everywhere it is offered (Home, Profile → App, the iPhone
- * notice under Notifications): "Install app" opens the browser's own dialog where there is one,
- * and otherwise the steps for this device; the Android and iOS buttons always show their steps.
- * The steps open in a small panel under the bar: Escape, a click outside or ✕ closes it.
+ * Installing the portal on a phone, the same everywhere it is offered (Home, Profile → App, the
+ * iPhone notice under Notifications). On a phone "Install app" opens the browser's own dialog
+ * where there is one, and otherwise this phone's steps. A computer gets no "Install app" — there
+ * is no reason to install the portal there (user, 18 Nov 2026) — only the Android and iOS steps,
+ * for the phone. The steps open in a small panel under the bar: Escape, a click outside or ✕.
  */
 const { t } = useI18n();
 const pwa = usePwaStore();
@@ -19,9 +20,9 @@ const uid = useId();
 const STEPS = {
     android: { steps: ['s1', 's2', 's3', 's4'], icon: { s2: 'browserMenu' } },
     ios: { steps: ['s1', 's2', 's3', 's4'], icon: { s2: 'share' } },
-    desktop: { steps: ['s1', 's2', 's3'], icon: { s2: 'browserMenu' } },
 };
 
+const onPhone = computed(() => pwa.platform === 'ios' || pwa.platform === 'android');
 const guide = ref(null);
 const busy = ref(false);
 const root = ref(null);
@@ -36,7 +37,7 @@ async function install() {
         }
         return;
     }
-    open(pwa.platform === 'ios' || pwa.platform === 'android' ? pwa.platform : 'desktop');
+    open(pwa.platform);
 }
 
 function open(name) {
@@ -70,18 +71,20 @@ onBeforeUnmount(close);
 <template>
     <div ref="root" class="install-guide">
         <div class="install-bar">
-            <button
-                type="button"
-                class="btn btn-primary btn-sm"
-                :disabled="busy"
-                :aria-expanded="pwa.installState === 'prompt' ? undefined : String(guide !== null)"
-                @click="install"
-                v-tip="t('tips.portal.pwa.install.action')"
-            >
-                <AppIcon name="install" />
-                {{ t('portal.pwa.install.action') }}
-            </button>
-            <span class="sep" aria-hidden="true" />
+            <template v-if="onPhone">
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    :disabled="busy"
+                    :aria-expanded="pwa.installState === 'prompt' ? undefined : String(guide !== null)"
+                    @click="install"
+                    v-tip="t('tips.portal.pwa.install.action')"
+                >
+                    <AppIcon name="install" />
+                    {{ t('portal.pwa.install.action') }}
+                </button>
+                <span class="sep" aria-hidden="true" />
+            </template>
             <button
                 type="button"
                 class="icon-btn"

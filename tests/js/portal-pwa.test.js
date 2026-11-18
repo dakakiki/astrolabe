@@ -329,19 +329,23 @@ describe('installing the portal', () => {
     });
 
     it('offers it on Home only while it can be done and until "Not now"', () => {
-        expect(showInstallCard({ view: 'prompt' })).toBe(true);
-        expect(showInstallCard({ view: 'ios' })).toBe(true);
-        expect(showInstallCard({ view: 'prompt', dismissed: true })).toBe(false);
-        expect(showInstallCard({ view: 'ios', dismissed: true })).toBe(false);
+        expect(showInstallCard({ view: 'prompt', platform: 'android' })).toBe(true);
+        expect(showInstallCard({ view: 'ios', platform: 'ios' })).toBe(true);
+        expect(showInstallCard({ view: 'prompt', platform: 'android', dismissed: true })).toBe(false);
+        expect(showInstallCard({ view: 'ios', platform: 'ios', dismissed: true })).toBe(false);
 
-        for (const view of ['standalone', 'installed', 'hint']) {
-            expect(showInstallCard({ view })).toBe(false);
+        for (const view of ['standalone', 'installed']) {
+            expect(showInstallCard({ view, platform: 'android' })).toBe(false);
+            expect(showInstallCard({ view, platform: 'ios' })).toBe(false);
         }
     });
 
-    it('offers it on an Android phone too, which has steps to show', () => {
+    it('offers it on phones only — iPhone, iPad and Android', () => {
         expect(showInstallCard({ view: 'hint', platform: 'android' })).toBe(true);
+        expect(showInstallCard({ view: 'prompt', platform: 'android' })).toBe(true);
+        expect(showInstallCard({ view: 'ios', platform: 'ios' })).toBe(true);
         expect(showInstallCard({ view: 'hint', platform: 'android', dismissed: true })).toBe(false);
+        expect(showInstallCard({ view: 'prompt', platform: 'desktop' })).toBe(false);
         expect(showInstallCard({ view: 'hint', platform: 'desktop' })).toBe(false);
         expect(showInstallCard({ view: 'installed', platform: 'android' })).toBe(false);
     });
@@ -350,7 +354,7 @@ describe('installing the portal', () => {
         const guide = en.portal.pwa.install.guide;
 
         expect(Object.keys(guide.labels)).toEqual(['android', 'ios']);
-        for (const device of ['android', 'ios', 'desktop']) {
+        for (const device of ['android', 'ios']) {
             expect(guide.title[device]).toBeTruthy();
             expect(Object.values(guide[device]).some((step) => step.includes('{icon}'))).toBe(true);
         }

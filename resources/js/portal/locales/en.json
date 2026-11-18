@@ -307,6 +307,7 @@
                 "title": "App",
                 "homeTitle": "Use the portal as an app",
                 "lead": "Install the portal on this device. It opens from your home screen like an app.",
+                "leadDesktop": "On your phone the portal can sit on the home screen like an app. Open the portal on your phone and follow the steps for it:",
                 "action": "Install app",
                 "notNow": "Not now",
                 "badge": "Installed",
@@ -322,8 +323,7 @@
                     },
                     "title": {
                         "android": "Install on Android",
-                        "ios": "Install on iPhone or iPad",
-                        "desktop": "Install on this computer"
+                        "ios": "Install on iPhone or iPad"
                     },
                     "android": {
                         "s1": "Open the portal in Chrome.",
@@ -336,11 +336,6 @@
                         "s2": "Tap Share {icon} at the bottom of the screen (at the top on iPad).",
                         "s3": "Choose “Add to Home Screen”.",
                         "s4": "Tap “Add”."
-                    },
-                    "desktop": {
-                        "s1": "In Chrome or Edge, click the install icon at the right end of the address bar.",
-                        "s2": "Or open the browser menu {icon} and choose the option to install the page as an app.",
-                        "s3": "In Safari on a Mac, choose File → Add to Dock."
                     }
                 }
             }
@@ -433,7 +428,7 @@
             },
             "pwa": {
                 "install": {
-                    "action": "Install the portal as an app — or see how on this device",
+                    "action": "Install the portal on this phone — or see how",
                     "notNow": "Hide this for now",
                     "android": "How to install the portal on Android",
                     "ios": "How to install the portal on iPhone or iPad"

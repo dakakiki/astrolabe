@@ -46,7 +46,9 @@ const pwa = usePwaStore();
         </p>
         <p v-else-if="pwa.installState === 'installed'">{{ t('portal.pwa.install.installed') }}</p>
         <template v-else>
-            <p class="mb-3 text-ink-2">{{ t('portal.pwa.install.lead') }}</p>
+            <p class="mb-3 text-ink-2">
+                {{ pwa.platform === 'desktop' ? t('portal.pwa.install.leadDesktop') : t('portal.pwa.install.lead') }}
+            </p>
             <InstallGuide />
         </template>
     </div>
