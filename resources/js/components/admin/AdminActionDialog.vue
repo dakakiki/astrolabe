@@ -118,8 +118,13 @@ defineExpose({ open });
                         autocomplete="current-password"
                     />
                 </FormField>
-                <div class="flex justify-end gap-2">
-                    <button type="button" class="btn btn-ghost" v-tip="t('tips.common.cancel')" @click="close">
+                <div class="form-actions">
+                    <button
+                        type="button"
+                        class="btn btn-ghost form-cancel"
+                        v-tip="t('tips.common.cancel')"
+                        @click="close"
+                    >
                         <AppIcon name="cancel" />{{ t('common.cancel') }}
                     </button>
                     <button

@@ -498,7 +498,16 @@ const steps = computed(() => [
                                         {{ t('dashboard.requests.messageHint') }}
                                     </div>
                                 </div>
-                                <div class="flex flex-wrap gap-2">
+                                <div class="form-actions">
+                                    <button
+                                        type="button"
+                                        class="btn btn-ghost btn-sm form-cancel"
+                                        @click="declining = null"
+                                        v-tip="t('tips.dashboard.requests.keep')"
+                                    >
+                                        <AppIcon name="undo" />
+                                        {{ t('dashboard.requests.keep') }}
+                                    </button>
                                     <button
                                         type="submit"
                                         class="btn btn-danger btn-sm"
@@ -507,15 +516,6 @@ const steps = computed(() => [
                                     >
                                         <AppIcon name="decline" />
                                         {{ t('dashboard.requests.send') }}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        class="btn btn-ghost btn-sm"
-                                        @click="declining = null"
-                                        v-tip="t('tips.dashboard.requests.keep')"
-                                    >
-                                        <AppIcon name="undo" />
-                                        {{ t('dashboard.requests.keep') }}
                                     </button>
                                 </div>
                             </form>

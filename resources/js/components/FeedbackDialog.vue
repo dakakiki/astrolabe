@@ -76,8 +76,13 @@ defineExpose({ open });
                         maxlength="5000"
                     />
                 </FormField>
-                <div class="flex justify-end gap-2">
-                    <button type="button" class="btn btn-ghost" @click="close" v-tip="t('tips.common.cancel')">
+                <div class="form-actions">
+                    <button
+                        type="button"
+                        class="btn btn-ghost form-cancel"
+                        @click="close"
+                        v-tip="t('tips.common.cancel')"
+                    >
                         <AppIcon name="cancel" />{{ t('common.cancel') }}
                     </button>
                     <button

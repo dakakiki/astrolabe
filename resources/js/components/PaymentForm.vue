@@ -346,11 +346,11 @@ async function save() {
                 <textarea :id="id" v-model="form.data.notes" v-bind="aria" class="input min-h-16" maxlength="2000" />
             </FormField>
 
-            <div class="flex justify-end gap-2">
+            <div class="form-actions">
                 <button
                     v-if="closable || editing"
                     type="button"
-                    class="btn btn-ghost"
+                    class="btn btn-ghost form-cancel"
                     @click="emit('cancel')"
                     v-tip="t('tips.common.cancel')"
                 >

@@ -345,7 +345,28 @@ async function remove() {
                 {{ form.errors.value.bookable_in_portal }}
             </div>
 
-            <div class="mt-5 flex flex-wrap items-center gap-2">
+            <div class="form-actions mt-5">
+                <button
+                    type="button"
+                    class="btn btn-ghost form-cancel"
+                    @click="close"
+                    v-tip="t('tips.services.form.cancel')"
+                >
+                    <AppIcon name="cancel" />{{ t('services.form.cancel') }}
+                </button>
+                <template v-if="editing !== 'new'">
+                    <span v-if="editing.in_use" class="text-xs text-ink-3">{{ t('services.form.inUse') }}</span>
+                    <button
+                        v-else
+                        type="button"
+                        class="btn btn-ghost"
+                        @click="remove"
+                        v-tip="t('tips.services.form.delete')"
+                    >
+                        <AppIcon name="delete" />
+                        {{ t('services.form.delete') }}
+                    </button>
+                </template>
                 <button
                     class="btn btn-primary"
                     type="submit"
@@ -355,22 +376,6 @@ async function remove() {
                     <AppIcon name="save" />
                     {{ editing === 'new' ? t('services.form.create') : t('services.form.save') }}
                 </button>
-                <button type="button" class="btn btn-ghost" @click="close" v-tip="t('tips.services.form.cancel')">
-                    <AppIcon name="cancel" />{{ t('services.form.cancel') }}
-                </button>
-                <template v-if="editing !== 'new'">
-                    <span v-if="editing.in_use" class="ml-auto text-xs text-ink-3">{{ t('services.form.inUse') }}</span>
-                    <button
-                        v-else
-                        type="button"
-                        class="btn btn-ghost ml-auto"
-                        @click="remove"
-                        v-tip="t('tips.services.form.delete')"
-                    >
-                        <AppIcon name="delete" />
-                        {{ t('services.form.delete') }}
-                    </button>
-                </template>
             </div>
         </form>
     </section>

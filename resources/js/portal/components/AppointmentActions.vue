@@ -127,7 +127,17 @@ async function cancel() {
             >
                 <textarea :id="id" v-bind="aria" v-model="reason" class="input block" rows="2" maxlength="500" />
             </FormField>
-            <div class="flex flex-wrap gap-2">
+            <div class="form-actions">
+                <button
+                    type="button"
+                    class="btn btn-sm btn-ghost form-cancel"
+                    :disabled="busy"
+                    @click="keep"
+                    v-tip="request ? t('tips.portal.appointments.keepRequest') : t('tips.portal.appointments.keep')"
+                >
+                    <AppIcon name="undo" />
+                    {{ request ? t('portal.appointments.keepRequest') : t('portal.appointments.keep') }}
+                </button>
                 <button
                     type="submit"
                     class="btn btn-sm btn-danger"
@@ -142,16 +152,6 @@ async function cancel() {
                     {{
                         request ? t('portal.appointments.cancelRequestConfirm') : t('portal.appointments.cancelConfirm')
                     }}
-                </button>
-                <button
-                    type="button"
-                    class="btn btn-sm btn-ghost"
-                    :disabled="busy"
-                    @click="keep"
-                    v-tip="request ? t('tips.portal.appointments.keepRequest') : t('tips.portal.appointments.keep')"
-                >
-                    <AppIcon name="undo" />
-                    {{ request ? t('portal.appointments.keepRequest') : t('portal.appointments.keep') }}
                 </button>
             </div>
         </form>

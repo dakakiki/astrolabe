@@ -353,6 +353,8 @@ Korisnik: u liniji sa naslovom profila klijenta samo dva dugmeta, bez „New“ 
 
 Van specifikacije: zaglavlje profila klijenta — „Appointment“ i „Consultation“; kartica „Manage client“ na kraju desne kolone taba Overview (Edit profile, Archive / Restore, odvojeno Delete permanently). Tooltip ima oko 250 dugmadi u aplikaciji, adminu i portalu (i dugmad samo sa ikonicom, traka editora, meni naloga, kartice usluga u portalu); bez tooltip-a ostaju ponuđena vremena u portalu i izbori koji nisu radnja (segmentni prekidači, tabovi, linkovi). Vitest proverava da svako dugme ima tooltip i da tekst postoji.
 
+Isti dan, korisnik: „cancel button uvek ide skroz levo a ostali buttoni desno … važi za sve forme“. U svim formama i potvrdama dugme koje odustaje (Cancel, „Keep it“, „Keep the request“) stoji prvo i skroz levo, ostala dugmad desno sa glavnom radnjom poslednjom (npr. usluga: Cancel … Delete service, Save service); dvostepeno uključivanje 2FA dobija polje iznad i dugmad ispod. „Cancel appointment“ i „Cancel the deletion“ su radnje i ne menjaju mesto. Bez izmene specifikacije.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

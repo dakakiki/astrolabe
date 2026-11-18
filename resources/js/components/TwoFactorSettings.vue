@@ -181,34 +181,37 @@ function closeCodes() {
 
             <form v-if="step === 'password'" novalidate @submit.prevent="confirmPassword">
                 <p class="mb-3 text-ink-3">{{ t('settings.security.twoFactor.confirmPassword') }}</p>
-                <div class="flex items-end gap-2">
-                    <div class="flex-1">
-                        <FormField
-                            v-slot="{ id, aria }"
-                            :label="t('auth.fields.password')"
-                            :error="password.errors.value.password"
-                        >
-                            <input
-                                :id="id"
-                                ref="passwordInput"
-                                v-model="password.data.password"
-                                v-bind="aria"
-                                class="input"
-                                type="password"
-                                autocomplete="current-password"
-                            />
-                        </FormField>
-                    </div>
+                <FormField
+                    v-slot="{ id, aria }"
+                    :label="t('auth.fields.password')"
+                    :error="password.errors.value.password"
+                >
+                    <input
+                        :id="id"
+                        ref="passwordInput"
+                        v-model="password.data.password"
+                        v-bind="aria"
+                        class="input"
+                        type="password"
+                        autocomplete="current-password"
+                    />
+                </FormField>
+                <div class="form-actions">
                     <button
-                        class="btn btn-primary mb-3.5"
+                        class="btn form-cancel"
+                        type="button"
+                        @click="step = 'idle'"
+                        v-tip="t('tips.common.cancel')"
+                    >
+                        <AppIcon name="cancel" />{{ t('common.cancel') }}
+                    </button>
+                    <button
+                        class="btn btn-primary"
                         type="submit"
                         :disabled="password.processing.value"
                         v-tip="t('tips.settings.security.twoFactor.continue')"
                     >
                         {{ t('settings.security.twoFactor.continue') }}<AppIcon name="continue" />
-                    </button>
-                    <button class="btn mb-3.5" type="button" @click="step = 'idle'" v-tip="t('tips.common.cancel')">
-                        <AppIcon name="cancel" />{{ t('common.cancel') }}
                     </button>
                 </div>
             </form>
@@ -222,36 +225,27 @@ function closeCodes() {
                         <code class="font-mono text-sm break-all select-all">{{ secret }}</code>
                     </div>
                 </div>
-                <div class="flex items-end gap-2">
-                    <div class="max-w-56 flex-1">
-                        <FormField
-                            v-slot="{ id, aria }"
-                            :label="t('settings.security.twoFactor.code')"
-                            :error="confirmation.errors.value.code"
-                        >
-                            <input
-                                :id="id"
-                                ref="codeInput"
-                                v-model="confirmation.data.code"
-                                v-bind="aria"
-                                class="input font-mono tracking-widest"
-                                inputmode="numeric"
-                                autocomplete="one-time-code"
-                                maxlength="12"
-                            />
-                        </FormField>
-                    </div>
-                    <button
-                        class="btn btn-primary mb-3.5"
-                        type="submit"
-                        :disabled="confirmation.processing.value"
-                        v-tip="t('tips.settings.security.twoFactor.confirm')"
+                <div class="max-w-56">
+                    <FormField
+                        v-slot="{ id, aria }"
+                        :label="t('settings.security.twoFactor.code')"
+                        :error="confirmation.errors.value.code"
                     >
-                        <AppIcon name="confirm" />
-                        {{ t('settings.security.twoFactor.confirm') }}
-                    </button>
+                        <input
+                            :id="id"
+                            ref="codeInput"
+                            v-model="confirmation.data.code"
+                            v-bind="aria"
+                            class="input font-mono tracking-widest"
+                            inputmode="numeric"
+                            autocomplete="one-time-code"
+                            maxlength="12"
+                        />
+                    </FormField>
+                </div>
+                <div class="form-actions">
                     <button
-                        class="btn mb-3.5"
+                        class="btn form-cancel"
                         type="button"
                         :disabled="busy"
                         @click="cancelSetup"
@@ -259,6 +253,15 @@ function closeCodes() {
                     >
                         <AppIcon name="cancel" />
                         {{ t('common.cancel') }}
+                    </button>
+                    <button
+                        class="btn btn-primary"
+                        type="submit"
+                        :disabled="confirmation.processing.value"
+                        v-tip="t('tips.settings.security.twoFactor.confirm')"
+                    >
+                        <AppIcon name="confirm" />
+                        {{ t('settings.security.twoFactor.confirm') }}
                     </button>
                 </div>
             </form>

@@ -75,7 +75,15 @@ async function signOut() {
                 required
             />
         </FormField>
-        <div class="flex gap-2">
+        <div class="form-actions">
+            <button
+                class="btn btn-ghost form-cancel"
+                type="button"
+                @click="changingEmail = false"
+                v-tip="t('tips.common.cancel')"
+            >
+                <AppIcon name="cancel" />{{ t('common.cancel') }}
+            </button>
             <button
                 class="btn"
                 type="submit"
@@ -84,9 +92,6 @@ async function signOut() {
             >
                 <AppIcon name="send" />
                 {{ t('auth.verify.updateEmail') }}
-            </button>
-            <button class="btn btn-ghost" type="button" @click="changingEmail = false" v-tip="t('tips.common.cancel')">
-                <AppIcon name="cancel" />{{ t('common.cancel') }}
             </button>
         </div>
     </form>

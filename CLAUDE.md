@@ -28,6 +28,11 @@ before starting a phase. The user communicates in Serbian.
   portal, `portal/locales/en.json`). The tip says what happens, not the label again ("Add a new
   consultation for this client"). No `title` on buttons — it would show a second tooltip.
   `tests/js/tooltips.test.js` fails on a button without `v-tip` or a tip key with no text.
+- The buttons that end a form or a confirmation sit in `<div class="form-actions">`: the one that
+  walks away (Cancel, "Keep it", "Keep the request") comes **first** in the markup with
+  `form-cancel` and lands far left; everything else goes right, the main action last. A cancel
+  `<button>` is `type="button"`. "Cancel appointment" / "Cancel the deletion" are actions, not
+  this. `tests/js/forms.test.js` checks the known walk-away labels.
 
 ## Multi-tenancy
 

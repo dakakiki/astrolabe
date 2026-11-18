@@ -218,7 +218,17 @@ const consultationLabel = (consultation) =>
                         </option>
                     </select>
                 </FormField>
-                <div class="flex gap-2">
+                <div class="form-actions">
+                    <button
+                        v-if="editing"
+                        type="button"
+                        class="btn btn-ghost form-cancel"
+                        @click="cancel"
+                        v-tip="t('tips.common.cancel')"
+                    >
+                        <AppIcon name="cancel" />
+                        {{ t('common.cancel') }}
+                    </button>
                     <button
                         type="submit"
                         class="btn btn-primary"
@@ -227,16 +237,6 @@ const consultationLabel = (consultation) =>
                     >
                         <AppIcon name="save" />
                         {{ editing ? t('notes.update') : t('notes.save') }}
-                    </button>
-                    <button
-                        v-if="editing"
-                        type="button"
-                        class="btn btn-ghost"
-                        @click="cancel"
-                        v-tip="t('tips.common.cancel')"
-                    >
-                        <AppIcon name="cancel" />
-                        {{ t('common.cancel') }}
                     </button>
                 </div>
             </div>

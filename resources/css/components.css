@@ -514,6 +514,25 @@
         border-color: var(--danger);
     }
 
+    /* The buttons that end a form or a confirmation: the one that walks away (Cancel, Keep …)
+       on the far left, everything else on the right. It comes first in the markup too, so Tab
+       follows the eye; where the row has no room to spare it still keeps a clear gap. */
+    .form-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .form-actions > .form-cancel {
+        margin-right: auto;
+    }
+
+    .form-actions > .form-cancel + * {
+        margin-left: 16px;
+    }
+
     .field {
         margin-bottom: 14px;
     }

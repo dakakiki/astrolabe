@@ -314,7 +314,13 @@ async function save() {
             </div>
         </section>
 
-        <div class="flex gap-2">
+        <div class="form-actions">
+            <RouterLink
+                :to="clientId ? { name: 'clients.show', params: { id: clientId } } : { name: 'clients.index' }"
+                class="btn btn-ghost form-cancel"
+                v-tip="t('tips.clients.form.cancel')"
+                ><AppIcon name="cancel" />{{ t('clients.form.cancel') }}</RouterLink
+            >
             <button
                 class="btn btn-primary"
                 type="submit"
@@ -324,12 +330,6 @@ async function save() {
                 <AppIcon name="save" />
                 {{ t('clients.form.save') }}
             </button>
-            <RouterLink
-                :to="clientId ? { name: 'clients.show', params: { id: clientId } } : { name: 'clients.index' }"
-                class="btn btn-ghost"
-                v-tip="t('tips.clients.form.cancel')"
-                ><AppIcon name="cancel" />{{ t('clients.form.cancel') }}</RouterLink
-            >
         </div>
     </form>
     <p v-else class="text-ink-3">{{ t('common.loading') }}</p>

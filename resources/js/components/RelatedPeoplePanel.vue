@@ -169,7 +169,16 @@ const birthLine = (birth) =>
             <FormField v-slot="{ id, aria }" :label="t('related.linkForm.notes')" :error="linkForm.errors.value.notes">
                 <input :id="id" v-model="linkForm.data.notes" v-bind="aria" class="input" autocomplete="off" />
             </FormField>
-            <div class="flex gap-2">
+            <div class="form-actions">
+                <button
+                    type="button"
+                    class="btn btn-ghost btn-sm form-cancel"
+                    @click="linking = false"
+                    v-tip="t('tips.related.cancel')"
+                >
+                    <AppIcon name="cancel" />
+                    {{ t('related.cancel') }}
+                </button>
                 <button
                     class="btn btn-primary btn-sm"
                     type="submit"
@@ -178,15 +187,6 @@ const birthLine = (birth) =>
                 >
                     <AppIcon name="save" />
                     {{ t('related.linkForm.save') }}
-                </button>
-                <button
-                    type="button"
-                    class="btn btn-ghost btn-sm"
-                    @click="linking = false"
-                    v-tip="t('tips.related.cancel')"
-                >
-                    <AppIcon name="cancel" />
-                    {{ t('related.cancel') }}
                 </button>
             </div>
         </form>
@@ -258,7 +258,16 @@ const birthLine = (birth) =>
                             </td>
                         </template>
                         <td class="text-right whitespace-nowrap" @click.stop>
-                            <template v-if="editing === link.id">
+                            <div v-if="editing === link.id" class="form-actions">
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-ghost form-cancel"
+                                    @click="editing = null"
+                                    v-tip="t('tips.related.cancel')"
+                                >
+                                    <AppIcon name="cancel" />
+                                    {{ t('related.cancel') }}
+                                </button>
                                 <button
                                     type="button"
                                     class="btn btn-sm btn-primary"
@@ -269,16 +278,7 @@ const birthLine = (birth) =>
                                     <AppIcon name="save" />
                                     {{ t('related.save') }}
                                 </button>
-                                <button
-                                    type="button"
-                                    class="btn btn-sm btn-ghost"
-                                    @click="editing = null"
-                                    v-tip="t('tips.related.cancel')"
-                                >
-                                    <AppIcon name="cancel" />
-                                    {{ t('related.cancel') }}
-                                </button>
-                            </template>
+                            </div>
                             <template v-else>
                                 <RouterLink
                                     v-if="link.party.birth?.chart_ready"

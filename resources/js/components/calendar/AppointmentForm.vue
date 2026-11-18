@@ -306,7 +306,16 @@ const when = (appointment) =>
                 </div>
             </div>
 
-            <div class="flex flex-wrap gap-2">
+            <div class="form-actions">
+                <button
+                    type="button"
+                    class="btn btn-ghost form-cancel"
+                    @click="emit('cancel')"
+                    v-tip="t('tips.appointments.form.cancel')"
+                >
+                    <AppIcon name="cancel" />
+                    {{ t('appointments.form.cancel') }}
+                </button>
                 <button
                     v-if="conflicts.length"
                     type="button"
@@ -327,15 +336,6 @@ const when = (appointment) =>
                 >
                     <AppIcon name="save" />
                     {{ editing ? t('appointments.form.save') : t('appointments.form.create') }}
-                </button>
-                <button
-                    type="button"
-                    class="btn btn-ghost"
-                    @click="emit('cancel')"
-                    v-tip="t('tips.appointments.form.cancel')"
-                >
-                    <AppIcon name="cancel" />
-                    {{ t('appointments.form.cancel') }}
                 </button>
             </div>
         </div>

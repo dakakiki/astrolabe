@@ -451,7 +451,16 @@ async function depositSaved() {
                         }}
                     </div>
                 </div>
-                <div class="flex flex-wrap gap-2">
+                <div class="form-actions">
+                    <button
+                        type="button"
+                        class="btn btn-ghost btn-sm form-cancel"
+                        @click="declining = false"
+                        v-tip="t('tips.appointments.detail.keepRequest')"
+                    >
+                        <AppIcon name="undo" />
+                        {{ t('appointments.detail.keepRequest') }}
+                    </button>
                     <button
                         type="submit"
                         class="btn btn-danger btn-sm"
@@ -460,15 +469,6 @@ async function depositSaved() {
                     >
                         <AppIcon name="decline" />
                         {{ t('appointments.detail.confirmDecline') }}
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-ghost btn-sm"
-                        @click="declining = false"
-                        v-tip="t('tips.appointments.detail.keepRequest')"
-                    >
-                        <AppIcon name="undo" />
-                        {{ t('appointments.detail.keepRequest') }}
                     </button>
                 </div>
             </form>
@@ -692,7 +692,16 @@ async function depositSaved() {
                         }}</span>
                     </span>
                 </label>
-                <div class="flex flex-wrap gap-2">
+                <div class="form-actions">
+                    <button
+                        type="button"
+                        class="btn btn-ghost btn-sm form-cancel"
+                        @click="cancelling = false"
+                        v-tip="t('tips.appointments.detail.keep')"
+                    >
+                        <AppIcon name="undo" />
+                        {{ t('appointments.detail.keep') }}
+                    </button>
                     <button
                         type="submit"
                         class="btn btn-danger btn-sm"
@@ -701,15 +710,6 @@ async function depositSaved() {
                     >
                         <AppIcon name="cancelAppointment" />
                         {{ t('appointments.detail.confirmCancel') }}
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-ghost btn-sm"
-                        @click="cancelling = false"
-                        v-tip="t('tips.appointments.detail.keep')"
-                    >
-                        <AppIcon name="undo" />
-                        {{ t('appointments.detail.keep') }}
                     </button>
                 </div>
             </form>

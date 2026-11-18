@@ -195,7 +195,10 @@ const cancelRoute = computed(() =>
             </div>
         </section>
 
-        <div class="flex gap-2">
+        <div class="form-actions">
+            <RouterLink :to="cancelRoute" class="btn btn-ghost form-cancel" v-tip="t('tips.related.form.cancel')"
+                ><AppIcon name="cancel" />{{ t('related.form.cancel') }}</RouterLink
+            >
             <button
                 class="btn btn-primary"
                 type="submit"
@@ -205,9 +208,6 @@ const cancelRoute = computed(() =>
                 <AppIcon name="save" />
                 {{ t('related.form.save') }}
             </button>
-            <RouterLink :to="cancelRoute" class="btn btn-ghost" v-tip="t('tips.related.form.cancel')"
-                ><AppIcon name="cancel" />{{ t('related.form.cancel') }}</RouterLink
-            >
         </div>
     </form>
     <p v-else class="text-ink-3">{{ t('common.loading') }}</p>

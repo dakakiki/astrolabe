@@ -212,11 +212,11 @@ async function save() {
                 />
             </FormField>
 
-            <div class="flex justify-end gap-2">
+            <div class="form-actions">
                 <button
                     v-if="closable || editing"
                     type="button"
-                    class="btn btn-ghost"
+                    class="btn btn-ghost form-cancel"
                     @click="emit('cancel')"
                     v-tip="t('tips.common.cancel')"
                 >
