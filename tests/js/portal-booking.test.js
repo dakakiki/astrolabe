@@ -14,6 +14,7 @@ import {
     groupSlotsByDay,
     idempotencyKey,
     nextDay,
+    practiceWhen,
     priceText,
     readBookingQuery,
     readMoment,
@@ -450,5 +451,32 @@ describe('booking requests', () => {
 
     it('has the words for a move that kept the time', () => {
         expect(en.portal.appointments.unchanged).toBeTruthy();
+    });
+});
+
+describe('practiceWhen', () => {
+    const at = (iso, minutes = 60) => ({
+        starts_at: iso,
+        ends_at: new Date(Date.parse(iso) + minutes * 60000).toISOString(),
+    });
+
+    it('shows the practice clock when it reads another time', () => {
+        expect(practiceWhen(at('2026-11-19T11:30:00Z'), 'en-GB', 'Europe/London', 'Europe/Belgrade')).toEqual({
+            day: null,
+            time: '12:30 – 13:30',
+            zone: 'Belgrade',
+        });
+    });
+
+    it('names the day when the practice is already on another one', () => {
+        const when = practiceWhen(at('2026-11-19T23:30:00Z'), 'en-GB', 'America/New_York', 'Europe/Belgrade');
+        expect(when.time).toBe('00:30 – 01:30');
+        expect(when.day).toBe(dayLabel('2026-11-20', 'en-GB').full);
+    });
+
+    it('stays out when both clocks read the same', () => {
+        expect(practiceWhen(at('2026-11-19T11:30:00Z'), 'en-GB', 'Europe/Belgrade', 'Europe/Belgrade')).toBeNull();
+        expect(practiceWhen(at('2026-11-19T11:30:00Z'), 'en-GB', 'Europe/Paris', 'Europe/Belgrade')).toBeNull();
+        expect(practiceWhen(at('2026-11-19T11:30:00Z'), 'en-GB', 'Europe/London', null)).toBeNull();
     });
 });

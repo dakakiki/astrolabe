@@ -2,10 +2,12 @@
 
 namespace App\Support\Portal;
 
+use App\Models\AvailabilityRule;
 use App\Models\BookingPolicy;
 use App\Models\Service;
 use App\Models\User;
 use App\Support\Booking\BookingAvailability;
+use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -45,6 +47,22 @@ final class PortalBooking
     public static function astrologerId(Request $request): ?int
     {
         return self::astrologer($request)?->getKey();
+    }
+
+    /**
+     * The practice's clock, which the portal shows beside the client's when the two read
+     * differently: the zone of the booking astrologer's working hours, else the astrologer's
+     * own, else the practice's.
+     */
+    public static function timezone(Request $request): string
+    {
+        $astrologer = self::astrologer($request);
+        $zone = $astrologer
+            ? (AvailabilityRule::query()->where('user_id', $astrologer->getKey())->orderBy('id')->value('timezone')
+                ?? $astrologer->timezone)
+            : null;
+
+        return $zone ?: (app(CurrentWorkspace::class)->get()?->timezone ?? config('app.timezone'));
     }
 
     /** Whether clients can book now: the practice switched it on and has someone to book with. */

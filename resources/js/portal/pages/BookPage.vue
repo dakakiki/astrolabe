@@ -17,6 +17,7 @@ import {
     dayOf,
     findSlot,
     idempotencyKey,
+    practiceWhen,
     priceText,
     readBookingQuery,
     slotRange,
@@ -75,6 +76,10 @@ const step = computed(() => {
 });
 const pickedWhen = computed(() => (chosen.value ? when(chosen.value) : null));
 const slotWhen = computed(() => (slot.value ? when(slot.value) : null));
+// The practice's clock beside the client's, when the two read differently.
+const practiceSlotWhen = computed(() =>
+    practiceWhen(slot.value, locale.value, zone.value, booking.value?.practice_timezone),
+);
 const rules = computed(() =>
     booking.value ? changeRules(booking.value.reschedule_until_hours, booking.value.cancel_until_hours) : [],
 );
@@ -402,6 +407,14 @@ function rule(line) {
                     <dd>
                         {{ slotWhen.time }} <span class="text-xs text-ink-3">· {{ slotWhen.zone }}</span>
                     </dd>
+                    <template v-if="practiceSlotWhen">
+                        <dt>{{ t('portal.booking.summary.practiceTime') }}</dt>
+                        <dd>
+                            <template v-if="practiceSlotWhen.day">{{ practiceSlotWhen.day }}<br /></template>
+                            {{ practiceSlotWhen.time }}
+                            <span class="text-xs text-ink-3">· {{ practiceSlotWhen.zone }}</span>
+                        </dd>
+                    </template>
                     <template v-if="service.location_type !== 'either'">
                         <dt>{{ t('portal.booking.summary.where') }}</dt>
                         <dd>{{ t(`portal.appointments.location.${service.location_type}`) }}</dd>

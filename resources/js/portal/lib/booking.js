@@ -159,6 +159,26 @@ export function slotRange(slot, locale, timeZone) {
     return `${slotTime(slot.starts_at, locale, timeZone)} – ${slotTime(slot.ends_at, locale, timeZone)}`;
 }
 
+/**
+ * The same time on the practice's clock, for the confirmation — only when it reads differently
+ * from the client's (another time, or another day); otherwise null. `day` is set only when the
+ * day differs too. `zone` is the practice zone's place name, e.g. "Belgrade".
+ */
+export function practiceWhen(slot, locale, clientZone, practiceZone) {
+    if (!slot || !practiceZone || practiceZone === clientZone) return null;
+
+    const time = slotRange(slot, locale, practiceZone);
+    const day = dayOf(slot.starts_at, practiceZone);
+    const sameDay = day === dayOf(slot.starts_at, clientZone);
+    if (sameDay && time === slotRange(slot, locale, clientZone)) return null;
+
+    return {
+        day: sameDay ? null : dayLabel(day, locale).full,
+        time,
+        zone: String(practiceZone).split('/').pop().replaceAll('_', ' '),
+    };
+}
+
 /** The free time that starts at `isoTimestamp`, or null — compared as moments, not as text. */
 export function findSlot(slots, isoTimestamp) {
     const moment = Date.parse(isoTimestamp);

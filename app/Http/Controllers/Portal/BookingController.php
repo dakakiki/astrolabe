@@ -45,6 +45,7 @@ class BookingController extends Controller
             'cancel_until_hours' => $policy->client_cancel_until_hours,
             'max_days_ahead' => $policy->max_days_ahead,
             'min_notice_minutes' => $policy->min_notice_minutes,
+            'practice_timezone' => PortalBooking::timezone($request),
             'services' => $open
                 ? PortalServiceResource::collection(PortalBooking::services()->orderBy('name')->orderBy('id')->get())->resolve($request)
                 : [],
@@ -82,6 +83,7 @@ class BookingController extends Controller
             'duration_minutes' => $minutes,
             'from' => $policy->earliestStart($now)->toIso8601ZuluString(),
             'to' => $policy->latestStart($now)->toIso8601ZuluString(),
+            'practice_timezone' => PortalBooking::timezone($request),
             'slots' => BookingConflict::slotList($starts, $minutes),
         ]]);
     }

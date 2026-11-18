@@ -13,6 +13,7 @@ import {
     daysAhead,
     findSlot,
     idempotencyKey,
+    practiceWhen,
     readMoment,
     sameMoment,
     slotRange,
@@ -70,6 +71,9 @@ const step = computed(() => {
 const pickedWhen = computed(() => (chosen.value ? when(chosen.value) : null));
 const nowWhen = computed(() => (appointment.value ? when(appointment.value) : null));
 const slotWhen = computed(() => (slot.value ? when(slot.value) : null));
+// The practice's clock beside the client's, when the two read differently.
+const practiceZone = ref(null);
+const practiceSlotWhen = computed(() => practiceWhen(slot.value, locale.value, zone.value, practiceZone.value));
 
 onMounted(() => {
     loadScreen(loadAppointment);
@@ -105,6 +109,7 @@ async function loadSlots() {
         const response = await http.get('/booking/slots', { params: { appointment_id: id } });
         slots.value = response.data.data.slots;
         reach.value = daysAhead(response.data.data.to);
+        practiceZone.value = response.data.data.practice_timezone ?? null;
     } catch (error) {
         const answer = bookingProblem(error);
         if (['generic', 'too_many'].includes(answer.code)) slotsFailed.value = true;
@@ -302,6 +307,14 @@ const problems = {
                         {{ slotWhen.day }}<br />
                         {{ slotWhen.time }} <span class="text-xs font-normal text-ink-3">· {{ slotWhen.zone }}</span>
                     </dd>
+                    <template v-if="practiceSlotWhen">
+                        <dt>{{ t('portal.booking.summary.practiceTime') }}</dt>
+                        <dd>
+                            <template v-if="practiceSlotWhen.day">{{ practiceSlotWhen.day }}<br /></template>
+                            {{ practiceSlotWhen.time }}
+                            <span class="text-xs text-ink-3">· {{ practiceSlotWhen.zone }}</span>
+                        </dd>
+                    </template>
                 </dl>
                 <button
                     type="submit"

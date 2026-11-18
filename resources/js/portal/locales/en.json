@@ -204,7 +204,8 @@
                 "day": "Day",
                 "time": "Time",
                 "where": "Where",
-                "price": "Price"
+                "price": "Price",
+                "practiceTime": "Practice's time"
             },
             "where": "How would you like to meet?",
             "whereRequired": "Please choose online or in person.",

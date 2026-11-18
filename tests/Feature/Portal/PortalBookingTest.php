@@ -175,6 +175,21 @@ class PortalBookingTest extends TestCase
         Event::assertNotDispatched(AppointmentBooked::class);
     }
 
+    public function test_the_practice_clock_is_the_zone_of_the_astrologers_working_hours(): void
+    {
+        $this->bookingPolicy($this->vega);
+        $this->signInToPortal($this->user);
+
+        // No working hours yet: the astrologer's own zone.
+        $this->vega->forceFill(['timezone' => 'Asia/Tokyo'])->save();
+        $this->portal('GET', 'booking')->assertOk()->assertJsonPath('data.practice_timezone', 'Asia/Tokyo');
+
+        // The zone the week is written in wins, on the booking terms and with the free times.
+        $this->workingWeek($this->vega, [2 => [['09:00', '13:00']]], 'America/New_York');
+        $this->portal('GET', 'booking')->assertJsonPath('data.practice_timezone', 'America/New_York');
+        $this->slotsFor($this->service)->assertOk()->assertJsonPath('data.practice_timezone', 'America/New_York');
+    }
+
     public function test_free_times_follow_the_week_time_off_extra_time_and_appointments(): void
     {
         $member = $this->memberOf($this->vega);
@@ -224,8 +239,11 @@ class PortalBookingTest extends TestCase
             $this->starts($this->slotsFor($forecast)->assertJsonPath('data.duration_minutes', 90)),
         );
 
-        // Times and nothing else: not whose they are, nor why the others are not free.
-        $this->assertSame(['duration_minutes', 'from', 'to', 'slots'], array_keys($response->json('data')));
+        // Times and the practice's clock, nothing else: not whose they are, nor why the others are not free.
+        $this->assertSame(
+            ['duration_minutes', 'from', 'to', 'practice_timezone', 'slots'],
+            array_keys($response->json('data')),
+        );
         foreach ($response->json('data.slots') as $slot) {
             $this->assertSame(['starts_at', 'ends_at'], array_keys($slot));
         }
