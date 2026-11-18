@@ -353,6 +353,11 @@ const reminder = computed(() => {
     return { text, shifted: state.shifted === true };
 });
 
+// A consultation is recorded from an appointment that took or takes place: not a request, not a cancelled one.
+const canRecordConsultation = computed(
+    () => appointment.value?.status !== 'cancelled' && appointment.value?.status !== 'requested',
+);
+
 // Deposits: what was paid before the session; the service may ask for one, a request included.
 const payments = computed(() => appointment.value?.payments ?? []);
 const depositExpected = computed(
@@ -678,92 +683,160 @@ async function depositSaved() {
                 </div>
             </div>
 
-            <div class="flex flex-wrap gap-2">
-                <RouterLink
-                    v-if="appointment.consultation"
-                    :to="{ name: 'consultations.show', params: { id: appointment.consultation.id } }"
-                    class="btn btn-primary btn-sm"
-                    v-tip="t('tips.appointments.detail.openConsultation')"
-                    ><AppIcon name="consultation" />{{ t('appointments.detail.openConsultation') }}</RouterLink
+            <!-- What can be done with it, grouped by what it acts on; cancelling stands apart, last. -->
+            <div class="act-groups">
+                <div
+                    v-if="appointment.consultation || canRecordConsultation"
+                    class="act-group"
+                    role="group"
+                    aria-labelledby="act-consultation"
                 >
-                <RouterLink
-                    v-else-if="appointment.status !== 'cancelled' && appointment.status !== 'requested'"
-                    :to="{ name: 'consultations.create', query: { appointment: appointment.id } }"
-                    class="btn btn-primary btn-sm"
-                    v-tip="t('tips.appointments.detail.recordConsultation')"
-                    ><AppIcon name="addConsultation" />{{ t('appointments.detail.recordConsultation') }}</RouterLink
-                >
-                <button
-                    type="button"
-                    class="btn btn-sm"
-                    @click="emit('edit', appointment)"
-                    v-tip="t('tips.appointments.detail.edit')"
-                >
-                    <AppIcon name="edit" />
-                    {{ t('appointments.detail.edit') }}
-                </button>
-                <button
-                    type="button"
-                    class="btn btn-sm"
-                    :aria-expanded="chartState !== 'idle'"
-                    @click="toggleChart"
-                    v-tip="
-                        chartState === 'idle'
-                            ? t('tips.appointments.detail.showChart')
-                            : t('tips.appointments.detail.hideChart')
-                    "
-                >
-                    <AppIcon :name="chartState === 'idle' ? 'chart' : 'hide'" />
-                    {{
-                        chartState === 'idle' ? t('appointments.detail.showChart') : t('appointments.detail.hideChart')
-                    }}
-                </button>
-                <button
-                    v-if="appointment.status !== 'cancelled' && !depositOpen"
-                    type="button"
-                    class="btn btn-sm"
-                    @click="depositOpen = true"
-                    v-tip="t('tips.appointments.detail.recordDeposit')"
-                >
-                    <AppIcon name="payment" />
-                    {{ t('appointments.detail.recordDeposit') }}
-                </button>
-                <RouterLink
-                    v-if="appointment.client.chart_ready"
-                    :to="transitsRoute(appointment.client.id, appointment.starts_at, zone)"
-                    class="btn btn-sm"
-                    v-tip="t('tips.transits.forDate')"
-                    ><AppIcon name="transits" />{{ t('transits.forDate') }}</RouterLink
-                >
-            </div>
+                    <div id="act-consultation" class="act-label">
+                        {{ t('appointments.detail.groups.consultation') }}
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <RouterLink
+                            v-if="appointment.consultation"
+                            :to="{ name: 'consultations.show', params: { id: appointment.consultation.id } }"
+                            class="btn btn-primary btn-sm"
+                            v-tip="t('tips.appointments.detail.openConsultation')"
+                            ><AppIcon name="consultation" />{{ t('appointments.detail.openConsultation') }}</RouterLink
+                        >
+                        <RouterLink
+                            v-else-if="canRecordConsultation"
+                            :to="{ name: 'consultations.create', query: { appointment: appointment.id } }"
+                            class="btn btn-primary btn-sm"
+                            v-tip="t('tips.appointments.detail.recordConsultation')"
+                            ><AppIcon name="addConsultation" />{{
+                                t('appointments.detail.recordConsultation')
+                            }}</RouterLink
+                        >
+                    </div>
+                </div>
 
-            <!-- A request is answered above; it is never "scheduled again" from here, and neither
-                 is a declined one: the client was told no, and a new booking is theirs to make. -->
-            <div
-                v-if="appointment.status !== 'requested' && !appointment.declined_at"
-                class="flex flex-wrap gap-2 border-t border-line-soft pt-3"
-            >
-                <template v-if="appointment.status === 'scheduled'">
-                    <button
-                        type="button"
-                        class="btn btn-ghost btn-sm"
-                        :disabled="busy"
-                        @click="setStatus('completed')"
-                        v-tip="t('tips.appointments.detail.markHeld')"
-                    >
-                        <AppIcon name="held" />
-                        {{ t('appointments.detail.markHeld') }}
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-ghost btn-sm"
-                        :disabled="busy"
-                        @click="setStatus('no_show')"
-                        v-tip="t('tips.appointments.detail.markNoShow')"
-                    >
-                        <AppIcon name="noShow" />
-                        {{ t('appointments.detail.markNoShow') }}
-                    </button>
+                <div class="act-group" role="group" aria-labelledby="act-appointment">
+                    <div id="act-appointment" class="act-label">{{ t('appointments.detail.groups.appointment') }}</div>
+                    <div class="flex flex-wrap gap-2">
+                        <button
+                            type="button"
+                            class="btn btn-sm"
+                            @click="emit('edit', appointment)"
+                            v-tip="t('tips.appointments.detail.edit')"
+                        >
+                            <AppIcon name="edit" />
+                            {{ t('appointments.detail.edit') }}
+                        </button>
+                        <button
+                            v-if="appointment.status !== 'cancelled' && !depositOpen"
+                            type="button"
+                            class="btn btn-sm"
+                            @click="depositOpen = true"
+                            v-tip="t('tips.appointments.detail.recordDeposit')"
+                        >
+                            <AppIcon name="payment" />
+                            {{ t('appointments.detail.recordDeposit') }}
+                        </button>
+                    </div>
+                    <div v-if="depositOpen" class="mt-3">
+                        <h3 class="mb-2 text-sm font-semibold">{{ t('payments.form.depositTitle') }}</h3>
+                        <PaymentForm
+                            :appointment="{ id: appointment.id, starts_at: appointment.starts_at }"
+                            :client="appointment.client"
+                            compact
+                            closable
+                            @saved="depositSaved"
+                            @cancel="depositOpen = false"
+                        />
+                    </div>
+                </div>
+
+                <div class="act-group" role="group" aria-labelledby="act-chart">
+                    <div id="act-chart" class="act-label">{{ t('appointments.detail.groups.chart') }}</div>
+                    <div class="flex flex-wrap gap-2">
+                        <button
+                            type="button"
+                            class="btn btn-sm"
+                            :aria-expanded="chartState !== 'idle'"
+                            @click="toggleChart"
+                            v-tip="
+                                chartState === 'idle'
+                                    ? t('tips.appointments.detail.showChart')
+                                    : t('tips.appointments.detail.hideChart')
+                            "
+                        >
+                            <AppIcon :name="chartState === 'idle' ? 'chart' : 'hide'" />
+                            {{
+                                chartState === 'idle'
+                                    ? t('appointments.detail.showChart')
+                                    : t('appointments.detail.hideChart')
+                            }}
+                        </button>
+                        <RouterLink
+                            v-if="appointment.client.chart_ready"
+                            :to="transitsRoute(appointment.client.id, appointment.starts_at, zone)"
+                            class="btn btn-sm"
+                            v-tip="t('tips.transits.forDate')"
+                            ><AppIcon name="transits" />{{ t('transits.forDate') }}</RouterLink
+                        >
+                    </div>
+                    <div v-if="chartState !== 'idle'" class="mt-3">
+                        <p v-if="chartState === 'loading'" class="text-ink-3" role="status">{{ t('chart.loading') }}</p>
+                        <div v-else-if="chartState === 'failed'" class="notice n-warn" role="alert">
+                            {{ t('chart.unavailable') }}
+                        </div>
+                        <div v-else-if="!chart" class="notice n-neutral">{{ t('appointments.detail.noChart') }}</div>
+                        <NatalChart v-else :chart="chart" :name="appointment.client.full_name" compact />
+                    </div>
+                </div>
+
+                <!-- A request is answered above; it is never "scheduled again" from here, and neither
+                     is a declined one: the client was told no, and a new booking is theirs to make. -->
+                <div
+                    v-if="appointment.status !== 'requested' && !appointment.declined_at"
+                    class="act-group"
+                    role="group"
+                    aria-labelledby="act-status"
+                >
+                    <div id="act-status" class="act-label">{{ t('appointments.detail.groups.status') }}</div>
+                    <div class="flex flex-wrap gap-2">
+                        <template v-if="appointment.status === 'scheduled'">
+                            <button
+                                type="button"
+                                class="btn btn-sm"
+                                :disabled="busy"
+                                @click="setStatus('completed')"
+                                v-tip="t('tips.appointments.detail.markHeld')"
+                            >
+                                <AppIcon name="held" />
+                                {{ t('appointments.detail.markHeld') }}
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-sm"
+                                :disabled="busy"
+                                @click="setStatus('no_show')"
+                                v-tip="t('tips.appointments.detail.markNoShow')"
+                            >
+                                <AppIcon name="noShow" />
+                                {{ t('appointments.detail.markNoShow') }}
+                            </button>
+                        </template>
+                        <template v-else>
+                            <button
+                                type="button"
+                                class="btn btn-sm"
+                                :disabled="busy"
+                                @click="setStatus('scheduled')"
+                                v-tip="t('tips.appointments.detail.reinstate')"
+                            >
+                                <AppIcon name="reinstate" />
+                                {{ t('appointments.detail.reinstate') }}
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <div v-if="appointment.status === 'scheduled'" class="act-danger">
                     <button
                         type="button"
                         class="btn btn-ghost btn-sm text-danger"
@@ -774,90 +847,64 @@ async function depositSaved() {
                         <AppIcon name="cancelAppointment" />
                         {{ t('appointments.detail.cancel') }}
                     </button>
-                </template>
-                <button
-                    v-else
-                    type="button"
-                    class="btn btn-ghost btn-sm"
-                    :disabled="busy"
-                    @click="setStatus('scheduled')"
-                    v-tip="t('tips.appointments.detail.reinstate')"
-                >
-                    <AppIcon name="reinstate" />
-                    {{ t('appointments.detail.reinstate') }}
-                </button>
+                    <form v-if="cancelling" class="mt-3" novalidate @submit.prevent="cancel">
+                        <div class="field">
+                            <label class="label" for="cancel-reason">{{ t('appointments.detail.cancelReason') }}</label>
+                            <textarea
+                                id="cancel-reason"
+                                ref="reasonInput"
+                                v-model="reason"
+                                class="input min-h-16"
+                                rows="2"
+                                maxlength="500"
+                                :aria-invalid="reasonError ? 'true' : undefined"
+                                :aria-describedby="reasonError ? 'cancel-reason-error' : 'cancel-reason-hint'"
+                            />
+                            <div v-if="reasonError" id="cancel-reason-error" class="error" role="alert">
+                                {{ reasonError }}
+                            </div>
+                            <div v-else id="cancel-reason-hint" class="hint">
+                                {{ t('appointments.detail.cancelHint') }}
+                            </div>
+                        </div>
+                        <!-- The client uses the portal and the time is still ahead: they can hear of it (never of the reason). -->
+                        <label v-if="offersCancelEmail(appointment)" class="mb-3 flex items-start gap-2 text-sm">
+                            <input
+                                v-model="notifyClient"
+                                type="checkbox"
+                                class="mt-1"
+                                aria-describedby="cancel-notify-hint"
+                            />
+                            <span>
+                                <span class="block">{{ t('appointments.detail.notifyCancel') }}</span>
+                                <span id="cancel-notify-hint" class="block text-xs text-ink-3">{{
+                                    t('appointments.detail.notifyCancelHint')
+                                }}</span>
+                            </span>
+                        </label>
+                        <div class="form-actions">
+                            <button
+                                type="button"
+                                class="btn btn-ghost btn-sm form-cancel"
+                                @click="cancelling = false"
+                                v-tip="t('tips.appointments.detail.keep')"
+                            >
+                                <AppIcon name="undo" />
+                                {{ t('appointments.detail.keep') }}
+                            </button>
+                            <button
+                                type="submit"
+                                class="btn btn-danger btn-sm"
+                                :disabled="busy"
+                                v-tip="t('tips.appointments.detail.confirmCancel')"
+                            >
+                                <AppIcon name="cancelAppointment" />
+                                {{ t('appointments.detail.confirmCancel') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-
-            <form v-if="cancelling" novalidate @submit.prevent="cancel">
-                <div class="field">
-                    <label class="label" for="cancel-reason">{{ t('appointments.detail.cancelReason') }}</label>
-                    <textarea
-                        id="cancel-reason"
-                        ref="reasonInput"
-                        v-model="reason"
-                        class="input min-h-16"
-                        rows="2"
-                        maxlength="500"
-                        :aria-invalid="reasonError ? 'true' : undefined"
-                        :aria-describedby="reasonError ? 'cancel-reason-error' : 'cancel-reason-hint'"
-                    />
-                    <div v-if="reasonError" id="cancel-reason-error" class="error" role="alert">
-                        {{ reasonError }}
-                    </div>
-                    <div v-else id="cancel-reason-hint" class="hint">{{ t('appointments.detail.cancelHint') }}</div>
-                </div>
-                <!-- The client uses the portal and the time is still ahead: they can hear of it (never of the reason). -->
-                <label v-if="offersCancelEmail(appointment)" class="mb-3 flex items-start gap-2 text-sm">
-                    <input v-model="notifyClient" type="checkbox" class="mt-1" aria-describedby="cancel-notify-hint" />
-                    <span>
-                        <span class="block">{{ t('appointments.detail.notifyCancel') }}</span>
-                        <span id="cancel-notify-hint" class="block text-xs text-ink-3">{{
-                            t('appointments.detail.notifyCancelHint')
-                        }}</span>
-                    </span>
-                </label>
-                <div class="form-actions">
-                    <button
-                        type="button"
-                        class="btn btn-ghost btn-sm form-cancel"
-                        @click="cancelling = false"
-                        v-tip="t('tips.appointments.detail.keep')"
-                    >
-                        <AppIcon name="undo" />
-                        {{ t('appointments.detail.keep') }}
-                    </button>
-                    <button
-                        type="submit"
-                        class="btn btn-danger btn-sm"
-                        :disabled="busy"
-                        v-tip="t('tips.appointments.detail.confirmCancel')"
-                    >
-                        <AppIcon name="cancelAppointment" />
-                        {{ t('appointments.detail.confirmCancel') }}
-                    </button>
-                </div>
-            </form>
-
-            <div v-if="depositOpen" class="border-t border-line-soft pt-3">
-                <h3 class="mb-2 text-sm font-semibold">{{ t('payments.form.depositTitle') }}</h3>
-                <PaymentForm
-                    :appointment="{ id: appointment.id, starts_at: appointment.starts_at }"
-                    :client="appointment.client"
-                    compact
-                    closable
-                    @saved="depositSaved"
-                    @cancel="depositOpen = false"
-                />
-            </div>
-
-            <template v-if="chartState !== 'idle'">
-                <p v-if="chartState === 'loading'" class="text-ink-3" role="status">{{ t('chart.loading') }}</p>
-                <div v-else-if="chartState === 'failed'" class="notice n-warn" role="alert">
-                    {{ t('chart.unavailable') }}
-                </div>
-                <div v-else-if="!chart" class="notice n-neutral">{{ t('appointments.detail.noChart') }}</div>
-                <NatalChart v-else :chart="chart" :name="appointment.client.full_name" compact />
-            </template>
         </div>
 
         <p v-else-if="failed" class="card-body text-ink-3">{{ t('notFound.title') }}</p>

@@ -1225,6 +1225,12 @@
             "declineHintNoPortal": "The client cannot use the portal at the moment, so no email goes out; the message stays in the history. The time becomes free again.",
             "confirmDecline": "Decline request",
             "keepRequest": "Keep the request",
+            "groups": {
+                "consultation": "Consultation",
+                "appointment": "Appointment",
+                "chart": "Client's chart",
+                "status": "Status"
+            },
             "moveRequestedTitle": "The client asks to move it",
             "moveRequested": "to {when}. It stays at its time until you answer; the new time is held for the client meanwhile.",
             "confirmMove": "Confirm move",

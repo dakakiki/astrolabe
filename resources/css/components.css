@@ -941,6 +941,29 @@
         min-width: 0;
     }
 
+    /* An appointment's actions beside the calendar: a small title per group (what the buttons act
+       on), the buttons under it; cancelling set apart below a rule, last. */
+    .act-groups {
+        display: grid;
+        gap: 14px;
+        padding-top: 14px;
+        border-top: 1px solid var(--line-soft);
+    }
+
+    .act-label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink-3);
+        margin-bottom: 6px;
+    }
+
+    .act-danger {
+        padding-top: 14px;
+        border-top: 1px solid var(--line-soft);
+    }
+
     /* "Manage client" (end of the profile's right column): each action with a line on what it
        does; the permanent one set apart below a rule. */
     .manage-actions {
