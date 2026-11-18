@@ -359,6 +359,8 @@ Isti dan, strana konsultacije (korisnik: desna kolona predugačka, „elementi k
 
 Isti dan, odmah zatim (korisnik: beleške, fajlovi i follow-up su i dalje nisko; predložio tabove kao na profilu klijenta; karta desno — preporuka prihvaćena): strana konsultacije ima tabove preko cele širine **Details · Notes · Files & links · Follow-ups · Billing** (`?tab=`), sadržaj izabranog taba levo, a desno samo priložena karta. Details je cela forma sa „Save changes“ u zaglavlju; nesačuvane izmene pale tačkicu na tabu Details; Billing pokazuje stanje naplate; pre prvog čuvanja otvara se samo Details. Prethodni `?panel=` linkovi i dalje rade. Na priloženoj karti aspekti i kuspide su harmonika koja klizi; znak i naziv aspekta se ne lome. Iznad naslova konsultacije putanja **Clients › klijent › Consultations** (poslednji deo otvara tab Consultations tog klijenta), da se sa konsultacije jednim klikom vrati na listu konsultacija klijenta. Bez izmene specifikacije.
 
+Isti dan, korisnik: „delete button mora da se skloni … svako brisanje mora da bude označeno crvenom“. „Delete consultation“ je iz zaglavlja premešten na dno taba Details, crven, sa redom objašnjenja; sva dugmad koja brišu ili uklanjaju sačuvane podatke su crvena — okvir za zapis koji se gleda (konsultacija, povezana osoba, usluga, klijent, praksa), crven tekst za stavku u listi (beleška, zadatak, fajl, uplata, izuzetak u rasporedu, „Remove snapshot“, uklanjanje povezane osobe). Bez izmene specifikacije.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

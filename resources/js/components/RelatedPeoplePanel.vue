@@ -299,7 +299,7 @@ const birthLine = (birth) =>
                                 </button>
                                 <button
                                     type="button"
-                                    class="btn btn-sm btn-ghost"
+                                    class="btn btn-sm btn-ghost text-danger"
                                     @click="remove(link)"
                                     v-tip="t('tips.related.remove')"
                                 >

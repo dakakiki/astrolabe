@@ -359,7 +359,7 @@ async function remove() {
                     <button
                         v-else
                         type="button"
-                        class="btn btn-ghost"
+                        class="btn btn-danger"
                         @click="remove"
                         v-tip="t('tips.services.form.delete')"
                     >

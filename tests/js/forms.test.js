@@ -24,6 +24,20 @@ const CANCEL = new RegExp(`\\bt\\('(${WALK_AWAY.join('|').replace(/\./g, '\\.')}
 const ALONE = ['resources/js/components/SynastryPanel.vue'];
 
 describe('form buttons', () => {
+    it('shows every button that deletes or removes data in red', () => {
+        const deleting = files.flatMap(({ name, source }) =>
+            elements(source)
+                .filter((button) => /<AppIcon\s[^>]*name="(delete|unlink)"/.test(button.inner))
+                .map((button) => ({
+                    at: `${name}:${button.line}`,
+                    red: /\b(btn-danger|text-danger)\b/.test(button.open),
+                })),
+        );
+
+        expect(deleting.length).toBeGreaterThanOrEqual(18);
+        expect(deleting.filter((button) => !button.red).map((button) => button.at)).toEqual([]);
+    });
+
     it('marks every cancel button as the one that goes far left', () => {
         const found = files.flatMap(({ source }) => elements(source).filter((button) => CANCEL.test(button.inner)));
         expect(found.length).toBeGreaterThanOrEqual(19);

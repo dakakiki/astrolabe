@@ -150,7 +150,7 @@ async function remove() {
                     v-tip="t('tips.related.person.edit')"
                     ><AppIcon name="edit" />{{ t('related.person.edit') }}</RouterLink
                 >
-                <button type="button" class="btn btn-ghost" @click="remove" v-tip="t('tips.related.person.delete')">
+                <button type="button" class="btn btn-danger" @click="remove" v-tip="t('tips.related.person.delete')">
                     <AppIcon name="delete" />{{ t('related.person.delete') }}
                 </button>
                 <button

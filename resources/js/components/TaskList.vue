@@ -117,7 +117,7 @@ function followUpLabel(consultation) {
                 </button>
                 <button
                     type="button"
-                    class="btn btn-ghost btn-sm"
+                    class="btn btn-ghost btn-sm text-danger"
                     @click="emit('remove', task)"
                     v-tip="t('tips.common.delete')"
                 >

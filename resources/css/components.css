@@ -534,6 +534,12 @@
         border-color: var(--danger);
     }
 
+    /* Every button that deletes is red (user, 18 Nov 2026): btn-danger for the record on screen,
+       a quiet button with text-danger for a row in a list — red on hover too. */
+    .btn-ghost.text-danger:hover {
+        background: var(--danger-bg);
+    }
+
     /* The buttons that end a form or a confirmation: the one that walks away (Cancel, Keep …)
        on the far left, everything else on the right. It comes first in the markup too, so Tab
        follows the eye; where the row has no room to spare it still keeps a clear gap. */

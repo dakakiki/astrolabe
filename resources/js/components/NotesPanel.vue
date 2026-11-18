@@ -151,7 +151,7 @@ const consultationLabel = (consultation) =>
                             </button>
                             <button
                                 type="button"
-                                class="btn btn-ghost btn-sm"
+                                class="btn btn-ghost btn-sm text-danger"
                                 @click="remove(note)"
                                 v-tip="t('tips.common.delete')"
                             >

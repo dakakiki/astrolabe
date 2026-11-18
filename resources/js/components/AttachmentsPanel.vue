@@ -273,7 +273,7 @@ const glyph = { image: '▣', pdf: '▤', document: '▤', audio: '♫', video: 
                         <button
                             v-if="item.can_edit"
                             type="button"
-                            class="btn btn-ghost btn-sm"
+                            class="btn btn-ghost btn-sm text-danger"
                             @click="remove(item)"
                             v-tip="t('tips.files.remove')"
                         >
@@ -373,7 +373,7 @@ const glyph = { image: '▣', pdf: '▤', document: '▤', audio: '♫', video: 
                             <button
                                 v-if="item.can_edit"
                                 type="button"
-                                class="btn btn-ghost btn-sm"
+                                class="btn btn-ghost btn-sm text-danger"
                                 @click="remove(item)"
                                 v-tip="t('tips.files.remove')"
                             >

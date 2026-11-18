@@ -440,16 +440,6 @@ const otherZone = computed(() => {
             </div>
             <div class="ml-auto flex gap-2">
                 <button
-                    v-if="id"
-                    type="button"
-                    class="btn btn-ghost"
-                    @click="remove"
-                    v-tip="t('tips.consultations.form.delete')"
-                >
-                    <AppIcon name="delete" />
-                    {{ t('consultations.form.delete') }}
-                </button>
-                <button
                     type="button"
                     class="btn btn-primary"
                     :disabled="form.processing.value"
@@ -743,6 +733,24 @@ const otherZone = computed(() => {
                     </div>
                 </form>
 
+                <!-- Deleting is out of the header: at the end of Details, red, with what it does. -->
+                <section v-if="id" v-show="tab === 'details'" class="card mt-4">
+                    <div class="card-body manage-actions">
+                        <div>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-danger"
+                                @click="remove"
+                                v-tip="t('tips.consultations.form.delete')"
+                            >
+                                <AppIcon name="delete" />
+                                {{ t('consultations.form.delete') }}
+                            </button>
+                            <p>{{ t('consultations.form.deleteHint') }}</p>
+                        </div>
+                    </div>
+                </section>
+
                 <template v-if="id">
                     <NotesPanel
                         v-show="tab === 'notes'"
@@ -796,7 +804,7 @@ const otherZone = computed(() => {
                                 </button>
                                 <button
                                     type="button"
-                                    class="btn btn-ghost btn-sm"
+                                    class="btn btn-ghost btn-sm text-danger"
                                     :disabled="chartBusy"
                                     @click="detachChart"
                                     v-tip="t('tips.consultations.chart.detach')"

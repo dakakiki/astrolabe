@@ -33,6 +33,12 @@ before starting a phase. The user communicates in Serbian.
   `form-cancel` and lands far left; everything else goes right, the main action last. A cancel
   `<button>` is `type="button"`. "Cancel appointment" / "Cancel the deletion" are actions, not
   this. `tests/js/forms.test.js` checks the known walk-away labels.
+- Every button that deletes or removes stored data is red: `btn-danger` for the record on screen
+  (a consultation, a related person, a service, a client), `btn-ghost … text-danger` for a row in
+  a list (a note, a task, a file, a payment). Deleting the record on screen is not in the page
+  header: it sits at the end of the page (client: "Manage client" card; consultation: under the
+  Details form) with one line on what it removes. `forms.test.js` checks the icons `delete` and
+  `unlink`.
 - A section that folds away is `<AppAccordion>` (`#title` slot + content): a `<details
   class="accordion">` with the arrow on the right and the brand tint when open; it slides open
   and shut with a Web Animation of the content's height (CSS `::details-content` did not slide

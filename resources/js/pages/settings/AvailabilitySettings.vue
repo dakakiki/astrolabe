@@ -405,7 +405,7 @@ async function removeException(item) {
                     </div>
                     <button
                         type="button"
-                        class="btn btn-ghost btn-sm"
+                        class="btn btn-ghost btn-sm text-danger"
                         :disabled="removing === item.id"
                         :aria-label="
                             t('settings.availability.exceptions.removeLabel', {
