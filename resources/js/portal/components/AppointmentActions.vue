@@ -92,10 +92,10 @@ async function cancel() {
 </script>
 
 <template>
-    <p v-if="options.contact" class="mt-2 text-xs text-ink-3">{{ t('portal.appointments.contact') }}</p>
+    <p v-if="options.contact" class="mt-2 text-right text-xs text-ink-3">{{ t('portal.appointments.contact') }}</p>
 
     <div v-else>
-        <div v-if="!confirming" class="mt-3 flex flex-wrap gap-2">
+        <div v-if="!confirming" class="mt-3 flex flex-wrap justify-end gap-2">
             <RouterLink
                 v-if="options.reschedule"
                 :to="{ name: 'reschedule', params: { id: appointment.id }, state }"
@@ -156,7 +156,7 @@ async function cancel() {
             </div>
         </form>
 
-        <p v-for="line in deadlines" :key="line.key" class="mt-2 text-xs text-ink-3">
+        <p v-for="line in deadlines" :key="line.key" class="mt-2 text-right text-xs text-ink-3">
             {{ t(`portal.appointments.until.${line.key}`, { when: until(line.at) }) }}
         </p>
     </div>
