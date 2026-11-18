@@ -194,7 +194,7 @@
             "changeService": "Change service",
             "changeZone": "Change time zone",
             "days": "Days with free times",
-            "dayCount": "{count} time | {count} times",
+            "dayCount": "{count} free slot | {count} free slots",
             "noTimes": "No free times in the next {count} day. | No free times in the next {count} days.",
             "noTimesHint": "Please look again later, or contact the practice.",
             "retry": "Try again",
