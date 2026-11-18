@@ -115,6 +115,18 @@ const routes = [
         meta: { verified: true },
     },
     {
+        path: '/services/new',
+        name: 'services.create',
+        component: () => import('@/pages/services/ServiceFormPage.vue'),
+        meta: { verified: true },
+    },
+    {
+        path: '/services/:id(\\d+)/edit',
+        name: 'services.edit',
+        component: () => import('@/pages/services/ServiceFormPage.vue'),
+        meta: { verified: true },
+    },
+    {
         path: '/calendar',
         name: 'calendar',
         component: () => import('@/pages/calendar/CalendarPage.vue'),

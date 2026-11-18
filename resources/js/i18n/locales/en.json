@@ -1092,6 +1092,7 @@
             "save": "Save service",
             "cancel": "Cancel",
             "delete": "Delete service",
+            "deleteHint": "Deletes the service. One used on consultations or appointments can only be deactivated.",
             "inUse": "Used on consultations, so it cannot be deleted — deactivate it instead."
         }
     },

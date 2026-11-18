@@ -361,6 +361,8 @@ Isti dan, odmah zatim (korisnik: beleške, fajlovi i follow-up su i dalje nisko;
 
 Isti dan, korisnik: „delete button mora da se skloni … svako brisanje mora da bude označeno crvenom“. „Delete consultation“ je iz zaglavlja premešten desno, ispod karte, crven, sa redom objašnjenja, a „Save changes“ je samo ispod forme (korisnik, odmah posle); sva dugmad koja brišu ili uklanjaju sačuvane podatke su crvena — okvir za zapis koji se gleda (konsultacija, povezana osoba, usluga, klijent, praksa), crven tekst za stavku u listi (beleška, zadatak, fajl, uplata, izuzetak u rasporedu, „Remove snapshot“, uklanjanje povezane osobe). Bez izmene specifikacije.
 
+Isti dan, usluge (korisnik: „Add i edit moraju da imaju svoje stranice … ako je na laptopu i klikne edit dole na listi neće videti šta se iznad dogodilo“): dodavanje i izmena usluge su na svojim stranicama (`/services/new`, `/services/{id}/edit`); lista je samo lista, a klik na red ili „Edit“ otvara stranicu usluge; posle čuvanja ili brisanja povratak na listu; brisanje je posebna kartica ispod forme (crveno, sa objašnjenjem), a za uslugu u upotrebi umesto njega stoji napomena. Povezana osoba: „Edit profile“, „Make a client“ i „Delete person“ u kartici „Manage person“ na kraju desne kolone. Bez izmene specifikacije.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.
