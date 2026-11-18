@@ -1099,9 +1099,9 @@
         text-align: center;
     }
 
-    /* Accordion (<details class="accordion">): a framed row with the arrow on the right. Closed
-       it is quiet; open it takes the brand tint, the arrow turns and the content shows below.
-       Native <details>, so the keyboard and screen readers work without script. */
+    /* Accordion (components/AppAccordion.vue, a <details class="accordion">): a framed row with
+       the arrow on the right. Closed it is quiet; open it takes the brand tint, the arrow turns
+       and the content slides down. While it slides shut (data-closing) it already looks closed. */
     .accordion {
         border: 1px solid var(--line);
         border-radius: var(--r);
@@ -1143,24 +1143,27 @@
         transition: transform 0.15s ease;
     }
 
-    .accordion[open] {
+    .accordion[open]:not([data-closing]) {
         border-color: var(--brand-300);
     }
 
-    .accordion[open] > summary {
+    .accordion[open]:not([data-closing]) > summary {
         background: var(--brand-050);
         color: var(--link);
         font-weight: 600;
-        border-bottom: 1px solid var(--line-soft);
     }
 
-    .accordion[open] > summary .chevron {
+    .accordion[open]:not([data-closing]) > summary .chevron {
         color: var(--link);
         transform: rotate(180deg);
     }
 
-    .accordion-body {
+    /* The sliding part has no padding of its own, so it can shrink to nothing. A table wider
+       than a phone scrolls inside rather than breaking its rows. */
+    .accordion-inner {
         padding: 4px 6px 6px;
+        border-top: 1px solid var(--line-soft);
+        overflow-x: auto;
     }
 
     @media (prefers-reduced-motion: reduce) {

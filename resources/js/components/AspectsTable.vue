@@ -8,9 +8,13 @@ import { BODY_GLYPHS } from '@/lib/zodiac';
 /**
  * The chart's aspects from the tightest to the widest, with the orb and
  * whether each is applying or separating (docs/spec/11). The same list the
- * wheel draws as lines, readable without it.
+ * wheel draws as lines, readable without it. The aspect's glyph and name never break apart;
+ * `compact` (the consultation sidebar) packs the cells tighter.
  */
-const props = defineProps({ aspects: { type: Array, required: true } });
+const props = defineProps({
+    aspects: { type: Array, required: true },
+    compact: { type: Boolean, default: false },
+});
 
 const { t } = useI18n();
 
@@ -28,7 +32,7 @@ function pointGlyph(key) {
 <template>
     <p v-if="!rows.length" class="px-4 py-3 text-ink-3">{{ t('chart.aspects.none') }}</p>
 
-    <table v-else class="data">
+    <table v-else class="data" :class="{ dense: compact }">
         <caption class="sr-only">
             {{
                 t('chart.aspects.title')
@@ -58,14 +62,14 @@ function pointGlyph(key) {
                         }}</span>
                     </span>
                 </th>
-                <td :class="`asp-${aspect.type}`">
+                <td :class="`asp-${aspect.type}`" class="whitespace-nowrap">
                     <span class="aspect-glyph mr-1.5 text-base" aria-hidden="true">{{
                         ASPECT_GLYPHS[aspect.type]
                     }}</span>
                     {{ t(`aspectTypes.${aspect.type}`) }}
                 </td>
                 <td class="text-right font-mono whitespace-nowrap">{{ formatOrb(aspect.orb) }}</td>
-                <td class="text-xs text-ink-3">
+                <td class="text-xs whitespace-nowrap text-ink-3">
                     <template v-if="aspect.applying !== null">
                         {{ aspect.applying ? t('chart.aspects.applying') : t('chart.aspects.separating') }}
                     </template>

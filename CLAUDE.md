@@ -33,10 +33,11 @@ before starting a phase. The user communicates in Serbian.
   `form-cancel` and lands far left; everything else goes right, the main action last. A cancel
   `<button>` is `type="button"`. "Cancel appointment" / "Cancel the deletion" are actions, not
   this. `tests/js/forms.test.js` checks the known walk-away labels.
-- A section that folds away is `<details class="accordion">` with
-  `<summary><span>…</span><AppIcon name="more" class="chevron" /></summary>` and its content in
-  `.accordion-body` (arrow on the right, brand tint when open). Tabs that switch a block inside
-  a page use `.panel-tabs` (the consultation's notes / files / follow-ups).
+- A section that folds away is `<AppAccordion>` (`#title` slot + content): a `<details
+  class="accordion">` with the arrow on the right and the brand tint when open; it slides open
+  and shut with a Web Animation of the content's height (CSS `::details-content` did not slide
+  shut in Chromium), not at all with reduced motion. Tabs that switch a block inside a page use
+  `.panel-tabs` (the consultation's notes / files / follow-ups).
 
 ## Multi-tenancy
 

@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, useId, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import AppIcon from '@/components/AppIcon.vue';
+import AppAccordion from '@/components/AppAccordion.vue';
 import AspectsTable from '@/components/AspectsTable.vue';
 import ChartWheel from '@/components/ChartWheel.vue';
 import HouseCuspsTable from '@/components/HouseCuspsTable.vue';
@@ -185,24 +185,14 @@ const aspectCount = computed(() => props.chart.aspects?.length ?? 0);
             <div class="overflow-x-auto">
                 <PositionsTable :chart="chart" compact />
             </div>
-            <details v-if="chart.aspects" class="accordion">
-                <summary>
-                    <span>{{ t('chart.aspects.show', { count: aspectCount }) }}</span>
-                    <AppIcon name="more" class="chevron" />
-                </summary>
-                <div class="accordion-body overflow-x-auto">
-                    <AspectsTable :aspects="chart.aspects" />
-                </div>
-            </details>
-            <details v-if="houses" class="accordion">
-                <summary>
-                    <span>{{ t('chart.cusps.title') }} · {{ labels.houseSystem(houses.system) }}</span>
-                    <AppIcon name="more" class="chevron" />
-                </summary>
-                <div class="accordion-body">
-                    <HouseCuspsTable :cusps="houses.cusps" compact />
-                </div>
-            </details>
+            <AppAccordion v-if="chart.aspects">
+                <template #title>{{ t('chart.aspects.show', { count: aspectCount }) }}</template>
+                <AspectsTable :aspects="chart.aspects" compact />
+            </AppAccordion>
+            <AppAccordion v-if="houses">
+                <template #title>{{ t('chart.cusps.title') }} · {{ labels.houseSystem(houses.system) }}</template>
+                <HouseCuspsTable :cusps="houses.cusps" compact />
+            </AppAccordion>
         </template>
 
         <!-- Client profile: positions and cusps beside the aspects -->
