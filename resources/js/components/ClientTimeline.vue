@@ -25,6 +25,9 @@ const labels = useLabels();
 const money = useMoney();
 const auth = useAuthStore();
 
+// Ten entries at first; "Show earlier" adds the next ten below (user, 18 Nov 2026).
+const PAGE_SIZE = 10;
+
 const filter = ref('all');
 const entries = ref([]);
 const meta = ref(null);
@@ -37,7 +40,7 @@ async function load(page = 1) {
 
     try {
         const { data } = await http.get(`/clients/${props.clientId}/timeline`, {
-            params: { type: filter.value, page, per_page: 20 },
+            params: { type: filter.value, page, per_page: PAGE_SIZE },
         });
         const described = data.data.map((event) => ({ event, ...describeEvent(event) }));
         entries.value = page === 1 ? described : [...entries.value, ...described];
