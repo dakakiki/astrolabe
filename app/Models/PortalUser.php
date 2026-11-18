@@ -27,6 +27,8 @@ use Illuminate\Notifications\Notifiable;
  * @property CarbonImmutable|null $last_signed_in_at
  * @property bool $appointment_reminders a reminder a day before each appointment (Phase 9b, Profile)
  * @property PortalNotificationChannel $notification_channel email, push or both (Phase 9c, Profile)
+ * @property array<string, array<string, bool>>|null $notification_preferences email and push per
+ *                                                                             notice (18 Nov 2026; ClientNotificationPreferences)
  */
 #[Fillable(['name', 'locale', 'timezone', 'appointment_reminders', 'notification_channel'])]
 class PortalUser extends Model implements AuthenticatableContract, HasLocalePreference
@@ -47,6 +49,7 @@ class PortalUser extends Model implements AuthenticatableContract, HasLocalePref
             'last_signed_in_at' => 'immutable_datetime',
             'appointment_reminders' => 'boolean',
             'notification_channel' => PortalNotificationChannel::class,
+            'notification_preferences' => 'array',
         ];
     }
 

@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PortalPushSubscription;
 use App\Models\PortalUser;
 use App\Support\Audit\Audit;
+use App\Support\Notifications\ClientNotificationPreferences;
 use App\Support\Portal\Push\PortalPush;
 use App\Support\Portal\Push\PushMessage;
 use Illuminate\Http\JsonResponse;
@@ -93,10 +94,14 @@ class PushController extends Controller
                 ->get()
                 ->each->delete();
 
-            // The first device switched on: push joins email unless the person chose otherwise.
-            // A further device leaves the choice as it is — "email" may then be the person's own.
-            if ($first && $user->notification_channel === PortalNotificationChannel::Email) {
-                $user->forceFill(['notification_channel' => PortalNotificationChannel::Both])->save();
+            // The first device switched on: push joins email for the notices that come by email,
+            // unless the person already chose push for some. A further device leaves the choice as it is.
+            if ($first && ! ClientNotificationPreferences::of($user)->anyPush()) {
+                if ($user->notification_preferences === null) {
+                    $user->forceFill(['notification_channel' => PortalNotificationChannel::Both])->save();
+                } else {
+                    $user->forceFill(['notification_preferences' => ClientNotificationPreferences::of($user)->withPushBesideEmail()->toArray()])->save();
+                }
             }
 
             return $existing === null;

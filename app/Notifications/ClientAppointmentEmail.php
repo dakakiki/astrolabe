@@ -57,14 +57,14 @@ abstract class ClientAppointmentEmail extends Notification implements ShouldQueu
     }
 
     /**
-     * Email, web push or both — the client's choice in Portal → Profile (Phase 9c),
-     * email whenever no device has push on (ClientChannels).
+     * Email, web push, both or none — the client's choice for this notice in Portal →
+     * Profile (since 18 Nov 2026 per notice), email whenever no device has push on (ClientChannels).
      *
      * @return array<int, string>
      */
     public function via(object $notifiable): array
     {
-        $channels = $notifiable instanceof PortalUser ? ClientChannels::for($notifiable) : ['mail'];
+        $channels = $notifiable instanceof PortalUser ? ClientChannels::for($notifiable, $this->preference()) : ['mail'];
         $this->mailQueued = in_array('mail', $channels, true);
 
         return $channels;
@@ -93,6 +93,15 @@ abstract class ClientAppointmentEmail extends Notification implements ShouldQueu
      * @return array{0: string, 1: string}
      */
     abstract protected function push(string $zone): array;
+
+    /**
+     * Its row in Portal → Profile → Notifications (ClientNotificationPreferences::KINDS):
+     * the same name as its push.
+     */
+    public function preference(): string
+    {
+        return $this->push($this->appointment->practiceZone)[0];
+    }
 
     /**
      * "Today at 3:00 PM", "Tomorrow at 3:00 PM" or "Mon, Oct 5, 2026 at 3:00 PM", on

@@ -10,6 +10,7 @@ use App\Models\Country;
 use App\Models\PortalUser;
 use App\Support\Activity\ActivityLog;
 use App\Support\Audit\Audit;
+use App\Support\Notifications\ClientNotificationPreferences;
 use App\Support\Portal\PortalContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,8 +24,10 @@ use Illuminate\Validation\Rule;
  * the astrologer has it — the change shows on the client's timeline as the
  * client's own. The email address is the practice's to change.
  *
- * The account's reminder a day before each appointment (Phase 9b,
- * `appointment_reminders`) is switched on and off here, for every practice.
+ * Which notices come, and how (since 18 Nov 2026, `notifications`: `{kind: {mail,
+ * push}}`, ClientNotificationPreferences), for every practice. The fields of before
+ * are still taken: `notification_channel` sets every notice, `appointment_reminders`
+ * the reminder.
  */
 class ProfileController extends Controller
 {
@@ -42,11 +45,16 @@ class ProfileController extends Controller
             'phone' => ['nullable', 'string', 'max:50'],
             'appointment_reminders' => ['sometimes', 'boolean'],
             'notification_channel' => ['sometimes', Rule::enum(PortalNotificationChannel::class)],
+            'notifications' => ['sometimes', 'array:'.implode(',', ClientNotificationPreferences::KINDS)],
+            'notifications.*' => ['array:'.implode(',', ClientNotificationPreferences::CHANNELS)],
+            'notifications.*.*' => ['required', 'boolean'],
         ]);
 
         /** @var PortalUser $user */
         $user = Auth::guard('portal')->user();
-        $user->fill(collect($data)->only(['name', 'timezone', 'locale', 'appointment_reminders', 'notification_channel'])->all())->save();
+        $user->fill(collect($data)->only(['name', 'timezone', 'locale', 'appointment_reminders', 'notification_channel'])->all());
+        $user->notification_preferences = $this->notices($user, $data);
+        $user->save();
         $fields = array_keys($user->getChanges());
 
         $client = $context->client();
@@ -67,6 +75,40 @@ class ProfileController extends Controller
     }
 
     /**
+     * The notices as they are to be stored: an old-style channel for all of them starts
+     * them over from it, the old reminder switch sets the reminder, and the notices sent
+     * are laid over that.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, array<string, bool>>|null
+     */
+    private function notices(PortalUser $user, array $data): ?array
+    {
+        $stored = $user->getOriginal('notification_preferences');
+
+        if (array_key_exists('notification_channel', $data)) {
+            $stored = null;
+        }
+
+        if ($stored === null && ! array_key_exists('notifications', $data)) {
+            return null;
+        }
+
+        $preferences = ClientNotificationPreferences::of($user->forceFill(['notification_preferences' => $stored]));
+
+        if (array_key_exists('appointment_reminders', $data) && is_array($stored)) {
+            $choice = $user->notification_channel ?? PortalNotificationChannel::Email;
+            $on = (bool) $data['appointment_reminders'];
+            $preferences = $preferences->with(['reminder' => [
+                ClientNotificationPreferences::MAIL => $on && $choice->wantsEmail(),
+                ClientNotificationPreferences::PUSH => $on && $choice->wantsPush(),
+            ]]);
+        }
+
+        return $preferences->with($data['notifications'] ?? [])->toArray();
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function profile(PortalContext $context): array
@@ -80,9 +122,11 @@ class ProfileController extends Controller
             'name' => $user->name,
             'timezone' => $user->timezone,
             'locale' => $user->locale,
-            'appointment_reminders' => (bool) $user->appointment_reminders,
-            // Email, push or both (Phase 9c); devices are in GET /push.
+            'appointment_reminders' => ClientNotificationPreferences::of($user)->wantsAny('reminder'),
+            // Email, push or both (Phase 9c), what the account chose before choosing per notice.
             'notification_channel' => ($user->notification_channel ?? PortalNotificationChannel::Email)->value,
+            // Email and push per notice (18 Nov 2026); devices are in GET /push.
+            'notifications' => ClientNotificationPreferences::of($user)->toArray(),
             'phone' => $client->phone,
             'country_code' => $client->country_code,
             'practice_timezone' => $context->workspace()->timezone,

@@ -327,6 +327,19 @@
         .notif-matrix .ch {
             width: 64px;
         }
+
+        /* On a phone the channel's name goes under its icon, smaller, so the notices keep the width. */
+        .notif-matrix thead .ch {
+            font-size: 9.5px;
+            letter-spacing: 0.02em;
+            white-space: normal;
+            padding-inline: 2px;
+        }
+
+        .notif-matrix thead .ch svg {
+            display: block;
+            margin: 0 auto 3px;
+        }
     }
 
     /* The bell (notifications in the app): a count on the button, a panel under it. */

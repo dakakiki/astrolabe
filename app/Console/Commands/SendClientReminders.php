@@ -9,6 +9,7 @@ use App\Models\Scopes\WorkspaceScope;
 use App\Models\Service;
 use App\Notifications\ClientAppointmentReminder;
 use App\Support\Notifications\ClientAppointmentFacts;
+use App\Support\Notifications\ClientNotificationPreferences;
 use App\Support\Notifications\ClientRecipient;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
@@ -60,7 +61,8 @@ class SendClientReminders extends Command
 
                     $access = $recipients->get(ClientRecipient::key((int) $appointment->workspace_id, (int) $appointment->client_id));
 
-                    if ($claimed !== 1 || $access?->portalUser === null || ! $access->portalUser->appointment_reminders) {
+                    if ($claimed !== 1 || $access?->portalUser === null
+                        || ! ClientNotificationPreferences::of($access->portalUser)->wantsAny('reminder')) {
                         continue;
                     }
 

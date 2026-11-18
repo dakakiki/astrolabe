@@ -160,6 +160,10 @@ before starting a phase. The user communicates in Serbian.
   `toInApp()` (an `InAppMessage`: ids, UTC times, counts — never names or messages). A new one gets a
   row in `lib/inAppNotifications.js`, words under `settings.notifications.kinds` and `bell.*`. Account
   and security email (verify, reset, invitations, `AccountNotice`) always goes and is not a kind.
+- A client's notice about an appointment is a kind in `ClientNotificationPreferences::KINDS` (the name
+  of its push, `ClientAppointmentEmail::preference()`), with `mail` and `push`; `via()` goes through
+  `ClientChannels::for($user, $kind)`. Push wanted without a live device comes by email; a notice off on
+  both comes not at all. The invitation and the sign-in codes always go by email.
 - Client email goes only to the portal account of a usable link (`ClientRecipient::access()` —
   `PortalAccess::usable()`), checked again in `shouldSend()`; a client without the portal gets nothing.
   It names the practice (`Workspace::portalName()`), shows times in the client's zone

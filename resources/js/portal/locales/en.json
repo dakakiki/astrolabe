@@ -293,6 +293,43 @@
             },
             "channelHint": "If none of your devices can receive notifications, notices come by email.",
             "byEmail": "Notices about your appointments come by email to {email}.",
+            "choose": "Choose how each notice about your appointments reaches you: by email to {email}, as a notification on your devices, both — or untick both to turn it off.",
+            "pushWithoutDevice": "Notifications reach the devices where you turned them on above. Until one has them on, notices you want as notifications come by email.",
+            "columns": {
+                "notice": "Notice",
+                "mail": "Email",
+                "push": "Notification"
+            },
+            "groups": {
+                "yours": "What you did",
+                "practice": "From the practice",
+                "reminders": "Reminders",
+                "always": "Always by email"
+            },
+            "kinds": {
+                "booked": "You booked an appointment",
+                "requested": "You sent a booking request",
+                "moved_by_you": "You moved an appointment",
+                "move_requested": "You asked to move an appointment",
+                "cancelled_by_you": "You cancelled an appointment",
+                "confirmed": "The practice confirmed your request",
+                "declined": "The practice could not accept your request",
+                "move_confirmed": "The practice confirmed the new time",
+                "move_declined": "The practice kept the old time",
+                "moved": "The practice moved your appointment",
+                "cancelled": "The practice cancelled your appointment",
+                "reminder": "A reminder a day before each appointment"
+            },
+            "always": {
+                "invitation": "Invitation to the portal",
+                "signIn": "Sign-in codes and links"
+            },
+            "alwaysHint": "They let you into your portal, so they cannot be turned off.",
+            "alwaysBadge": "Always",
+            "alwaysTitle": "Always sent by email",
+            "notAvailable": "Not available for this notice",
+            "checkbox": "{channel}: {notice}",
+            "offHint": "A notice you turn off still shows in your portal, under Appointments.",
             "saved": "Notification settings saved",
             "states": {
                 "insecure": "Notifications need a secure (https) connection to the portal.",

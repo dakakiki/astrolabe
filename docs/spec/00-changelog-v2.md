@@ -391,7 +391,10 @@ Korisnik: „svako i praksa i klijent moraju da imaju opciju otkazivanja notifik
 - 05: `users.notification_preferences.channels`; nova tabela `app_notifications`.
 - 09: odluka o kanalima i obaveznim obaveštenjima.
 
-Klijent (izbor po obaveštenju u portalu) je sledeći korak.
+Odmah zatim, klijent (korisnik: „može, kreni tako“ — i potvrde sopstvenih koraka mogu da se isključe): Portal → Profile → Notifications ima isti oblik — Email i Notification (push) po obaveštenju, u grupama *What you did*, *From the practice*, *Reminders*, i zaključano *Always by email* (poziv, kodovi za prijavu). Push bez uređaja i dalje stiže mejlom.
+
+- 02, 12: Portal → Profile → Notifications po obaveštenju.
+- 05: `portal_users.notification_preferences`.
 
 ## Nedostaje dokument 08
 

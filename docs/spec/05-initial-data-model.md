@@ -655,6 +655,7 @@ Jedan pregledač u kome je klijent posle prijave uključio obaveštenja (Portal 
 ### Izmene postojećih tabela (9c)
 
 - `portal_users`: `notification_channel` (string, podrazumevano `email`) — `email`, `push` ili `both`; push bez živog uređaja ide mejlom. Prvi uređaj sa uključenim obaveštenjima menja `email` u `both`.
+- `portal_users.notification_preferences` (JSON, nullable; 18. 11. 2026) — `{vrsta: {mail: bool, push: bool}}` za `booked`, `requested`, `moved_by_you`, `move_requested`, `cancelled_by_you`, `confirmed`, `declined`, `move_confirmed`, `move_declined`, `moved`, `cancelled`, `reminder`; vrsta koje nema sledi `notification_channel` i (za podsetnik) `appointment_reminders`. Slanje `notification_channel` kroz API vraća sve na taj kanal; prvi uređaj, ako nijedno obaveštenje nije bilo push, dodaje push uz mejl.
 - `audit_logs`: `portal_push_enabled`, `portal_push_disabled` (izvršilac `portal_user_id`, bez adrese pretplate).
 
 ## Obavezna pravila

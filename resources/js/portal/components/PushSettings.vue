@@ -3,9 +3,9 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import AppIcon from '@/components/AppIcon.vue';
-import ToggleRow from '@/components/ToggleRow.vue';
 import InstallGuide from '@/portal/components/InstallGuide.vue';
 import http from '@/portal/http';
+import { CLIENT_ALWAYS_BY_EMAIL, CLIENT_CHANNELS, CLIENT_NOTICE_GROUPS, noticesForm } from '@/portal/lib/notices';
 import { deviceLabel, madeWithOtherKey, pushDevices, pushProblem, sha256Hex, supportNotice } from '@/portal/lib/pwa';
 import { loadScreen } from '@/portal/load';
 import { currentSubscription, pushSupportHere, sendTest, subscribe, unsubscribe } from '@/portal/pwa/push';
@@ -15,9 +15,10 @@ import { useToastStore } from '@/stores/toast';
 /**
  * Profile → Notifications (Phase 9c, docs/spec/12, "Web push"): web push on
  * or off for this device, a test notification, the other devices that have it
- * on, how notices reach the client (email, notifications or both — offered once
- * a device has push on; without one they come by email), and the reminder a
- * day before each appointment. Every choice is saved at once.
+ * on, and — since 18 Nov 2026 — every notice about an appointment with email
+ * and push to tick or untick (neither turns it off; push without a device
+ * comes by email). The invitation and the sign-in codes are listed as always
+ * by email. Every choice is saved at once.
  *
  * This device is recognised by its endpoint's SHA-256 among the account's
  * devices; a subscription the portal does not know (left from an earlier
@@ -34,24 +35,21 @@ const { t, locale } = useI18n();
 const pwa = usePwaStore();
 const toast = useToastStore();
 
-const CHANNELS = ['email', 'push', 'both'];
-
 const push = ref(null);
 const loaded = ref(false);
 const support = ref(null);
 const endpoint = ref(null);
 const hash = ref(null);
-const channel = ref(props.profile.notification_channel ?? 'email');
-const reminders = ref(props.profile.appointment_reminders ?? true);
+const notices = ref(noticesForm(props.profile.notifications));
 const busy = ref(false);
-const savingChannel = ref(false);
-const savingReminders = ref(false);
+const saving = ref(null);
 
 const available = computed(() => Boolean(push.value?.available));
 const devices = computed(() => pushDevices(push.value?.devices, hash.value));
 const on = computed(() => devices.value.here && Boolean(endpoint.value));
 const supportText = computed(() => supportNotice(support.value));
-const remindersModel = computed({ get: () => reminders.value, set: saveReminders });
+// The push column only where the portal can send push at all.
+const channels = computed(() => (available.value ? CLIENT_CHANNELS : ['mail']));
 
 const othersText = computed(() => {
     const others = devices.value.others;
@@ -83,7 +81,6 @@ async function refresh() {
 
 function apply(data) {
     push.value = data;
-    channel.value = data.channel;
 }
 
 async function readThisDevice() {
@@ -149,6 +146,8 @@ async function turnOn() {
         apply(result.state);
         endpoint.value = result.endpoint;
         hash.value = await sha256Hex(result.endpoint);
+        // The first device may have added push beside email: read the choices again.
+        await refreshNotices();
         toast.success(t('portal.notifications.turnedOn'));
     } catch (error) {
         report(error);
@@ -211,41 +210,32 @@ function report(error, fallback = null) {
     toast.error(problem === 'failed' && fallback ? t(fallback) : t(`portal.notifications.problems.${problem}`));
 }
 
-async function saveChannel(value) {
-    if (value === channel.value) return;
-
-    const previous = channel.value;
-    channel.value = value;
-    savingChannel.value = true;
-
+async function refreshNotices() {
     try {
-        const response = await http.put('/profile', { notification_channel: value });
-        channel.value = response.data.data.notification_channel;
+        const response = await http.get('/profile');
+        notices.value = noticesForm(response.data.data.notifications);
         emit('saved', response.data.data);
-        toast.success(t('portal.notifications.saved'));
-    } catch (error) {
-        channel.value = previous;
-        complain(error);
-    } finally {
-        savingChannel.value = false;
+    } catch {
+        // The choices on screen stay; the next save reads them again.
     }
 }
 
-async function saveReminders(value) {
-    const previous = reminders.value;
-    reminders.value = value;
-    savingReminders.value = true;
+/** One notice on one channel, saved at once. */
+async function saveNotice(kind, channel, value) {
+    const previous = notices.value[kind][channel];
+    notices.value[kind][channel] = value;
+    saving.value = `${kind}.${channel}`;
 
     try {
-        const response = await http.put('/profile', { appointment_reminders: value });
-        reminders.value = response.data.data.appointment_reminders;
+        const response = await http.put('/profile', { notifications: { [kind]: { [channel]: value } } });
+        notices.value = noticesForm(response.data.data.notifications);
         emit('saved', response.data.data);
         toast.success(t('portal.notifications.saved'));
     } catch (error) {
-        reminders.value = previous;
+        notices.value[kind][channel] = previous;
         complain(error);
     } finally {
-        savingReminders.value = false;
+        saving.value = null;
     }
 }
 
@@ -328,33 +318,80 @@ function list(names) {
     </div>
 
     <div class="card-body">
-        <template v-if="loaded">
-            <fieldset v-if="available && devices.any" class="mb-2">
-                <legend class="mb-1.5 text-xs font-medium text-ink-2">{{ t('portal.notifications.channel') }}</legend>
-                <label v-for="option in CHANNELS" :key="option" class="flex items-center gap-2 py-1 text-sm">
-                    <input
-                        type="radio"
-                        name="notification-channel"
-                        :value="option"
-                        :checked="channel === option"
-                        :disabled="savingChannel"
-                        @change="saveChannel(option)"
-                    />
-                    {{ t(`portal.notifications.channels.${option}`) }}
-                </label>
-                <p class="mt-1 text-xs text-ink-3">{{ t('portal.notifications.channelHint') }}</p>
-            </fieldset>
-            <p v-else class="text-sm text-ink-2">
-                {{ t('portal.notifications.byEmail', { email: profile.email }) }}
-            </p>
-        </template>
-        <div class="mt-2">
-            <ToggleRow
-                v-model="remindersModel"
-                :label="t('portal.profile.reminders')"
-                :description="t('portal.profile.remindersHint')"
-                :disabled="savingReminders"
-            />
+        <p class="mb-3 text-sm text-ink-2">{{ t('portal.notifications.choose', { email: profile.email }) }}</p>
+        <p v-if="loaded && available && !devices.any" class="notice n-neutral mb-3">
+            {{ t('portal.notifications.pushWithoutDevice') }}
+        </p>
+        <div class="table-wrap">
+            <table class="notif-matrix">
+                <thead>
+                    <tr>
+                        <th scope="col">{{ t('portal.notifications.columns.notice') }}</th>
+                        <th v-for="channel in channels" :key="channel" scope="col" class="ch">
+                            <AppIcon :name="channel === 'mail' ? 'mail' : 'notificationsOn'" />
+                            {{ t(`portal.notifications.columns.${channel}`) }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody v-for="group in CLIENT_NOTICE_GROUPS" :key="group.key">
+                    <tr class="group">
+                        <th :colspan="channels.length + 1" scope="colgroup">
+                            {{ t(`portal.notifications.groups.${group.key}`) }}
+                        </th>
+                    </tr>
+                    <tr v-for="kind in group.kinds" :key="kind">
+                        <th scope="row">
+                            <span class="block font-medium text-ink">{{
+                                t(`portal.notifications.kinds.${kind}`)
+                            }}</span>
+                        </th>
+                        <td v-for="channel in channels" :key="channel" class="ch">
+                            <input
+                                :id="`notice-${kind}-${channel}`"
+                                type="checkbox"
+                                :checked="notices[kind][channel]"
+                                :disabled="saving !== null"
+                                :aria-label="
+                                    t('portal.notifications.checkbox', {
+                                        channel: t(`portal.notifications.columns.${channel}`),
+                                        notice: t(`portal.notifications.kinds.${kind}`),
+                                    })
+                                "
+                                @change="saveNotice(kind, channel, $event.target.checked)"
+                            />
+                        </td>
+                    </tr>
+                </tbody>
+                <!-- They get the client in, so they always come by email. -->
+                <tbody>
+                    <tr class="group">
+                        <th :colspan="channels.length + 1" scope="colgroup">
+                            {{ t('portal.notifications.groups.always') }}
+                            <span class="block text-xs font-normal text-ink-3 normal-case">{{
+                                t('portal.notifications.alwaysHint')
+                            }}</span>
+                        </th>
+                    </tr>
+                    <tr v-for="key in CLIENT_ALWAYS_BY_EMAIL" :key="key" class="locked">
+                        <th scope="row">
+                            <span class="block font-medium text-ink">{{
+                                t(`portal.notifications.always.${key}`)
+                            }}</span>
+                        </th>
+                        <td class="ch">
+                            <span class="badge" :title="t('portal.notifications.alwaysTitle')">{{
+                                t('portal.notifications.alwaysBadge')
+                            }}</span>
+                        </td>
+                        <td v-if="channels.length > 1" class="ch">
+                            <span class="text-ink-3" :title="t('portal.notifications.notAvailable')"
+                                >—<span class="sr-only">{{ t('portal.notifications.notAvailable') }}</span></span
+                            >
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
+        <p class="mt-3 text-xs text-ink-3">{{ t('portal.notifications.offHint') }}</p>
     </div>
 </template>

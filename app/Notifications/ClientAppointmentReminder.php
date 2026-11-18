@@ -6,6 +6,7 @@ use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\PortalUser;
 use App\Models\Scopes\WorkspaceScope;
+use App\Support\Notifications\ClientNotificationPreferences;
 use Illuminate\Notifications\Messages\MailMessage;
 
 /**
@@ -23,7 +24,7 @@ class ClientAppointmentReminder extends ClientAppointmentEmail
      */
     public function shouldSend(object $notifiable, string $channel): bool
     {
-        if (! $notifiable instanceof PortalUser || ! $notifiable->appointment_reminders) {
+        if (! $notifiable instanceof PortalUser || ! ClientNotificationPreferences::of($notifiable)->wantsAny('reminder')) {
             return false;
         }
 
