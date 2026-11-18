@@ -16,8 +16,9 @@ import AppIcon from '@/components/AppIcon.vue';
 
 /**
  * Portal → Home (docs/spec/12): the next appointment (and, since 9b, "Book
- * an appointment" while the practice takes bookings here), how much was
- * shared since the last visit, and — until the client picks a zone — an
+ * an appointment" while the practice takes bookings here), how much is shared
+ * with the client — with how much of it is new since the last visit, when any is
+ * (user, 18 Nov 2026: a lone "0 new" read as nothing shared at all), and — until the client picks a zone — an
  * offer to show times on their device's clock. Since 9c, below them and
  * only until "Not now", an offer to install the portal as an app.
  */
@@ -94,10 +95,16 @@ async function useDeviceZone() {
                 <h2>{{ t('portal.home.shared') }}</h2>
             </div>
             <div class="card-body">
-                <p class="font-serif text-3xl">{{ home.new_shared }}</p>
-                <p class="text-sm text-ink-3">
-                    {{ t('portal.home.newShared', { count: home.new_shared }, home.new_shared) }}
-                </p>
+                <template v-if="home.shared_total">
+                    <p class="font-serif text-3xl">{{ home.shared_total }}</p>
+                    <p class="text-sm text-ink-3">{{ t('portal.home.sharedItems', home.shared_total) }}</p>
+                    <p v-if="home.new_shared" class="mt-2">
+                        <span class="badge b-info">{{
+                            t('portal.home.newShared', { count: home.new_shared }, home.new_shared)
+                        }}</span>
+                    </p>
+                </template>
+                <p v-else class="text-sm text-ink-3">{{ t('portal.home.nothingShared') }}</p>
                 <RouterLink :to="{ name: 'shared' }" class="btn btn-sm mt-3" v-tip="t('tips.portal.home.openShared')"
                     ><AppIcon name="shared" />{{ t('portal.home.openShared') }}</RouterLink
                 >

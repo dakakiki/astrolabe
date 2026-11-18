@@ -377,6 +377,10 @@ Odmah zatim (korisnik: „dodaj isprekidan blok za traženo vreme“): u danu, n
 
 Isti dan, detalj termina u kalendaru (korisnik: dugmad „sa različitim funkcijama … izmešana“, „grupiši buttone“; predlog prihvaćen): dugmad su u grupama sa malim naslovom — **Consultation** (Record / Open the consultation), **Appointment** (Edit, Record deposit), **Client's chart** (Show chart, Transits for this date), **Status** (Mark as held, Mark as no-show, odnosno Schedule again) — a „Cancel appointment“ je poslednji, ispod linije. Forma za avans, karta i forma za otkazivanje otvaraju se ispod svoje grupe. Bez izmene specifikacije.
 
+Isti dan, portal Home (korisnik: „Shared with you 0“ na Home, a u Shared ima stavki — broj je bio samo novo od prethodne posete): kartica „Shared with you“ pokazuje ukupan broj deljenih stavki, a „N new since your last visit“ samo kada ima novih; bez ičega podeljenog kaže to rečima.
+
+- 02: Portal → Home — ukupan broj deljenih i oznaka novih.
+
 Van specifikacije, isti dan (portal, korisnik): ispod datuma „15 free slots“ umesto „15 times“; dani kao slajder sa strelicama gore desno (umesto „Change time zone“); koraci zakazivanja su klikabilni (link „Change service“ otpada); red „Practice's time“ na potvrdi kada se sat klijenta i prakse razlikuju; zelena oznaka „Confirmed“ za potvrđen termin koji predstoji; „Reschedule“ i „Cancel“ desno na kartici termina.
 
 ## Nedostaje dokument 08

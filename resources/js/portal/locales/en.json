@@ -104,7 +104,9 @@
             "noNext": "No appointment is booked at the moment.",
             "moreUpcoming": "and {count} more upcoming appointment | and {count} more upcoming appointments",
             "shared": "Shared with you",
-            "newShared": "new since your last visit | new since your last visit",
+            "sharedItems": "shared item | shared items",
+            "newShared": "{count} new since your last visit | {count} new since your last visit",
+            "nothingShared": "Nothing has been shared with you yet.",
             "openShared": "Open",
             "book": "Book an appointment",
             "bookHint": "Choose a service and a free time that suits you."
