@@ -40,6 +40,7 @@ const router = useRouter();
 
 // The right column's lower part: notes, files and links, follow-ups — one at a time.
 const PANELS = ['notes', 'files', 'followUps'];
+const panelIcons = { notes: 'notes', files: 'attach', followUps: 'tasks' };
 const panel = computed(() => (PANELS.includes(route.query.panel) ? route.query.panel : 'notes'));
 const panelCounts = ref({ notes: 0, files: 0, followUps: 0 });
 const auth = useAuthStore();
@@ -763,7 +764,7 @@ const otherZone = computed(() => {
                          choice kept in the address (?panel=). All three stay loaded so the
                          counts show and a half-written note survives a switch. -->
                     <div>
-                        <nav class="tabs mb-3!" :aria-label="heading">
+                        <nav class="panel-tabs" :aria-label="heading">
                             <RouterLink
                                 v-for="name in PANELS"
                                 :key="name"
@@ -771,7 +772,8 @@ const otherZone = computed(() => {
                                 :aria-current="panel === name ? 'page' : undefined"
                                 replace
                             >
-                                {{ t(`consultations.panels.${name}`) }}
+                                <AppIcon :name="panelIcons[name]" />
+                                <span class="label">{{ t(`consultations.panels.${name}`) }}</span>
                                 <span v-if="panelCounts[name]" class="count">{{ panelCounts[name] }}</span>
                             </RouterLink>
                         </nav>

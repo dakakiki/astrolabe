@@ -42,8 +42,10 @@ describe('icons', () => {
             }
             // Names kept in data: navigation items, editor buttons, admin actions, portal sections
             for (const match of source.matchAll(/\bicon: '([^']+)'/g)) used.push([name, match[1]]);
-            const sections = source.match(/const sectionIcons = \{([^}]*)\}/);
-            for (const literal of sections?.[1].matchAll(/: '([^']+)'/g) ?? []) used.push([name, literal[1]]);
+            // …and maps like `const sectionIcons = { home: 'home' }` / `const panelIcons = { … }`
+            for (const map of source.matchAll(/const \w*Icons = \{([^}]*)\}/g)) {
+                for (const literal of map[1].matchAll(/: '([^']+)'/g)) used.push([name, literal[1]]);
+            }
         }
 
         expect(used.length).toBeGreaterThan(250);
