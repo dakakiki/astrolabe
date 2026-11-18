@@ -3,7 +3,6 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import AppIcon from '@/components/AppIcon.vue';
-import InstallGuide from '@/portal/components/InstallGuide.vue';
 import http from '@/portal/http';
 import { CLIENT_ALWAYS_BY_EMAIL, CLIENT_CHANNELS, CLIENT_NOTICE_GROUPS, noticesForm } from '@/portal/lib/notices';
 import { deviceLabel, madeWithOtherKey, pushDevices, pushProblem, sha256Hex, supportNotice } from '@/portal/lib/pwa';
@@ -269,8 +268,6 @@ function list(names) {
             <p class="notice n-neutral mt-2">
                 {{ t(`portal.notifications.states.${supportText}`) }}
             </p>
-            <!-- iPhone and iPad outside the installed app: the way there, right here. -->
-            <InstallGuide v-if="support === 'install-first'" class="mt-3" />
         </template>
         <template v-else>
             <p class="text-sm text-ink-2">

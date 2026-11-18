@@ -5,7 +5,6 @@ import { useI18n } from 'vue-i18n';
 import AppIcon from '@/components/AppIcon.vue';
 import FormField from '@/components/FormField.vue';
 import PhoneInput from '@/components/PhoneInput.vue';
-import InstallApp from '@/portal/components/InstallApp.vue';
 import PushSettings from '@/portal/components/PushSettings.vue';
 import http, { validationErrors } from '@/portal/http';
 import { loadScreen } from '@/portal/load';
@@ -134,14 +133,5 @@ async function save() {
             <h2>{{ t('portal.notifications.title') }}</h2>
         </div>
         <PushSettings :profile="profile" @saved="profile = $event" />
-    </section>
-
-    <section v-if="form" class="card mt-4 max-w-xl">
-        <div class="card-head">
-            <h2>{{ t('portal.pwa.install.title') }}</h2>
-        </div>
-        <div class="card-body">
-            <InstallApp />
-        </div>
     </section>
 </template>

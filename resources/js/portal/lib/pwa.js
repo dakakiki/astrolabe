@@ -153,11 +153,12 @@ export function installView({ standalone = false, installed = false, canInstall 
 }
 
 /**
- * Home offers installing once, discreetly, until the person says "Not now" — only on a phone
- * (iPhone, iPad, Android): there is no reason to install the portal on a computer.
+ * The install bar floats on every page of the portal on a phone (iPhone, iPad, Android) until the
+ * portal is installed or runs as the app (user, 18 Nov 2026) — never on a computer, where there is
+ * no reason to install it — and steps aside while a new version waits to be loaded.
  */
-export function showInstallCard({ view, dismissed = false, platform = 'desktop' } = {}) {
-    if (dismissed || (platform !== 'ios' && platform !== 'android')) return false;
+export function showInstallBar({ view, platform = 'desktop', updateReady = false } = {}) {
+    if (updateReady || (platform !== 'ios' && platform !== 'android')) return false;
 
     return view === 'prompt' || view === 'ios' || view === 'hint';
 }

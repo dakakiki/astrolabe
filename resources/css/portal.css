@@ -545,17 +545,54 @@
 
     /* Installing the portal (InstallGuide.vue): a rounded bar — "Install app", then Android and
        iOS — and under it a small panel with the numbered steps for the chosen device. */
-    .install-guide {
-        position: relative;
-        display: inline-block;
-        max-width: 100%;
+    /* The install bar floats at the bottom right of every page on a phone (InstallBar). */
+    .install-float {
+        position: fixed;
+        z-index: 60;
+        right: max(16px, env(safe-area-inset-right, 0px));
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+        max-width: calc(100vw - 32px);
+    }
+
+    /* Room under the last card, so the bar never covers it. */
+    .portal.with-install .portal-foot {
+        padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .install-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px 6px 8px;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--ink);
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+    }
+
+    .install-action:hover {
+        color: var(--link);
+    }
+
+    .install-action .icon {
+        width: 18px;
+        height: 18px;
     }
 
     .install-bar {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 4px;
+        padding: 5px 6px;
         border: 1px solid var(--line);
         border-radius: 999px;
         background: var(--surface);
@@ -574,9 +611,9 @@
     }
 
     .install-bar .icon-btn {
-        width: 30px;
-        height: 30px;
-        flex-basis: 30px;
+        width: 36px;
+        height: 36px;
+        flex-basis: 36px;
         background: var(--surface-2);
         border-color: transparent;
     }
@@ -593,10 +630,6 @@
     }
 
     .install-pop {
-        position: absolute;
-        z-index: 30;
-        top: calc(100% + 8px);
-        left: 0;
         width: min(340px, calc(100vw - 32px));
         padding: 14px 16px 16px;
         border: 1px solid var(--line);

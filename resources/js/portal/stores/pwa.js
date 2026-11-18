@@ -1,20 +1,9 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
-import { installView, platformOf, showInstallCard } from '@/portal/lib/pwa';
+import { installView, platformOf, showInstallBar } from '@/portal/lib/pwa';
 import { appInstalled, canPrompt, promptInstall as openInstallDialog } from '@/portal/pwa/install';
 import { applyUpdate as applyWorkerUpdate, updateWaiting } from '@/portal/pwa/serviceWorker';
-
-// "Not now" on Home's install card: a UI flag of this browser, never client data.
-const HINT_KEY = 'astrolabe.portal.install-hint';
-
-function readDismissed() {
-    try {
-        return localStorage.getItem(HINT_KEY) === 'dismissed';
-    } catch {
-        return false;
-    }
-}
 
 function runningStandalone() {
     try {
@@ -32,7 +21,6 @@ function runningStandalone() {
 export const usePwaStore = defineStore('portal-pwa', () => {
     const stale = ref(false);
     const standalone = ref(runningStandalone());
-    const installHintDismissed = ref(readDismissed());
     const platform = platformOf({
         userAgent: navigator.userAgent,
         maxTouchPoints: navigator.maxTouchPoints,
@@ -58,8 +46,8 @@ export const usePwaStore = defineStore('portal-pwa', () => {
             platform,
         }),
     );
-    const showHomeInstall = computed(() =>
-        showInstallCard({ view: installState.value, dismissed: installHintDismissed.value, platform }),
+    const showInstall = computed(() =>
+        showInstallBar({ view: installState.value, platform, updateReady: updateReady.value }),
     );
 
     /** A route's file could not be loaded: most likely the portal was updated meanwhile. */
@@ -75,16 +63,6 @@ export const usePwaStore = defineStore('portal-pwa', () => {
         return openInstallDialog();
     }
 
-    function dismissInstallHint() {
-        installHintDismissed.value = true;
-
-        try {
-            localStorage.setItem(HINT_KEY, 'dismissed');
-        } catch {
-            // Storage can be unavailable (private mode); the card stays hidden for this visit.
-        }
-    }
-
     return {
         platform,
         standalone,
@@ -92,11 +70,9 @@ export const usePwaStore = defineStore('portal-pwa', () => {
         canInstall,
         installed,
         installState,
-        installHintDismissed,
-        showHomeInstall,
+        showInstall,
         markStale,
         applyUpdate,
         promptInstall,
-        dismissInstallHint,
     };
 });

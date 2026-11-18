@@ -396,6 +396,12 @@ Odmah zatim, klijent (korisnik: „može, kreni tako“ — i potvrde sopstvenih
 - 02, 12: Portal → Profile → Notifications po obaveštenju.
 - 05: `portal_users.notification_preferences`.
 
+## Portal: plutajuća traka za instalaciju (18. 11. 2026)
+
+Korisnik (uz sliku): „Profile \ App treba da se skloni i da dodaš floating bar kao na primeru. Android ikonica će odmah instalirati PWA, a klik na iOS prikazuje uputstvo … floating je vidljiv na celoj app na tel za klijenta.“
+
+- 02, 12: Instalacija — plutajuća traka na svakoj strani portala na telefonu; Profile → App i ponuda na Home uklonjeni.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

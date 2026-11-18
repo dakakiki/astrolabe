@@ -351,15 +351,8 @@
                 "reload": "Reload"
             },
             "install": {
-                "title": "App",
-                "homeTitle": "Use the portal as an app",
                 "lead": "Install the portal on this device. It opens from your home screen like an app.",
-                "leadDesktop": "On your phone the portal can sit on the home screen like an app. Open the portal on your phone and follow the steps for it:",
                 "action": "Install app",
-                "notNow": "Not now",
-                "badge": "Installed",
-                "standalone": "You're using the installed app.",
-                "installed": "The app is installed. Open it from your home screen or your list of apps.",
                 "iosSteps": "Tap Share, then Add to Home Screen.",
                 "iosNote": "Notifications on iPhone and iPad need the installed app (iOS 16.4 or later).",
                 "hint": "If your browser offers it, you can add the portal to your home screen or dock from the browser's menu.",
@@ -370,7 +363,7 @@
                     },
                     "title": {
                         "android": "Install on Android",
-                        "ios": "Install on iPhone or iPad"
+                        "ios": "Add the app to your Home Screen"
                     },
                     "android": {
                         "s1": "Open the portal in Chrome.",
@@ -379,10 +372,9 @@
                         "s4": "Tap “Install”."
                     },
                     "ios": {
-                        "s1": "Open the portal in Safari.",
-                        "s2": "Tap Share {icon} at the bottom of the screen (at the top on iPad).",
-                        "s3": "Choose “Add to Home Screen”.",
-                        "s4": "Tap “Add”."
+                        "s1": "Tap the share button {icon} at the bottom of the screen",
+                        "s2": "Choose “Add to Home Screen”",
+                        "s3": "Tap “Add”"
                     }
                 }
             }
@@ -483,7 +475,6 @@
             "pwa": {
                 "install": {
                     "action": "Install the portal on this phone — or see how",
-                    "notNow": "Hide this for now",
                     "android": "How to install the portal on Android",
                     "ios": "How to install the portal on iPhone or iPad"
                 },

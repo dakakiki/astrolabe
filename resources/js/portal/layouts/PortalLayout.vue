@@ -6,8 +6,10 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 import AppIcon from '@/components/AppIcon.vue';
 import BrandMark from '@/components/BrandMark.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
+import InstallBar from '@/portal/components/InstallBar.vue';
 import PracticeMark from '@/portal/components/PracticeMark.vue';
 import { unsubscribeLocally } from '@/portal/pwa/push';
+import { usePwaStore } from '@/portal/stores/pwa';
 import { useSessionStore } from '@/portal/stores/session';
 
 /**
@@ -18,6 +20,7 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const session = useSessionStore();
+const pwa = usePwaStore();
 
 const sections = ['home', 'appointments', 'shared', 'profile', 'security'];
 const sectionIcons = {
@@ -40,7 +43,7 @@ async function signOut() {
 </script>
 
 <template>
-    <div class="portal">
+    <div class="portal" :class="{ 'with-install': pwa.showInstall }">
         <header class="portal-top">
             <div class="portal-top-inner">
                 <RouterLink v-if="session.practice" :to="{ name: 'home' }" class="portal-practice">
@@ -93,5 +96,8 @@ async function signOut() {
             <BrandMark class="size-4" />
             {{ t('portal.poweredBy') }}
         </footer>
+
+        <!-- On a phone, until the portal is installed: the same bar on every page. -->
+        <InstallBar v-if="pwa.showInstall" />
     </div>
 </template>

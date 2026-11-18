@@ -184,6 +184,7 @@ Klijent nikad ne vidi: interne i timske beleške i fajlove, zadatke, karte i sni
 
 - Android i desktop Chrome / Edge: dugme „Install app“ (iz `beforeinstallprompt`) u Profile i jednom diskretno na Home.
 - iOS / iPadOS Safari: kratko uputstvo „Share → Add to Home Screen“ (iOS ne nudi dugme).
+- **Od 18. 11. 2026 (korisnik): plutajuća traka za instalaciju** dole desno na svakoj strani portala, samo na telefonu (iPhone, iPad, Android) i dok portal nije instaliran ili otvoren kao aplikacija; sklanja se dok čeka nova verzija. Traka: „Install app“ (radi ono što ovaj telefon može), dugme **Android** (odmah otvara instalaciju pregledača kada je nudi, inače korake za Android) i dugme **iOS** (iznad trake uputstvo „Add the app to your Home Screen“: Share → „Add to Home Screen“ → „Add“). Kartica Profile → App i ponuda na Home („Not now“) su uklonjene. Komponenta `InstallBar.vue` u `PortalLayout` (`pwa.showInstall`, `showInstallBar` u `lib/pwa.js`).
 
 ### Web push (po izboru klijenta)
 

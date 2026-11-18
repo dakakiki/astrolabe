@@ -14,7 +14,7 @@ import {
     pushSupport,
     sameKey,
     sha256Hex,
-    showInstallCard,
+    showInstallBar,
     supportNotice,
     UPDATE_CHECK_INTERVAL,
     updateCheckDue,
@@ -328,26 +328,21 @@ describe('installing the portal', () => {
         expect(installView()).toBe('hint');
     });
 
-    it('offers it on Home only while it can be done and until "Not now"', () => {
-        expect(showInstallCard({ view: 'prompt', platform: 'android' })).toBe(true);
-        expect(showInstallCard({ view: 'ios', platform: 'ios' })).toBe(true);
-        expect(showInstallCard({ view: 'prompt', platform: 'android', dismissed: true })).toBe(false);
-        expect(showInstallCard({ view: 'ios', platform: 'ios', dismissed: true })).toBe(false);
+    it('floats the install bar on phones only, until the portal is installed (user, 18 Nov 2026)', () => {
+        expect(showInstallBar({ view: 'prompt', platform: 'android' })).toBe(true);
+        expect(showInstallBar({ view: 'hint', platform: 'android' })).toBe(true);
+        expect(showInstallBar({ view: 'ios', platform: 'ios' })).toBe(true);
 
         for (const view of ['standalone', 'installed']) {
-            expect(showInstallCard({ view, platform: 'android' })).toBe(false);
-            expect(showInstallCard({ view, platform: 'ios' })).toBe(false);
+            expect(showInstallBar({ view, platform: 'android' })).toBe(false);
+            expect(showInstallBar({ view, platform: 'ios' })).toBe(false);
         }
-    });
 
-    it('offers it on phones only — iPhone, iPad and Android', () => {
-        expect(showInstallCard({ view: 'hint', platform: 'android' })).toBe(true);
-        expect(showInstallCard({ view: 'prompt', platform: 'android' })).toBe(true);
-        expect(showInstallCard({ view: 'ios', platform: 'ios' })).toBe(true);
-        expect(showInstallCard({ view: 'hint', platform: 'android', dismissed: true })).toBe(false);
-        expect(showInstallCard({ view: 'prompt', platform: 'desktop' })).toBe(false);
-        expect(showInstallCard({ view: 'hint', platform: 'desktop' })).toBe(false);
-        expect(showInstallCard({ view: 'installed', platform: 'android' })).toBe(false);
+        // No reason to install the portal on a computer.
+        expect(showInstallBar({ view: 'prompt', platform: 'desktop' })).toBe(false);
+        expect(showInstallBar({ view: 'hint', platform: 'desktop' })).toBe(false);
+        // It steps aside while a new version waits to be loaded (that bar sits at the bottom too).
+        expect(showInstallBar({ view: 'prompt', platform: 'android', updateReady: true })).toBe(false);
     });
 
     it('has the steps of every install guide, each with the button it names', () => {
@@ -426,7 +421,7 @@ describe('the texts', () => {
         expect(notifications.others.split(' | ')).toHaveLength(2);
         expect(pwa.update).toEqual({ available: expect.any(String), reload: expect.any(String) });
         expect(Object.keys(pwa.install)).toEqual(
-            expect.arrayContaining(['action', 'notNow', 'standalone', 'installed', 'iosSteps', 'iosNote', 'hint']),
+            expect.arrayContaining(['action', 'lead', 'iosSteps', 'iosNote', 'hint', 'guide']),
         );
         // The reminder is no longer email only (Phase 9c).
         expect(profile.reminders).not.toMatch(/email/i);
