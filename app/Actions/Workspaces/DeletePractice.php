@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Workspace;
 use App\Notifications\PracticeDeleted;
 use App\Support\Audit\Audit;
+use App\Support\Notifications\NotificationPreferences;
 use App\Support\Portal\PortalAccounts;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +38,7 @@ final class DeletePractice
         'activity_events', 'attachments', 'notes', 'payments', 'tasks', 'consultations', 'appointments',
         'availability_exceptions', 'availability_rules', 'booking_policies',
         'portal_access', 'chart_calculations', 'client_relationships', 'related_people', 'clients', 'tags',
-        'services', 'astrology_methods', 'workspace_exports',
+        'services', 'astrology_methods', 'workspace_exports', 'app_notifications',
     ];
 
     /**
@@ -87,7 +88,12 @@ final class DeletePractice
         $this->deleteDirectory(config('astrolabe.attachments.disk'), (string) $id);
         $this->deleteDirectory(config('astrolabe.exports.disk'), (string) $id);
 
+        // By email only, and only to those who did not turn it off (Settings → Notifications).
         foreach ($members as $member) {
+            if (! $member->notificationPreferences()->wants('practice_deleted', NotificationPreferences::MAIL)) {
+                continue;
+            }
+
             Notification::route('mail', $member->email)
                 ->notify(new PracticeDeleted($name, $leaving->contains($member)));
         }

@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\User;
+use App\Support\Notifications\InAppMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -22,10 +23,13 @@ class TasksDueToday extends Notification implements ShouldQueue
     // The account may be deleted (with its practice) before the queue gets here.
     public bool $deleteWhenMissingModels = true;
 
+    public const PREFERENCE = 'task_digest';
+
     public function __construct(
         public readonly string $practice,
         public readonly int $today,
         public readonly int $overdue,
+        public readonly ?int $workspaceId = null,
     ) {}
 
     /**
@@ -37,11 +41,13 @@ class TasksDueToday extends Notification implements ShouldQueue
     }
 
     /**
+     * Email, in the app or both, as the person chose (Settings → Notifications).
+     *
      * @return array<int, string>
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return $notifiable instanceof User ? $notifiable->notificationPreferences()->via(self::PREFERENCE) : ['mail'];
     }
 
     /**
@@ -65,5 +71,10 @@ class TasksDueToday extends Notification implements ShouldQueue
             ->action(__('notifications.digest.action'), url('/tasks').'?'.http_build_query(['show' => 'today']))
             ->line(__('notifications.digest.private'))
             ->line(__('notifications.settings', ['url' => url('/settings/notifications')]));
+    }
+
+    public function toInApp(User $notifiable): InAppMessage
+    {
+        return new InAppMessage(self::PREFERENCE, $this->workspaceId, ['today' => $this->today, 'overdue' => $this->overdue]);
     }
 }

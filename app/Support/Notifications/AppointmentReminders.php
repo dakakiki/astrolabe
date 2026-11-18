@@ -40,7 +40,7 @@ final class AppointmentReminders
 
         $preferences = $astrologer->notificationPreferences();
 
-        if (! $preferences->appointmentReminders) {
+        if (! $preferences->wantsAny('appointment_reminder')) {
             return null;
         }
 

@@ -251,6 +251,173 @@
         z-index: 40;
     }
 
+    /* Settings → Notifications: one row per notice, a column per channel (email, in the app). */
+    .notif-matrix {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .notif-matrix th,
+    .notif-matrix td {
+        padding: 9px 8px;
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid var(--line-soft);
+        font-weight: 400;
+    }
+
+    .notif-matrix thead th {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink-3);
+        border-bottom-color: var(--line);
+    }
+
+    .notif-matrix .ch {
+        width: 92px;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .notif-matrix thead .ch {
+        display: table-cell;
+    }
+
+    .notif-matrix thead .ch svg {
+        display: inline-block;
+        vertical-align: -2px;
+        margin-right: 3px;
+    }
+
+    .notif-matrix td.ch input {
+        width: 17px;
+        height: 17px;
+        margin-top: 2px;
+        accent-color: var(--brand);
+        cursor: pointer;
+    }
+
+    .notif-matrix tr.group th {
+        padding-top: 18px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink-2);
+        border-bottom-color: var(--line);
+    }
+
+    .notif-matrix tr.extra td {
+        padding: 2px 8px 10px;
+    }
+
+    .notif-matrix tr.extra .field {
+        margin-bottom: 0;
+    }
+
+    .notif-matrix tr.locked .badge svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    @media (max-width: 480px) {
+        .notif-matrix .ch {
+            width: 64px;
+        }
+    }
+
+    /* The bell (notifications in the app): a count on the button, a panel under it. */
+    .bell {
+        position: relative;
+    }
+
+    .bell-count {
+        position: absolute;
+        top: -5px;
+        right: -6px;
+        min-width: 17px;
+        height: 17px;
+        padding: 0 4px;
+        border-radius: 9px;
+        background: var(--danger);
+        color: var(--surface);
+        font-size: 10.5px;
+        font-weight: 600;
+        line-height: 17px;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .menu.bell-panel {
+        width: min(380px, calc(100vw - 24px));
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .bell-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--line-soft);
+        min-height: 46px;
+    }
+
+    .bell-list {
+        max-height: min(440px, 60vh);
+        overflow-y: auto;
+        margin: 0;
+        padding: 4px;
+        list-style: none;
+    }
+
+    .menu .bell-item {
+        align-items: flex-start;
+        gap: 10px;
+        padding: 9px 10px;
+        border-radius: 6px;
+        color: var(--ink-2);
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .menu .bell-item.unread {
+        color: var(--ink);
+        background: var(--brand-050);
+    }
+
+    .bell-icon {
+        flex: 0 0 auto;
+        margin-top: 2px;
+        color: var(--ink-3);
+    }
+
+    .bell-dot {
+        flex: 0 0 8px;
+        width: 8px;
+        height: 8px;
+        margin-top: 6px;
+        border-radius: 50%;
+        background: var(--brand);
+    }
+
+    .bell-empty {
+        padding: 18px 14px;
+        color: var(--ink-3);
+        font-size: 13px;
+    }
+
+    .menu a.bell-settings {
+        border-top: 1px solid var(--line-soft);
+        border-radius: 0;
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
     .menu .who {
         padding: 8px 10px 10px;
         border-bottom: 1px solid var(--line-soft);

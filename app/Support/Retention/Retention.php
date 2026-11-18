@@ -24,7 +24,8 @@ use Throwable;
  * - finished exports when they expire;
  * - expired or revoked invitations, failed queue jobs, used-up password
  *   reset links and expired cache entries (which may hold an idempotent
- *   response with a client in it) after their own short periods;
+ *   response with a client in it) after their own short periods, and
+ *   notifications in the app after `app_notifications_days`;
  * - the client portal (Phase 9a): used or expired sign-in links and codes
  *   after a day, finished portal invitations after `housekeeping_days`,
  *   portal sessions past their lifetime (with the push subscriptions made in
@@ -164,6 +165,8 @@ final class Retention
             'failed_jobs' => $this->remove(DB::table(config('queue.failed.table', 'failed_jobs'))->where('failed_at', '<=', $cutoff), $dryRun),
             'password_resets' => $this->remove(DB::table('password_reset_tokens')
                 ->where('created_at', '<=', $now->subMinutes(config('auth.passwords.users.expire', 60))), $dryRun),
+            'app_notifications' => $this->remove(DB::table('app_notifications')
+                ->where('created_at', '<=', $now->subDays(config('astrolabe.retention.app_notifications_days'))), $dryRun),
         ];
 
         if (config('cache.default') === 'database') {

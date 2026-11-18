@@ -48,7 +48,7 @@ class SendTaskDigests extends Command
                         $counts = $current->run($workspace, fn () => TaskDigest::counts($user, $now));
 
                         if ($counts['today'] > 0) {
-                            $user->notify(new TasksDueToday($workspace->name, $counts['today'], $counts['overdue']));
+                            $user->notify(new TasksDueToday($workspace->name, $counts['today'], $counts['overdue'], (int) $workspace->getKey()));
                             $sent++;
                         }
                     }

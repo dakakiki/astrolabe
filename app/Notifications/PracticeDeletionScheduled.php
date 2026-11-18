@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\User;
+use App\Support\Notifications\InAppMessage;
 use Carbon\CarbonImmutable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -21,17 +22,22 @@ class PracticeDeletionScheduled extends Notification implements ShouldQueue
 
     public bool $deleteWhenMissingModels = true;
 
+    public const PREFERENCE = 'practice_deletion_scheduled';
+
     public function __construct(
         public readonly string $practice,
         public readonly string $deletesAt,
+        public readonly ?int $workspaceId = null,
     ) {}
 
     /**
+     * Email, in the app or both, as the person chose (Settings → Notifications).
+     *
      * @return array<int, string>
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return $notifiable instanceof User ? $notifiable->notificationPreferences()->via(self::PREFERENCE) : ['mail'];
     }
 
     /**
@@ -51,5 +57,10 @@ class PracticeDeletionScheduled extends Notification implements ShouldQueue
             ->line(__('notifications.deletion_scheduled.cancel'))
             ->action(__('notifications.deletion_scheduled.action'), url('/practice-deletion'))
             ->line(__('notifications.deletion_scheduled.not_you'));
+    }
+
+    public function toInApp(User $notifiable): InAppMessage
+    {
+        return new InAppMessage(self::PREFERENCE, $this->workspaceId, ['deletes_at' => $this->deletesAt]);
     }
 }

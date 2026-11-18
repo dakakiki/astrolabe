@@ -155,6 +155,11 @@ before starting a phase. The user communicates in Serbian.
   `AppointmentActor`, practice moves and cancels carry `notifyClient`). Two listeners send the mail:
   `NotifyClientOfAppointmentChange` (`Client*` notifications) and `NotifyAstrologerOfPortalBooking`
   (`PortalBookingNotice`). Dispatch the event from the action; never send booking mail from a controller.
+- Every notification an astrologer may turn off is a kind in `NotificationPreferences::KINDS` with its
+  channels (`mail`, `app`); its `via()` asks `notificationPreferences()->via(KIND)` and it has
+  `toInApp()` (an `InAppMessage`: ids, UTC times, counts — never names or messages). A new one gets a
+  row in `lib/inAppNotifications.js`, words under `settings.notifications.kinds` and `bell.*`. Account
+  and security email (verify, reset, invitations, `AccountNotice`) always goes and is not a kind.
 - Client email goes only to the portal account of a usable link (`ClientRecipient::access()` —
   `PortalAccess::usable()`), checked again in `shouldSend()`; a client without the portal gets nothing.
   It names the practice (`Workspace::portalName()`), shows times in the client's zone

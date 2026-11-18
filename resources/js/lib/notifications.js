@@ -34,7 +34,7 @@ export function reminderChoices(current = null) {
  * - `sent`: it went out at `at`;
  * - `planned`: it goes out at `at`; `shifted` when quiet hours moved it;
  * - `none`: no reminder was chosen;
- * - `paused`: the astrologer switched reminders off (known only for one's own);
+ * - `paused`: the astrologer switched reminders off on every channel (known only for one's own);
  * - `passed`: its time had gone by when the appointment was booked or moved.
  *
  * `preferences` are the astrologer's own, or null when someone else runs it.
@@ -66,14 +66,12 @@ export function quietHoursForm(preferences) {
     return { enabled: Boolean(quiet), start: quiet?.start ?? '22:00', end: quiet?.end ?? '08:00' };
 }
 
-/** The preferences to send from the settings form. */
+/** The preferences to send from the settings form: each kind's channels (docs/spec/09, "Obaveštenja"). */
 export function preferencesPayload(form) {
     return {
-        appointment_reminders: form.appointment_reminders,
+        channels: form.channels,
         reminder_minutes: form.reminder_minutes,
-        task_digest: form.task_digest,
         digest_time: form.digest_time,
-        portal_bookings: form.portal_bookings,
         quiet_hours: form.quiet_enabled ? { start: form.quiet_start, end: form.quiet_end } : null,
     };
 }

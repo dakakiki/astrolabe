@@ -192,6 +192,8 @@ return [
         'audit_log_months' => (int) env('RETENTION_AUDIT_LOG_MONTHS', 12),
         'practice_deletion_days' => (int) env('PRACTICE_DELETION_DAYS', 30),
         'housekeeping_days' => (int) env('RETENTION_HOUSEKEEPING_DAYS', 30),
+        // Notifications in the app (the bell): kept this long, read or not.
+        'app_notifications_days' => (int) env('RETENTION_APP_NOTIFICATIONS_DAYS', 90),
     ],
 
     /*

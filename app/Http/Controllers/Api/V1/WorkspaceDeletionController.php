@@ -46,7 +46,7 @@ class WorkspaceDeletionController extends Controller
 
         Notification::send(
             $workspace->users()->wherePivot('status', MembershipStatus::Active->value)->get(),
-            new PracticeDeletionScheduled($workspace->name, $workspace->deletes_at->toIso8601ZuluString()),
+            new PracticeDeletionScheduled($workspace->name, $workspace->deletes_at->toIso8601ZuluString(), (int) $workspace->getKey()),
         );
 
         return WorkspaceResource::make($workspace);
@@ -69,7 +69,7 @@ class WorkspaceDeletionController extends Controller
 
         Notification::send(
             $workspace->users()->wherePivot('status', MembershipStatus::Active->value)->get(),
-            new PracticeDeletionCancelled($workspace->name),
+            new PracticeDeletionCancelled($workspace->name, (int) $workspace->getKey()),
         );
 
         return WorkspaceResource::make($workspace);

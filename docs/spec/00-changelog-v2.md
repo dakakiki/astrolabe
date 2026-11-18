@@ -383,6 +383,16 @@ Isti dan, portal Home (korisnik: „Shared with you 0“ na Home, a u Shared ima
 
 Van specifikacije, isti dan (portal, korisnik): ispod datuma „15 free slots“ umesto „15 times“; dani kao slajder sa strelicama gore desno (umesto „Change time zone“); koraci zakazivanja su klikabilni (link „Change service“ otpada); red „Practice's time“ na potvrdi kada se sat klijenta i prakse razlikuju; zelena oznaka „Confirmed“ za potvrđen termin koji predstoji; „Reschedule“ i „Cancel“ desno na kartici termina.
 
+## Obaveštenja: kanal po obaveštenju i zvonce (18. 11. 2026)
+
+Korisnik: „svako i praksa i klijent moraju da imaju opciju otkazivanja notifikacija … Za praksu treba izlistati notifikacije i omogućiti odabir kanala komunikacije po svakoj notifikaciji. Za registraciju, poziv i sl. gde mora mail … nema opciju da ih isključi. Hajde prvo od prakse.“ Izabrao kanale „mejl + u aplikaciji“ (preporuka) i obavezna obaveštenja „nalog i bezbednost“.
+
+- 02: Settings → Notifications kao tabela kanala po obaveštenju; zvonce u zaglavlju.
+- 05: `users.notification_preferences.channels`; nova tabela `app_notifications`.
+- 09: odluka o kanalima i obaveznim obaveštenjima.
+
+Klijent (izbor po obaveštenju u portalu) je sledeći korak.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

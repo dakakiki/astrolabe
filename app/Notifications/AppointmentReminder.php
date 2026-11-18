@@ -6,6 +6,7 @@ use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\Scopes\WorkspaceScope;
 use App\Models\User;
+use App\Support\Notifications\InAppMessage;
 use Carbon\CarbonImmutable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -26,10 +27,14 @@ class AppointmentReminder extends Notification implements ShouldQueue
     // The account may be deleted (with its practice) before the queue gets here.
     public bool $deleteWhenMissingModels = true;
 
+    /** Its row in Settings → Notifications (NotificationPreferences::KINDS). */
+    public const PREFERENCE = 'appointment_reminder';
+
     public function __construct(
         public readonly int $appointmentId,
         public readonly string $startsAt,
         public readonly string $endsAt,
+        public readonly ?int $workspaceId = null,
     ) {}
 
     public static function for(Appointment $appointment): self
@@ -38,6 +43,7 @@ class AppointmentReminder extends Notification implements ShouldQueue
             $appointment->getKey(),
             $appointment->starts_at->toIso8601ZuluString(),
             $appointment->ends_at->toIso8601ZuluString(),
+            (int) $appointment->workspace_id,
         );
     }
 
@@ -50,11 +56,13 @@ class AppointmentReminder extends Notification implements ShouldQueue
     }
 
     /**
+     * Email, in the app or both, as the person chose (Settings → Notifications).
+     *
      * @return array<int, string>
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return $notifiable instanceof User ? $notifiable->notificationPreferences()->via(self::PREFERENCE) : ['mail'];
     }
 
     /**
@@ -96,5 +104,15 @@ class AppointmentReminder extends Notification implements ShouldQueue
             ]))
             ->line(__('notifications.reminder.private'))
             ->line(__('notifications.settings', ['url' => url('/settings/notifications')]));
+    }
+
+    /** In the app: the appointment and its time; the client's name is read when the list is shown. */
+    public function toInApp(User $notifiable): InAppMessage
+    {
+        return new InAppMessage(self::PREFERENCE, $this->workspaceId, [
+            'appointment_id' => $this->appointmentId,
+            'starts_at' => $this->startsAt,
+            'ends_at' => $this->endsAt,
+        ]);
     }
 }

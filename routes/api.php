@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\Admin\AdminAuditLogController;
 use App\Http\Controllers\Api\V1\Admin\AdminFeedbackController;
 use App\Http\Controllers\Api\V1\Admin\AdminInvitationController;
 use App\Http\Controllers\Api\V1\Admin\AdminSystemController;
+use App\Http\Controllers\Api\V1\AppNotificationController;
 use App\Http\Controllers\Api\V1\AppointmentController;
 use App\Http\Controllers\Api\V1\AstrologyMethodController;
 use App\Http\Controllers\Api\V1\AttachmentController;
@@ -146,6 +147,12 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 Route::post('/notification-preferences/test', [NotificationPreferencesController::class, 'test'])
                     ->middleware('throttle:3,10')
                     ->name('notification-preferences.test');
+                // The bell in the header: notifications in the app (docs/spec/09, "Obaveštenja").
+                Route::get('/notifications', [AppNotificationController::class, 'index'])->name('notifications.index');
+                Route::post('/notifications/read-all', [AppNotificationController::class, 'readAll'])->name('notifications.read-all');
+                Route::post('/notifications/{notification}/read', [AppNotificationController::class, 'read'])
+                    ->whereNumber('notification')
+                    ->name('notifications.read');
 
                 Route::apiResource('astrology-methods', AstrologyMethodController::class)->except('show');
 

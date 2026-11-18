@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Notifications\Channels\InAppChannel;
 use App\Support\Notifications\NotificationPreferences;
 use App\Support\Notifications\QuietHours;
 use Carbon\CarbonImmutable;
@@ -85,19 +86,24 @@ class QuietHoursTest extends TestCase
     {
         $defaults = NotificationPreferences::fromArray(null)->toArray();
 
-        $this->assertSame([
-            'appointment_reminders' => true,
-            'reminder_minutes' => 1440,
-            'task_digest' => true,
-            'digest_time' => '08:00',
-            'portal_bookings' => true,
-            'quiet_hours' => ['start' => '22:00', 'end' => '08:00'],
-        ], $defaults);
+        $this->assertSame(['start' => '22:00', 'end' => '08:00'], $defaults['quiet_hours']);
+        $this->assertSame([1440, '08:00'], [$defaults['reminder_minutes'], $defaults['digest_time']]);
+        $this->assertSame(array_keys(NotificationPreferences::KINDS), array_keys($defaults['channels']));
+        $this->assertTrue($defaults['appointment_reminders'] && $defaults['task_digest'] && $defaults['portal_bookings']);
 
         $stored = NotificationPreferences::fromArray(['reminder_minutes' => 120, 'quiet_hours' => null]);
 
         $this->assertSame(120, $stored->reminderMinutes);
         $this->assertNull($stored->quietHours);
-        $this->assertTrue($stored->taskDigest);
+        $this->assertTrue($stored->wantsAny('task_digest'));
+
+        // A row saved before 18 Nov 2026: an old switch off turns both channels of its kinds off.
+        $old = NotificationPreferences::fromArray(['appointment_reminders' => false, 'portal_bookings' => false]);
+        $this->assertFalse($old->wantsAny('appointment_reminder'));
+        $this->assertFalse($old->wantsAny('portal_move_requested'));
+        $this->assertTrue($old->wants('task_digest', 'app'));
+        $this->assertSame([], $old->via('portal_booked'));
+        $this->assertSame(['mail', InAppChannel::class], $old->via('export_ready'));
+        $this->assertSame(['mail'], $old->via('practice_deleted'));
     }
 }

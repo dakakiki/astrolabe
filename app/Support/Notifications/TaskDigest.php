@@ -20,7 +20,7 @@ final class TaskDigest
     {
         $preferences = $user->notificationPreferences();
 
-        if (! $preferences->taskDigest) {
+        if (! $preferences->wantsAny('task_digest')) {
             return null;
         }
 

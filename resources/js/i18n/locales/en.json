@@ -27,6 +27,29 @@
         "toNight": "Switch to the night theme",
         "toDay": "Switch to the day theme"
     },
+    "bell": {
+        "title": "Notifications",
+        "open": "Notifications",
+        "openUnread": "Notifications, {count} unread | Notifications, {count} unread",
+        "unread": "Unread",
+        "readAll": "Mark all as read",
+        "empty": "Nothing here yet. The notices you choose to get in the app appear here.",
+        "settings": "Notification settings",
+        "someClient": "A client",
+        "reminder": "Appointment with {client}",
+        "digest": "{count} task due today | {count} tasks due today",
+        "overdue": "and {count} overdue | and {count} overdue",
+        "portal_booked": "{client} booked an appointment",
+        "portal_requested": "{client} asks you to confirm a booking",
+        "portal_moved": "{client} moved their appointment",
+        "portal_move_requested": "{client} asks to move their appointment",
+        "portal_cancelled": "{client} cancelled their appointment",
+        "fromTo": "{from} → {when}",
+        "export_ready": "Your practice export is ready, until {day}",
+        "practice_deletion_scheduled": "The practice will be deleted on {day}",
+        "practice_deletion_cancelled": "The practice will not be deleted",
+        "unknown": "Notification"
+    },
     "nav": {
         "practice": "Practice",
         "workspace": "Workspace",
@@ -373,22 +396,96 @@
             "saved": "Transit orbs saved"
         },
         "notifications": {
-            "title": "Email notifications",
-            "intro": "The emails AstroLabe sends you. Times follow your time zone ({zone}), set under Regional. Clients with portal access get their own emails about their appointments, from the portal.",
-            "reminders": "Appointment reminders",
-            "remindersHint": "An email before each appointment. Each appointment can have its own time, or none.",
+            "title": "Notifications",
+            "intro": "What AstroLabe tells you, and where: by email, in the app — the bell at the top of every page — or both. Untick both to turn a notice off. Times follow your time zone ({zone}), set under Regional. Clients with portal access get their own notices about their appointments, from the portal.",
+            "columns": {
+                "notice": "Notification",
+                "mail": "Email",
+                "app": "In the app"
+            },
+            "groups": {
+                "work": "Calendar and tasks",
+                "portal": "Client portal",
+                "practice": "Your practice",
+                "always": "Always by email"
+            },
+            "kinds": {
+                "appointment_reminder": {
+                    "label": "Appointment reminder",
+                    "hint": "Before each appointment. Each appointment can have its own time, or none."
+                },
+                "task_digest": {
+                    "label": "Tasks due today",
+                    "hint": "In the morning, how many tasks marked “Remind me” are due that day — only when there are some."
+                },
+                "portal_booked": {
+                    "label": "New booking",
+                    "hint": "A client booked an appointment in your client portal."
+                },
+                "portal_requested": {
+                    "label": "Booking request",
+                    "hint": "A client asks you to confirm a time they chose."
+                },
+                "portal_moved": {
+                    "label": "Client moved an appointment",
+                    "hint": "A client moved an appointment in the portal."
+                },
+                "portal_move_requested": {
+                    "label": "Move request",
+                    "hint": "A client asks to move a confirmed appointment; you confirm or decline it."
+                },
+                "portal_cancelled": {
+                    "label": "Client cancelled",
+                    "hint": "A client cancelled an appointment or a request."
+                },
+                "export_ready": {
+                    "label": "Practice export ready",
+                    "hint": "The export you asked for can be downloaded."
+                },
+                "practice_deletion_scheduled": {
+                    "label": "Practice deletion scheduled",
+                    "hint": "The owner scheduled the practice for deletion, with the day it goes."
+                },
+                "practice_deletion_cancelled": {
+                    "label": "Practice deletion cancelled",
+                    "hint": "The owner cancelled the scheduled deletion."
+                },
+                "practice_deleted": {
+                    "label": "Practice deleted",
+                    "hint": "On the day it is deleted. By email only — there is no app left to show it in."
+                }
+            },
+            "always": {
+                "verify": {
+                    "label": "Confirming your email address",
+                    "hint": "After you sign up or change your address."
+                },
+                "reset": {
+                    "label": "Password reset",
+                    "hint": "When you ask for a new password."
+                },
+                "invitation": {
+                    "label": "Invitations to AstroLabe",
+                    "hint": "A personal invitation to create an account."
+                },
+                "accountNotice": {
+                    "label": "Notices about your account",
+                    "hint": "Two-step sign-in turned off, the account suspended or working again — from the AstroLabe team."
+                }
+            },
+            "alwaysHint": "They keep your account safe and reachable, so they cannot be turned off.",
+            "alwaysBadge": "Always",
+            "alwaysTitle": "Always sent by email",
+            "notAvailable": "Not available for this notice",
+            "checkbox": "{channel}: {notice}",
             "reminderMinutes": "Usual reminder",
             "reminderMinutesHint": "Suggested for new appointments.",
-            "digest": "Tasks due today",
-            "digestHint": "One email in the morning with how many tasks are due that day, if any — tasks marked “Remind me”.",
-            "digestTime": "Morning email at",
-            "portalBookings": "New portal booking",
-            "portalBookingsHint": "An email when a client books, moves or cancels an appointment in your client portal, or asks you to confirm a time.",
+            "digestTime": "Morning notice at",
             "quiet": "Quiet hours",
-            "quietHint": "No email in this stretch. A reminder or booking email that falls in it goes out when it ends — or just before it begins, if the appointment starts first.",
+            "quietHint": "No email in this stretch: a reminder or booking email that falls in it goes out when it ends — or just before it begins, if the appointment starts first. Notices in the app still appear.",
             "quietFrom": "From",
             "quietTo": "Until",
-            "private": "Emails stay generic: the time and a link, never a client’s name or a task title. The details open after you sign in.",
+            "private": "Emails stay generic: the time and a link, never a client’s name or a task title. In the app, notices name the client — you see them only after signing in.",
             "saved": "Notification preferences saved",
             "testTitle": "Test email",
             "testIntro": "Sends a message to {email} the same way reminders go, to check that email reaches you.",
@@ -2271,6 +2368,11 @@
         "where": "Clients sign in at {url}"
     },
     "tips": {
+        "bell": {
+            "open": "Your notifications in the app",
+            "readAll": "Mark every notification here as read",
+            "item": "Open what this notification is about"
+        },
         "admin": {
             "actions": {
                 "resetTwoFactor": "Turn off two-factor sign-in for this astrologer — asks for a reason",

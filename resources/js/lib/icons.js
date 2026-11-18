@@ -22,6 +22,7 @@ import {
     CalendarSync,
     CalendarX,
     Check,
+    CheckCheck,
     ChevronDown,
     ChevronLeft,
     ChevronRight,
@@ -230,6 +231,9 @@ export const icons = {
     browserMenu: EllipsisVertical,
     notificationsOn: Bell,
     notificationsOff: BellOff,
+    // The bell in the app's header (notifications in the app)
+    notifications: Bell,
+    markRead: CheckCheck,
 
     // Operator's admin
     auditLog: ScrollText,

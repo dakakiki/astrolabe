@@ -16,8 +16,8 @@ use Carbon\CarbonImmutable;
 /**
  * Emails the astrologer about what a client did in the portal (docs/spec/12,
  * "Mejlovi (9b)"): a new booking or request, a move or a request to move, a cancellation — to the
- * person the appointment belongs to, when "New portal booking" is on in their
- * Settings → Notifications. What the practice itself does is never announced
+ * person the appointment belongs to, by email, in the app or both as they chose
+ * for that kind in Settings → Notifications. What the practice itself does is never announced
  * back to it, and a closing practice gets nothing.
  *
  * Inside the astrologer's quiet hours the email waits until they end — or goes
@@ -85,15 +85,16 @@ class NotifyAstrologerOfPortalBooking
         $astrologer = $appointment->assigned_user_id === null ? null : User::query()->find($appointment->assigned_user_id);
 
         if ($astrologer === null
-            || ! $astrologer->notificationPreferences()->portalBookings
+            || ! $astrologer->notificationPreferences()->wantsAny($notice->preference())
             || ! Workspace::query()->whereKey($appointment->workspace_id)->whereNull('deletes_at')->exists()) {
             return;
         }
 
         $at = self::sendAt($astrologer, $deadline ?? $appointment->starts_at, CarbonImmutable::now());
 
+        // Quiet hours hold back the email; the bell in the app shows it at once.
         if ($at !== null) {
-            $notice->delay($at);
+            $notice->delay(['mail' => $at]);
         }
 
         // The change is committed already: a failure to queue the email is reported, never the request's answer.

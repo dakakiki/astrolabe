@@ -30,12 +30,26 @@ class NotificationPreferencesTest extends TestCase
         $this->actingAs($this->user)->getJson('/api/v1/me')
             ->assertOk()
             ->assertJsonPath('data.user.notification_preferences', [
-                'appointment_reminders' => true,
+                // Every kind a person may turn off, on both its channels (docs/spec/09, "Obaveštenja").
+                'channels' => [
+                    'appointment_reminder' => ['mail' => true, 'app' => true],
+                    'task_digest' => ['mail' => true, 'app' => true],
+                    'portal_booked' => ['mail' => true, 'app' => true],
+                    'portal_requested' => ['mail' => true, 'app' => true],
+                    'portal_moved' => ['mail' => true, 'app' => true],
+                    'portal_move_requested' => ['mail' => true, 'app' => true],
+                    'portal_cancelled' => ['mail' => true, 'app' => true],
+                    'export_ready' => ['mail' => true, 'app' => true],
+                    'practice_deletion_scheduled' => ['mail' => true, 'app' => true],
+                    'practice_deletion_cancelled' => ['mail' => true, 'app' => true],
+                    'practice_deleted' => ['mail' => true],
+                ],
                 'reminder_minutes' => 1440,
-                'task_digest' => true,
                 'digest_time' => '08:00',
-                'portal_bookings' => true,
                 'quiet_hours' => ['start' => '22:00', 'end' => '08:00'],
+                'appointment_reminders' => true,
+                'task_digest' => true,
+                'portal_bookings' => true,
             ]);
     }
 
@@ -66,7 +80,12 @@ class NotificationPreferencesTest extends TestCase
             ->assertJsonPath('data.notification_preferences.portal_bookings', false)
             ->assertJsonPath('data.notification_preferences.task_digest', true);
 
-        $this->assertFalse($this->user->fresh()->notificationPreferences()->portalBookings);
+        // The old switch turns every channel of all five portal kinds off.
+        $preferences = $this->user->fresh()->notificationPreferences();
+        foreach (['portal_booked', 'portal_requested', 'portal_moved', 'portal_move_requested', 'portal_cancelled'] as $kind) {
+            $this->assertFalse($preferences->wantsAny($kind));
+        }
+        $this->assertTrue($preferences->wants('appointment_reminder', 'app'));
 
         $this->actingAs($this->user)->putJson('/api/v1/notification-preferences', ['portal_bookings' => 'often'])
             ->assertUnprocessable()

@@ -76,28 +76,25 @@ describe('the settings form', () => {
         });
         expect(quietHoursForm({ quiet_hours: null })).toEqual({ enabled: false, start: '22:00', end: '08:00' });
 
+        const channels = { appointment_reminder: { mail: true, app: false }, practice_deleted: { mail: false } };
         const form = {
-            appointment_reminders: true,
+            channels,
             reminder_minutes: 120,
-            task_digest: false,
             digest_time: '08:00',
-            portal_bookings: false,
             quiet_enabled: false,
             quiet_start: '22:00',
             quiet_end: '08:00',
         };
+        // Each kind's channels go as they are (docs/spec/09, "Obaveštenja"); the old switches are gone.
         expect(preferencesPayload(form)).toEqual({
-            appointment_reminders: true,
+            channels,
             reminder_minutes: 120,
-            task_digest: false,
             digest_time: '08:00',
-            portal_bookings: false,
             quiet_hours: null,
         });
         expect(preferencesPayload({ ...form, quiet_enabled: true }).quiet_hours).toEqual({
             start: '22:00',
             end: '08:00',
         });
-        expect(preferencesPayload({ ...form, portal_bookings: true }).portal_bookings).toBe(true);
     });
 });

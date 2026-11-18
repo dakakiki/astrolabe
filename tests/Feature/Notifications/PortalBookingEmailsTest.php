@@ -446,8 +446,10 @@ class PortalBookingEmailsTest extends TestCase
         $this->book();
 
         Notification::assertSentTo($this->astrologer, function (PortalBookingNotice $notice) {
-            $this->assertInstanceOf(CarbonImmutable::class, $notice->delay);
-            $this->assertSame('2026-10-03T06:00:00Z', $notice->delay->toIso8601ZuluString());
+            // Only the email waits; the bell in the app shows it at once.
+            $this->assertSame(['mail'], array_keys($notice->delay));
+            $this->assertInstanceOf(CarbonImmutable::class, $notice->delay['mail']);
+            $this->assertSame('2026-10-03T06:00:00Z', $notice->delay['mail']->toIso8601ZuluString());
 
             return true;
         });
@@ -515,7 +517,7 @@ class PortalBookingEmailsTest extends TestCase
 
         Notification::assertSentTo($this->astrologer, function (PortalBookingNotice $notice) {
             $this->assertSame(PortalBookingNotice::MOVED, $notice->kind);
-            $this->assertSame('2026-10-03T06:00:00Z', $notice->delay?->toIso8601ZuluString());
+            $this->assertSame('2026-10-03T06:00:00Z', ($notice->delay['mail'] ?? null)?->toIso8601ZuluString());
 
             return true;
         });

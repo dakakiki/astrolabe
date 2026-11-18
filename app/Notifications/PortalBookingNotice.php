@@ -8,6 +8,8 @@ use App\Models\Scopes\WorkspaceScope;
 use App\Models\User;
 use App\Models\Workspace;
 use App\Support\Notifications\ClientAppointmentFacts;
+use App\Support\Notifications\InAppMessage;
+use App\Support\Notifications\NotificationPreferences;
 use Carbon\CarbonImmutable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -54,7 +56,14 @@ class PortalBookingNotice extends Notification implements ShouldQueue
         public readonly string $endsAt,
         public readonly ?string $previousStartsAt = null,
         public readonly ?string $previousEndsAt = null,
+        public readonly ?int $workspaceId = null,
     ) {}
+
+    /** Its row in Settings → Notifications: one per kind (NotificationPreferences::KINDS). */
+    public function preference(): string
+    {
+        return 'portal_'.$this->kind;
+    }
 
     /** A new booking — or a request, while the practice confirms bookings by hand. */
     public static function booked(Appointment $appointment): self
@@ -80,6 +89,7 @@ class PortalBookingNotice extends Notification implements ShouldQueue
             $appointment->proposed_ends_at->toIso8601ZuluString(),
             $appointment->starts_at->toIso8601ZuluString(),
             $appointment->ends_at->toIso8601ZuluString(),
+            (int) $appointment->workspace_id,
         );
     }
 
@@ -98,6 +108,7 @@ class PortalBookingNotice extends Notification implements ShouldQueue
             $appointment->ends_at->toIso8601ZuluString(),
             $previousStart?->toIso8601ZuluString(),
             $previousEnd?->toIso8601ZuluString(),
+            (int) $appointment->workspace_id,
         );
     }
 
@@ -110,22 +121,26 @@ class PortalBookingNotice extends Notification implements ShouldQueue
     }
 
     /**
+     * Email, in the app or both, as the astrologer chose for this kind.
+     *
      * @return array<int, string>
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return $notifiable instanceof User ? $notifiable->notificationPreferences()->via($this->preference()) : ['mail'];
     }
 
     /**
      * Checked again when the queue gets to it (it may have waited for quiet
      * hours to end): still the astrologer's appointment, the practice still
-     * open, the email still wanted — and a request still waiting for an answer
+     * open, the notice still wanted on this channel — and a request still waiting for an answer
      * (for a move: still asking for the same time).
      */
     public function shouldSend(object $notifiable, string $channel): bool
     {
-        if (! $notifiable instanceof User || ! $notifiable->notificationPreferences()->portalBookings) {
+        $wanted = $channel === 'mail' ? NotificationPreferences::MAIL : NotificationPreferences::APP;
+
+        if (! $notifiable instanceof User || ! $notifiable->notificationPreferences()->wants($this->preference(), $wanted)) {
             return false;
         }
 
@@ -194,5 +209,17 @@ class PortalBookingNotice extends Notification implements ShouldQueue
     private function local(string $iso, string $zone): CarbonImmutable
     {
         return CarbonImmutable::parse($iso)->setTimezone($zone)->locale(app()->getLocale());
+    }
+
+    /** In the app: the appointment and its times; the client's name is read when the list is shown. */
+    public function toInApp(User $notifiable): InAppMessage
+    {
+        return new InAppMessage($this->preference(), $this->workspaceId, array_filter([
+            'appointment_id' => $this->appointmentId,
+            'starts_at' => $this->startsAt,
+            'ends_at' => $this->endsAt,
+            'previous_starts_at' => $this->previousStartsAt,
+            'previous_ends_at' => $this->previousEndsAt,
+        ], fn ($value) => $value !== null));
     }
 }

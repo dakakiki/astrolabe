@@ -6,6 +6,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 import AppIcon from '@/components/AppIcon.vue';
 import BrandMark from '@/components/BrandMark.vue';
 import FeedbackDialog from '@/components/FeedbackDialog.vue';
+import NotificationBell from '@/components/NotificationBell.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import http from '@/lib/http';
 import { formatLegalDate, LEGAL_DOCUMENTS, privacyNotice } from '@/lib/legal';
@@ -181,6 +182,7 @@ async function dismissPrivacyNotice() {
                     {{ t('nav.feedback') }}
                 </button>
                 <span class="tz-chip">{{ auth.user?.timezone }} · {{ localTime }}</span>
+                <NotificationBell v-if="!auth.isAdmin" />
                 <ThemeToggle />
                 <div ref="menuRoot" class="relative">
                     <button

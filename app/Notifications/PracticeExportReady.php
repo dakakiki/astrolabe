@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Models\Scopes\WorkspaceScope;
 use App\Models\User;
 use App\Models\WorkspaceExport;
+use App\Support\Notifications\InAppMessage;
 use Carbon\CarbonImmutable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -31,19 +32,26 @@ class PracticeExportReady extends Notification implements ShouldQueue
 
     public readonly string $expiresAt;
 
+    public readonly ?int $workspaceId;
+
+    public const PREFERENCE = 'export_ready';
+
     public function __construct(WorkspaceExport $export)
     {
         $this->exportId = $export->getKey();
         $this->practice = $export->workspace->name;
         $this->expiresAt = $export->expires_at->toIso8601ZuluString();
+        $this->workspaceId = $export->workspace_id === null ? null : (int) $export->workspace_id;
     }
 
     /**
+     * Email, in the app or both, as the person chose (Settings → Notifications).
+     *
      * @return array<int, string>
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return $notifiable instanceof User ? $notifiable->notificationPreferences()->via(self::PREFERENCE) : ['mail'];
     }
 
     /** Not for an export deleted in the meantime (a client deleted for good takes them along). */
@@ -72,5 +80,11 @@ class PracticeExportReady extends Notification implements ShouldQueue
             ->line(__('notifications.export_ready.link', ['hours' => $hours]))
             ->line(__('notifications.export_ready.kept', ['date' => $until]))
             ->line(__('notifications.export_ready.private'));
+    }
+
+    /** In the app: the export can be downloaded in Settings → Your data until it expires. */
+    public function toInApp(User $notifiable): InAppMessage
+    {
+        return new InAppMessage(self::PREFERENCE, $this->workspaceId, ['export_id' => $this->exportId, 'expires_at' => $this->expiresAt]);
     }
 }

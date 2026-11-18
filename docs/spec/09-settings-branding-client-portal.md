@@ -54,6 +54,8 @@ Poslovna polja su opciona. Svako polje namenjeno klijentu ima eksplicitnu vidlji
 
 > Notifications — implementirano u Fazi 7c (25. 9. 2026): lično podešavanje svakog korisnika (ne workspace-a), samo email kanal. Podsetnici pred termine (uključeni / isključeni, uobičajeno vreme — podrazumevano dan ranije), jutarnji mejl o zadacima dospelim tog dana (uključen / isključen, vreme — podrazumevano 08:00), tihi sati (podrazumevano 22:00–08:00) i dugme „Send a test email“. Vremena su po zoni korisnika iz Regional. Kategorija iz prototipa „New portal booking“ urađena je u Fazi 9b (mejl kada klijent u portalu rezerviše, pomeri ili otkaže termin ili traži potvrdu; podrazumevano **uključena** — odluka korisnika 15. 10. 2026, u prototipu je bila isključena; tihi sati važe). „Payment recorded“ i „Weekly summary“, push kanal i uređaji (PWA) dolaze kasnije. Detalji u dokumentu 02, „Obaveštenja“.
 
+> **Od 18. 11. 2026 (odluka korisnika: „svako i praksa i klijent moraju da imaju opciju otkazivanja notifikacija … za praksu izlistati notifikacije i omogućiti odabir kanala po svakoj“):** kanali su **Email** i **In the app** (zvonce u zaglavlju); svako obaveštenje ima svoj red i bira kanale, bez oba je isključeno. Obavezna, uvek mejlom, samo nalog i bezbednost (potvrda adrese, nova lozinka, pozivnica, obaveštenja o nalogu) — u listi kao zaključana. Brisanje prakse i izvoz se mogu isključiti; „Practice deleted“ ide samo mejlom. Push za astrologa nije uveden (moguće kasnije). Klijent u portalu dolazi sledeći korak. Opis u dokumentu 02, model u dokumentu 05.
+
 ## Branding
 
 Astrolog može da postavi:
