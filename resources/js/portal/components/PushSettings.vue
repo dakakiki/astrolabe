@@ -282,15 +282,36 @@ function list(names) {
                 {{ on ? t('portal.notifications.isOn') : t('portal.notifications.isOff') }}
             </p>
             <div class="mt-3 flex flex-wrap gap-2">
-                <button v-if="on" type="button" class="btn" :disabled="busy" @click="turnOff">
+                <button
+                    v-if="on"
+                    type="button"
+                    class="btn"
+                    :disabled="busy"
+                    @click="turnOff"
+                    v-tip="t('tips.portal.notifications.turnOff')"
+                >
                     <AppIcon name="notificationsOff" />
                     {{ t('portal.notifications.turnOff') }}
                 </button>
-                <button v-else type="button" class="btn btn-primary" :disabled="busy" @click="turnOn">
+                <button
+                    v-else
+                    type="button"
+                    class="btn btn-primary"
+                    :disabled="busy"
+                    @click="turnOn"
+                    v-tip="t('tips.portal.notifications.turnOn')"
+                >
                     <AppIcon name="notificationsOn" />
                     {{ t('portal.notifications.turnOn') }}
                 </button>
-                <button v-if="on" type="button" class="btn btn-ghost" :disabled="busy" @click="test">
+                <button
+                    v-if="on"
+                    type="button"
+                    class="btn btn-ghost"
+                    :disabled="busy"
+                    @click="test"
+                    v-tip="t('tips.portal.notifications.test')"
+                >
                     <AppIcon name="send" />
                     {{ t('portal.notifications.test') }}
                 </button>

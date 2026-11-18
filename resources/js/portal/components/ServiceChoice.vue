@@ -22,7 +22,12 @@ const { t, locale } = useI18n();
 <template>
     <ul class="space-y-3" :aria-label="t('portal.booking.steps.service')">
         <li v-for="service in services" :key="service.id">
-            <button type="button" class="svc-card" @click="emit('choose', service)">
+            <button
+                type="button"
+                class="svc-card"
+                v-tip="t('tips.portal.booking.chooseService')"
+                @click="emit('choose', service)"
+            >
                 <span class="svc-top">
                     <span class="svc-name">{{ service.name }}</span>
                     <AppIcon name="continue" class="svc-go" />

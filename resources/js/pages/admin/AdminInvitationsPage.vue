@@ -101,7 +101,12 @@ onMounted(() => load().catch(() => toast.error(t('errors.generic'))));
                     />
                 </FormField>
             </div>
-            <button type="submit" class="btn btn-primary" :disabled="form.processing.value || !form.data.email">
+            <button
+                type="submit"
+                class="btn btn-primary"
+                :disabled="form.processing.value || !form.data.email"
+                v-tip="t('tips.admin.invitations.send')"
+            >
                 <AppIcon name="send" />
                 {{ t('admin.invitations.send') }}
             </button>
@@ -158,6 +163,7 @@ onMounted(() => load().catch(() => toast.error(t('errors.generic'))));
                                 type="button"
                                 class="btn btn-ghost btn-sm text-danger"
                                 @click="revoke(invitation)"
+                                v-tip="t('tips.admin.invitations.revoke')"
                             >
                                 <AppIcon name="ban" />
                                 {{ t('admin.invitations.revoke') }}

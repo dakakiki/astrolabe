@@ -115,7 +115,12 @@ function startOver() {
                 </label>
                 <RouterLink :to="{ name: 'forgot-password' }">{{ t('auth.login.forgot') }}</RouterLink>
             </div>
-            <button class="btn btn-primary w-full" type="submit" :disabled="form.processing.value">
+            <button
+                class="btn btn-primary w-full"
+                type="submit"
+                :disabled="form.processing.value"
+                v-tip="t('tips.auth.login.submit')"
+            >
                 <AppIcon name="signIn" />
                 {{ t('auth.login.submit') }}
             </button>
@@ -169,7 +174,12 @@ function startOver() {
                     required
                 />
             </FormField>
-            <button class="btn btn-primary w-full" type="submit" :disabled="code.processing.value">
+            <button
+                class="btn btn-primary w-full"
+                type="submit"
+                :disabled="code.processing.value"
+                v-tip="t('tips.auth.twoFactor.submit')"
+            >
                 <AppIcon name="signIn" />
                 {{ t('auth.twoFactor.submit') }}
             </button>

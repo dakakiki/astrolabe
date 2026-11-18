@@ -176,7 +176,12 @@ async function sendTest() {
 
             <p class="notice n-neutral mt-3 mb-4">{{ t('settings.notifications.private') }}</p>
 
-            <button class="btn btn-primary" type="submit" :disabled="form.processing.value">
+            <button
+                class="btn btn-primary"
+                type="submit"
+                :disabled="form.processing.value"
+                v-tip="t('tips.common.save')"
+            >
                 <AppIcon name="save" />
                 {{ t('common.save') }}
             </button>
@@ -189,7 +194,13 @@ async function sendTest() {
         </div>
         <div class="card-body">
             <p class="mb-3 text-ink-3">{{ t('settings.notifications.testIntro', { email: auth.user.email }) }}</p>
-            <button type="button" class="btn" :disabled="testing" @click="sendTest">
+            <button
+                type="button"
+                class="btn"
+                :disabled="testing"
+                @click="sendTest"
+                v-tip="t('tips.settings.notifications.testSend')"
+            >
                 <AppIcon name="send" />
                 {{ t('settings.notifications.testSend') }}
             </button>

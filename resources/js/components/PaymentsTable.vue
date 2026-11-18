@@ -115,6 +115,7 @@ const amount = (payment) => money.format({ amount: signedAmount(payment), curren
                         type="button"
                         class="btn btn-ghost btn-sm"
                         @click="emit('edit', payment)"
+                        v-tip="t('tips.payments.edit')"
                     >
                         <AppIcon name="edit" />
                         {{ t('payments.edit') }}
@@ -124,6 +125,7 @@ const amount = (payment) => money.format({ amount: signedAmount(payment), curren
                         class="btn btn-ghost btn-sm text-danger"
                         :disabled="busyId === payment.id"
                         @click="emit('remove', payment)"
+                        v-tip="t('tips.payments.delete')"
                     >
                         <AppIcon name="delete" />
                         {{ t('payments.delete') }}

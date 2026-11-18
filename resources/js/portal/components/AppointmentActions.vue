@@ -100,9 +100,16 @@ async function cancel() {
                 v-if="options.reschedule"
                 :to="{ name: 'reschedule', params: { id: appointment.id }, state }"
                 class="btn btn-sm"
+                v-tip="t('tips.portal.appointments.reschedule')"
                 ><AppIcon name="reschedule" />{{ t('portal.appointments.reschedule') }}</RouterLink
             >
-            <button v-if="options.cancel" type="button" class="btn btn-sm btn-danger" @click="ask">
+            <button
+                v-if="options.cancel"
+                type="button"
+                class="btn btn-sm btn-danger"
+                @click="ask"
+                v-tip="request ? t('tips.portal.appointments.cancelRequest') : t('tips.portal.appointments.cancel')"
+            >
                 <AppIcon name="cancelAppointment" />
                 {{ request ? t('portal.appointments.cancelRequest') : t('portal.appointments.cancel') }}
             </button>
@@ -121,13 +128,28 @@ async function cancel() {
                 <textarea :id="id" v-bind="aria" v-model="reason" class="input block" rows="2" maxlength="500" />
             </FormField>
             <div class="flex flex-wrap gap-2">
-                <button type="submit" class="btn btn-sm btn-danger" :disabled="busy">
+                <button
+                    type="submit"
+                    class="btn btn-sm btn-danger"
+                    :disabled="busy"
+                    v-tip="
+                        request
+                            ? t('tips.portal.appointments.cancelRequestConfirm')
+                            : t('tips.portal.appointments.cancelConfirm')
+                    "
+                >
                     <AppIcon name="cancelAppointment" />
                     {{
                         request ? t('portal.appointments.cancelRequestConfirm') : t('portal.appointments.cancelConfirm')
                     }}
                 </button>
-                <button type="button" class="btn btn-sm btn-ghost" :disabled="busy" @click="keep">
+                <button
+                    type="button"
+                    class="btn btn-sm btn-ghost"
+                    :disabled="busy"
+                    @click="keep"
+                    v-tip="request ? t('tips.portal.appointments.keepRequest') : t('tips.portal.appointments.keep')"
+                >
                     <AppIcon name="undo" />
                     {{ request ? t('portal.appointments.keepRequest') : t('portal.appointments.keep') }}
                 </button>

@@ -150,6 +150,9 @@ defineExpose({ reload: load });
                         :class="{ 'btn-primary': portal.status !== 'invited' }"
                         :disabled="busy"
                         @click="invite"
+                        v-tip="
+                            portal.status === 'invited' ? t('tips.clientPortal.resend') : t('tips.clientPortal.invite')
+                        "
                     >
                         <AppIcon name="send" />
                         {{ portal.status === 'invited' ? t('clientPortal.resend') : t('clientPortal.invite') }}
@@ -160,6 +163,11 @@ defineExpose({ reload: load });
                         class="btn btn-sm btn-ghost text-danger"
                         :disabled="busy"
                         @click="revoke"
+                        v-tip="
+                            portal.status === 'invited'
+                                ? t('tips.clientPortal.withdraw')
+                                : t('tips.clientPortal.revoke')
+                        "
                     >
                         <AppIcon name="ban" />
                         {{ portal.status === 'invited' ? t('clientPortal.withdraw') : t('clientPortal.revoke') }}

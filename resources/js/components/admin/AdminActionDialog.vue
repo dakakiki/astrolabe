@@ -119,13 +119,14 @@ defineExpose({ open });
                     />
                 </FormField>
                 <div class="flex justify-end gap-2">
-                    <button type="button" class="btn btn-ghost" @click="close">
+                    <button type="button" class="btn btn-ghost" v-tip="t('tips.common.cancel')" @click="close">
                         <AppIcon name="cancel" />{{ t('common.cancel') }}
                     </button>
                     <button
                         type="submit"
                         class="btn"
                         :class="action.danger ? 'btn-danger' : 'btn-primary'"
+                        v-tip="t('tips.admin.actionSubmit')"
                         :disabled="busy || (action.reasonRequired && !reason.trim()) || (needsPassword && !password)"
                     >
                         <AppIcon :name="action.icon ?? 'confirm'" />

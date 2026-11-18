@@ -148,6 +148,7 @@ onMounted(() => reference.load().catch(() => {}));
                     class="btn btn-danger mb-3.5"
                     type="submit"
                     :disabled="deletion.processing.value || !deletion.data.password"
+                    v-tip="t('tips.settings.data.deletion.submit')"
                 >
                     <AppIcon name="delete" />
                     {{ t('settings.data.deletion.submit') }}

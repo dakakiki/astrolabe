@@ -348,10 +348,13 @@ const steps = computed(() => [
             <div class="sub">{{ summary || auth.workspace?.name }}</div>
         </div>
         <div class="ml-auto flex flex-wrap gap-2">
-            <RouterLink :to="{ name: 'calendar', query: { new: 1 } }" class="btn"
+            <RouterLink
+                :to="{ name: 'calendar', query: { new: 1 } }"
+                class="btn"
+                v-tip="t('tips.dashboard.newAppointment')"
                 ><AppIcon name="addAppointment" />{{ t('dashboard.newAppointment') }}</RouterLink
             >
-            <RouterLink :to="{ name: 'clients.create' }" class="btn btn-primary"
+            <RouterLink :to="{ name: 'clients.create' }" class="btn btn-primary" v-tip="t('tips.dashboard.addClient')"
                 ><AppIcon name="addClient" />{{ t('dashboard.addClient') }}</RouterLink
             >
         </div>
@@ -440,6 +443,7 @@ const steps = computed(() => [
                                         class="btn btn-primary btn-sm"
                                         :disabled="answering !== null"
                                         @click="confirmRequest(request)"
+                                        v-tip="t('tips.dashboard.requests.confirm')"
                                     >
                                         <AppIcon name="confirm" />
                                         {{ t('dashboard.requests.confirm') }}
@@ -450,6 +454,7 @@ const steps = computed(() => [
                                         :disabled="answering !== null"
                                         :aria-expanded="declining === request.id"
                                         @click="openDecline(request)"
+                                        v-tip="t('tips.dashboard.requests.decline')"
                                     >
                                         <AppIcon name="decline" />
                                         {{ t('dashboard.requests.decline') }}
@@ -457,6 +462,7 @@ const steps = computed(() => [
                                     <RouterLink
                                         :to="{ name: 'calendar', query: { appointment: request.id } }"
                                         class="btn btn-ghost btn-sm"
+                                        v-tip="t('tips.dashboard.requests.open')"
                                         ><AppIcon name="open" />{{ t('dashboard.requests.open') }}</RouterLink
                                     >
                                 </div>
@@ -493,11 +499,21 @@ const steps = computed(() => [
                                     </div>
                                 </div>
                                 <div class="flex flex-wrap gap-2">
-                                    <button type="submit" class="btn btn-danger btn-sm" :disabled="answering !== null">
+                                    <button
+                                        type="submit"
+                                        class="btn btn-danger btn-sm"
+                                        :disabled="answering !== null"
+                                        v-tip="t('tips.dashboard.requests.send')"
+                                    >
                                         <AppIcon name="decline" />
                                         {{ t('dashboard.requests.send') }}
                                     </button>
-                                    <button type="button" class="btn btn-ghost btn-sm" @click="declining = null">
+                                    <button
+                                        type="button"
+                                        class="btn btn-ghost btn-sm"
+                                        @click="declining = null"
+                                        v-tip="t('tips.dashboard.requests.keep')"
+                                    >
                                         <AppIcon name="undo" />
                                         {{ t('dashboard.requests.keep') }}
                                     </button>
@@ -578,6 +594,7 @@ const steps = computed(() => [
                                                 query: { appointment: appointment.id },
                                             }"
                                             class="btn btn-sm mr-1"
+                                            v-tip="t('tips.dashboard.nextUp.record')"
                                             ><AppIcon name="addConsultation" />{{
                                                 t('dashboard.nextUp.record')
                                             }}</RouterLink
@@ -589,6 +606,7 @@ const steps = computed(() => [
                                                 params: { id: appointment.consultation.id },
                                             }"
                                             class="btn btn-sm btn-ghost mr-1"
+                                            v-tip="t('tips.dashboard.nextUp.consultation')"
                                             ><AppIcon name="consultation" />{{
                                                 t('dashboard.nextUp.consultation')
                                             }}</RouterLink
@@ -596,6 +614,7 @@ const steps = computed(() => [
                                         <RouterLink
                                             :to="{ name: 'calendar', query: { appointment: appointment.id } }"
                                             class="btn btn-sm"
+                                            v-tip="t('tips.dashboard.nextUp.open')"
                                             ><AppIcon name="open" />{{ t('dashboard.nextUp.open') }}</RouterLink
                                         >
                                     </td>
@@ -641,6 +660,7 @@ const steps = computed(() => [
                                             <RouterLink
                                                 :to="transitsRoute(entry.client.id, entry.appointment.starts_at, zone)"
                                                 class="btn btn-sm ml-auto"
+                                                v-tip="t('tips.dashboard.transits.open')"
                                                 ><AppIcon name="transits" />{{
                                                     t('dashboard.transits.open')
                                                 }}</RouterLink
@@ -717,6 +737,7 @@ const steps = computed(() => [
                                         <RouterLink
                                             :to="{ name: 'consultations.show', params: { id: consultation.id } }"
                                             class="btn btn-sm"
+                                            v-tip="t('tips.dashboard.waiting.record')"
                                             ><AppIcon name="payment" />{{ t('dashboard.waiting.record') }}</RouterLink
                                         >
                                     </td>
@@ -833,6 +854,7 @@ const steps = computed(() => [
                                     <RouterLink
                                         :to="{ name: 'clients.edit', params: { id: client.id } }"
                                         class="btn btn-sm"
+                                        v-tip="t('tips.dashboard.attention.complete')"
                                         ><AppIcon name="addBirthData" />{{
                                             t('dashboard.attention.complete')
                                         }}</RouterLink

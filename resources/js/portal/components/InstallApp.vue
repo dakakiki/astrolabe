@@ -47,11 +47,17 @@ async function install() {
                 class="btn btn-primary btn-sm"
                 :disabled="busy"
                 @click="install"
+                v-tip="t('tips.portal.pwa.install.action')"
             >
                 <AppIcon name="install" />
                 {{ t('portal.pwa.install.action') }}
             </button>
-            <button type="button" class="btn btn-ghost btn-sm" @click="pwa.dismissInstallHint()">
+            <button
+                type="button"
+                class="btn btn-ghost btn-sm"
+                @click="pwa.dismissInstallHint()"
+                v-tip="t('tips.portal.pwa.install.notNow')"
+            >
                 <AppIcon name="close" />
                 {{ t('portal.pwa.install.notNow') }}
             </button>
@@ -66,7 +72,13 @@ async function install() {
         <p v-else-if="pwa.installState === 'installed'">{{ t('portal.pwa.install.installed') }}</p>
         <template v-else-if="pwa.installState === 'prompt'">
             <p class="mb-3 text-ink-2">{{ t('portal.pwa.install.lead') }}</p>
-            <button type="button" class="btn btn-primary" :disabled="busy" @click="install">
+            <button
+                type="button"
+                class="btn btn-primary"
+                :disabled="busy"
+                @click="install"
+                v-tip="t('tips.portal.pwa.install.action')"
+            >
                 <AppIcon name="install" />
                 {{ t('portal.pwa.install.action') }}
             </button>

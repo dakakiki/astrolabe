@@ -161,7 +161,13 @@ async function remove() {
             <h1>{{ t('services.title') }}</h1>
             <div class="sub">{{ t('services.sub') }}</div>
         </div>
-        <button v-if="auth.isOwner" type="button" class="btn btn-primary ml-auto" @click="open()">
+        <button
+            v-if="auth.isOwner"
+            type="button"
+            class="btn btn-primary ml-auto"
+            @click="open()"
+            v-tip="t('tips.services.add')"
+        >
             <AppIcon name="add" />
             {{ t('services.add') }}
         </button>
@@ -303,6 +309,7 @@ async function remove() {
                         type="button"
                         class="btn btn-ghost btn-sm"
                         @click="showAllMethods = true"
+                        v-tip="t('tips.clients.form.showAllMethods')"
                     >
                         <AppIcon name="more" />
                         {{ t('clients.form.showAllMethods') }}
@@ -339,16 +346,27 @@ async function remove() {
             </div>
 
             <div class="mt-5 flex flex-wrap items-center gap-2">
-                <button class="btn btn-primary" type="submit" :disabled="form.processing.value">
+                <button
+                    class="btn btn-primary"
+                    type="submit"
+                    :disabled="form.processing.value"
+                    v-tip="editing === 'new' ? t('tips.services.form.create') : t('tips.services.form.save')"
+                >
                     <AppIcon name="save" />
                     {{ editing === 'new' ? t('services.form.create') : t('services.form.save') }}
                 </button>
-                <button type="button" class="btn btn-ghost" @click="close">
+                <button type="button" class="btn btn-ghost" @click="close" v-tip="t('tips.services.form.cancel')">
                     <AppIcon name="cancel" />{{ t('services.form.cancel') }}
                 </button>
                 <template v-if="editing !== 'new'">
                     <span v-if="editing.in_use" class="ml-auto text-xs text-ink-3">{{ t('services.form.inUse') }}</span>
-                    <button v-else type="button" class="btn btn-ghost ml-auto" @click="remove">
+                    <button
+                        v-else
+                        type="button"
+                        class="btn btn-ghost ml-auto"
+                        @click="remove"
+                        v-tip="t('tips.services.form.delete')"
+                    >
                         <AppIcon name="delete" />
                         {{ t('services.form.delete') }}
                     </button>
@@ -436,7 +454,12 @@ async function remove() {
                             </div>
                         </td>
                         <td v-if="auth.isOwner" class="text-right">
-                            <button type="button" class="btn btn-sm" @click.stop="open(service)">
+                            <button
+                                type="button"
+                                class="btn btn-sm"
+                                @click.stop="open(service)"
+                                v-tip="t('tips.services.edit')"
+                            >
                                 <AppIcon name="edit" />
                                 {{ t('services.edit') }}
                             </button>

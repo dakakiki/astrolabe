@@ -98,6 +98,7 @@ onBeforeUnmount(() => clearTimeout(timer));
                         class="btn btn-sm"
                         :href="`/api/v1/workspace/exports/${item.id}/download`"
                         download
+                        v-tip="t('tips.settings.data.export.download')"
                         ><AppIcon name="download" />{{ t('settings.data.export.download') }}</a
                     >
                 </li>
@@ -105,7 +106,13 @@ onBeforeUnmount(() => clearTimeout(timer));
             <p v-else-if="exports" class="text-ink-3">{{ t('settings.data.export.none') }}</p>
 
             <div class="flex flex-wrap items-center gap-3">
-                <button type="button" class="btn btn-primary" :disabled="busy || pending" @click="request">
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    :disabled="busy || pending"
+                    @click="request"
+                    v-tip="t('tips.settings.data.export.request')"
+                >
                     <AppIcon name="exportArchive" />
                     {{ t('settings.data.export.request') }}
                 </button>

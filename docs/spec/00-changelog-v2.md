@@ -345,6 +345,14 @@ Korisnik: „za sve buttone dodaj odgovarajuće ikonice“; izabrao Lucide i obu
 
 Van specifikacije: sva dugmad u aplikaciji, adminu i portalu (oko 250) dobijaju ikonicu ispred teksta („+ “ ispred naziva otpada); dugmad samo sa znakom (✕, ‹ ›, ☰, ☾/☀) i traka alatki editora prelaze na ikonice uz postojeći `aria-label`; levi meni, meni naloga, podmeni podešavanja i navigacija portala imaju ikonice — na telefonu je navigacija portala pet jednakih kartica sa ikonicom iznad naziva. Bez ikonice ostaju izbori koji nisu radnja: segmentni prekidači (Day / Week / Month, filteri vremenske linije), tabovi, tekstualni linkovi, termini u kalendaru, ponuđena vremena za zakazivanje i izbor prakse u portalu. Vitest proverava da svako dugme sa klasom `.btn` ima ikonicu i da sva imena postoje u spisku.
 
+## Profil klijenta i tooltip na dugmadima (18. 11. 2026)
+
+Korisnik: u liniji sa naslovom profila klijenta samo dva dugmeta, bez „New“ u natpisu, a izmena, arhiviranje i brisanje na kraj desne kolone (bez običnog linka uz dugmad); zatim tooltip za dugmad („Consultation“ → „Add new consultation“) — izabrao sopstveni tooltip u stilu aplikacije, a obuhvat „važi za sve buttone“.
+
+- 03: Frontend — tooltip na svakom dugmetu, direktiva `v-tip`, tekstovi pod `tips.*`.
+
+Van specifikacije: zaglavlje profila klijenta — „Appointment“ i „Consultation“; kartica „Manage client“ na kraju desne kolone taba Overview (Edit profile, Archive / Restore, odvojeno Delete permanently). Tooltip ima oko 250 dugmadi u aplikaciji, adminu i portalu (i dugmad samo sa ikonicom, traka editora, meni naloga, kartice usluga u portalu); bez tooltip-a ostaju ponuđena vremena u portalu i izbori koji nisu radnja (segmentni prekidači, tabovi, linkovi). Vitest proverava da svako dugme ima tooltip i da tekst postoji.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

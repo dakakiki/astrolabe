@@ -137,11 +137,21 @@ const consultationLabel = (consultation) =>
                             >{{ consultationLabel(note.consultation) }}</RouterLink
                         >
                         <span v-if="note.can_edit" class="ml-auto flex gap-1">
-                            <button type="button" class="btn btn-ghost btn-sm" @click="edit(note)">
+                            <button
+                                type="button"
+                                class="btn btn-ghost btn-sm"
+                                @click="edit(note)"
+                                v-tip="t('tips.common.edit')"
+                            >
                                 <AppIcon name="edit" />
                                 {{ t('common.edit') }}
                             </button>
-                            <button type="button" class="btn btn-ghost btn-sm" @click="remove(note)">
+                            <button
+                                type="button"
+                                class="btn btn-ghost btn-sm"
+                                @click="remove(note)"
+                                v-tip="t('tips.common.delete')"
+                            >
                                 <AppIcon name="delete" />
                                 {{ t('common.delete') }}
                             </button>
@@ -156,6 +166,7 @@ const consultationLabel = (consultation) =>
                 type="button"
                 class="btn btn-sm"
                 @click="load(meta.current_page + 1)"
+                v-tip="t('tips.common.more')"
             >
                 <AppIcon name="more" />
                 {{ t('common.more') }}
@@ -208,11 +219,22 @@ const consultationLabel = (consultation) =>
                     </select>
                 </FormField>
                 <div class="flex gap-2">
-                    <button type="submit" class="btn btn-primary" :disabled="form.processing.value">
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        :disabled="form.processing.value"
+                        v-tip="editing ? t('tips.notes.update') : t('tips.notes.save')"
+                    >
                         <AppIcon name="save" />
                         {{ editing ? t('notes.update') : t('notes.save') }}
                     </button>
-                    <button v-if="editing" type="button" class="btn btn-ghost" @click="cancel">
+                    <button
+                        v-if="editing"
+                        type="button"
+                        class="btn btn-ghost"
+                        @click="cancel"
+                        v-tip="t('tips.common.cancel')"
+                    >
                         <AppIcon name="cancel" />
                         {{ t('common.cancel') }}
                     </button>

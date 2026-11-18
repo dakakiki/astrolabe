@@ -91,7 +91,13 @@ async function signOutEverywhere() {
         </div>
         <div class="card-body border-t border-line-soft">
             <p class="mb-3 text-sm text-ink-3">{{ t('portal.security.everywhereHint') }}</p>
-            <button type="button" class="btn btn-danger" :disabled="busy" @click="signOutEverywhere">
+            <button
+                type="button"
+                class="btn btn-danger"
+                :disabled="busy"
+                @click="signOutEverywhere"
+                v-tip="t('tips.portal.security.everywhere')"
+            >
                 <AppIcon name="signOut" />
                 {{ t('portal.security.everywhere') }}
             </button>

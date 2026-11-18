@@ -317,6 +317,13 @@ async function removeException(item) {
                                         })
                                     "
                                     @click="changeDay(day.weekday, (entry) => removeStretch(entry, index))"
+                                    v-tip="
+                                        t('tips.settings.availability.remove', {
+                                            from: stretch.start,
+                                            until: stretch.end,
+                                            day: dayName(day.weekday),
+                                        })
+                                    "
                                 >
                                     <AppIcon name="close" />
                                 </button>
@@ -337,6 +344,7 @@ async function removeException(item) {
                             type="button"
                             class="btn btn-ghost btn-sm"
                             @click="changeDay(day.weekday, addStretch)"
+                            v-tip="t('tips.settings.availability.addHours')"
                         >
                             <AppIcon name="add" />
                             {{ t('settings.availability.addHours') }}
@@ -347,7 +355,12 @@ async function removeException(item) {
             </ul>
 
             <div class="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-                <button type="button" class="btn btn-ghost btn-sm" @click="copyMonday">
+                <button
+                    type="button"
+                    class="btn btn-ghost btn-sm"
+                    @click="copyMonday"
+                    v-tip="t('tips.settings.availability.copyMonday')"
+                >
                     <AppIcon name="copy" />
                     {{ t('settings.availability.copyMonday') }}
                 </button>
@@ -358,7 +371,12 @@ async function removeException(item) {
 
             <p class="notice n-neutral mb-4">{{ t('settings.availability.private') }}</p>
 
-            <button class="btn btn-primary" type="submit" :disabled="week.processing.value">
+            <button
+                class="btn btn-primary"
+                type="submit"
+                :disabled="week.processing.value"
+                v-tip="t('tips.common.save')"
+            >
                 <AppIcon name="save" />
                 {{ t('common.save') }}
             </button>
@@ -396,6 +414,7 @@ async function removeException(item) {
                             })
                         "
                         @click="removeException(item)"
+                        v-tip="t('tips.settings.availability.exceptions.remove')"
                     >
                         <AppIcon name="delete" />
                         {{ t('settings.availability.exceptions.remove') }}
@@ -527,7 +546,12 @@ async function removeException(item) {
                     {{ exceptionError('kind') || exceptionError('all_day') }}
                 </p>
 
-                <button class="btn btn-primary" type="submit" :disabled="exception.processing.value">
+                <button
+                    class="btn btn-primary"
+                    type="submit"
+                    :disabled="exception.processing.value"
+                    v-tip="t('tips.settings.availability.exceptions.add')"
+                >
                     <AppIcon name="add" />
                     {{ t('settings.availability.exceptions.add') }}
                 </button>

@@ -48,7 +48,13 @@ async function signIn() {
     <template v-if="token && !failed">
         <h1>{{ t('portal.link.title') }}</h1>
         <p class="sub">{{ t('portal.link.sub') }}</p>
-        <button type="button" class="btn btn-primary w-full justify-center" :disabled="busy" @click="signIn">
+        <button
+            type="button"
+            class="btn btn-primary w-full justify-center"
+            :disabled="busy"
+            @click="signIn"
+            v-tip="t('tips.portal.link.action')"
+        >
             <AppIcon name="signIn" />
             {{ t('portal.link.action') }}
         </button>
@@ -56,7 +62,10 @@ async function signIn() {
     <template v-else>
         <h1>{{ t('portal.link.invalidTitle') }}</h1>
         <p class="sub">{{ t('portal.link.invalid') }}</p>
-        <RouterLink :to="{ name: 'sign-in' }" class="btn btn-primary w-full justify-center"
+        <RouterLink
+            :to="{ name: 'sign-in' }"
+            class="btn btn-primary w-full justify-center"
+            v-tip="t('tips.portal.link.again')"
             ><AppIcon name="mail" />{{ t('portal.link.again') }}</RouterLink
         >
     </template>

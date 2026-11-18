@@ -18,6 +18,7 @@ const { t } = useI18n();
                 class="btn btn-sm"
                 :disabled="meta.current_page <= 1"
                 @click="emit('page', meta.current_page - 1)"
+                v-tip="t('tips.clients.previous')"
             >
                 <AppIcon name="previous" />
                 {{ t('clients.previous') }}
@@ -27,6 +28,7 @@ const { t } = useI18n();
                 class="btn btn-sm"
                 :disabled="meta.current_page >= meta.last_page"
                 @click="emit('page', meta.current_page + 1)"
+                v-tip="t('tips.clients.next')"
             >
                 {{ t('clients.next') }}<AppIcon name="next" />
             </button>

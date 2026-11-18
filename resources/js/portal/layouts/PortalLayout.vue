@@ -56,10 +56,16 @@ async function signOut() {
                         v-if="session.practices.length > 1"
                         :to="{ name: 'choose' }"
                         class="btn btn-ghost btn-sm"
+                        v-tip="t('tips.portal.nav.switch')"
                         ><AppIcon name="switch" />{{ t('portal.nav.switch') }}</RouterLink
                     >
                     <ThemeToggle />
-                    <button type="button" class="btn btn-ghost btn-sm" @click="signOut">
+                    <button
+                        type="button"
+                        class="btn btn-ghost btn-sm"
+                        @click="signOut"
+                        v-tip="t('tips.portal.nav.signOut')"
+                    >
                         <AppIcon name="signOut" />
                         {{ t('portal.nav.signOut') }}
                     </button>

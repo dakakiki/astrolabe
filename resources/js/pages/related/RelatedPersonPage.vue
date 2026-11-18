@@ -144,13 +144,22 @@ async function remove() {
                 </div>
             </div>
             <div class="ml-auto flex flex-wrap gap-2">
-                <RouterLink :to="{ name: 'related-people.edit', params: { id: person.id } }" class="btn"
+                <RouterLink
+                    :to="{ name: 'related-people.edit', params: { id: person.id } }"
+                    class="btn"
+                    v-tip="t('tips.related.person.edit')"
                     ><AppIcon name="edit" />{{ t('related.person.edit') }}</RouterLink
                 >
-                <button type="button" class="btn btn-ghost" @click="remove">
+                <button type="button" class="btn btn-ghost" @click="remove" v-tip="t('tips.related.person.delete')">
                     <AppIcon name="delete" />{{ t('related.person.delete') }}
                 </button>
-                <button type="button" class="btn btn-primary" :disabled="busy" @click="makeClient">
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    :disabled="busy"
+                    @click="makeClient"
+                    v-tip="t('tips.related.person.makeClient')"
+                >
                     <AppIcon name="addClient" />
                     {{ t('related.person.makeClient') }}
                 </button>
@@ -250,6 +259,7 @@ async function remove() {
                                 v-if="person.birth?.chart.ready"
                                 :to="synastryRoute(link.client.id, 'person', person.id)"
                                 class="btn btn-sm mt-1.5"
+                                v-tip="t('tips.related.person.compareWith', { name: link.client.full_name })"
                                 ><AppIcon name="compare" />{{
                                     t('related.person.compareWith', { name: link.client.full_name })
                                 }}</RouterLink

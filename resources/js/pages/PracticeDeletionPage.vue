@@ -58,7 +58,13 @@ async function signOut() {
 
     <template v-if="auth.isOwner">
         <p class="mb-3">{{ t('practiceDeletion.ownerHint') }}</p>
-        <button class="btn btn-primary mb-5 w-full" type="button" :disabled="busy" @click="cancel">
+        <button
+            class="btn btn-primary mb-5 w-full"
+            type="button"
+            :disabled="busy"
+            @click="cancel"
+            v-tip="t('tips.practiceDeletion.cancel')"
+        >
             <AppIcon name="reset" />
             {{ t('practiceDeletion.cancel') }}
         </button>
@@ -66,7 +72,7 @@ async function signOut() {
     </template>
     <p v-else class="mb-5 text-ink-3">{{ t('practiceDeletion.memberHint') }}</p>
 
-    <button class="btn btn-ghost w-full" type="button" @click="signOut">
+    <button class="btn btn-ghost w-full" type="button" @click="signOut" v-tip="t('tips.practiceDeletion.signOut')">
         <AppIcon name="signOut" />{{ t('practiceDeletion.signOut') }}
     </button>
 </template>

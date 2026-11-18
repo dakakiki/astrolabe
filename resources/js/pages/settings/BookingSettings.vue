@@ -310,7 +310,12 @@ async function save() {
                     />
                 </FormField>
 
-                <button class="btn btn-primary" type="submit" :disabled="form.processing.value">
+                <button
+                    class="btn btn-primary"
+                    type="submit"
+                    :disabled="form.processing.value"
+                    v-tip="t('tips.common.save')"
+                >
                     <AppIcon name="save" />
                     {{ t('common.save') }}
                 </button>

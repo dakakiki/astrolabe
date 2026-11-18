@@ -151,11 +151,22 @@ async function save() {
                 </div>
 
                 <div class="flex flex-wrap gap-2">
-                    <button class="btn btn-primary" type="submit" :disabled="orbs.processing.value">
+                    <button
+                        class="btn btn-primary"
+                        type="submit"
+                        :disabled="orbs.processing.value"
+                        v-tip="t('tips.common.save')"
+                    >
                         <AppIcon name="save" />
                         {{ t('common.save') }}
                     </button>
-                    <button class="btn btn-ghost" type="button" :disabled="!defaults" @click="restore">
+                    <button
+                        class="btn btn-ghost"
+                        type="button"
+                        :disabled="!defaults"
+                        @click="restore"
+                        v-tip="t('tips.settings.orbs.reset')"
+                    >
                         <AppIcon name="reset" />
                         {{ t('settings.orbs.reset') }}
                     </button>

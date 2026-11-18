@@ -36,6 +36,7 @@ async function signOut() {
             type="button"
             class="btn w-full justify-start gap-3 py-3"
             :aria-current="practice.id === session.currentPracticeId ? 'true' : undefined"
+            v-tip="t('tips.portal.choose.open')"
             @click="open(practice)"
         >
             <PracticeMark :practice="practice" />

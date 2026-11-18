@@ -23,6 +23,11 @@ before starting a phase. The user communicates in Serbian.
   is already there ("save", "delete", "addAppointment" …) before adding a new one; a new Lucide
   icon is imported there and nowhere else. A button with only an icon keeps its `aria-label`.
   `tests/js/icons.test.js` fails on a `.btn` without an icon or an unknown name.
+- Every button also gets a tooltip: `v-tip="t('tips.<its label key>')"` (global directive from
+  `resources/js/lib/tooltip.js`; texts under `tips` in `i18n/locales/en.json` and, for the
+  portal, `portal/locales/en.json`). The tip says what happens, not the label again ("Add a new
+  consultation for this client"). No `title` on buttons — it would show a second tooltip.
+  `tests/js/tooltips.test.js` fails on a button without `v-tip` or a tip key with no text.
 
 ## Multi-tenancy
 

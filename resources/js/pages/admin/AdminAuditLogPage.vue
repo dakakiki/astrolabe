@@ -82,10 +82,10 @@ onMounted(() => load());
                 <input v-model="filters.warnings" type="checkbox" />
                 {{ t('admin.audit.filters.warnings') }}
             </label>
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" v-tip="t('tips.admin.common.filter')">
                 <AppIcon name="filter" />{{ t('admin.common.filter') }}
             </button>
-            <button type="button" class="btn btn-ghost" @click="clear">
+            <button type="button" class="btn btn-ghost" @click="clear" v-tip="t('tips.admin.common.clear')">
                 <AppIcon name="clearFilter" />{{ t('admin.common.clear') }}
             </button>
         </form>

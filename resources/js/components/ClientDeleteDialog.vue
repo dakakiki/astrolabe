@@ -83,10 +83,15 @@ defineExpose({ open });
                     />
                 </FormField>
                 <div class="flex justify-end gap-2">
-                    <button type="button" class="btn btn-ghost" @click="close">
+                    <button type="button" class="btn btn-ghost" @click="close" v-tip="t('tips.common.cancel')">
                         <AppIcon name="cancel" />{{ t('common.cancel') }}
                     </button>
-                    <button type="submit" class="btn btn-danger" :disabled="!matches || form.processing.value">
+                    <button
+                        type="submit"
+                        class="btn btn-danger"
+                        :disabled="!matches || form.processing.value"
+                        v-tip="t('tips.clients.deleteDialog.submit')"
+                    >
                         <AppIcon name="delete" />
                         {{ t('clients.deleteDialog.submit') }}
                     </button>

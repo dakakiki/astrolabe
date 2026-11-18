@@ -32,7 +32,13 @@ function reload() {
                     class="mx-auto flex w-full max-w-[880px] items-center gap-3 px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))]"
                 >
                     <span class="min-w-0 flex-1 text-sm">{{ t('portal.pwa.update.available') }}</span>
-                    <button type="button" class="btn btn-primary btn-sm shrink-0" :disabled="busy" @click="reload">
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm shrink-0"
+                        :disabled="busy"
+                        @click="reload"
+                        v-tip="t('tips.portal.pwa.update.reload')"
+                    >
                         <AppIcon name="reload" />
                         {{ t('portal.pwa.update.reload') }}
                     </button>

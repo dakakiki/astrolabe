@@ -13,7 +13,7 @@ const theme = useThemeStore();
         type="button"
         class="icon-btn"
         :aria-label="theme.theme === 'day' ? t('theme.toNight') : t('theme.toDay')"
-        :title="theme.theme === 'day' ? t('theme.toNight') : t('theme.toDay')"
+        v-tip="theme.theme === 'day' ? t('theme.toNight') : t('theme.toDay')"
         @click="theme.toggle()"
     >
         <AppIcon :name="theme.theme === 'day' ? 'dark' : 'light'" />

@@ -125,11 +125,20 @@ const birthLine = (birth) =>
         <div class="card-head">
             <h2>{{ t('related.title') }}</h2>
             <span class="right flex flex-wrap gap-2">
-                <button type="button" class="btn btn-sm" :aria-expanded="linking" @click="startLinking">
+                <button
+                    type="button"
+                    class="btn btn-sm"
+                    :aria-expanded="linking"
+                    @click="startLinking"
+                    v-tip="t('tips.related.linkClient')"
+                >
                     <AppIcon name="link" />
                     {{ t('related.linkClient') }}
                 </button>
-                <RouterLink :to="{ name: 'related-people.create', params: { clientId } }" class="btn btn-sm btn-primary"
+                <RouterLink
+                    :to="{ name: 'related-people.create', params: { clientId } }"
+                    class="btn btn-sm btn-primary"
+                    v-tip="t('tips.related.add')"
                     ><AppIcon name="addPerson" />{{ t('related.add') }}</RouterLink
                 >
             </span>
@@ -161,11 +170,21 @@ const birthLine = (birth) =>
                 <input :id="id" v-model="linkForm.data.notes" v-bind="aria" class="input" autocomplete="off" />
             </FormField>
             <div class="flex gap-2">
-                <button class="btn btn-primary btn-sm" type="submit" :disabled="!chosen || linkForm.processing.value">
+                <button
+                    class="btn btn-primary btn-sm"
+                    type="submit"
+                    :disabled="!chosen || linkForm.processing.value"
+                    v-tip="t('tips.related.linkForm.save')"
+                >
                     <AppIcon name="save" />
                     {{ t('related.linkForm.save') }}
                 </button>
-                <button type="button" class="btn btn-ghost btn-sm" @click="linking = false">
+                <button
+                    type="button"
+                    class="btn btn-ghost btn-sm"
+                    @click="linking = false"
+                    v-tip="t('tips.related.cancel')"
+                >
                     <AppIcon name="cancel" />
                     {{ t('related.cancel') }}
                 </button>
@@ -245,11 +264,17 @@ const birthLine = (birth) =>
                                     class="btn btn-sm btn-primary"
                                     :disabled="editForm.processing.value"
                                     @click="saveEditing(link)"
+                                    v-tip="t('tips.related.save')"
                                 >
                                     <AppIcon name="save" />
                                     {{ t('related.save') }}
                                 </button>
-                                <button type="button" class="btn btn-sm btn-ghost" @click="editing = null">
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-ghost"
+                                    @click="editing = null"
+                                    v-tip="t('tips.related.cancel')"
+                                >
                                     <AppIcon name="cancel" />
                                     {{ t('related.cancel') }}
                                 </button>
@@ -260,13 +285,24 @@ const birthLine = (birth) =>
                                     :to="synastryRoute(clientId, link.kind, link.party.id)"
                                     class="btn btn-sm"
                                     replace
+                                    v-tip="t('tips.related.compare')"
                                     ><AppIcon name="compare" />{{ t('related.compare') }}</RouterLink
                                 >
-                                <button type="button" class="btn btn-sm" @click="startEditing(link)">
+                                <button
+                                    type="button"
+                                    class="btn btn-sm"
+                                    @click="startEditing(link)"
+                                    v-tip="t('tips.related.edit')"
+                                >
                                     <AppIcon name="edit" />
                                     {{ t('related.edit') }}
                                 </button>
-                                <button type="button" class="btn btn-sm btn-ghost" @click="remove(link)">
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-ghost"
+                                    @click="remove(link)"
+                                    v-tip="t('tips.related.remove')"
+                                >
                                     <AppIcon name="unlink" />
                                     {{ t('related.remove') }}
                                 </button>

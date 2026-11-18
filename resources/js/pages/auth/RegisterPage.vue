@@ -215,7 +215,12 @@ async function reloadLegal() {
                     {{ form.errors.value.accept_terms }}
                 </div>
             </div>
-            <button class="btn btn-primary w-full" type="submit" :disabled="form.processing.value || !acceptTerms">
+            <button
+                class="btn btn-primary w-full"
+                type="submit"
+                :disabled="form.processing.value || !acceptTerms"
+                v-tip="t('tips.auth.register.submit')"
+            >
                 <AppIcon name="register" />
                 {{ t('auth.register.submit') }}
             </button>

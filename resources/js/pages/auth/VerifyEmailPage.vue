@@ -50,7 +50,13 @@ async function signOut() {
     <h2>{{ t('auth.verify.title') }}</h2>
     <div class="sub">{{ t('auth.verify.sub', { email: auth.user?.email }) }}</div>
 
-    <button class="btn btn-primary w-full" type="button" :disabled="resend.processing.value" @click="sendAgain">
+    <button
+        class="btn btn-primary w-full"
+        type="button"
+        :disabled="resend.processing.value"
+        @click="sendAgain"
+        v-tip="t('tips.auth.verify.resend')"
+    >
         <AppIcon name="send" />
         {{ t('auth.verify.resend') }}
     </button>
@@ -70,11 +76,16 @@ async function signOut() {
             />
         </FormField>
         <div class="flex gap-2">
-            <button class="btn" type="submit" :disabled="emailForm.processing.value">
+            <button
+                class="btn"
+                type="submit"
+                :disabled="emailForm.processing.value"
+                v-tip="t('tips.auth.verify.updateEmail')"
+            >
                 <AppIcon name="send" />
                 {{ t('auth.verify.updateEmail') }}
             </button>
-            <button class="btn btn-ghost" type="button" @click="changingEmail = false">
+            <button class="btn btn-ghost" type="button" @click="changingEmail = false" v-tip="t('tips.common.cancel')">
                 <AppIcon name="cancel" />{{ t('common.cancel') }}
             </button>
         </div>

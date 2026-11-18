@@ -46,6 +46,7 @@ function onKeydown(event) {
                 type="button"
                 class="cursor-pointer text-ink-4 hover:text-danger"
                 :aria-label="`× ${tag}`"
+                v-tip="t('tips.tags.remove')"
                 @click="remove(tag)"
             >
                 <AppIcon name="close" />

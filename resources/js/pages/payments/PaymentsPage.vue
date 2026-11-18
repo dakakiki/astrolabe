@@ -207,13 +207,13 @@ const held = (consultation) =>
                 type="button"
                 class="btn"
                 :disabled="exporting || !payments.length"
-                :title="t('payments.csvHint')"
+                v-tip="t('payments.csvHint')"
                 @click="exportCsv"
             >
                 <AppIcon name="export" />
                 {{ t('payments.export') }}
             </button>
-            <button type="button" class="btn btn-primary" @click="openForm()">
+            <button type="button" class="btn btn-primary" @click="openForm()" v-tip="t('tips.payments.record')">
                 <AppIcon name="payment" />{{ t('payments.record') }}
             </button>
         </div>
@@ -288,7 +288,12 @@ const held = (consultation) =>
                 </label>
                 <span v-if="clientId && clientName" class="tag mb-1 inline-flex items-center gap-1.5">
                     {{ clientName }}
-                    <button type="button" :aria-label="t('common.close')" @click="clearClient">
+                    <button
+                        type="button"
+                        :aria-label="t('common.close')"
+                        @click="clearClient"
+                        v-tip="t('tips.common.close')"
+                    >
                         <AppIcon name="close" />
                     </button>
                 </span>
@@ -327,6 +332,7 @@ const held = (consultation) =>
                     class="btn btn-sm"
                     :disabled="loading"
                     @click="loadPayments(meta.current_page + 1)"
+                    v-tip="t('tips.common.more')"
                 >
                     <AppIcon name="more" />
                     {{ t('common.more') }}
@@ -396,7 +402,12 @@ const held = (consultation) =>
                                 {{ money.format(consultation.billing.balance) }}
                             </td>
                             <td class="text-right">
-                                <button type="button" class="btn btn-sm" @click="openForm({ consultation })">
+                                <button
+                                    type="button"
+                                    class="btn btn-sm"
+                                    @click="openForm({ consultation })"
+                                    v-tip="t('tips.payments.record')"
+                                >
                                     <AppIcon name="payment" />
                                     {{ t('payments.record') }}
                                 </button>

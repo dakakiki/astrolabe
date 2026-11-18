@@ -42,7 +42,12 @@ async function submit() {
                 required
             />
         </FormField>
-        <button class="btn btn-primary w-full" type="submit" :disabled="form.processing.value">
+        <button
+            class="btn btn-primary w-full"
+            type="submit"
+            :disabled="form.processing.value"
+            v-tip="t('tips.auth.forgot.submit')"
+        >
             <AppIcon name="send" />
             {{ t('auth.forgot.submit') }}
         </button>

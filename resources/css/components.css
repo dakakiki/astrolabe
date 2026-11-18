@@ -467,6 +467,42 @@
         height: 20px;
     }
 
+    /* Tooltip (lib/tooltip.js, v-tip): one bubble on <body>, in the sidebar's dark colours in
+       both themes, placed by script above (or below) the button. */
+    .tooltip {
+        position: fixed;
+        z-index: 200;
+        max-width: 260px;
+        padding: 6px 9px;
+        border: 1px solid var(--shell-2);
+        border-radius: 6px;
+        background: var(--shell);
+        color: #fff;
+        box-shadow: var(--shadow);
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 1.4;
+        text-align: center;
+        pointer-events: none;
+        animation: tooltip-in 0.12s ease-out;
+    }
+
+    .tooltip[hidden] {
+        display: none;
+    }
+
+    @keyframes tooltip-in {
+        from {
+            opacity: 0;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .tooltip {
+            animation: none;
+        }
+    }
+
     .btn-danger {
         color: var(--danger);
         border-color: var(--danger);

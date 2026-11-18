@@ -132,6 +132,7 @@ async function removeLogo() {
                             type="button"
                             class="btn btn-ghost btn-sm"
                             @click="form.data.brand_color = ''"
+                            v-tip="t('tips.settings.branding.useDefault')"
                         >
                             <AppIcon name="reset" />
                             {{ t('settings.branding.useDefault') }}
@@ -156,7 +157,12 @@ async function removeLogo() {
                     }}</span>
                 </div>
 
-                <button class="btn btn-primary" type="submit" :disabled="form.processing.value">
+                <button
+                    class="btn btn-primary"
+                    type="submit"
+                    :disabled="form.processing.value"
+                    v-tip="t('tips.common.save')"
+                >
                     <AppIcon name="save" />
                     {{ t('common.save') }}
                 </button>
@@ -178,7 +184,14 @@ async function removeLogo() {
                 />
                 <p v-else class="text-sm text-ink-3">{{ t('settings.branding.noLogo') }}</p>
                 <div v-if="auth.isOwner" class="flex flex-wrap gap-2">
-                    <label class="btn btn-sm" :class="{ 'pointer-events-none opacity-60': uploading }"
+                    <label
+                        class="btn btn-sm"
+                        :class="{ 'pointer-events-none opacity-60': uploading }"
+                        v-tip="
+                            auth.workspace.logo_url
+                                ? t('tips.settings.branding.replaceLogo')
+                                : t('tips.settings.branding.uploadLogo')
+                        "
                         ><AppIcon name="upload" />
                         {{
                             auth.workspace.logo_url
@@ -192,6 +205,7 @@ async function removeLogo() {
                         type="button"
                         class="btn btn-sm btn-ghost text-danger"
                         @click="removeLogo"
+                        v-tip="t('tips.settings.branding.removeLogo')"
                     >
                         <AppIcon name="delete" />
                         {{ t('settings.branding.removeLogo') }}
@@ -244,7 +258,12 @@ async function removeLogo() {
                             {{ t('settings.branding.sampleText') }}
                             <a href="#" @click.prevent>{{ t('settings.branding.sampleLink') }}</a>
                         </p>
-                        <button type="button" class="btn btn-primary btn-sm" tabindex="-1">
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm"
+                            tabindex="-1"
+                            v-tip="t('tips.settings.branding.sampleButton')"
+                        >
                             <AppIcon name="confirm" />
                             {{ t('settings.branding.sampleButton') }}
                         </button>

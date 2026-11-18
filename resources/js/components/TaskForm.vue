@@ -108,6 +108,7 @@ async function save() {
                 class="btn btn-ghost btn-sm right"
                 :aria-label="t('common.close')"
                 @click="emit('cancel')"
+                v-tip="t('tips.common.close')"
             >
                 <AppIcon name="close" />
             </button>
@@ -136,7 +137,12 @@ async function save() {
                 <ClientPicker :input-id="id" :aria="aria" :selected="chosen?.full_name" @select="chosen = $event" />
                 <p v-if="chosen" class="mt-1.5 flex items-center gap-2 text-xs text-ink-3">
                     ✓ {{ chosen.full_name }}
-                    <button type="button" class="btn btn-ghost btn-sm" @click="chosen = null">
+                    <button
+                        type="button"
+                        class="btn btn-ghost btn-sm"
+                        @click="chosen = null"
+                        v-tip="t('tips.tasks.form.removeClient')"
+                    >
                         <AppIcon name="close" />
                         {{ t('tasks.form.removeClient') }}
                     </button>
@@ -207,11 +213,22 @@ async function save() {
             </FormField>
 
             <div class="flex justify-end gap-2">
-                <button v-if="closable || editing" type="button" class="btn btn-ghost" @click="emit('cancel')">
+                <button
+                    v-if="closable || editing"
+                    type="button"
+                    class="btn btn-ghost"
+                    @click="emit('cancel')"
+                    v-tip="t('tips.common.cancel')"
+                >
                     <AppIcon name="cancel" />
                     {{ t('common.cancel') }}
                 </button>
-                <button type="submit" class="btn btn-primary" :disabled="form.processing.value">
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    :disabled="form.processing.value"
+                    v-tip="editing ? t('tips.tasks.form.save') : t('tips.tasks.form.create')"
+                >
                     <AppIcon name="save" />
                     {{ editing ? t('tasks.form.save') : t('tasks.form.create') }}
                 </button>

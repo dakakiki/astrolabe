@@ -81,7 +81,10 @@ function clear() {
             <h1>{{ t('consultations.title') }}</h1>
             <div class="sub">{{ t('consultations.sub') }}</div>
         </div>
-        <RouterLink :to="{ name: 'consultations.create' }" class="btn btn-primary ml-auto"
+        <RouterLink
+            :to="{ name: 'consultations.create' }"
+            class="btn btn-primary ml-auto"
+            v-tip="t('tips.consultations.add')"
             ><AppIcon name="addConsultation" />{{ t('consultations.add') }}</RouterLink
         >
     </div>
@@ -136,7 +139,13 @@ function clear() {
                     @change="setFilter('to', $event.target.value)"
                 />
             </label>
-            <button v-if="hasFilters" type="button" class="btn btn-ghost btn-sm" @click="clear">
+            <button
+                v-if="hasFilters"
+                type="button"
+                class="btn btn-ghost btn-sm"
+                @click="clear"
+                v-tip="t('tips.consultations.filters.clear')"
+            >
                 <AppIcon name="clearFilter" />
                 {{ t('consultations.filters.clear') }}
             </button>

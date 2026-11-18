@@ -164,12 +164,19 @@ async function dismissPrivacyNotice() {
                     aria-controls="sidebar"
                     :aria-expanded="sidebarOpen"
                     @click="sidebarOpen = !sidebarOpen"
+                    v-tip="t('tips.nav.openMenu')"
                 >
                     <AppIcon name="menu" />
                 </button>
                 <span v-if="auth.isAdmin" class="badge b-warn">{{ t('admin.badge') }}</span>
                 <div class="flex-1" />
-                <button v-if="!auth.isAdmin" type="button" class="btn btn-ghost btn-sm" @click="feedbackDialog.open()">
+                <button
+                    v-if="!auth.isAdmin"
+                    type="button"
+                    class="btn btn-ghost btn-sm"
+                    @click="feedbackDialog.open()"
+                    v-tip="t('tips.nav.feedback')"
+                >
                     <AppIcon name="feedback" />
                     {{ t('nav.feedback') }}
                 </button>
@@ -183,6 +190,7 @@ async function dismissPrivacyNotice() {
                         aria-haspopup="menu"
                         :aria-expanded="menuOpen"
                         @click="menuOpen = !menuOpen"
+                        v-tip="t('tips.nav.userMenu')"
                     >
                         {{ initials }}
                     </button>
@@ -197,7 +205,7 @@ async function dismissPrivacyNotice() {
                         <RouterLink v-else to="/settings" role="menuitem">
                             <AppIcon name="settings" />{{ t('nav.settings') }}
                         </RouterLink>
-                        <button type="button" role="menuitem" @click="signOut">
+                        <button type="button" role="menuitem" @click="signOut" v-tip="t('tips.nav.signOut')">
                             <AppIcon name="signOut" />{{ t('nav.signOut') }}
                         </button>
                     </div>
@@ -211,7 +219,12 @@ async function dismissPrivacyNotice() {
                             t('legal.privacyRead')
                         }}</RouterLink>
                     </div>
-                    <button type="button" class="btn btn-ghost btn-sm" @click="dismissPrivacyNotice">
+                    <button
+                        type="button"
+                        class="btn btn-ghost btn-sm"
+                        @click="dismissPrivacyNotice"
+                        v-tip="t('tips.legal.privacyDismiss')"
+                    >
                         <AppIcon name="confirm" />
                         {{ t('legal.privacyDismiss') }}
                     </button>

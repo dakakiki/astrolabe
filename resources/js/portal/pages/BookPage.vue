@@ -282,7 +282,7 @@ function rule(line) {
         <p class="text-sm text-ink-2">
             {{ booking.enabled ? t('portal.booking.noServices') : t('portal.booking.disabled') }}
         </p>
-        <RouterLink :to="{ name: 'home' }" class="btn btn-sm mt-4"
+        <RouterLink :to="{ name: 'home' }" class="btn btn-sm mt-4" v-tip="t('tips.portal.booking.backHome')"
             ><AppIcon name="home" />{{ t('portal.booking.backHome') }}</RouterLink
         >
     </section>
@@ -302,7 +302,11 @@ function rule(line) {
 
         <div v-if="notice" class="notice mb-4 flex-wrap items-center" :class="notice.tone" role="alert">
             <span class="min-w-0 flex-1">{{ notice.text }}</span>
-            <RouterLink v-if="notice.appointments" :to="{ name: 'appointments' }" class="btn btn-sm"
+            <RouterLink
+                v-if="notice.appointments"
+                :to="{ name: 'appointments' }"
+                class="btn btn-sm"
+                v-tip="t('tips.portal.booking.seeAppointments')"
                 ><AppIcon name="calendar" />{{ t('portal.booking.seeAppointments') }}</RouterLink
             >
         </div>
@@ -330,7 +334,12 @@ function rule(line) {
             <div class="card-body">
                 <div v-if="listed === null && slotsFailed" class="flex flex-wrap items-center gap-3">
                     <span class="text-sm text-ink-3">{{ t('portal.errors.generic') }}</span>
-                    <button type="button" class="btn btn-sm" @click="loadSlots(service.id)">
+                    <button
+                        type="button"
+                        class="btn btn-sm"
+                        @click="loadSlots(service.id)"
+                        v-tip="t('tips.portal.booking.retry')"
+                    >
                         <AppIcon name="retry" />
                         {{ t('portal.booking.retry') }}
                     </button>
@@ -348,7 +357,13 @@ function rule(line) {
                 v-if="listed?.length"
                 class="card-body book-next flex flex-wrap items-center gap-3 border-t border-line-soft"
             >
-                <button type="button" class="btn btn-primary" :disabled="!chosen" @click="next">
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    :disabled="!chosen"
+                    @click="next"
+                    v-tip="t('tips.portal.booking.continue')"
+                >
                     {{ t('portal.booking.continue') }}<AppIcon name="continue" />
                 </button>
                 <span v-if="pickedWhen" class="text-sm text-ink-2"
@@ -423,7 +438,14 @@ function rule(line) {
                     <li v-if="booking.requires_confirmation">{{ t('portal.booking.requestHint') }}</li>
                 </ul>
 
-                <button type="submit" class="btn btn-primary" :disabled="busy">
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    :disabled="busy"
+                    v-tip="
+                        booking.requires_confirmation ? t('tips.portal.booking.request') : t('tips.portal.booking.book')
+                    "
+                >
                     <AppIcon :name="booking.requires_confirmation ? 'send' : 'confirm'" />
                     {{ booking.requires_confirmation ? t('portal.booking.request') : t('portal.booking.book') }}
                 </button>
@@ -439,7 +461,10 @@ function rule(line) {
                     }}</strong>
                 </div>
                 <AppointmentItem :appointment="booked" :time-zone="zone" />
-                <RouterLink :to="{ name: 'appointments' }" class="btn btn-primary mt-4"
+                <RouterLink
+                    :to="{ name: 'appointments' }"
+                    class="btn btn-primary mt-4"
+                    v-tip="t('tips.portal.booking.seeAppointments')"
                     ><AppIcon name="calendar" />{{ t('portal.booking.seeAppointments') }}</RouterLink
                 >
             </div>

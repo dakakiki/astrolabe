@@ -90,9 +90,14 @@ function host(url) {
                         target="_blank"
                         rel="noopener noreferrer"
                         class="btn btn-sm"
+                        v-tip="t('tips.portal.shared.open')"
                         ><AppIcon name="external" />{{ t('portal.shared.open') }}</a
                     >
-                    <a v-else :href="`/api/portal/v1/files/${item.id}/download`" class="btn btn-sm"
+                    <a
+                        v-else
+                        :href="`/api/portal/v1/files/${item.id}/download`"
+                        class="btn btn-sm"
+                        v-tip="t('tips.portal.shared.download')"
                         ><AppIcon name="download" />{{ t('portal.shared.download') }}</a
                     >
                 </div>

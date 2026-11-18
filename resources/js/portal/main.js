@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 
+import { tip } from '@/lib/tooltip';
 import PortalApp from '@/portal/PortalApp.vue';
 import { setNoPracticeHandler, setUnauthenticatedHandler } from '@/portal/http';
 import i18n from '@/portal/i18n';
@@ -17,7 +18,7 @@ import { useSessionStore } from '@/portal/stores/session';
 // Phase 9c: the browser may say the portal can be installed right after loading — listen first.
 captureInstallPrompt();
 
-const app = createApp(PortalApp).use(createPinia()).use(router).use(i18n);
+const app = createApp(PortalApp).use(createPinia()).use(router).use(i18n).directive('tip', tip);
 
 const session = useSessionStore();
 const pwa = usePwaStore();

@@ -185,7 +185,7 @@ const glyph = { image: '▣', pdf: '▤', document: '▤', audio: '♫', video: 
                         {{ t(`visibility.${value}`) }}
                     </option>
                 </select>
-                <button type="button" class="btn btn-sm" @click="showLink = !showLink">
+                <button type="button" class="btn btn-sm" @click="showLink = !showLink" v-tip="t('tips.files.addLink')">
                     <AppIcon name="link" />{{ t('files.addLink') }}
                 </button>
             </div>
@@ -214,7 +214,9 @@ const glyph = { image: '▣', pdf: '▤', document: '▤', audio: '♫', video: 
                     :placeholder="t('files.linkTitlePlaceholder')"
                 />
             </div>
-            <button type="submit" class="btn btn-primary"><AppIcon name="save" />{{ t('files.linkSave') }}</button>
+            <button type="submit" class="btn btn-primary" v-tip="t('tips.files.linkSave')">
+                <AppIcon name="save" />{{ t('files.linkSave') }}
+            </button>
         </form>
 
         <!-- A narrow column (the consultation page) gets a list instead of the table. -->
@@ -262,9 +264,16 @@ const glyph = { image: '▣', pdf: '▤', document: '▤', audio: '♫', video: 
                             target="_blank"
                             rel="noopener"
                             class="btn btn-ghost btn-sm"
+                            v-tip="t('tips.files.open')"
                             ><AppIcon name="external" />{{ t('files.open') }}</a
                         >
-                        <button v-if="item.can_edit" type="button" class="btn btn-ghost btn-sm" @click="remove(item)">
+                        <button
+                            v-if="item.can_edit"
+                            type="button"
+                            class="btn btn-ghost btn-sm"
+                            @click="remove(item)"
+                            v-tip="t('tips.files.remove')"
+                        >
                             <AppIcon name="delete" />
                             {{ t('files.remove') }}
                         </button>
@@ -354,6 +363,7 @@ const glyph = { image: '▣', pdf: '▤', document: '▤', audio: '♫', video: 
                                 target="_blank"
                                 rel="noopener"
                                 class="btn btn-ghost btn-sm"
+                                v-tip="t('tips.files.open')"
                                 ><AppIcon name="external" />{{ t('files.open') }}</a
                             >
                             <button
@@ -361,6 +371,7 @@ const glyph = { image: '▣', pdf: '▤', document: '▤', audio: '♫', video: 
                                 type="button"
                                 class="btn btn-ghost btn-sm"
                                 @click="remove(item)"
+                                v-tip="t('tips.files.remove')"
                             >
                                 <AppIcon name="delete" />
                                 {{ t('files.remove') }}

@@ -123,7 +123,7 @@ async function save() {
                     <option v-for="item in profile.locales" :key="item.code" :value="item.code">{{ item.name }}</option>
                 </select>
             </FormField>
-            <button class="btn btn-primary" type="submit" :disabled="busy">
+            <button class="btn btn-primary" type="submit" :disabled="busy" v-tip="t('tips.common.save')">
                 <AppIcon name="save" />{{ t('common.save') }}
             </button>
         </form>

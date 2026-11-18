@@ -96,7 +96,12 @@ async function signOutOthers() {
                     />
                 </FormField>
             </div>
-            <button class="btn btn-primary" type="submit" :disabled="password.processing.value">
+            <button
+                class="btn btn-primary"
+                type="submit"
+                :disabled="password.processing.value"
+                v-tip="t('tips.common.save')"
+            >
                 <AppIcon name="save" />
                 {{ t('common.save') }}
             </button>
@@ -129,7 +134,12 @@ async function signOutOthers() {
                             />
                         </FormField>
                     </div>
-                    <button class="btn btn-danger mb-3.5" type="submit" :disabled="sessions.processing.value">
+                    <button
+                        class="btn btn-danger mb-3.5"
+                        type="submit"
+                        :disabled="sessions.processing.value"
+                        v-tip="t('tips.settings.security.sessionsSubmit')"
+                    >
                         <AppIcon name="signOut" />
                         {{ t('settings.security.sessionsSubmit') }}
                     </button>

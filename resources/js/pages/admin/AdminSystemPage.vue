@@ -193,6 +193,7 @@ onMounted(load);
                                     class="btn btn-sm"
                                     :disabled="busy === job.uuid"
                                     @click="act(job, 'retry')"
+                                    v-tip="t('tips.admin.system.retry')"
                                 >
                                     <AppIcon name="retry" />
                                     {{ t('admin.system.retry') }}
@@ -202,6 +203,7 @@ onMounted(load);
                                     class="btn btn-ghost btn-sm text-danger"
                                     :disabled="busy === job.uuid"
                                     @click="act(job, 'forget')"
+                                    v-tip="t('tips.admin.system.forget')"
                                 >
                                     <AppIcon name="delete" />
                                     {{ t('admin.system.forget') }}

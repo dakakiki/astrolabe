@@ -282,6 +282,7 @@ async function save() {
                         type="button"
                         class="btn btn-ghost btn-sm mt-1"
                         @click="showAllMethods = true"
+                        v-tip="t('tips.clients.form.showAllMethods')"
                     >
                         <AppIcon name="more" />
                         {{ t('clients.form.showAllMethods') }}
@@ -314,13 +315,19 @@ async function save() {
         </section>
 
         <div class="flex gap-2">
-            <button class="btn btn-primary" type="submit" :disabled="form.processing.value">
+            <button
+                class="btn btn-primary"
+                type="submit"
+                :disabled="form.processing.value"
+                v-tip="t('tips.clients.form.save')"
+            >
                 <AppIcon name="save" />
                 {{ t('clients.form.save') }}
             </button>
             <RouterLink
                 :to="clientId ? { name: 'clients.show', params: { id: clientId } } : { name: 'clients.index' }"
                 class="btn btn-ghost"
+                v-tip="t('tips.clients.form.cancel')"
                 ><AppIcon name="cancel" />{{ t('clients.form.cancel') }}</RouterLink
             >
         </div>

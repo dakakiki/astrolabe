@@ -85,7 +85,12 @@ async function savePractice() {
                     </select>
                 </FormField>
             </div>
-            <button class="btn btn-primary" type="submit" :disabled="mine.processing.value">
+            <button
+                class="btn btn-primary"
+                type="submit"
+                :disabled="mine.processing.value"
+                v-tip="t('tips.common.save')"
+            >
                 <AppIcon name="save" />
                 {{ t('common.save') }}
             </button>
@@ -134,7 +139,12 @@ async function savePractice() {
                         </select>
                     </FormField>
                 </div>
-                <button class="btn btn-primary" type="submit" :disabled="practice.processing.value">
+                <button
+                    class="btn btn-primary"
+                    type="submit"
+                    :disabled="practice.processing.value"
+                    v-tip="t('tips.common.save')"
+                >
                     <AppIcon name="save" />
                     {{ t('common.save') }}
                 </button>

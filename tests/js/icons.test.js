@@ -1,59 +1,8 @@
-import { readdirSync, readFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
 import { describe, expect, it } from 'vitest';
 
 import { icons } from '@/lib/icons';
 
-const root = fileURLToPath(new URL('../../', import.meta.url));
-
-function vueFiles(dir) {
-    return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-        const path = join(dir, entry.name);
-        if (entry.isDirectory()) return vueFiles(path);
-        return entry.name.endsWith('.vue') ? [path] : [];
-    });
-}
-
-const files = vueFiles(join(root, 'resources/js')).map((path) => ({
-    name: relative(root, path).replace(/\\/g, '/'),
-    source: readFileSync(path, 'utf8'),
-}));
-
-// End of the opening tag that starts at `start`, skipping ">" inside attribute values.
-function openTagEnd(source, start) {
-    let quote = null;
-    for (let i = start + 1; i < source.length; i++) {
-        const c = source[i];
-        if (quote) {
-            if (c === quote) quote = null;
-        } else if (c === '"' || c === "'") {
-            quote = c;
-        } else if (c === '>') {
-            return i + 1;
-        }
-    }
-    return -1;
-}
-
-// Every element with the .btn class: buttons, links styled as buttons, upload labels.
-function buttons(source) {
-    const found = [];
-    const template = source.indexOf('<template');
-    const tags = /<(button|RouterLink|a|label)(?=[\s>])/g;
-    let match;
-    while ((match = tags.exec(source))) {
-        if (match.index < template) continue;
-        const end = openTagEnd(source, match.index);
-        const open = source.slice(match.index, end);
-        const classes = (open.match(/\sclass="([^"]*)"/) || [])[1] ?? '';
-        if (open.endsWith('/>') || !/(?:^|\s)btn(?:\s|$)/.test(classes)) continue;
-        const inner = source.slice(end, source.indexOf(`</${match[1]}`, end));
-        found.push({ line: source.slice(0, match.index).split('\n').length, inner });
-    }
-    return found;
-}
+import { elements as buttons, files } from './helpers/templates';
 
 // Buttons whose content is the choice itself — a time slot, a practice with its logo.
 const WITHOUT_ICON = [

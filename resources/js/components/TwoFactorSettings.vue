@@ -199,10 +199,15 @@ function closeCodes() {
                             />
                         </FormField>
                     </div>
-                    <button class="btn btn-primary mb-3.5" type="submit" :disabled="password.processing.value">
+                    <button
+                        class="btn btn-primary mb-3.5"
+                        type="submit"
+                        :disabled="password.processing.value"
+                        v-tip="t('tips.settings.security.twoFactor.continue')"
+                    >
                         {{ t('settings.security.twoFactor.continue') }}<AppIcon name="continue" />
                     </button>
-                    <button class="btn mb-3.5" type="button" @click="step = 'idle'">
+                    <button class="btn mb-3.5" type="button" @click="step = 'idle'" v-tip="t('tips.common.cancel')">
                         <AppIcon name="cancel" />{{ t('common.cancel') }}
                     </button>
                 </div>
@@ -236,11 +241,22 @@ function closeCodes() {
                             />
                         </FormField>
                     </div>
-                    <button class="btn btn-primary mb-3.5" type="submit" :disabled="confirmation.processing.value">
+                    <button
+                        class="btn btn-primary mb-3.5"
+                        type="submit"
+                        :disabled="confirmation.processing.value"
+                        v-tip="t('tips.settings.security.twoFactor.confirm')"
+                    >
                         <AppIcon name="confirm" />
                         {{ t('settings.security.twoFactor.confirm') }}
                     </button>
-                    <button class="btn mb-3.5" type="button" :disabled="busy" @click="cancelSetup">
+                    <button
+                        class="btn mb-3.5"
+                        type="button"
+                        :disabled="busy"
+                        @click="cancelSetup"
+                        v-tip="t('tips.common.cancel')"
+                    >
                         <AppIcon name="cancel" />
                         {{ t('common.cancel') }}
                     </button>
@@ -253,28 +269,58 @@ function closeCodes() {
                 <ul class="mb-4 grid grid-cols-1 gap-x-6 gap-y-1 font-mono text-sm select-all sm:grid-cols-2">
                     <li v-for="code in codes" :key="code">{{ code }}</li>
                 </ul>
-                <button class="btn btn-primary" type="button" @click="closeCodes">
+                <button
+                    class="btn btn-primary"
+                    type="button"
+                    @click="closeCodes"
+                    v-tip="t('tips.settings.security.twoFactor.codesDone')"
+                >
                     <AppIcon name="confirm" />
                     {{ t('settings.security.twoFactor.codesDone') }}
                 </button>
             </div>
 
             <div v-else-if="enabled" class="flex flex-wrap gap-2">
-                <button class="btn" type="button" :disabled="busy" @click="withPassword(loadCodes)">
+                <button
+                    class="btn"
+                    type="button"
+                    :disabled="busy"
+                    @click="withPassword(loadCodes)"
+                    v-tip="t('tips.settings.security.twoFactor.showCodes')"
+                >
                     <AppIcon name="key" />
                     {{ t('settings.security.twoFactor.showCodes') }}
                 </button>
-                <button class="btn" type="button" :disabled="busy" @click="renewCodes">
+                <button
+                    class="btn"
+                    type="button"
+                    :disabled="busy"
+                    @click="renewCodes"
+                    v-tip="t('tips.settings.security.twoFactor.newCodes')"
+                >
                     <AppIcon name="reload" />
                     {{ t('settings.security.twoFactor.newCodes') }}
                 </button>
-                <button class="btn btn-danger" type="button" :disabled="busy" @click="disable">
+                <button
+                    class="btn btn-danger"
+                    type="button"
+                    :disabled="busy"
+                    @click="disable"
+                    v-tip="t('tips.settings.security.twoFactor.disable')"
+                >
                     <AppIcon name="securityOff" />
                     {{ t('settings.security.twoFactor.disable') }}
                 </button>
             </div>
 
-            <button v-else class="btn btn-primary" type="button" :disabled="busy" @click="withPassword(start)">
+            <button
+                v-else
+                class="btn btn-primary"
+                type="button"
+                :disabled="busy"
+                @click="withPassword(start)"
+                v-tip="t('tips.settings.security.twoFactor.enable')"
+            >
                 <AppIcon name="security" />
                 {{ t('settings.security.twoFactor.enable') }}
             </button>

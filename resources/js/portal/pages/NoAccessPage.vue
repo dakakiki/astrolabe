@@ -25,10 +25,10 @@ async function signOut() {
     <h1>{{ t('portal.noAccess.title') }}</h1>
     <p class="sub">{{ t('portal.noAccess.body') }}</p>
     <div class="flex flex-wrap gap-2">
-        <RouterLink :to="{ name: 'security' }" class="btn"
+        <RouterLink :to="{ name: 'security' }" class="btn" v-tip="t('tips.portal.nav.security')"
             ><AppIcon name="security" />{{ t('portal.nav.security') }}</RouterLink
         >
-        <button type="button" class="btn btn-primary" @click="signOut">
+        <button type="button" class="btn btn-primary" @click="signOut" v-tip="t('tips.portal.nav.signOut')">
             <AppIcon name="signOut" />{{ t('portal.nav.signOut') }}
         </button>
     </div>

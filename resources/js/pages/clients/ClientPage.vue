@@ -225,14 +225,14 @@ function deleted() {
                     :to="{ name: 'calendar', query: { new: 1, client: client.id } }"
                     class="btn"
                     :aria-label="t('clients.newAppointment')"
-                    :title="t('clients.newAppointment')"
+                    v-tip="t('tips.clients.addAppointment')"
                     ><AppIcon name="addAppointment" />{{ t('clients.addAppointment') }}</RouterLink
                 >
                 <RouterLink
                     :to="{ name: 'consultations.create', query: { client: client.id } }"
                     class="btn btn-primary"
                     :aria-label="t('clients.newConsultation')"
-                    :title="t('clients.newConsultation')"
+                    v-tip="t('tips.clients.addConsultation')"
                     ><AppIcon name="addConsultation" />{{ t('clients.addConsultation') }}</RouterLink
                 >
             </div>
@@ -398,13 +398,23 @@ function deleted() {
                     </div>
                     <div class="card-body manage-actions">
                         <div>
-                            <RouterLink :to="{ name: 'clients.edit', params: { id: client.id } }" class="btn btn-sm"
+                            <RouterLink
+                                :to="{ name: 'clients.edit', params: { id: client.id } }"
+                                class="btn btn-sm"
+                                v-tip="t('tips.clients.manage.edit')"
                                 ><AppIcon name="edit" />{{ t('clients.manage.edit') }}</RouterLink
                             >
                             <p>{{ t('clients.manage.editHint') }}</p>
                         </div>
                         <div>
-                            <button type="button" class="btn btn-sm" @click="toggleArchive">
+                            <button
+                                type="button"
+                                class="btn btn-sm"
+                                @click="toggleArchive"
+                                v-tip="
+                                    client.status === 'archived' ? t('tips.clients.restore') : t('tips.clients.archive')
+                                "
+                            >
                                 <AppIcon :name="client.status === 'archived' ? 'unarchive' : 'archive'" />
                                 {{ client.status === 'archived' ? t('clients.restore') : t('clients.archive') }}
                             </button>
@@ -417,7 +427,12 @@ function deleted() {
                             </p>
                         </div>
                         <div v-if="auth.isOwner" class="danger">
-                            <button type="button" class="btn btn-sm btn-danger" @click="deleteDialog.open()">
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-danger"
+                                @click="deleteDialog.open()"
+                                v-tip="t('tips.clients.deletePermanently')"
+                            >
                                 <AppIcon name="delete" />
                                 {{ t('clients.deletePermanently') }}
                             </button>
@@ -484,6 +499,7 @@ function deleted() {
                 <RouterLink
                     :to="{ name: 'consultations.create', query: { client: client.id } }"
                     class="btn btn-sm btn-primary right"
+                    v-tip="t('tips.consultations.add')"
                     ><AppIcon name="addConsultation" />{{ t('consultations.add') }}</RouterLink
                 >
             </div>

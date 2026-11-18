@@ -49,7 +49,7 @@ onMounted(async () => {
                 {{ t('auth.verify.failedHint') }}
             </div>
         </div>
-        <RouterLink :to="{ name: 'verify-email' }" class="btn w-full"
+        <RouterLink :to="{ name: 'verify-email' }" class="btn w-full" v-tip="t('tips.auth.verify.resend')"
             ><AppIcon name="send" />{{ t('auth.verify.resend') }}</RouterLink
         >
     </template>

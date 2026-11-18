@@ -158,7 +158,13 @@ const dateOf = (iso) => formatDateTime(iso, locale.value, report.value.timezone,
                         :aria-describedby="`${id}-zone`"
                         @change="pick($event.target.value)"
                     />
-                    <button type="button" class="btn btn-sm" :disabled="busy" @click="now">
+                    <button
+                        type="button"
+                        class="btn btn-sm"
+                        :disabled="busy"
+                        @click="now"
+                        v-tip="t('tips.transits.now')"
+                    >
                         <AppIcon name="now" />
                         {{ t('transits.now') }}
                     </button>
@@ -183,7 +189,7 @@ const dateOf = (iso) => formatDateTime(iso, locale.value, report.value.timezone,
                         {{ t('clients.missing.title') }}
                         {{ missing.map((key) => t(`clients.missing.${key}`)).join(', ') }}
                         <div class="mt-1.5">
-                            <RouterLink :to="editTo" class="btn btn-sm"
+                            <RouterLink :to="editTo" class="btn btn-sm" v-tip="t('tips.transits.complete')"
                                 ><AppIcon name="addBirthData" />{{ t('transits.complete') }}</RouterLink
                             >
                         </div>

@@ -202,6 +202,7 @@ async function save() {
                 class="btn btn-ghost btn-sm right"
                 :aria-label="t('common.close')"
                 @click="emit('cancel')"
+                v-tip="t('tips.common.close')"
             >
                 <AppIcon name="close" />
             </button>
@@ -346,11 +347,22 @@ async function save() {
             </FormField>
 
             <div class="flex justify-end gap-2">
-                <button v-if="closable || editing" type="button" class="btn btn-ghost" @click="emit('cancel')">
+                <button
+                    v-if="closable || editing"
+                    type="button"
+                    class="btn btn-ghost"
+                    @click="emit('cancel')"
+                    v-tip="t('tips.common.cancel')"
+                >
                     <AppIcon name="cancel" />
                     {{ t('common.cancel') }}
                 </button>
-                <button type="submit" class="btn btn-primary" :disabled="form.processing.value">
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    :disabled="form.processing.value"
+                    v-tip="editing ? t('tips.payments.form.save') : t('tips.payments.form.create')"
+                >
                     <AppIcon name="save" />
                     {{ editing ? t('payments.form.save') : t('payments.form.create') }}
                 </button>

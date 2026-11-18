@@ -82,7 +82,13 @@ async function accept() {
                 {{ t('portal.invitation.switching', { email: session.user.email }) }}
             </div>
             <p class="mb-4 text-sm text-ink-3">{{ t('portal.invitation.forAddress', { email: invitation.email }) }}</p>
-            <button type="button" class="btn btn-primary w-full justify-center" :disabled="busy" @click="accept">
+            <button
+                type="button"
+                class="btn btn-primary w-full justify-center"
+                :disabled="busy"
+                @click="accept"
+                v-tip="t('tips.portal.invitation.accept')"
+            >
                 <AppIcon name="confirm" />
                 {{ t('portal.invitation.accept') }}
             </button>
@@ -93,7 +99,10 @@ async function accept() {
         <template v-else>
             <h1>{{ t(`portal.invitation.states.${state}.title`) }}</h1>
             <p class="sub">{{ t(`portal.invitation.states.${state}.body`, { practice: invitation.practice.name }) }}</p>
-            <RouterLink :to="{ name: 'sign-in' }" class="btn w-full justify-center"
+            <RouterLink
+                :to="{ name: 'sign-in' }"
+                class="btn w-full justify-center"
+                v-tip="t('tips.portal.invitation.signIn')"
                 ><AppIcon name="signIn" />{{ t('portal.invitation.signIn') }}</RouterLink
             >
         </template>
@@ -102,7 +111,10 @@ async function accept() {
     <template v-else>
         <h1>{{ t('portal.invitation.states.missing.title') }}</h1>
         <p class="sub">{{ t('portal.invitation.states.missing.body') }}</p>
-        <RouterLink :to="{ name: 'sign-in' }" class="btn w-full justify-center"
+        <RouterLink
+            :to="{ name: 'sign-in' }"
+            class="btn w-full justify-center"
+            v-tip="t('tips.portal.invitation.signIn')"
             ><AppIcon name="signIn" />{{ t('portal.invitation.signIn') }}</RouterLink
         >
     </template>

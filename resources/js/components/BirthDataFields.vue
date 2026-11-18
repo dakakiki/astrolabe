@@ -102,11 +102,21 @@ async function suggestTimezone() {
                     {{ formatCoordinate(birth.place.longitude, 'lng') }} · {{ birth.place.timezone }}
                 </div>
             </div>
-            <button type="button" class="btn btn-ghost btn-sm" @click="chooseFromList">
+            <button
+                type="button"
+                class="btn btn-ghost btn-sm"
+                @click="chooseFromList"
+                v-tip="t('tips.clients.birth.change')"
+            >
                 <AppIcon name="edit" />
                 {{ t('clients.birth.change') }}
             </button>
-            <button type="button" class="btn btn-ghost btn-sm" @click="enterManually">
+            <button
+                type="button"
+                class="btn btn-ghost btn-sm"
+                @click="enterManually"
+                v-tip="t('tips.clients.birth.enterManually')"
+            >
                 <AppIcon name="keyboard" />
                 {{ t('clients.birth.enterManually') }}
             </button>
@@ -164,13 +174,19 @@ async function suggestTimezone() {
                     class="btn"
                     :disabled="birth.latitude === '' || birth.longitude === ''"
                     @click="suggestTimezone"
+                    v-tip="t('tips.clients.birth.suggestTimezone')"
                 >
                     <AppIcon name="timezone" />
                     {{ t('clients.birth.suggestTimezone') }}
                 </button>
             </div>
         </FormField>
-        <button type="button" class="btn btn-ghost btn-sm mb-3" @click="chooseFromList">
+        <button
+            type="button"
+            class="btn btn-ghost btn-sm mb-3"
+            @click="chooseFromList"
+            v-tip="t('tips.clients.birth.backToList')"
+        >
             <AppIcon name="back" />
             {{ t('clients.birth.backToList') }}
         </button>
@@ -181,7 +197,12 @@ async function suggestTimezone() {
         <FormField v-slot="{ id, aria }" :label="t('clients.birth.place')" :error="error('place_id')">
             <PlaceAutocomplete :input-id="id" :aria="aria" @select="selectPlace" />
         </FormField>
-        <button type="button" class="btn btn-ghost btn-sm -mt-2 mb-3" @click="enterManually">
+        <button
+            type="button"
+            class="btn btn-ghost btn-sm -mt-2 mb-3"
+            @click="enterManually"
+            v-tip="t('tips.clients.birth.enterManually')"
+        >
             <AppIcon name="keyboard" />
             {{ t('clients.birth.enterManually') }}
         </button>

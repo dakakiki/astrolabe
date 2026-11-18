@@ -176,7 +176,12 @@ async function deleteMethod(method) {
                         </select>
                     </FormField>
                 </div>
-                <button class="btn btn-primary" type="submit" :disabled="defaults.processing.value">
+                <button
+                    class="btn btn-primary"
+                    type="submit"
+                    :disabled="defaults.processing.value"
+                    v-tip="t('tips.common.save')"
+                >
                     <AppIcon name="save" />
                     {{ t('common.save') }}
                 </button>
@@ -226,6 +231,7 @@ async function deleteMethod(method) {
                             type="button"
                             class="btn btn-ghost btn-sm"
                             @click="applySuggestion(method)"
+                            v-tip="t('tips.settings.methods.applySuggestion')"
                         >
                             <AppIcon name="suggest" />
                             {{ t('settings.methods.applySuggestion') }}
@@ -239,6 +245,7 @@ async function deleteMethod(method) {
                             type="button"
                             class="btn btn-ghost btn-sm text-danger"
                             @click="deleteMethod(method)"
+                            v-tip="t('tips.common.delete')"
                         >
                             <AppIcon name="delete" />
                             {{ t('common.delete') }}
@@ -255,6 +262,7 @@ async function deleteMethod(method) {
                     type="button"
                     :disabled="selection.processing.value"
                     @click="saveMethods"
+                    v-tip="t('tips.common.save')"
                 >
                     <AppIcon name="save" />
                     {{ t('common.save') }}
@@ -278,7 +286,12 @@ async function deleteMethod(method) {
                             />
                         </FormField>
                     </div>
-                    <button class="btn mb-3.5" type="submit" :disabled="addForm.processing.value || !addForm.data.name">
+                    <button
+                        class="btn mb-3.5"
+                        type="submit"
+                        :disabled="addForm.processing.value || !addForm.data.name"
+                        v-tip="t('tips.common.add')"
+                    >
                         <AppIcon name="add" />
                         {{ t('common.add') }}
                     </button>

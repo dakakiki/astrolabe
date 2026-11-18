@@ -131,13 +131,25 @@ const body = (key) => ({ glyph: BODY_GLYPHS[key], name: t(`bodies.${key}`) });
             />
         </label>
         <div class="flex gap-1">
-            <button type="button" class="btn btn-sm h-9" :aria-label="t('sky.previous')" @click="shift(-1)">
+            <button
+                type="button"
+                class="btn btn-sm h-9"
+                :aria-label="t('sky.previous')"
+                @click="shift(-1)"
+                v-tip="t('tips.sky.previous')"
+            >
                 <AppIcon name="previous" />
             </button>
-            <button type="button" class="btn btn-sm h-9" @click="go({ from: null })">
+            <button type="button" class="btn btn-sm h-9" @click="go({ from: null })" v-tip="t('tips.sky.today')">
                 <AppIcon name="today" />{{ t('sky.today') }}
             </button>
-            <button type="button" class="btn btn-sm h-9" :aria-label="t('sky.next')" @click="shift(1)">
+            <button
+                type="button"
+                class="btn btn-sm h-9"
+                :aria-label="t('sky.next')"
+                @click="shift(1)"
+                v-tip="t('tips.sky.next')"
+            >
                 <AppIcon name="next" />
             </button>
         </div>

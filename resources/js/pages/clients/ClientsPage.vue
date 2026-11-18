@@ -86,7 +86,7 @@ function born(client) {
             <h1>{{ t('clients.title') }}</h1>
             <div class="sub">{{ t('clients.sub') }}</div>
         </div>
-        <RouterLink :to="{ name: 'clients.create' }" class="btn btn-primary ml-auto"
+        <RouterLink :to="{ name: 'clients.create' }" class="btn btn-primary ml-auto" v-tip="t('tips.clients.add')"
             ><AppIcon name="addClient" />{{ t('clients.add') }}</RouterLink
         >
     </div>

@@ -243,11 +243,16 @@ const incompleteName = computed(() => (report.value?.side === 'client' ? clientN
                 <h3>{{ t('synastry.nobodyTitle') }}</h3>
                 <p class="text-ink-3">{{ t('synastry.nobodyText') }}</p>
                 <div class="mt-4 flex flex-wrap justify-center gap-2">
-                    <button type="button" class="btn btn-primary" @click="emit('open-tab', 'related')">
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        @click="emit('open-tab', 'related')"
+                        v-tip="t('tips.synastry.addPerson')"
+                    >
                         <AppIcon name="addPerson" />
                         {{ t('synastry.addPerson') }}
                     </button>
-                    <button type="button" class="btn" @click="picking = true">
+                    <button type="button" class="btn" @click="picking = true" v-tip="t('tips.synastry.pickClient')">
                         <AppIcon name="compare" />{{ t('synastry.pickClient') }}
                     </button>
                 </div>
@@ -304,7 +309,12 @@ const incompleteName = computed(() => (report.value?.side === 'client' ? clientN
                     <label :for="`${id}-client`" class="text-sm font-medium">{{ t('synastry.pickClient') }}</label>
                     <ClientPicker :input-id="`${id}-client`" @select="pickClient" />
                     <p v-if="pickError" class="error">{{ pickError }}</p>
-                    <button type="button" class="btn btn-sm btn-ghost" @click="picking = false">
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-ghost"
+                        @click="picking = false"
+                        v-tip="t('tips.synastry.cancel')"
+                    >
                         <AppIcon name="cancel" />
                         {{ t('synastry.cancel') }}
                     </button>
@@ -328,7 +338,7 @@ const incompleteName = computed(() => (report.value?.side === 'client' ? clientN
                         {{ t('clients.missing.title') }}
                         {{ report.missing.map((key) => t(`clients.missing.${key}`)).join(', ') }}
                         <div v-if="completeTo" class="mt-1.5">
-                            <RouterLink :to="completeTo" class="btn btn-sm"
+                            <RouterLink :to="completeTo" class="btn btn-sm" v-tip="t('tips.synastry.complete')"
                                 ><AppIcon name="addBirthData" />{{ t('synastry.complete') }}</RouterLink
                             >
                         </div>
@@ -432,7 +442,16 @@ const incompleteName = computed(() => (report.value?.side === 'client' ? clientN
                         />
                     </div>
                     <div v-if="ready.contacts.length > CONTACTS_SHOWN" class="px-4 py-2">
-                        <button type="button" class="btn btn-sm btn-ghost" @click="showAll = !showAll">
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-ghost"
+                            @click="showAll = !showAll"
+                            v-tip="
+                                showAll
+                                    ? t('tips.synastry.contacts.showFewer')
+                                    : t('tips.synastry.contacts.showAll', { count: ready.contacts.length })
+                            "
+                        >
                             <AppIcon :name="showAll ? 'less' : 'more'" />
                             {{
                                 showAll

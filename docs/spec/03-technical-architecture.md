@@ -47,6 +47,7 @@ Provereno u Fazi 0 (24. 9. 2026): Laravel 13 je aktuelna stabilna verzija i tra�
 - Vue I18n;
 - Tailwind CSS 4 — utility klase se razrešavaju u CSS varijable (design tokeni iz prototipa), pa tema i brending menjaju samo varijable;
 - ikonice Lucide (`@lucide/vue`, ISC licenca, od 18. 11. 2026) — svako dugme ima ikonicu uz tekst (dugme samo sa ikonicom zadržava `aria-label`), a levi meni, podmeni podešavanja i navigacija portala imaju ikonicu ispred naziva; ikonice se biraju po značenju iz jednog spiska (`resources/js/lib/icons.js` — „save“ je uvek kvačica, „delete“ korpa), crtaju se bojom teksta i u build ulaze samo korišćene;
+- tooltip na svakom dugmetu (od 18. 11. 2026) — sopstvena Vue direktiva `v-tip` (`resources/js/lib/tooltip.js`, bez biblioteke): jedan oblačić u tamnim bojama bočne trake, iznad dugmeta (ispod kad nema mesta), posle ~0,3 s na mišu i odmah na fokusu tastaturom, vezan sa `aria-describedby`; tekstovi su u prevodima pod `tips.*` i kažu šta dugme radi, a ne ponavljaju natpis; na ekranu na dodir se ne prikazuje;
 - Composition API.
 
 Točak natalne karte se crta kao **inline SVG Vue komponenta**, bez Canvas-a i bez spoljne biblioteke za karte. Razlozi:

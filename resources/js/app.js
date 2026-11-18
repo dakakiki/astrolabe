@@ -5,10 +5,11 @@ import App from './App.vue';
 import router from './router';
 import i18n, { setLocale } from './i18n';
 import { setLegalPendingHandler, setPracticeClosedHandler, setUnauthenticatedHandler } from './lib/http';
+import { tip } from './lib/tooltip';
 import { useAuthStore } from './stores/auth';
 import { useToastStore } from './stores/toast';
 
-const app = createApp(App).use(createPinia()).use(router).use(i18n);
+const app = createApp(App).use(createPinia()).use(router).use(i18n).directive('tip', tip);
 
 const auth = useAuthStore();
 

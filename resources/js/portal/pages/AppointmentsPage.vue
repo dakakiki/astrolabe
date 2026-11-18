@@ -74,7 +74,11 @@ onMounted(async () => {
             <h1>{{ t('portal.nav.appointments') }}</h1>
             <div class="sub">{{ t('portal.appointments.zone', { zone: zoneLabel(zone, null, locale) }) }}</div>
         </div>
-        <RouterLink v-if="canBook" :to="{ name: 'book' }" class="btn btn-primary"
+        <RouterLink
+            v-if="canBook"
+            :to="{ name: 'book' }"
+            class="btn btn-primary"
+            v-tip="t('tips.portal.appointments.book')"
             ><AppIcon name="addAppointment" />{{ t('portal.appointments.book') }}</RouterLink
         >
     </div>
@@ -106,7 +110,7 @@ onMounted(async () => {
             />
         </div>
     </div>
-    <button v-if="items && page < lastPage" type="button" class="btn mt-4" @click="more">
+    <button v-if="items && page < lastPage" type="button" class="btn mt-4" @click="more" v-tip="t('tips.common.more')">
         <AppIcon name="more" />{{ t('common.more') }}
     </button>
 </template>

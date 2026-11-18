@@ -344,5 +344,83 @@
             "dialCode": "Dialling code",
             "none": "—"
         }
+    },
+    "tips": {
+        "common": {
+            "more": "Load more",
+            "save": "Save your changes"
+        },
+        "portal": {
+            "appointments": {
+                "back": "Back to your appointments without changing anything",
+                "book": "Choose a service and a free time",
+                "cancelRequest": "Withdraw your booking request",
+                "cancel": "Cancel this appointment",
+                "cancelRequestConfirm": "Withdraw the request now",
+                "cancelConfirm": "Cancel the appointment now",
+                "keepRequest": "Keep the request as it is",
+                "keep": "Keep the appointment as it is",
+                "move": "Move the appointment to the time you chose",
+                "reschedule": "Choose another time for this appointment"
+            },
+            "booking": {
+                "backHome": "Back to the start of your portal",
+                "chooseService": "Book this service",
+                "continue": "Go to the next step",
+                "request": "Send the request — the practice confirms it",
+                "book": "Book this time",
+                "retry": "Load the free times again",
+                "seeAppointments": "See all your appointments"
+            },
+            "choose": {
+                "open": "Open this practice's portal"
+            },
+            "home": {
+                "book": "Choose a service and a free time",
+                "openShared": "See the notes and files shared with you",
+                "zoneUse": "Show the times on this device's clock"
+            },
+            "invitation": {
+                "accept": "Accept the invitation and open the portal",
+                "signIn": "Sign in with your email address"
+            },
+            "link": {
+                "action": "Sign in on this device",
+                "again": "Ask for a new sign-in link"
+            },
+            "nav": {
+                "security": "See where you are signed in",
+                "signOut": "Sign out on this device",
+                "switch": "Open another practice's portal"
+            },
+            "notFound": {
+                "home": "Back to the start of your portal"
+            },
+            "notifications": {
+                "test": "Send a test notification to this device",
+                "turnOff": "Stop notifications on this device",
+                "turnOn": "Get notifications on this device"
+            },
+            "pwa": {
+                "install": {
+                    "action": "Add the portal to your home screen or desktop",
+                    "notNow": "Hide this for now"
+                },
+                "update": {
+                    "reload": "Load the new version of the portal"
+                }
+            },
+            "security": {
+                "everywhere": "Sign out on every device, this one too"
+            },
+            "shared": {
+                "download": "Download the file",
+                "open": "Open the link in a new tab"
+            },
+            "signIn": {
+                "send": "We email you a sign-in link and a six-digit code",
+                "verify": "Check the code and sign in"
+            }
+        }
     }
 }

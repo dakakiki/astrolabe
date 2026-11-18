@@ -147,7 +147,13 @@ const emptyText = computed(() => {
         <section class="card">
             <div class="card-head">
                 <h2>{{ t('tasks.followUps') }}</h2>
-                <button v-if="!formOpen" type="button" class="btn btn-sm right" @click="openForm()">
+                <button
+                    v-if="!formOpen"
+                    type="button"
+                    class="btn btn-sm right"
+                    @click="openForm()"
+                    v-tip="t('tips.tasks.addFollowUp')"
+                >
                     <AppIcon name="add" />
                     {{ t('tasks.addFollowUp') }}
                 </button>
@@ -223,6 +229,7 @@ const emptyText = computed(() => {
                     class="btn btn-sm mt-3"
                     :disabled="loading"
                     @click="load(meta.current_page + 1)"
+                    v-tip="t('tips.common.more')"
                 >
                     <AppIcon name="more" />
                     {{ t('common.more') }}

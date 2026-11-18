@@ -86,7 +86,12 @@ function restart() {
                     required
                 />
             </FormField>
-            <button class="btn btn-primary w-full justify-center" type="submit" :disabled="busy || !email">
+            <button
+                class="btn btn-primary w-full justify-center"
+                type="submit"
+                :disabled="busy || !email"
+                v-tip="t('tips.portal.signIn.send')"
+            >
                 <AppIcon name="mail" />
                 {{ t('portal.signIn.send') }}
             </button>
@@ -111,7 +116,12 @@ function restart() {
                     @input="code = normaliseCode($event.target.value)"
                 />
             </FormField>
-            <button class="btn btn-primary w-full justify-center" type="submit" :disabled="busy || code.length !== 6">
+            <button
+                class="btn btn-primary w-full justify-center"
+                type="submit"
+                :disabled="busy || code.length !== 6"
+                v-tip="t('tips.portal.signIn.verify')"
+            >
                 <AppIcon name="signIn" />
                 {{ t('portal.signIn.verify') }}
             </button>

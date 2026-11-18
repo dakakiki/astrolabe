@@ -2221,5 +2221,336 @@
         "confirmWithdraw": "Withdraw the invitation? The link in the email stops working.",
         "confirmRevoke": "Revoke the client’s portal access? Their next click in the portal is refused. Nothing in the client’s history changes.",
         "where": "Clients sign in at {url}"
+    },
+    "tips": {
+        "admin": {
+            "actions": {
+                "resetTwoFactor": "Turn off two-factor sign-in for this astrologer — asks for a reason",
+                "verification": "Email the address confirmation link again",
+                "suspend": "Stop this account from signing in — asks for a reason",
+                "restore": "Let this account sign in again"
+            },
+            "actionSubmit": "Carry this out — it goes into the audit log",
+            "common": {
+                "clear": "Clear the filters and show everything",
+                "filter": "Show only the entries that match"
+            },
+            "feedback": {
+                "reopen": "Move this back to Open",
+                "markHandled": "Move this to Handled"
+            },
+            "invitations": {
+                "revoke": "Make this invitation link stop working",
+                "send": "Email a personal registration link"
+            },
+            "system": {
+                "forget": "Remove this failed job without running it",
+                "retry": "Put this failed job back in the queue"
+            }
+        },
+        "appointments": {
+            "detail": {
+                "cancel": "Cancel this appointment — you can give a reason",
+                "close": "Close this panel",
+                "confirm": "Confirm the booking request — the client is told",
+                "confirmCancel": "Cancel the appointment now",
+                "confirmDecline": "Decline the request — the client is told",
+                "decline": "Decline this booking request",
+                "edit": "Change the time, service or details",
+                "keep": "Leave the appointment as it is",
+                "keepRequest": "Leave the request waiting",
+                "markHeld": "Record that the appointment took place",
+                "markNoShow": "Record that the client did not come",
+                "openConsultation": "Open the consultation recorded from this appointment",
+                "recordConsultation": "Start a consultation record from this appointment",
+                "recordDeposit": "Record money received for this appointment",
+                "reinstate": "Book this cancelled appointment again",
+                "showChart": "Show the client's chart here",
+                "hideChart": "Hide the chart"
+            },
+            "form": {
+                "cancel": "Close without saving",
+                "save": "Save the changes to this appointment",
+                "create": "Add the appointment to your calendar",
+                "saveAnyway": "Save even though it overlaps another appointment"
+            }
+        },
+        "auth": {
+            "forgot": {
+                "submit": "Email me a link to choose a new password"
+            },
+            "login": {
+                "submit": "Sign in to your practice"
+            },
+            "register": {
+                "submit": "Create your account and your practice"
+            },
+            "reset": {
+                "submit": "Save the new password and sign in"
+            },
+            "twoFactor": {
+                "submit": "Check the code and sign in"
+            },
+            "verify": {
+                "resend": "Email the confirmation link again",
+                "updateEmail": "Save the new address and send the link there"
+            }
+        },
+        "calendar": {
+            "new": "Add a new appointment",
+            "next": "Go to the next day, week or month",
+            "previous": "Go to the previous day, week or month",
+            "today": "Jump back to today"
+        },
+        "clientPortal": {
+            "invite": "Email the client an invitation to the portal",
+            "resend": "Email the invitation again — the earlier link stops working",
+            "withdraw": "Cancel the invitation before it is used",
+            "revoke": "Close the client's access to the portal"
+        },
+        "clients": {
+            "add": "Add a new client",
+            "addAppointment": "Add a new appointment for this client",
+            "addConsultation": "Add a new consultation for this client",
+            "birth": {
+                "backToList": "Search the list of places again",
+                "change": "Choose a different place",
+                "enterManually": "Type the latitude, longitude and time zone yourself",
+                "suggestTimezone": "Fill in the time zone of the nearest known place"
+            },
+            "deleteDialog": {
+                "submit": "Delete the client and all their data — this cannot be undone"
+            },
+            "deletePermanently": "Delete the client and all their data, after you type the name",
+            "form": {
+                "cancel": "Go back without saving",
+                "save": "Save the client's details",
+                "showAllMethods": "Show every method, not only the usual ones"
+            },
+            "manage": {
+                "edit": "Change name, contact details, birth data, methods and tags"
+            },
+            "next": "Go to the next page",
+            "previous": "Go to the previous page",
+            "profile": {
+                "addBirth": "Enter the date, time and place of birth"
+            },
+            "restore": "Bring the client back to your lists",
+            "archive": "Take the client off your lists — nothing is deleted"
+        },
+        "common": {
+            "add": "Add it to the list",
+            "cancel": "Close without saving",
+            "close": "Close",
+            "delete": "Delete this entry",
+            "edit": "Edit this entry",
+            "more": "Load more",
+            "save": "Save your changes"
+        },
+        "consultations": {
+            "add": "Add a new consultation",
+            "chart": {
+                "attach": "Keep a snapshot of the chart as it is now with this consultation",
+                "detach": "Remove the chart snapshot from this consultation",
+                "replace": "Replace the snapshot with the chart as it is now"
+            },
+            "filters": {
+                "clear": "Clear the filters"
+            },
+            "form": {
+                "delete": "Delete this consultation",
+                "save": "Save the changes to this consultation",
+                "create": "Save the new consultation"
+            }
+        },
+        "dashboard": {
+            "addClient": "Add a new client",
+            "attention": {
+                "complete": "Add what is missing so the chart can be calculated"
+            },
+            "newAppointment": "Add a new appointment",
+            "nextUp": {
+                "consultation": "Open the consultation",
+                "open": "Open the appointment in the calendar",
+                "record": "Start a consultation record from this appointment"
+            },
+            "requests": {
+                "confirm": "Confirm the booking request — the client is told",
+                "decline": "Decline the request, with an optional message",
+                "keep": "Leave the request waiting",
+                "open": "Open the request in the calendar",
+                "send": "Decline the request — the client is told"
+            },
+            "transits": {
+                "open": "Open the client's transits for the appointment time"
+            },
+            "waiting": {
+                "record": "Record a payment for this consultation"
+            }
+        },
+        "editor": {
+            "bold": "Bold",
+            "italic": "Italic",
+            "heading": "Heading",
+            "bulletList": "Bulleted list",
+            "orderedList": "Numbered list",
+            "quote": "Quote",
+            "link": "Add or remove a link",
+            "undo": "Undo",
+            "redo": "Redo"
+        },
+        "feedback": {
+            "submit": "Send your feedback to the AstroLabe team"
+        },
+        "files": {
+            "addLink": "Add a link to a web page or a document",
+            "linkSave": "Save the link",
+            "open": "Open in a new tab",
+            "remove": "Remove this file or link"
+        },
+        "legal": {
+            "accept": {
+                "submit": "Accept the updated terms and open your practice"
+            },
+            "privacyDismiss": "Hide this notice"
+        },
+        "nav": {
+            "feedback": "Tell us what works and what does not",
+            "openMenu": "Open the menu",
+            "userMenu": "Your account",
+            "signOut": "Sign out on this device"
+        },
+        "notes": {
+            "update": "Save the changes to this note",
+            "save": "Save the note"
+        },
+        "payments": {
+            "delete": "Remove this payment",
+            "edit": "Edit this payment",
+            "form": {
+                "save": "Save the changes to this payment",
+                "create": "Save the payment"
+            },
+            "record": "Record money received or a refund"
+        },
+        "practiceDeletion": {
+            "cancel": "Keep the practice — the deletion is called off",
+            "signOut": "Sign out of AstroLabe"
+        },
+        "related": {
+            "add": "Add a partner, child or other person with their birth data",
+            "cancel": "Close without saving",
+            "compare": "Compare this person's chart with the client's",
+            "edit": "Change how this person is related",
+            "form": {
+                "cancel": "Go back without saving",
+                "save": "Save the person's details"
+            },
+            "linkClient": "Link another client as a related person",
+            "linkForm": {
+                "save": "Save the link between the two clients"
+            },
+            "person": {
+                "compareWith": "Compare the two charts",
+                "delete": "Delete this person",
+                "edit": "Change the name and birth data",
+                "makeClient": "Make this person a client of their own, keeping the birth data"
+            },
+            "remove": "Remove the link — the person stays if linked to someone else",
+            "save": "Save the change"
+        },
+        "services": {
+            "add": "Add a new service",
+            "edit": "Edit this service",
+            "form": {
+                "cancel": "Close without saving",
+                "create": "Add the service",
+                "save": "Save the changes to this service",
+                "delete": "Delete this service — one already in use can only be turned off"
+            }
+        },
+        "settings": {
+            "availability": {
+                "addHours": "Add another stretch of hours to this day",
+                "copyMonday": "Use Monday's hours for Tuesday to Friday",
+                "exceptions": {
+                    "add": "Add the time off or extra time",
+                    "remove": "Remove this entry"
+                },
+                "remove": "Remove these hours"
+            },
+            "branding": {
+                "removeLogo": "Remove the logo from the portal",
+                "replaceLogo": "Choose a new logo file",
+                "uploadLogo": "Choose a logo file — PNG, WebP or SVG",
+                "sampleButton": "How buttons look in your portal",
+                "useDefault": "Go back to AstroLabe's colours"
+            },
+            "data": {
+                "deletion": {
+                    "submit": "Schedule the deletion of the practice and your account"
+                },
+                "export": {
+                    "download": "Download the export as a ZIP file",
+                    "request": "Prepare a ZIP of all your practice data — you get an email when it is ready"
+                }
+            },
+            "methods": {
+                "applySuggestion": "Use this method's suggested chart settings"
+            },
+            "notifications": {
+                "testSend": "Send a test email to your address"
+            },
+            "orbs": {
+                "reset": "Go back to the default orbs"
+            },
+            "security": {
+                "sessionsSubmit": "Sign out on all your other devices",
+                "twoFactor": {
+                    "codesDone": "Hide the codes — keep them somewhere safe",
+                    "confirm": "Check the code and turn on two-factor sign-in",
+                    "continue": "Go on to scan the code with your phone",
+                    "disable": "Turn off two-factor sign-in",
+                    "enable": "Ask for a code from your phone at every sign-in",
+                    "newCodes": "Make new recovery codes — the old ones stop working",
+                    "showCodes": "Show your recovery codes"
+                }
+            }
+        },
+        "sky": {
+            "next": "Go to the next period",
+            "previous": "Go to the previous period",
+            "today": "Start from today"
+        },
+        "synastry": {
+            "addPerson": "Add a related person to compare with",
+            "cancel": "Close without choosing",
+            "complete": "Add the missing birth data",
+            "contacts": {
+                "showFewer": "Show only the closest contacts",
+                "showAll": "Show every contact"
+            },
+            "pickClient": "Choose another client to compare with"
+        },
+        "tags": {
+            "remove": "Remove this tag"
+        },
+        "tasks": {
+            "addFollowUp": "Add a task to follow up on this consultation",
+            "form": {
+                "removeClient": "Remove the client from this task",
+                "save": "Save the changes to this task",
+                "create": "Add the task"
+            }
+        },
+        "timeline": {
+            "loadMore": "Load older entries"
+        },
+        "transits": {
+            "complete": "Add the missing birth data",
+            "forDate": "Open the client's transits for this appointment",
+            "now": "Show the transits for this moment",
+            "onDate": "Open the client's transits for the consultation date"
+        }
     }
 }

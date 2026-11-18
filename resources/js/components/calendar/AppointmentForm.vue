@@ -152,6 +152,7 @@ const when = (appointment) =>
                 class="btn btn-ghost btn-sm right"
                 :aria-label="t('appointments.detail.close')"
                 @click="emit('cancel')"
+                v-tip="t('tips.appointments.detail.close')"
             >
                 <AppIcon name="close" />
             </button>
@@ -312,15 +313,27 @@ const when = (appointment) =>
                     class="btn btn-primary"
                     :disabled="form.processing.value"
                     @click="save(true)"
+                    v-tip="t('tips.appointments.form.saveAnyway')"
                 >
                     <AppIcon name="warning" />
                     {{ t('appointments.form.saveAnyway') }}
                 </button>
-                <button v-else class="btn btn-primary" type="submit" :disabled="form.processing.value">
+                <button
+                    v-else
+                    class="btn btn-primary"
+                    type="submit"
+                    :disabled="form.processing.value"
+                    v-tip="editing ? t('tips.appointments.form.save') : t('tips.appointments.form.create')"
+                >
                     <AppIcon name="save" />
                     {{ editing ? t('appointments.form.save') : t('appointments.form.create') }}
                 </button>
-                <button type="button" class="btn btn-ghost" @click="emit('cancel')">
+                <button
+                    type="button"
+                    class="btn btn-ghost"
+                    @click="emit('cancel')"
+                    v-tip="t('tips.appointments.form.cancel')"
+                >
                     <AppIcon name="cancel" />
                     {{ t('appointments.form.cancel') }}
                 </button>

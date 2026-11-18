@@ -209,7 +209,7 @@ onBeforeUnmount(() => clearInterval(clock));
                 {{ t('calendar.zoneNote', { zone }) }}
             </div>
         </div>
-        <button type="button" class="btn btn-primary ml-auto" @click="create()">
+        <button type="button" class="btn btn-primary ml-auto" @click="create()" v-tip="t('tips.calendar.new')">
             <AppIcon name="addAppointment" />{{ t('calendar.new') }}
         </button>
     </div>
@@ -226,7 +226,7 @@ onBeforeUnmount(() => clearInterval(clock));
                 {{ t(`calendar.views.${option}`) }}
             </button>
         </div>
-        <button type="button" class="btn btn-sm" @click="go({ date: undefined })">
+        <button type="button" class="btn btn-sm" @click="go({ date: undefined })" v-tip="t('tips.calendar.today')">
             <AppIcon name="today" />{{ t('calendar.today') }}
         </button>
         <button
@@ -234,6 +234,7 @@ onBeforeUnmount(() => clearInterval(clock));
             class="btn btn-sm"
             :aria-label="t('calendar.previous')"
             @click="go({ date: shiftDate(view, date, -1) })"
+            v-tip="t('tips.calendar.previous')"
         >
             <AppIcon name="previous" />
         </button>
@@ -242,6 +243,7 @@ onBeforeUnmount(() => clearInterval(clock));
             class="btn btn-sm"
             :aria-label="t('calendar.next')"
             @click="go({ date: shiftDate(view, date, 1) })"
+            v-tip="t('tips.calendar.next')"
         >
             <AppIcon name="next" />
         </button>

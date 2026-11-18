@@ -59,7 +59,7 @@ async function useDeviceZone() {
         <span class="min-w-0 flex-1">{{
             t('portal.home.zoneOffer', { practice: session.practice.timezone, device: offerZone })
         }}</span>
-        <button type="button" class="btn btn-sm" @click="useDeviceZone">
+        <button type="button" class="btn btn-sm" @click="useDeviceZone" v-tip="t('tips.portal.home.zoneUse')">
             <AppIcon name="timezone" />{{ t('portal.home.zoneUse') }}
         </button>
     </div>
@@ -82,7 +82,7 @@ async function useDeviceZone() {
                 </p>
             </div>
             <div v-if="canBook" class="card-body flex flex-wrap items-center gap-3 border-t border-line-soft">
-                <RouterLink :to="{ name: 'book' }" class="btn btn-primary"
+                <RouterLink :to="{ name: 'book' }" class="btn btn-primary" v-tip="t('tips.portal.home.book')"
                     ><AppIcon name="addAppointment" />{{ t('portal.home.book') }}</RouterLink
                 >
                 <span class="min-w-0 flex-1 text-xs text-ink-3">{{ t('portal.home.bookHint') }}</span>
@@ -98,7 +98,7 @@ async function useDeviceZone() {
                 <p class="text-sm text-ink-3">
                     {{ t('portal.home.newShared', { count: home.new_shared }, home.new_shared) }}
                 </p>
-                <RouterLink :to="{ name: 'shared' }" class="btn btn-sm mt-3"
+                <RouterLink :to="{ name: 'shared' }" class="btn btn-sm mt-3" v-tip="t('tips.portal.home.openShared')"
                     ><AppIcon name="shared" />{{ t('portal.home.openShared') }}</RouterLink
                 >
             </div>

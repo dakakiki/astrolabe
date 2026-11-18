@@ -224,6 +224,7 @@ onMounted(async () => {
                         type="button"
                         class="btn"
                         :class="{ 'btn-danger': action.danger }"
+                        v-tip="t(`tips.admin.actions.${action.key}`)"
                         @click="start(action)"
                     >
                         <AppIcon :name="action.icon" />

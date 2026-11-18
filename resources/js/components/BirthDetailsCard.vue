@@ -104,7 +104,7 @@ const labels = useLabels();
 
             <div v-else class="flex items-center justify-between gap-3">
                 <span class="text-ink-3">{{ t('clients.profile.noBirth') }}</span>
-                <RouterLink :to="editTo" class="btn btn-sm"
+                <RouterLink :to="editTo" class="btn btn-sm" v-tip="t('tips.clients.profile.addBirth')"
                     ><AppIcon name="addBirthData" />{{ t('clients.profile.addBirth') }}</RouterLink
                 >
             </div>

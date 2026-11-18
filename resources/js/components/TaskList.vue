@@ -106,11 +106,21 @@ function followUpLabel(consultation) {
                 >{{ t(`tasks.priorities.${task.priority}`) }}</span
             >
             <span v-if="editable" class="flex shrink-0 gap-1">
-                <button type="button" class="btn btn-ghost btn-sm" @click="emit('edit', task)">
+                <button
+                    type="button"
+                    class="btn btn-ghost btn-sm"
+                    @click="emit('edit', task)"
+                    v-tip="t('tips.common.edit')"
+                >
                     <AppIcon name="edit" />
                     {{ t('common.edit') }}
                 </button>
-                <button type="button" class="btn btn-ghost btn-sm" @click="emit('remove', task)">
+                <button
+                    type="button"
+                    class="btn btn-ghost btn-sm"
+                    @click="emit('remove', task)"
+                    v-tip="t('tips.common.delete')"
+                >
                     <AppIcon name="delete" />
                     {{ t('common.delete') }}
                 </button>

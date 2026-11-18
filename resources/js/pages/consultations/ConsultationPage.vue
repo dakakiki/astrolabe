@@ -408,11 +408,23 @@ const otherZone = computed(() => {
                 </div>
             </div>
             <div class="ml-auto flex gap-2">
-                <button v-if="id" type="button" class="btn btn-ghost" @click="remove">
+                <button
+                    v-if="id"
+                    type="button"
+                    class="btn btn-ghost"
+                    @click="remove"
+                    v-tip="t('tips.consultations.form.delete')"
+                >
                     <AppIcon name="delete" />
                     {{ t('consultations.form.delete') }}
                 </button>
-                <button type="button" class="btn btn-primary" :disabled="form.processing.value" @click="save">
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    :disabled="form.processing.value"
+                    @click="save"
+                    v-tip="id ? t('tips.consultations.form.save') : t('tips.consultations.form.create')"
+                >
                     <AppIcon name="save" />
                     {{ id ? t('consultations.form.save') : t('consultations.form.create') }}
                 </button>
@@ -590,6 +602,7 @@ const otherZone = computed(() => {
                                     type="button"
                                     class="btn btn-ghost btn-sm"
                                     @click="showAllMethods = true"
+                                    v-tip="t('tips.clients.form.showAllMethods')"
                                 >
                                     <AppIcon name="more" />
                                     {{ t('clients.form.showAllMethods') }}
@@ -662,7 +675,12 @@ const otherZone = computed(() => {
                 </section>
 
                 <div class="flex justify-end">
-                    <button type="submit" class="btn btn-primary" :disabled="form.processing.value">
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        :disabled="form.processing.value"
+                        v-tip="id ? t('tips.consultations.form.save') : t('tips.consultations.form.create')"
+                    >
                         <AppIcon name="save" />
                         {{ id ? t('consultations.form.save') : t('consultations.form.create') }}
                     </button>
@@ -685,7 +703,13 @@ const otherZone = computed(() => {
                                 <NatalChart :chart="consultation.chart" :name="client?.full_name" compact />
                                 <p class="text-xs text-ink-3">{{ t('consultations.chart.snapshotNote') }}</p>
                                 <div class="flex flex-wrap gap-2">
-                                    <button type="button" class="btn btn-sm" :disabled="chartBusy" @click="attachChart">
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm"
+                                        :disabled="chartBusy"
+                                        @click="attachChart"
+                                        v-tip="t('tips.consultations.chart.replace')"
+                                    >
                                         <AppIcon name="replace" />
                                         {{ t('consultations.chart.replace') }}
                                     </button>
@@ -694,6 +718,7 @@ const otherZone = computed(() => {
                                         class="btn btn-ghost btn-sm"
                                         :disabled="chartBusy"
                                         @click="detachChart"
+                                        v-tip="t('tips.consultations.chart.detach')"
                                     >
                                         <AppIcon name="unlink" />
                                         {{ t('consultations.chart.detach') }}
@@ -709,6 +734,7 @@ const otherZone = computed(() => {
                                     class="btn btn-primary btn-sm mt-3"
                                     :disabled="chartBusy"
                                     @click="attachChart"
+                                    v-tip="t('tips.consultations.chart.attach')"
                                 >
                                     <AppIcon name="attach" />
                                     {{ t('consultations.chart.attach') }}
@@ -718,6 +744,7 @@ const otherZone = computed(() => {
                                 <RouterLink
                                     :to="transitsRoute(client.id, consultation.starts_at, auth.user?.timezone)"
                                     class="btn btn-sm"
+                                    v-tip="t('tips.transits.onDate')"
                                     ><AppIcon name="transits" />{{ t('transits.onDate') }}</RouterLink
                                 >
                             </div>

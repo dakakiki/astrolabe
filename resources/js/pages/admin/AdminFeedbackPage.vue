@@ -85,6 +85,7 @@ onMounted(() => load());
                         class="btn btn-sm"
                         :class="{ 'btn-primary': !item.handled_at }"
                         @click="setHandled(item, !item.handled_at)"
+                        v-tip="item.handled_at ? t('tips.admin.feedback.reopen') : t('tips.admin.feedback.markHandled')"
                     >
                         <AppIcon :name="item.handled_at ? 'reset' : 'confirm'" />
                         {{ item.handled_at ? t('admin.feedback.reopen') : t('admin.feedback.markHandled') }}

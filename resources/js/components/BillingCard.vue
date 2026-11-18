@@ -125,7 +125,12 @@ const negate = (value) => (value ? { ...value, amount: -value.amount } : null);
                             <template v-if="payment.appointment_id"> · {{ t('billing.deposit') }}</template>
                         </span>
                         <span class="ml-auto flex">
-                            <button type="button" class="btn btn-ghost btn-sm" @click="open(payment)">
+                            <button
+                                type="button"
+                                class="btn btn-ghost btn-sm"
+                                @click="open(payment)"
+                                v-tip="t('tips.payments.edit')"
+                            >
                                 <AppIcon name="edit" />
                                 {{ t('payments.edit') }}
                             </button>
@@ -134,6 +139,7 @@ const negate = (value) => (value ? { ...value, amount: -value.amount } : null);
                                 class="btn btn-ghost btn-sm text-danger"
                                 :disabled="busyId === payment.id"
                                 @click="remove(payment)"
+                                v-tip="t('tips.payments.delete')"
                             >
                                 <AppIcon name="delete" />
                                 {{ t('payments.delete') }}
@@ -144,7 +150,7 @@ const negate = (value) => (value ? { ...value, amount: -value.amount } : null);
                 <p v-else class="text-sm text-ink-3">{{ t('billing.noPayments') }}</p>
             </div>
 
-            <button v-if="!form" type="button" class="btn btn-sm" @click="open()">
+            <button v-if="!form" type="button" class="btn btn-sm" @click="open()" v-tip="t('tips.payments.record')">
                 <AppIcon name="payment" />{{ t('payments.record') }}
             </button>
 

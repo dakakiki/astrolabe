@@ -173,6 +173,7 @@ function taskLine(task) {
                 class="btn btn-sm"
                 :disabled="loading"
                 @click="load(meta.current_page + 1)"
+                v-tip="t('tips.timeline.loadMore')"
             >
                 <AppIcon name="more" />
                 {{ t('timeline.loadMore') }}

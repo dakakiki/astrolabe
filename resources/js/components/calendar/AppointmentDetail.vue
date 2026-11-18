@@ -323,6 +323,7 @@ async function depositSaved() {
                 class="btn btn-ghost btn-sm right"
                 :aria-label="t('appointments.detail.close')"
                 @click="emit('close')"
+                v-tip="t('tips.appointments.detail.close')"
             >
                 <AppIcon name="close" />
             </button>
@@ -401,7 +402,13 @@ async function depositSaved() {
                     <strong>{{ t('appointments.detail.requestedTitle') }}</strong>
                     {{ t('appointments.detail.requested') }}
                     <div class="mt-2 flex flex-wrap gap-2">
-                        <button type="button" class="btn btn-primary btn-sm" :disabled="busy" @click="confirmRequest">
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm"
+                            :disabled="busy"
+                            @click="confirmRequest"
+                            v-tip="t('tips.appointments.detail.confirm')"
+                        >
                             <AppIcon name="confirm" />
                             {{ t('appointments.detail.confirm') }}
                         </button>
@@ -411,6 +418,7 @@ async function depositSaved() {
                             :disabled="busy"
                             :aria-expanded="declining"
                             @click="openDecline"
+                            v-tip="t('tips.appointments.detail.decline')"
                         >
                             <AppIcon name="decline" />
                             {{ t('appointments.detail.decline') }}
@@ -444,11 +452,21 @@ async function depositSaved() {
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                    <button type="submit" class="btn btn-danger btn-sm" :disabled="busy">
+                    <button
+                        type="submit"
+                        class="btn btn-danger btn-sm"
+                        :disabled="busy"
+                        v-tip="t('tips.appointments.detail.confirmDecline')"
+                    >
                         <AppIcon name="decline" />
                         {{ t('appointments.detail.confirmDecline') }}
                     </button>
-                    <button type="button" class="btn btn-ghost btn-sm" @click="declining = false">
+                    <button
+                        type="button"
+                        class="btn btn-ghost btn-sm"
+                        @click="declining = false"
+                        v-tip="t('tips.appointments.detail.keepRequest')"
+                    >
                         <AppIcon name="undo" />
                         {{ t('appointments.detail.keepRequest') }}
                     </button>
@@ -528,6 +546,7 @@ async function depositSaved() {
                         class="btn btn-sm mt-2"
                         :disabled="busy"
                         @click="setStatus('scheduled', true)"
+                        v-tip="t('tips.appointments.form.saveAnyway')"
                     >
                         <AppIcon name="warning" />
                         {{ t('appointments.form.saveAnyway') }}
@@ -540,19 +559,36 @@ async function depositSaved() {
                     v-if="appointment.consultation"
                     :to="{ name: 'consultations.show', params: { id: appointment.consultation.id } }"
                     class="btn btn-primary btn-sm"
+                    v-tip="t('tips.appointments.detail.openConsultation')"
                     ><AppIcon name="consultation" />{{ t('appointments.detail.openConsultation') }}</RouterLink
                 >
                 <RouterLink
                     v-else-if="appointment.status !== 'cancelled' && appointment.status !== 'requested'"
                     :to="{ name: 'consultations.create', query: { appointment: appointment.id } }"
                     class="btn btn-primary btn-sm"
+                    v-tip="t('tips.appointments.detail.recordConsultation')"
                     ><AppIcon name="addConsultation" />{{ t('appointments.detail.recordConsultation') }}</RouterLink
                 >
-                <button type="button" class="btn btn-sm" @click="emit('edit', appointment)">
+                <button
+                    type="button"
+                    class="btn btn-sm"
+                    @click="emit('edit', appointment)"
+                    v-tip="t('tips.appointments.detail.edit')"
+                >
                     <AppIcon name="edit" />
                     {{ t('appointments.detail.edit') }}
                 </button>
-                <button type="button" class="btn btn-sm" :aria-expanded="chartState !== 'idle'" @click="toggleChart">
+                <button
+                    type="button"
+                    class="btn btn-sm"
+                    :aria-expanded="chartState !== 'idle'"
+                    @click="toggleChart"
+                    v-tip="
+                        chartState === 'idle'
+                            ? t('tips.appointments.detail.showChart')
+                            : t('tips.appointments.detail.hideChart')
+                    "
+                >
                     <AppIcon :name="chartState === 'idle' ? 'chart' : 'hide'" />
                     {{
                         chartState === 'idle' ? t('appointments.detail.showChart') : t('appointments.detail.hideChart')
@@ -563,6 +599,7 @@ async function depositSaved() {
                     type="button"
                     class="btn btn-sm"
                     @click="depositOpen = true"
+                    v-tip="t('tips.appointments.detail.recordDeposit')"
                 >
                     <AppIcon name="payment" />
                     {{ t('appointments.detail.recordDeposit') }}
@@ -571,6 +608,7 @@ async function depositSaved() {
                     v-if="appointment.client.chart_ready"
                     :to="transitsRoute(appointment.client.id, appointment.starts_at, zone)"
                     class="btn btn-sm"
+                    v-tip="t('tips.transits.forDate')"
                     ><AppIcon name="transits" />{{ t('transits.forDate') }}</RouterLink
                 >
             </div>
@@ -582,11 +620,23 @@ async function depositSaved() {
                 class="flex flex-wrap gap-2 border-t border-line-soft pt-3"
             >
                 <template v-if="appointment.status === 'scheduled'">
-                    <button type="button" class="btn btn-ghost btn-sm" :disabled="busy" @click="setStatus('completed')">
+                    <button
+                        type="button"
+                        class="btn btn-ghost btn-sm"
+                        :disabled="busy"
+                        @click="setStatus('completed')"
+                        v-tip="t('tips.appointments.detail.markHeld')"
+                    >
                         <AppIcon name="held" />
                         {{ t('appointments.detail.markHeld') }}
                     </button>
-                    <button type="button" class="btn btn-ghost btn-sm" :disabled="busy" @click="setStatus('no_show')">
+                    <button
+                        type="button"
+                        class="btn btn-ghost btn-sm"
+                        :disabled="busy"
+                        @click="setStatus('no_show')"
+                        v-tip="t('tips.appointments.detail.markNoShow')"
+                    >
                         <AppIcon name="noShow" />
                         {{ t('appointments.detail.markNoShow') }}
                     </button>
@@ -595,6 +645,7 @@ async function depositSaved() {
                         class="btn btn-ghost btn-sm text-danger"
                         :aria-expanded="cancelling"
                         @click="openCancel"
+                        v-tip="t('tips.appointments.detail.cancel')"
                     >
                         <AppIcon name="cancelAppointment" />
                         {{ t('appointments.detail.cancel') }}
@@ -606,6 +657,7 @@ async function depositSaved() {
                     class="btn btn-ghost btn-sm"
                     :disabled="busy"
                     @click="setStatus('scheduled')"
+                    v-tip="t('tips.appointments.detail.reinstate')"
                 >
                     <AppIcon name="reinstate" />
                     {{ t('appointments.detail.reinstate') }}
@@ -641,11 +693,21 @@ async function depositSaved() {
                     </span>
                 </label>
                 <div class="flex flex-wrap gap-2">
-                    <button type="submit" class="btn btn-danger btn-sm" :disabled="busy">
+                    <button
+                        type="submit"
+                        class="btn btn-danger btn-sm"
+                        :disabled="busy"
+                        v-tip="t('tips.appointments.detail.confirmCancel')"
+                    >
                         <AppIcon name="cancelAppointment" />
                         {{ t('appointments.detail.confirmCancel') }}
                     </button>
-                    <button type="button" class="btn btn-ghost btn-sm" @click="cancelling = false">
+                    <button
+                        type="button"
+                        class="btn btn-ghost btn-sm"
+                        @click="cancelling = false"
+                        v-tip="t('tips.appointments.detail.keep')"
+                    >
                         <AppIcon name="undo" />
                         {{ t('appointments.detail.keep') }}
                     </button>

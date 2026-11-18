@@ -116,7 +116,7 @@ function isActive(button) {
                 <button
                     v-else
                     type="button"
-                    :title="t(button.label)"
+                    v-tip="t(`tips.${button.label}`)"
                     :aria-label="t(button.label)"
                     :aria-pressed="isActive(button)"
                     :disabled="!editor"

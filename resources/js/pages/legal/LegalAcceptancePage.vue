@@ -105,7 +105,12 @@ onMounted(loadDocuments);
                 t('legal.accept.agree', { documents: documents.map((document) => document.title).join(', ') })
             }}</span>
         </label>
-        <button class="btn btn-primary mb-5 w-full" type="submit" :disabled="!agreed || busy || !documents.length">
+        <button
+            class="btn btn-primary mb-5 w-full"
+            type="submit"
+            :disabled="!agreed || busy || !documents.length"
+            v-tip="t('tips.legal.accept.submit')"
+        >
             <AppIcon name="confirm" />
             {{ t('legal.accept.submit') }}
         </button>
@@ -116,7 +121,7 @@ onMounted(loadDocuments);
         <RouterLink v-if="auth.isOwner" :to="{ name: 'settings.data' }">{{ t('legal.accept.yourData') }}</RouterLink>
     </p>
 
-    <button class="btn btn-ghost w-full" type="button" @click="signOut">
+    <button class="btn btn-ghost w-full" type="button" @click="signOut" v-tip="t('tips.practiceDeletion.signOut')">
         <AppIcon name="signOut" />{{ t('practiceDeletion.signOut') }}
     </button>
 </template>
