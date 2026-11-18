@@ -499,6 +499,7 @@ function deleted() {
                 <RouterLink
                     :to="{ name: 'consultations.create', query: { client: client.id } }"
                     class="btn btn-sm btn-primary right"
+                    :aria-label="t('consultations.new')"
                     v-tip="t('tips.consultations.add')"
                     ><AppIcon name="addConsultation" />{{ t('consultations.add') }}</RouterLink
                 >

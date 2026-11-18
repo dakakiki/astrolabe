@@ -24,7 +24,7 @@ const props = defineProps({
     /** The open tab (v-model:view). */
     view: { type: String, default: 'open' },
 });
-const emit = defineEmits(['changed', 'update:view']);
+const emit = defineEmits(['changed', 'update:view', 'count']);
 
 const { t } = useI18n();
 const auth = useAuthStore();
@@ -71,6 +71,9 @@ async function load(page = 1) {
 
 onMounted(() => load());
 watch(current, () => load());
+
+// How many follow-ups are still open, for a tab label (the consultation page).
+watch(tasks, (list) => emit('count', list.filter((task) => task.status !== 'done').length), { deep: true });
 
 function setView(view) {
     current.value = view;

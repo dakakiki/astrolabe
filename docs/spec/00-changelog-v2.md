@@ -355,6 +355,8 @@ Van specifikacije: zaglavlje profila klijenta — „Appointment“ i „Consult
 
 Isti dan, korisnik: „cancel button uvek ide skroz levo a ostali buttoni desno … važi za sve forme“. U svim formama i potvrdama dugme koje odustaje (Cancel, „Keep it“, „Keep the request“) stoji prvo i skroz levo, ostala dugmad desno sa glavnom radnjom poslednjom (npr. usluga: Cancel … Delete service, Save service); dvostepeno uključivanje 2FA dobija polje iznad i dugmad ispod. „Cancel appointment“ i „Cancel the deletion“ su radnje i ne menjaju mesto. Bez izmene specifikacije.
 
+Isti dan, strana konsultacije (korisnik: desna kolona predugačka, „elementi kao da vise“; izabrao predlog „karta + naplata + tabovi“): desno ostaju „Attached chart“ i „Billing“, a ispod su tabovi **Notes · Files & links · Follow-ups** sa brojem (otvoreni follow-up-i), jedna lista u isto vreme, izbor u adresi (`?panel=`); link ka fajlu na konsultaciji otvara tab „Files & links“; promena samo taba više ne vraća stranu na vrh i ne pita za nesačuvane izmene. Dugme „New consultation“ → „Consultation“ (na tabu profila klijenta i na strani Consultations); dugme u zaglavlju kartice više ne dobija sivu boju linka (izgledalo je ugašeno dok se ne pređe mišem). Bez izmene specifikacije.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

@@ -293,7 +293,7 @@ const fileGlyph = { image: '▣', pdf: '▤', document: '▤', audio: '♫', vid
 const glyphOf = (file) => fileGlyph[file.kind === 'link' ? 'link' : fileKind(file.mime_type)] ?? fileGlyph.file;
 const fileRoute = (file) =>
     file.consultation_id
-        ? { name: 'consultations.show', params: { id: file.consultation_id } }
+        ? { name: 'consultations.show', params: { id: file.consultation_id }, query: { panel: 'files' } }
         : { name: 'clients.show', params: { id: file.client_id }, query: { tab: 'files' } };
 
 const missingText = (client) =>

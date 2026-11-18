@@ -1,5 +1,5 @@
 <script setup>
-import { computed, defineAsyncComponent, onMounted, ref } from 'vue';
+import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 
@@ -27,7 +27,7 @@ const props = defineProps({
     consultations: { type: Array, default: () => [] },
     compact: { type: Boolean, default: false },
 });
-const emit = defineEmits(['changed']);
+const emit = defineEmits(['changed', 'count']);
 
 const { t, locale } = useI18n();
 const auth = useAuthStore();
@@ -62,6 +62,9 @@ async function load(page = 1) {
 }
 
 onMounted(() => load());
+
+// How many notes there are, for a tab label (the consultation page).
+watch(meta, (value) => emit('count', value?.total ?? 0));
 
 function edit(note) {
     editing.value = note;

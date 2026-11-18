@@ -937,7 +937,8 @@
         "eyebrow": "Practice",
         "title": "Consultations",
         "sub": "The professional record: topics, notes, methods and the chart as it stood on the day.",
-        "add": "New consultation",
+        "add": "Consultation",
+        "new": "New consultation",
         "empty": "No consultations yet. Record one after a session with a client.",
         "emptyClient": "No consultations with this client yet.",
         "noMatches": "No consultations match these filters.",
@@ -1017,6 +1018,11 @@
         },
         "attachments": "Files and links",
         "notes": "Notes on this consultation",
+        "panels": {
+            "notes": "Notes",
+            "files": "Files & links",
+            "followUps": "Follow-ups"
+        },
         "saveFirst": "Save the consultation first; files and the chart can be attached after that.",
         "fromAppointment": "Recorded from the appointment on {date}"
     },

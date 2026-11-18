@@ -4,11 +4,12 @@ import { useAuthStore } from '@/stores/auth';
 
 import { resolveNavigation } from './guard';
 import routes from './routes';
+import { scrollFor } from './scroll';
 
 const router = createRouter({
     history: createWebHistory(),
     routes,
-    scrollBehavior: () => ({ top: 0 }),
+    scrollBehavior: scrollFor,
 });
 
 router.beforeEach(async (to) => {

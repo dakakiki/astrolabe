@@ -130,7 +130,7 @@ export function describeEvent(event) {
                 body: null,
                 private: event.visibility === 'private',
                 to: meta.consultation_id
-                    ? { name: 'consultations.show', params: { id: meta.consultation_id } }
+                    ? { name: 'consultations.show', params: { id: meta.consultation_id }, query: { panel: 'files' } }
                     : { tab: 'files' },
             };
         case 'chart_calculated':

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, useId } from 'vue';
+import { computed, onMounted, ref, useId, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 
@@ -22,7 +22,7 @@ const props = defineProps({
     consultationId: { type: [Number, String], default: null },
     compact: { type: Boolean, default: false },
 });
-const emit = defineEmits(['changed']);
+const emit = defineEmits(['changed', 'count']);
 
 const { t, locale } = useI18n();
 const auth = useAuthStore();
@@ -55,6 +55,9 @@ async function load() {
 }
 
 onMounted(() => Promise.all([reference.load(), load()]));
+
+// How many files and links there are, for a tab label (the consultation page).
+watch(items, (list) => emit('count', list.length));
 
 async function upload(files) {
     for (const file of files) {
@@ -322,6 +325,7 @@ const glyph = { image: '▣', pdf: '▤', document: '▤', audio: '♫', video: 
                                                 :to="{
                                                     name: 'consultations.show',
                                                     params: { id: item.consultation_id },
+                                                    query: { panel: 'files' },
                                                 }"
                                                 class="hover:underline"
                                                 >{{ t('files.onConsultation') }}</RouterLink

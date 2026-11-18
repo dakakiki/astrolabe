@@ -84,6 +84,7 @@ function clear() {
         <RouterLink
             :to="{ name: 'consultations.create' }"
             class="btn btn-primary ml-auto"
+            :aria-label="t('consultations.new')"
             v-tip="t('tips.consultations.add')"
             ><AppIcon name="addConsultation" />{{ t('consultations.add') }}</RouterLink
         >

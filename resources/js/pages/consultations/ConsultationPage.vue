@@ -37,6 +37,11 @@ const { t, locale } = useI18n();
 const labels = useLabels();
 const route = useRoute();
 const router = useRouter();
+
+// The right column's lower part: notes, files and links, follow-ups — one at a time.
+const PANELS = ['notes', 'files', 'followUps'];
+const panel = computed(() => (PANELS.includes(route.query.panel) ? route.query.panel : 'notes'));
+const panelCounts = ref({ notes: 0, files: 0, followUps: 0 });
 const auth = useAuthStore();
 const toast = useToastStore();
 const money = useMoney();
@@ -324,7 +329,8 @@ const confirmLeaving = () => {
     if (dirty.value && !window.confirm(t('consultations.unsaved'))) return false;
 };
 onBeforeRouteLeave(confirmLeaving);
-onBeforeRouteUpdate(confirmLeaving);
+// Switching the notes / files / follow-ups tab changes only the query: no warning for that.
+onBeforeRouteUpdate((to, from) => (to.params.id === from.params.id ? undefined : confirmLeaving()));
 
 function warnBeforeUnload(event) {
     if (dirty.value) event.preventDefault();
@@ -753,21 +759,42 @@ const otherZone = computed(() => {
 
                     <BillingCard :consultation="consultation" @changed="reloadBilling" />
 
-                    <TasksPanel :client="client" :consultation="{ id, title: heading }" />
+                    <!-- Notes, files and follow-ups share one place: one list at a time, the
+                         choice kept in the address (?panel=). All three stay loaded so the
+                         counts show and a half-written note survives a switch. -->
+                    <div>
+                        <nav class="tabs mb-3!" :aria-label="heading">
+                            <RouterLink
+                                v-for="name in PANELS"
+                                :key="name"
+                                :to="{ query: { ...route.query, panel: name } }"
+                                :aria-current="panel === name ? 'page' : undefined"
+                                replace
+                            >
+                                {{ t(`consultations.panels.${name}`) }}
+                                <span v-if="panelCounts[name]" class="count">{{ panelCounts[name] }}</span>
+                            </RouterLink>
+                        </nav>
 
-                    <section class="card">
-                        <div class="card-head">
-                            <h2>{{ t('consultations.attachments') }}</h2>
-                        </div>
-                        <div class="card-body">
-                            <AttachmentsPanel :consultation-id="id" compact />
-                        </div>
-                    </section>
-
-                    <section>
-                        <h2 class="mb-2 text-sm font-semibold">{{ t('consultations.notes') }}</h2>
-                        <NotesPanel :client-id="client.id" :consultation-id="id" compact />
-                    </section>
+                        <NotesPanel
+                            v-show="panel === 'notes'"
+                            :client-id="client.id"
+                            :consultation-id="id"
+                            compact
+                            @count="panelCounts.notes = $event"
+                        />
+                        <section v-show="panel === 'files'" class="card">
+                            <div class="card-body">
+                                <AttachmentsPanel :consultation-id="id" compact @count="panelCounts.files = $event" />
+                            </div>
+                        </section>
+                        <TasksPanel
+                            v-show="panel === 'followUps'"
+                            :client="client"
+                            :consultation="{ id, title: heading }"
+                            @count="panelCounts.followUps = $event"
+                        />
+                    </div>
                 </template>
             </div>
         </div>

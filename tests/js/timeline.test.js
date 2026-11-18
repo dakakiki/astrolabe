@@ -39,6 +39,7 @@ describe('describeEvent', () => {
         expect(describeEvent(event('file', { kind: 'file', name: 'a.pdf', consultation_id: 3 })).to).toEqual({
             name: 'consultations.show',
             params: { id: 3 },
+            query: { panel: 'files' },
         });
         expect(describeEvent(event('file', { kind: 'link', name: 'zoom.us' })).title).toEqual([
             'timeline.link',
