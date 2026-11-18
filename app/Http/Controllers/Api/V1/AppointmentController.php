@@ -46,7 +46,8 @@ class AppointmentController extends Controller
     /**
      * Appointments touching the calendar days `from`–`to` (inclusive, in the
      * astrologer's own zone), earliest first. A calendar period is short, so
-     * the list is not paginated.
+     * the list is not paginated. Beside the list, `move_requests`: confirmed
+     * appointments the client asked to move into the period (`proposed_starts_at`).
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -72,20 +73,46 @@ class AppointmentController extends Controller
             ]);
         }
 
-        $appointments = Appointment::query()
-            ->with(self::RELATIONS)
+        $appointments = $this->filtered(Appointment::query(), $filters)
             ->where('starts_at', '<', $to->utc())
             ->where('ends_at', '>', $from->utc())
-            ->when($filters['client_id'] ?? null, fn (Builder $query, int $id) => $query->where('client_id', $id))
-            ->when($filters['service_id'] ?? null, fn (Builder $query, int $id) => $query->where('service_id', $id))
-            ->when($filters['assigned_user_id'] ?? null, fn (Builder $query, int $id) => $query->where('assigned_user_id', $id))
             ->when($filters['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
-            ->when($filters['location_type'] ?? null, fn (Builder $query, string $type) => $query->where('location_type', $type))
             ->orderBy('starts_at')
             ->orderBy('id')
             ->get();
 
-        return AppointmentResource::collection($appointments);
+        // Confirmed appointments whose client asked to move them into this period (docs/spec/12),
+        // wherever they are now: the calendar draws the time asked for as a dashed block.
+        $moves = in_array($filters['status'] ?? null, [null, AppointmentStatus::Scheduled->value], true)
+            ? $this->filtered(Appointment::query(), $filters)
+                ->where('status', AppointmentStatus::Scheduled->value)
+                ->where('proposed_starts_at', '<', $to->utc())
+                ->where('proposed_ends_at', '>', $from->utc())
+                ->orderBy('proposed_starts_at')
+                ->orderBy('id')
+                ->get()
+            : collect();
+
+        return AppointmentResource::collection($appointments)->additional([
+            'move_requests' => AppointmentResource::collection($moves)->resolve($request),
+        ]);
+    }
+
+    /**
+     * The calendar's filters other than the period and the status.
+     *
+     * @param  Builder<Appointment>  $query
+     * @param  array<string, mixed>  $filters
+     * @return Builder<Appointment>
+     */
+    private function filtered(Builder $query, array $filters): Builder
+    {
+        return $query
+            ->with(self::RELATIONS)
+            ->when($filters['client_id'] ?? null, fn (Builder $query, int $id) => $query->where('client_id', $id))
+            ->when($filters['service_id'] ?? null, fn (Builder $query, int $id) => $query->where('service_id', $id))
+            ->when($filters['assigned_user_id'] ?? null, fn (Builder $query, int $id) => $query->where('assigned_user_id', $id))
+            ->when($filters['location_type'] ?? null, fn (Builder $query, string $type) => $query->where('location_type', $type));
     }
 
     /**

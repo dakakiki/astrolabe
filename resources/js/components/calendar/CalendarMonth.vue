@@ -48,20 +48,22 @@ const clock = (appointment) => {
 
 // The event shows only the time and the name; a screen reader hears the rest.
 const label = (appointment) =>
-    [
-        clock(appointment),
-        appointment.client?.full_name,
-        appointment.service?.name,
-        hasMoveRequest(appointment)
-            ? t('appointments.moveRequestedBadge')
-            : appointment.status === 'scheduled'
-              ? null
-              : t(`appointmentStatuses.${appointment.status}`),
-        bookedInPortal(appointment) ? t('calendar.portal') : null,
-        props.conflicts.has(appointment.id) ? t('calendar.conflict') : null,
-    ]
-        .filter(Boolean)
-        .join(', ');
+    appointment.moveOf
+        ? t('calendar.moveTargetLabel', { time: clock(appointment), name: appointment.client?.full_name ?? '' })
+        : [
+              clock(appointment),
+              appointment.client?.full_name,
+              appointment.service?.name,
+              hasMoveRequest(appointment)
+                  ? t('appointments.moveRequestedBadge')
+                  : appointment.status === 'scheduled'
+                    ? null
+                    : t(`appointmentStatuses.${appointment.status}`),
+              bookedInPortal(appointment) ? t('calendar.portal') : null,
+              props.conflicts.has(appointment.id) ? t('calendar.conflict') : null,
+          ]
+              .filter(Boolean)
+              .join(', ');
 </script>
 
 <template>
@@ -85,15 +87,16 @@ const label = (appointment) =>
                     :class="[
                         serviceEdgeClass(appointment.service?.color),
                         {
-                            'is-requested': appointment.status === 'requested' || hasMoveRequest(appointment),
+                            'is-requested': appointment.status === 'requested',
+                            'is-move-target': Boolean(appointment.moveOf),
                             'is-cancelled': appointment.status === 'cancelled',
                             'is-conflict': conflicts.has(appointment.id),
-                            'is-selected': selectedId === appointment.id,
+                            'is-selected': selectedId === (appointment.moveOf?.id ?? appointment.id),
                         },
                     ]"
                     :aria-label="label(appointment)"
                     :title="label(appointment)"
-                    @click="emit('select', appointment)"
+                    @click="emit('select', appointment.moveOf ?? appointment)"
                 >
                     <span class="n"
                         >{{ clock(appointment) }}

@@ -14,10 +14,11 @@ import {
     APPOINTMENT_STATUSES,
     conflictingIds,
     daysBetween,
+    moveTargets,
     shiftDate,
     todayIn,
-    VIEWS,
     viewRange,
+    VIEWS,
     wallClock,
 } from '@/lib/calendar';
 import http from '@/lib/http';
@@ -53,6 +54,8 @@ const range = computed(() => viewRange(view.value, date.value));
 const days = computed(() => daysBetween(range.value.from, range.value.to));
 
 const appointments = ref([]);
+// Confirmed appointments the client asked to move into this period (docs/spec/12).
+const moveRequests = ref([]);
 const loading = ref(false);
 const services = ref([]);
 
@@ -66,12 +69,15 @@ async function load() {
     try {
         const { data } = await http.get('/appointments', { params });
         appointments.value = data.data;
+        moveRequests.value = data.move_requests ?? [];
     } finally {
         loading.value = false;
     }
 }
 
 const conflicts = computed(() => conflictingIds(appointments.value));
+// The day, week and month also draw the times asked for, as dashed blocks.
+const drawn = computed(() => [...appointments.value, ...moveTargets(moveRequests.value)]);
 
 function go(changes) {
     router.replace({ query: { ...route.query, ...changes } });
@@ -319,7 +325,7 @@ onBeforeUnmount(() => clearInterval(clock));
             <CalendarGrid
                 v-if="view === 'day' || view === 'week'"
                 :days="days"
-                :appointments="appointments"
+                :appointments="drawn"
                 :time-zone="zone"
                 :today="today"
                 :now-minutes="nowMinutes"
@@ -332,7 +338,7 @@ onBeforeUnmount(() => clearInterval(clock));
                 v-else-if="view === 'month'"
                 :days="days"
                 :month="date"
-                :appointments="appointments"
+                :appointments="drawn"
                 :time-zone="zone"
                 :today="today"
                 :conflicts="conflicts"

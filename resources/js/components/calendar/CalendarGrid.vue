@@ -75,6 +75,11 @@ function label(item) {
     const appointment = item.appointment;
     const start = wallClock(appointment.starts_at, props.timeZone);
 
+    // The time a client asked to move their appointment to (docs/spec/12).
+    if (appointment.moveOf) {
+        return t('calendar.moveTargetLabel', { time: clock(start.minutes), name: appointment.client?.full_name ?? '' });
+    }
+
     return [
         clock(start.minutes),
         appointment.client?.full_name,
@@ -90,6 +95,8 @@ function label(item) {
 
 // The tooltip: what the marks on the event mean.
 function hint(appointment) {
+    if (appointment.moveOf) return t('calendar.moveTargetHint');
+
     return (
         [
             props.conflicts.has(appointment.id) ? t('calendar.conflict') : null,
@@ -135,17 +142,17 @@ function hint(appointment) {
                             :class="[
                                 serviceEdgeClass(item.appointment.service?.color),
                                 {
-                                    'is-requested':
-                                        item.appointment.status === 'requested' || hasMoveRequest(item.appointment),
+                                    'is-requested': item.appointment.status === 'requested',
+                                    'is-move-target': Boolean(item.appointment.moveOf),
                                     'is-cancelled': item.appointment.status === 'cancelled',
                                     'is-conflict': conflicts.has(item.appointment.id),
-                                    'is-selected': selectedId === item.appointment.id,
+                                    'is-selected': selectedId === (item.appointment.moveOf?.id ?? item.appointment.id),
                                 },
                             ]"
                             :style="position(item)"
                             :aria-label="label(item)"
                             :title="hint(item.appointment)"
-                            @click="emit('select', item.appointment)"
+                            @click="emit('select', item.appointment.moveOf ?? item.appointment)"
                         >
                             <span class="n"
                                 ><template v-if="conflicts.has(item.appointment.id)">⚠ </template
@@ -158,7 +165,8 @@ function hint(appointment) {
                                 <template v-if="item.appointment.service">
                                     · {{ item.appointment.service.name }}</template
                                 >
-                                <template v-if="hasMoveRequest(item.appointment)">
+                                <template v-if="item.appointment.moveOf"> · {{ t('calendar.moveTarget') }}</template>
+                                <template v-else-if="hasMoveRequest(item.appointment)">
                                     · {{ t('appointments.moveRequestedBadge') }}</template
                                 >
                                 <template v-else-if="item.appointment.status !== 'scheduled'">

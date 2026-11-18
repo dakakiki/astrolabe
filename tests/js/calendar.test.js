@@ -15,6 +15,7 @@ import {
     isAhead,
     isOpen,
     layoutDay,
+    moveTargets,
     movesAppointment,
     offersCancelEmail,
     offersMoveEmail,
@@ -193,6 +194,33 @@ describe('statuses and the portal (Phase 9b)', () => {
         expect(hasMoveRequest({ status: 'scheduled', proposed_starts_at: null })).toBe(false);
         expect(hasMoveRequest({ status: 'cancelled', proposed_starts_at: asked })).toBe(false);
         expect(hasMoveRequest(null)).toBe(false);
+    });
+
+    it('draws the time asked for as a block of its own that points back to the appointment', () => {
+        const appointment = {
+            id: 7,
+            status: 'scheduled',
+            starts_at: '2026-10-21T08:00:00Z',
+            ends_at: '2026-10-21T09:00:00Z',
+            proposed_starts_at: '2026-10-22T10:00:00Z',
+            proposed_ends_at: '2026-10-22T11:00:00Z',
+        };
+        const [block] = moveTargets([appointment, { id: 8, status: 'scheduled', proposed_starts_at: null }]);
+
+        expect(moveTargets([appointment])).toHaveLength(1);
+        expect(block).toMatchObject({
+            id: 'move-7',
+            starts_at: '2026-10-22T10:00:00Z',
+            ends_at: '2026-10-22T11:00:00Z',
+            moveOf: appointment,
+        });
+        // Not a request itself, and never in the way of the appointment's own conflicts.
+        expect(hasMoveRequest(block)).toBe(false);
+        expect(conflictingIds([appointment, block]).size).toBe(0);
+        expect(layoutDay([appointment, block], '2026-10-22', 'UTC')).toEqual([
+            { appointment: block, start: 600, end: 660, column: 0, columns: 1 },
+        ]);
+        expect(moveTargets(undefined)).toEqual([]);
     });
 });
 

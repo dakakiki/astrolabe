@@ -373,6 +373,8 @@ Korisnik: „uradio sam reschedule ali je odmah prikazao confirmed, ne čeka se 
 - 02: Kalendar, Dashboard, vremenska linija, portal (Upcoming) i obaveštenja — zahtev za pomeranje.
 - 05: `appointments.proposed_starts_at`, `proposed_ends_at`, `proposed_at`.
 
+Odmah zatim (korisnik: „dodaj isprekidan blok za traženo vreme“): u danu, nedelji i mesecu traženo vreme je isprekidan blok „Asked for“, a termin ostaje pun na svom mestu (ranije je i sam bio isprekidan). Izmenjeni 02 i 12.
+
 Van specifikacije, isti dan (portal, korisnik): ispod datuma „15 free slots“ umesto „15 times“; dani kao slajder sa strelicama gore desno (umesto „Change time zone“); koraci zakazivanja su klikabilni (link „Change service“ otpada); red „Practice's time“ na potvrdi kada se sat klijenta i prakse razlikuju; zelena oznaka „Confirmed“ za potvrđen termin koji predstoji; „Reschedule“ i „Cancel“ desno na kartici termina.
 
 ## Nedostaje dokument 08

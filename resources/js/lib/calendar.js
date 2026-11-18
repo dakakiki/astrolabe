@@ -32,6 +32,24 @@ export function hasMoveRequest(appointment) {
     return appointment?.status === 'scheduled' && Boolean(appointment?.proposed_starts_at);
 }
 
+/**
+ * The dashed blocks for the times clients asked to move confirmed appointments to
+ * (docs/spec/12): one per appointment, at the time asked for, pointing back to it
+ * (`moveOf`). A block is no appointment of its own: it carries no request and no id
+ * the calendar's conflicts or selection could mistake for the appointment's.
+ */
+export function moveTargets(appointments) {
+    return (appointments ?? []).filter(hasMoveRequest).map((appointment) => ({
+        ...appointment,
+        id: `move-${appointment.id}`,
+        starts_at: appointment.proposed_starts_at,
+        ends_at: appointment.proposed_ends_at,
+        proposed_starts_at: null,
+        proposed_ends_at: null,
+        moveOf: appointment,
+    }));
+}
+
 /** Booked by the client in the portal (Phase 9b), not entered by the practice. */
 export function bookedInPortal(appointment) {
     return appointment?.booking_source === 'portal';

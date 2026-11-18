@@ -1152,6 +1152,9 @@
         "more": "+{n} more",
         "conflict": "Overlaps another appointment",
         "portal": "Booked in the portal",
+        "moveTarget": "Asked for",
+        "moveTargetLabel": "{time}, {name}: the client asked to move their appointment to this time",
+        "moveTargetHint": "The client asked to move their appointment here. Open it to confirm or decline the move.",
         "slot": "New appointment on {date} at {time}",
         "minutes": "{n} min",
         "loading": "Loading the calendar…"

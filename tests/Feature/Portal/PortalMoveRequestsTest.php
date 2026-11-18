@@ -187,6 +187,16 @@ class PortalMoveRequestsTest extends TestCase
             ->assertJsonPath('data.proposed_starts_at', self::ASKED)
             ->assertJsonPath('data.proposed_ends_at', '2026-10-22T11:00:00Z');
 
+        // The calendar draws the time asked for in the period it falls in, wherever the appointment is.
+        $thursday = $this->actingAs($this->vega)->getJson('/api/v1/appointments?from=2026-10-22&to=2026-10-22')->assertOk();
+        $this->assertSame([], $thursday->json('data'));
+        $this->assertSame([$this->appointment->id], array_column($thursday->json('move_requests'), 'id'));
+        $this->assertSame(self::ASKED, $thursday->json('move_requests.0.proposed_starts_at'));
+        $wednesday = $this->actingAs($this->vega)->getJson('/api/v1/appointments?from=2026-10-21&to=2026-10-21');
+        $this->assertSame([$this->appointment->id], array_column($wednesday->json('data'), 'id'));
+        $this->assertSame([], $wednesday->json('move_requests'));
+        $this->assertSame([], $this->actingAs($this->vega)->getJson('/api/v1/appointments?from=2026-10-22&to=2026-10-22&status=requested')->json('move_requests'));
+
         $this->answer('confirm')
             ->assertOk()
             ->assertJsonPath('data.starts_at', self::ASKED)
