@@ -1099,6 +1099,76 @@
         text-align: center;
     }
 
+    /* Accordion (<details class="accordion">): a framed row with the arrow on the right. Closed
+       it is quiet; open it takes the brand tint, the arrow turns and the content shows below.
+       Native <details>, so the keyboard and screen readers work without script. */
+    .accordion {
+        border: 1px solid var(--line);
+        border-radius: var(--r);
+        background: var(--surface);
+        overflow: hidden;
+    }
+
+    .accordion > summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 9px 12px;
+        background: var(--surface-2);
+        color: var(--ink-2);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        list-style: none;
+        user-select: none;
+    }
+
+    .accordion > summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .accordion > summary:hover {
+        color: var(--ink);
+    }
+
+    .accordion > summary:focus-visible {
+        outline-offset: -2px;
+    }
+
+    .accordion > summary .chevron {
+        width: 16px;
+        height: 16px;
+        color: var(--ink-3);
+        transition: transform 0.15s ease;
+    }
+
+    .accordion[open] {
+        border-color: var(--brand-300);
+    }
+
+    .accordion[open] > summary {
+        background: var(--brand-050);
+        color: var(--link);
+        font-weight: 600;
+        border-bottom: 1px solid var(--line-soft);
+    }
+
+    .accordion[open] > summary .chevron {
+        color: var(--link);
+        transform: rotate(180deg);
+    }
+
+    .accordion-body {
+        padding: 4px 6px 6px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .accordion > summary .chevron {
+            transition: none;
+        }
+    }
+
     .seg {
         display: inline-flex;
         border: 1px solid var(--line);

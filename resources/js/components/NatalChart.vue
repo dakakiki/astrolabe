@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, useId, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AppIcon from '@/components/AppIcon.vue';
 import AspectsTable from '@/components/AspectsTable.vue';
 import ChartWheel from '@/components/ChartWheel.vue';
 import HouseCuspsTable from '@/components/HouseCuspsTable.vue';
@@ -184,20 +185,22 @@ const aspectCount = computed(() => props.chart.aspects?.length ?? 0);
             <div class="overflow-x-auto">
                 <PositionsTable :chart="chart" compact />
             </div>
-            <details v-if="chart.aspects">
-                <summary class="cursor-pointer text-sm font-medium">
-                    {{ t('chart.aspects.show', { count: aspectCount }) }}
+            <details v-if="chart.aspects" class="accordion">
+                <summary>
+                    <span>{{ t('chart.aspects.show', { count: aspectCount }) }}</span>
+                    <AppIcon name="more" class="chevron" />
                 </summary>
-                <div class="mt-2 overflow-x-auto">
+                <div class="accordion-body overflow-x-auto">
                     <AspectsTable :aspects="chart.aspects" />
                 </div>
             </details>
-            <details v-if="houses">
-                <summary class="cursor-pointer text-sm font-medium">
-                    {{ t('chart.cusps.title') }} · {{ labels.houseSystem(houses.system) }}
+            <details v-if="houses" class="accordion">
+                <summary>
+                    <span>{{ t('chart.cusps.title') }} · {{ labels.houseSystem(houses.system) }}</span>
+                    <AppIcon name="more" class="chevron" />
                 </summary>
-                <div class="mt-2 overflow-x-auto">
-                    <HouseCuspsTable :cusps="houses.cusps" />
+                <div class="accordion-body">
+                    <HouseCuspsTable :cusps="houses.cusps" compact />
                 </div>
             </details>
         </template>
