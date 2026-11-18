@@ -1,5 +1,8 @@
+import { h } from 'vue';
+
 import {
     Activity,
+    Apple,
     Archive,
     ArchiveRestore,
     ArrowLeft,
@@ -29,6 +32,7 @@ import {
     Copy,
     Database,
     Download,
+    EllipsisVertical,
     ExternalLink,
     EyeOff,
     FileArchive,
@@ -70,6 +74,7 @@ import {
     ScrollText,
     Send,
     Settings,
+    Share,
     ShieldCheck,
     ShieldOff,
     Sparkles,
@@ -89,6 +94,34 @@ import {
     WandSparkles,
     X,
 } from '@lucide/vue';
+
+/**
+ * Android's robot head in Lucide's line style (Lucide has no brand marks): a half-disc with two
+ * antennae and two eyes, drawn in the text colour. Used only to say "how to install on Android".
+ */
+const Android = (props) =>
+    h(
+        'svg',
+        {
+            xmlns: 'http://www.w3.org/2000/svg',
+            width: 24,
+            height: 24,
+            viewBox: '0 0 24 24',
+            fill: 'none',
+            stroke: 'currentColor',
+            'stroke-width': 2,
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            ...props,
+        },
+        [
+            h('path', { d: 'M2.5 19a9.5 9.5 0 0 1 19 0Z' }),
+            h('path', { d: 'm6.8 12.3-2.3-3.8' }),
+            h('path', { d: 'm17.2 12.3 2.3-3.8' }),
+            h('circle', { cx: 8.5, cy: 15.2, r: 1, fill: 'currentColor', stroke: 'none' }),
+            h('circle', { cx: 15.5, cy: 15.2, r: 1, fill: 'currentColor', stroke: 'none' }),
+        ],
+    );
 
 /**
  * Every icon the interface uses, by what it means rather than by its picture, so one action
@@ -191,6 +224,10 @@ export const icons = {
     home: House,
     shared: FolderOpen,
     install: Download,
+    android: Android,
+    ios: Apple,
+    share: Share,
+    browserMenu: EllipsisVertical,
     notificationsOn: Bell,
     notificationsOff: BellOff,
 

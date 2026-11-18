@@ -338,6 +338,23 @@ describe('installing the portal', () => {
             expect(showInstallCard({ view })).toBe(false);
         }
     });
+
+    it('offers it on an Android phone too, which has steps to show', () => {
+        expect(showInstallCard({ view: 'hint', platform: 'android' })).toBe(true);
+        expect(showInstallCard({ view: 'hint', platform: 'android', dismissed: true })).toBe(false);
+        expect(showInstallCard({ view: 'hint', platform: 'desktop' })).toBe(false);
+        expect(showInstallCard({ view: 'installed', platform: 'android' })).toBe(false);
+    });
+
+    it('has the steps of every install guide, each with the button it names', () => {
+        const guide = en.portal.pwa.install.guide;
+
+        expect(Object.keys(guide.labels)).toEqual(['android', 'ios']);
+        for (const device of ['android', 'ios', 'desktop']) {
+            expect(guide.title[device]).toBeTruthy();
+            expect(Object.values(guide[device]).some((step) => step.includes('{icon}'))).toBe(true);
+        }
+    });
 });
 
 describe('a new version', () => {

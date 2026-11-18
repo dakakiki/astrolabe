@@ -59,7 +59,7 @@ export const usePwaStore = defineStore('portal-pwa', () => {
         }),
     );
     const showHomeInstall = computed(() =>
-        showInstallCard({ view: installState.value, dismissed: installHintDismissed.value }),
+        showInstallCard({ view: installState.value, dismissed: installHintDismissed.value, platform }),
     );
 
     /** A route's file could not be loaded: most likely the portal was updated meanwhile. */

@@ -152,9 +152,14 @@ export function installView({ standalone = false, installed = false, canInstall 
     return 'hint';
 }
 
-/** Home offers installing once, discreetly: only while it can be done and until the person says "Not now". */
-export function showInstallCard({ view, dismissed = false } = {}) {
-    return !dismissed && (view === 'prompt' || view === 'ios');
+/**
+ * Home offers installing once, discreetly, until the person says "Not now": where the browser's
+ * dialog is ready, and on a phone (iPhone, iPad, Android), which has steps to show.
+ */
+export function showInstallCard({ view, dismissed = false, platform = 'desktop' } = {}) {
+    if (dismissed) return false;
+
+    return view === 'prompt' || view === 'ios' || (view === 'hint' && platform === 'android');
 }
 
 /** Whether to ask the server for a new service worker again (on returning to the page). */

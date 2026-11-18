@@ -314,7 +314,35 @@
                 "installed": "The app is installed. Open it from your home screen or your list of apps.",
                 "iosSteps": "Tap Share, then Add to Home Screen.",
                 "iosNote": "Notifications on iPhone and iPad need the installed app (iOS 16.4 or later).",
-                "hint": "If your browser offers it, you can add the portal to your home screen or dock from the browser's menu."
+                "hint": "If your browser offers it, you can add the portal to your home screen or dock from the browser's menu.",
+                "guide": {
+                    "labels": {
+                        "android": "Android",
+                        "ios": "iPhone and iPad"
+                    },
+                    "title": {
+                        "android": "Install on Android",
+                        "ios": "Install on iPhone or iPad",
+                        "desktop": "Install on this computer"
+                    },
+                    "android": {
+                        "s1": "Open the portal in Chrome.",
+                        "s2": "Tap the menu {icon} at the top right.",
+                        "s3": "Choose “Install app” or “Add to Home screen”.",
+                        "s4": "Tap “Install”."
+                    },
+                    "ios": {
+                        "s1": "Open the portal in Safari.",
+                        "s2": "Tap Share {icon} at the bottom of the screen (at the top on iPad).",
+                        "s3": "Choose “Add to Home Screen”.",
+                        "s4": "Tap “Add”."
+                    },
+                    "desktop": {
+                        "s1": "In Chrome or Edge, click the install icon at the right end of the address bar.",
+                        "s2": "Or open the browser menu {icon} and choose the option to install the page as an app.",
+                        "s3": "In Safari on a Mac, choose File → Add to Dock."
+                    }
+                }
             }
         },
         "security": {
@@ -333,7 +361,8 @@
         "loading": "Loading…",
         "save": "Save changes",
         "more": "Show more",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "close": "Close"
     },
     "theme": {
         "toNight": "Switch to the night theme",
@@ -348,7 +377,8 @@
     "tips": {
         "common": {
             "more": "Load more",
-            "save": "Save your changes"
+            "save": "Save your changes",
+            "close": "Close"
         },
         "portal": {
             "appointments": {
@@ -403,8 +433,10 @@
             },
             "pwa": {
                 "install": {
-                    "action": "Add the portal to your home screen or desktop",
-                    "notNow": "Hide this for now"
+                    "action": "Install the portal as an app — or see how on this device",
+                    "notNow": "Hide this for now",
+                    "android": "How to install the portal on Android",
+                    "ios": "How to install the portal on iPhone or iPad"
                 },
                 "update": {
                     "reload": "Load the new version of the portal"

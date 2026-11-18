@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 
 import AppIcon from '@/components/AppIcon.vue';
 import ToggleRow from '@/components/ToggleRow.vue';
+import InstallGuide from '@/portal/components/InstallGuide.vue';
 import http from '@/portal/http';
 import { deviceLabel, madeWithOtherKey, pushDevices, pushProblem, sha256Hex, supportNotice } from '@/portal/lib/pwa';
 import { loadScreen } from '@/portal/load';
@@ -274,9 +275,13 @@ function list(names) {
         </div>
 
         <p v-if="support === null" class="text-sm text-ink-3">{{ t('common.loading') }}</p>
-        <p v-else-if="supportText" class="notice n-neutral mt-2">
-            {{ t(`portal.notifications.states.${supportText}`) }}
-        </p>
+        <template v-else-if="supportText">
+            <p class="notice n-neutral mt-2">
+                {{ t(`portal.notifications.states.${supportText}`) }}
+            </p>
+            <!-- iPhone and iPad outside the installed app: the way there, right here. -->
+            <InstallGuide v-if="support === 'install-first'" class="mt-3" />
+        </template>
         <template v-else>
             <p class="text-sm text-ink-2">
                 {{ on ? t('portal.notifications.isOn') : t('portal.notifications.isOff') }}
