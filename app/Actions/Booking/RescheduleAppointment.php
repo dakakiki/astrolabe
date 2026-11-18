@@ -4,7 +4,9 @@ namespace App\Actions\Booking;
 
 use App\Enums\ActivityType;
 use App\Enums\AppointmentActor;
+use App\Enums\AppointmentStatus;
 use App\Enums\AuditEvent;
+use App\Events\Appointments\AppointmentMoveRequested;
 use App\Events\Appointments\AppointmentRescheduled;
 use App\Models\Appointment;
 use App\Models\BookingPolicy;
@@ -24,6 +26,12 @@ use Illuminate\Support\Facades\DB;
  * The appointment keeps its length, status and zone (a request stays a request);
  * the timeline records the move as made in the portal and the astrologer hears
  * about it (AppointmentRescheduled).
+ *
+ * A confirmed appointment in a practice that confirms bookings by hand is not
+ * moved at once (docs/spec/12, "Pomeranje kao zahtev"): it keeps its time, the
+ * new one is held as `proposed_starts_at` until the astrologer confirms or
+ * declines the move (ConfirmMove, DeclineMove), and both hear of the request
+ * (AppointmentMoveRequested). Asking again replaces the earlier request.
  */
 class RescheduleAppointment
 {
@@ -55,8 +63,8 @@ class RescheduleAppointment
                 throw BookingConflict::tooLate();
             }
 
-            // Picking the time it already has changes nothing: no entry, no email.
-            if ($appointment->starts_at->equalTo($start)) {
+            // Picking the time it already has — or already asked for — changes nothing: no entry, no email.
+            if ($appointment->starts_at->equalTo($start) || $appointment->proposed_starts_at?->equalTo($start)) {
                 return $appointment->load('service');
             }
 
@@ -70,6 +78,10 @@ class RescheduleAppointment
 
             if (! $availability->isFree($start, $minutes, $now, $appointment)) {
                 throw BookingConflict::slotTaken($availability->slotsToMove($appointment, $now), $minutes);
+            }
+
+            if ($policy->requires_confirmation && $appointment->status === AppointmentStatus::Scheduled) {
+                return $this->requestMove($context, $user, $appointment, $start, $minutes);
             }
 
             $previousStart = $appointment->starts_at;
@@ -96,5 +108,31 @@ class RescheduleAppointment
 
             return $appointment->load('service');
         });
+    }
+
+    /** The confirmed appointment stays where it is; the new time waits for the astrologer. */
+    private function requestMove(PortalContext $context, PortalUser $user, Appointment $appointment, CarbonImmutable $start, int $minutes): Appointment
+    {
+        $appointment->proposed_starts_at = $start;
+        $appointment->proposed_ends_at = $start->addMinutes($minutes);
+        $appointment->proposed_at = CarbonImmutable::now();
+        $appointment->save();
+
+        $this->activity->record($context->client(), ActivityType::AppointmentMoveRequested, [
+            'from' => $appointment->starts_at->toIso8601ZuluString(),
+            'from_end' => $appointment->ends_at->toIso8601ZuluString(),
+            'to' => $appointment->proposed_starts_at->toIso8601ZuluString(),
+            'to_end' => $appointment->proposed_ends_at->toIso8601ZuluString(),
+            'timezone' => $appointment->timezone,
+            'source' => 'portal',
+        ], $appointment);
+
+        $context->client()->touchActivity();
+
+        Audit::portal(AuditEvent::PortalAppointmentMoveRequested, $user, $appointment, workspace: $context->workspace());
+
+        AppointmentMoveRequested::dispatch($appointment);
+
+        return $appointment->load('service');
     }
 }

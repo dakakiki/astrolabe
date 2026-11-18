@@ -8,13 +8,15 @@
  * - fields: changed field names, each translated under timeline.fields.*
  * - to: where the entry leads — a route, or a tab of the client profile
  * - detail: a second line, [key, params] (e.g. that the client booked it in the portal)
- * - moved / wasAt / at: moments (UTC) the component formats in the viewer's zone
+ * - moved / wasAt / at / asked: moments (UTC) the component formats in the viewer's zone
  * - task: the task's deadline, priority and status, worded by the component
  * - money / day: a payment's amount (the component formats it into the title
  *   as `amount`) and the day it arrived, shown instead of a time
  *
  * What the client did in the portal says so (Phase 9a, 9b): `source: 'portal'`
- * on a log entry, `booking_source: 'portal'` on an appointment.
+ * on a log entry, `booking_source: 'portal'` on an appointment. A client's request
+ * to move a confirmed appointment (docs/spec/12) is its own entry, and so is the
+ * answer: a confirmed move is a move with `confirmed`, a declined one keeps the time.
  */
 export function describeEvent(event) {
     const meta = event.metadata ?? {};
@@ -52,10 +54,32 @@ export function describeEvent(event) {
             return {
                 tone: 'appointment',
                 title: [
-                    meta.source === 'portal' ? 'timeline.appointmentMovedByClient' : 'timeline.appointmentMoved',
+                    meta.confirmed
+                        ? 'timeline.moveConfirmed'
+                        : meta.source === 'portal'
+                          ? 'timeline.appointmentMovedByClient'
+                          : 'timeline.appointmentMoved',
                     {},
                 ],
                 moved: { from: meta.from, to: meta.to },
+                to: appointmentRoute(event.subject.id),
+            };
+        case 'appointment_move_requested':
+            return {
+                tone: 'appointment',
+                title: ['timeline.moveRequested', {}],
+                moved: { from: meta.from, to: meta.to },
+                to: appointmentRoute(event.subject.id),
+            };
+        case 'appointment_move_declined':
+            return {
+                tone: 'appointment',
+                // The reason went to the client, like a declined booking request's.
+                title: ['timeline.moveDeclined', {}],
+                body: meta.reason ?? null,
+                detail: meta.reason ? ['timeline.declineSent', {}] : null,
+                asked: meta.requested ?? null,
+                at: meta.starts_at ?? null,
                 to: appointmentRoute(event.subject.id),
             };
         case 'appointment_cancelled':

@@ -241,7 +241,7 @@ class PortalBookingTest extends TestCase
 
         // Times and the practice's clock, nothing else: not whose they are, nor why the others are not free.
         $this->assertSame(
-            ['duration_minutes', 'from', 'to', 'practice_timezone', 'slots'],
+            ['duration_minutes', 'from', 'to', 'practice_timezone', 'move_needs_confirmation', 'slots'],
             array_keys($response->json('data')),
         );
         foreach ($response->json('data.slots') as $slot) {

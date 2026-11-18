@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Enums\AppointmentActor;
 use App\Events\Appointments\AppointmentBooked;
 use App\Events\Appointments\AppointmentCancelled;
+use App\Events\Appointments\AppointmentMoveRequested;
 use App\Events\Appointments\AppointmentRescheduled;
 use App\Models\Appointment;
 use App\Models\User;
@@ -14,7 +15,7 @@ use Carbon\CarbonImmutable;
 
 /**
  * Emails the astrologer about what a client did in the portal (docs/spec/12,
- * "Mejlovi (9b)"): a new booking or request, a move, a cancellation — to the
+ * "Mejlovi (9b)"): a new booking or request, a move or a request to move, a cancellation — to the
  * person the appointment belongs to, when "New portal booking" is on in their
  * Settings → Notifications. What the practice itself does is never announced
  * back to it, and a closing practice gets nothing.
@@ -45,6 +46,27 @@ class NotifyAstrologerOfPortalBooking
             $event->appointment,
             PortalBookingNotice::moved($event->appointment, $event->previousStart, $event->previousEnd),
             $previous < $start ? $previous : $start,
+        );
+    }
+
+    /**
+     * A move asked for, not made: the deadline is the earlier of the two times,
+     * since the answer decides where the astrologer is expected.
+     */
+    public function handleMoveRequested(AppointmentMoveRequested $event): void
+    {
+        $appointment = $event->appointment;
+        $current = $appointment->starts_at;
+        $proposed = $appointment->proposed_starts_at;
+
+        if ($proposed === null) {
+            return;
+        }
+
+        $this->send(
+            $appointment,
+            PortalBookingNotice::moveRequested($appointment),
+            $current < $proposed ? $current : $proposed,
         );
     }
 

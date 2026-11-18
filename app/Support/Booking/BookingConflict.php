@@ -15,6 +15,8 @@ use RuntimeException;
  * - `change_too_late` (409): past the policy's deadline for moving or cancelling;
  * - `not_changeable` (409): no longer open (held, cancelled, already decided);
  * - `not_requested` (409): the astrologer confirms or declines what is no request;
+ * - `no_move_request` (409): the astrologer answers a move nobody asked for (any more);
+ * - `move_passed` (409): the time the client asked to move to has come already;
  * - `too_many_open` (409): the client already holds as many open appointments
  *   as the portal allows (`portal.booking.max_open_per_client`);
  * - `booking_disabled` (403): the practice does not take bookings in the portal now.
@@ -55,6 +57,18 @@ final class BookingConflict extends RuntimeException
     public static function notRequested(): self
     {
         return new self('not_requested', __('booking.not_requested'));
+    }
+
+    /** The astrologer's confirm or decline of a move on an appointment the client asked no move for (any more). */
+    public static function noMoveRequest(): self
+    {
+        return new self('no_move_request', __('booking.no_move_request'));
+    }
+
+    /** The time the client asked to move to has already come: the request can only be declined. */
+    public static function movePassed(): self
+    {
+        return new self('move_passed', __('booking.move_passed'));
     }
 
     /** The client holds `$max` open appointments already: the practice books any more. */

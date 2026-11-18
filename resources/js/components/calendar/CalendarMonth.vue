@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { bookedInPortal, groupByDay, wallClock } from '@/lib/calendar';
+import { bookedInPortal, groupByDay, hasMoveRequest, wallClock } from '@/lib/calendar';
 import { serviceEdgeClass } from '@/lib/services';
 
 /**
@@ -52,7 +52,11 @@ const label = (appointment) =>
         clock(appointment),
         appointment.client?.full_name,
         appointment.service?.name,
-        appointment.status === 'scheduled' ? null : t(`appointmentStatuses.${appointment.status}`),
+        hasMoveRequest(appointment)
+            ? t('appointments.moveRequestedBadge')
+            : appointment.status === 'scheduled'
+              ? null
+              : t(`appointmentStatuses.${appointment.status}`),
         bookedInPortal(appointment) ? t('calendar.portal') : null,
         props.conflicts.has(appointment.id) ? t('calendar.conflict') : null,
     ]
@@ -81,7 +85,7 @@ const label = (appointment) =>
                     :class="[
                         serviceEdgeClass(appointment.service?.color),
                         {
-                            'is-requested': appointment.status === 'requested',
+                            'is-requested': appointment.status === 'requested' || hasMoveRequest(appointment),
                             'is-cancelled': appointment.status === 'cancelled',
                             'is-conflict': conflicts.has(appointment.id),
                             'is-selected': selectedId === appointment.id,

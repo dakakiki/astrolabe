@@ -142,6 +142,12 @@ before starting a phase. The user communicates in Serbian.
   only by `ConfirmAppointment` / `DeclineAppointment` (409 `not_requested` on anything else): the calendar's
   PATCH refuses a status change on it, `/cancel` refuses it, and no consultation is recorded from it. A
   declined request is cancelled with `declined_at`; its `cancellation_reason` is written for the client.
+- With `requires_confirmation`, the client's move of a `scheduled` appointment is a move request
+  (docs/spec/12, 18 Nov 2026): `RescheduleAppointment` writes `proposed_starts_at` / `proposed_ends_at`
+  and leaves the time; the proposal holds time in `BookingAvailability::busy()` for everyone but that
+  appointment. Only `ConfirmMove` (overlap check like the calendar, `allow_overlap`) and `DeclineMove`
+  answer it (409 `no_move_request`, `move_passed`). `Appointment::booted` drops the proposal whenever
+  the time changes or the status stops being scheduled — never clear it by hand elsewhere.
 - Practice-side cancelling and moving (`CancelAppointment`, `SaveAppointment`) lock the appointment row and
   check its status again — the client may change the same appointment at the same moment. An edit of
   notes or place must not send the appointment's time.

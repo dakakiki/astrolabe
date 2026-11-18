@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { bookedInPortal, layoutDay, slotStart, visibleHours, wallClock } from '@/lib/calendar';
+import { bookedInPortal, hasMoveRequest, layoutDay, slotStart, visibleHours, wallClock } from '@/lib/calendar';
 import { formatDate } from '@/lib/format';
 import { serviceEdgeClass } from '@/lib/services';
 
@@ -79,7 +79,9 @@ function label(item) {
         clock(start.minutes),
         appointment.client?.full_name,
         appointment.service?.name,
-        t(`appointmentStatuses.${appointment.status}`),
+        hasMoveRequest(appointment)
+            ? t('appointments.moveRequestedBadge')
+            : t(`appointmentStatuses.${appointment.status}`),
         bookedInPortal(appointment) ? t('calendar.portal') : null,
     ]
         .filter(Boolean)
@@ -91,6 +93,7 @@ function hint(appointment) {
     return (
         [
             props.conflicts.has(appointment.id) ? t('calendar.conflict') : null,
+            hasMoveRequest(appointment) ? t('appointments.moveRequestedBadge') : null,
             bookedInPortal(appointment) ? t('calendar.portal') : null,
         ]
             .filter(Boolean)
@@ -132,7 +135,8 @@ function hint(appointment) {
                             :class="[
                                 serviceEdgeClass(item.appointment.service?.color),
                                 {
-                                    'is-requested': item.appointment.status === 'requested',
+                                    'is-requested':
+                                        item.appointment.status === 'requested' || hasMoveRequest(item.appointment),
                                     'is-cancelled': item.appointment.status === 'cancelled',
                                     'is-conflict': conflicts.has(item.appointment.id),
                                     'is-selected': selectedId === item.appointment.id,
@@ -154,7 +158,10 @@ function hint(appointment) {
                                 <template v-if="item.appointment.service">
                                     · {{ item.appointment.service.name }}</template
                                 >
-                                <template v-if="item.appointment.status !== 'scheduled'">
+                                <template v-if="hasMoveRequest(item.appointment)">
+                                    · {{ t('appointments.moveRequestedBadge') }}</template
+                                >
+                                <template v-else-if="item.appointment.status !== 'scheduled'">
                                     · {{ t(`appointmentStatuses.${item.appointment.status}`) }}</template
                                 ></span
                             >

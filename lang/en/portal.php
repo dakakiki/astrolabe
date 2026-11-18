@@ -101,6 +101,22 @@ return [
                 'subject' => 'Moved: your appointment is now on :when',
                 'line' => 'As you asked, your appointment with :practice is now on :when.',
             ],
+            // Moving a confirmed appointment while the practice confirms bookings by hand (docs/spec/12).
+            'move_requested' => [
+                'subject' => 'Move requested: your appointment on :when',
+                'line' => ':practice received your request to move your appointment to :other.',
+                'next' => 'Until :practice confirms the new time, your appointment stays on :when. Both times are held for you meanwhile, and you will get an email either way.',
+            ],
+            'move_confirmed' => [
+                'subject' => 'Moved: your appointment is now on :when',
+                'line' => ':practice confirmed the new time: your appointment is now on :when.',
+                'next' => 'It was on :other.',
+            ],
+            'move_declined' => [
+                'subject' => 'Not moved: your appointment stays on :when',
+                'line' => ':practice could not move your appointment to :other.',
+                'next' => 'Your appointment stays on :when. You can choose another time in your portal, or contact :practice.',
+            ],
             'cancelled' => [
                 'subject' => 'Cancelled: your appointment on :when',
                 'line' => ':practice cancelled your appointment on :when.',
@@ -139,6 +155,15 @@ return [
         ],
         'moved' => ['title' => 'Appointment moved'],
         'moved_by_you' => ['title' => 'You moved your appointment'],
+        'move_requested' => [
+            'title' => 'Move request sent',
+            'body' => ':when · waiting for confirmation',
+        ],
+        'move_confirmed' => ['title' => 'Move confirmed'],
+        'move_declined' => [
+            'title' => 'Move not confirmed',
+            'body' => ':when · your appointment stays at this time',
+        ],
         'cancelled' => ['title' => 'Appointment cancelled'],
         'cancelled_by_you' => ['title' => 'You cancelled your appointment'],
         'reminder' => ['title' => 'Appointment reminder'],

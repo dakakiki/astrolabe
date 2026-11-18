@@ -180,7 +180,7 @@
         },
         "requests": {
             "title": "Booking requests",
-            "hint": "Booked by clients in the portal and waiting for your answer. Each one holds its time until you confirm or decline it.",
+            "hint": "Booked or moved by clients in the portal and waiting for your answer. Each one holds its time until you confirm or decline it.",
             "summary": "one booking request waiting | {count} booking requests waiting",
             "confirm": "Confirm",
             "decline": "Decline",
@@ -188,7 +188,10 @@
             "message": "Message to the client (optional)",
             "messageHint": "Goes to the client with the answer. The time becomes free again.",
             "send": "Decline request",
+            "sendMove": "Decline the move",
             "keep": "Keep the request",
+            "moveFromTo": "{from} → {to}",
+            "moveMessageHint": "Goes to the client with the answer. The appointment stays at its time; the time asked for becomes free again.",
             "more": "and {count} more in the calendar"
         },
         "tasks": {
@@ -1168,6 +1171,9 @@
         "confirmed": "Booking confirmed",
         "declined": "Request declined",
         "notRequested": "This request has already been answered.",
+        "moveRequestedBadge": "Move requested",
+        "moveConfirmed": "Appointment moved",
+        "moveDeclined": "Move request declined",
         "detail": {
             "title": "Appointment",
             "when": "When",
@@ -1216,6 +1222,15 @@
             "declineHintNoPortal": "The client cannot use the portal at the moment, so no email goes out; the message stays in the history. The time becomes free again.",
             "confirmDecline": "Decline request",
             "keepRequest": "Keep the request",
+            "moveRequestedTitle": "The client asks to move it",
+            "moveRequested": "to {when}. It stays at its time until you answer; the new time is held for the client meanwhile.",
+            "confirmMove": "Confirm move",
+            "declineMove": "Decline move",
+            "confirmDeclineMove": "Decline the move",
+            "declineMoveHint": "Sent to the client with the answer. The appointment stays at its time; the time asked for becomes free again.",
+            "declineMoveHintNoPortal": "The client cannot use the portal at the moment, so no email goes out; the message stays in the history. The appointment stays at its time.",
+            "moveOverlapTitle": "You have something else at the new time",
+            "confirmMoveAnyway": "Move it anyway",
             "declinedOn": "Declined {when}.",
             "declineSent": "Message sent to the client",
             "cancelledByClient": "Cancelled by the client in the portal {when}.",
@@ -1476,6 +1491,11 @@
         "requestDeclined": "Request declined",
         "declineSent": "Message sent to the client:",
         "appointmentConfirmed": "Booking request confirmed",
+        "moveRequested": "The client asked in the portal to move it",
+        "moveConfirmed": "Move confirmed, as the client asked",
+        "moveDeclined": "Move request declined",
+        "askedFor": "Asked for {time}",
+        "staysAt": "Stays on {time}",
         "forTime": "For {time}",
         "movedFromTo": "From {from} to {to}",
         "wasAt": "It was set for {time}",
@@ -2071,6 +2091,7 @@
             "portal_profile_updated": "Portal: profile changed",
             "portal_appointment_booked": "Portal: appointment booked",
             "portal_appointment_rescheduled": "Portal: appointment moved",
+            "portal_appointment_move_requested": "Portal: asked to move an appointment",
             "portal_appointment_cancelled": "Portal: appointment cancelled",
             "portal_push_enabled": "Portal: notifications turned on for a device",
             "portal_push_disabled": "Portal: notifications turned off for a device"
@@ -2273,6 +2294,10 @@
                 "confirm": "Confirm the booking request — the client is told",
                 "confirmCancel": "Cancel the appointment now",
                 "confirmDecline": "Decline the request — the client is told",
+                "confirmMove": "Move the appointment to the time the client asked for — the client is told",
+                "declineMove": "Keep the appointment at its time — you can write to the client",
+                "confirmDeclineMove": "Decline the move — the client is told",
+                "confirmMoveAnyway": "Move it even though it overlaps",
                 "decline": "Decline this booking request",
                 "edit": "Change the time, service or details",
                 "keep": "Leave the appointment as it is",
@@ -2395,10 +2420,13 @@
             },
             "requests": {
                 "confirm": "Confirm the booking request — the client is told",
+                "confirmMove": "Move the appointment to the time the client asked for — the client is told",
                 "decline": "Decline the request, with an optional message",
+                "declineMove": "Keep the appointment at its time, with an optional message",
                 "keep": "Leave the request waiting",
                 "open": "Open the request in the calendar",
-                "send": "Decline the request — the client is told"
+                "send": "Decline the request — the client is told",
+                "sendMove": "Decline the move — the client is told"
             },
             "transits": {
                 "open": "Open the client's transits for the appointment time"

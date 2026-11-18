@@ -267,6 +267,9 @@ export function statusBadge(appointment) {
 
     // A request is open until the practice answers; one whose time passed was never confirmed.
     if (status === 'requested') return upcoming ? { key: 'requested', tone: 'b-warn' } : { key: 'declined', tone: '' };
+    // Confirmed, and the client asked to move it: it waits for the practice (docs/spec/12).
+    if (upcoming && status === 'scheduled' && appointment.move_requested)
+        return { key: 'move_requested', tone: 'b-warn' };
     // An appointment ahead that stands: plainly confirmed (user, 18 Nov 2026), whoever booked it.
     if (upcoming) return status === 'scheduled' ? { key: 'confirmed', tone: 'b-ok' } : null;
 

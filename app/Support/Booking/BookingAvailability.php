@@ -166,20 +166,36 @@ final class BookingAvailability
     }
 
     /**
-     * The astrologer's appointments in this practice that hold their time.
+     * The astrologer's appointments in this practice that hold their time — and the times
+     * clients asked to move confirmed appointments to, held until the astrologer answers.
+     * `$except` (the appointment being moved) holds neither its time nor its request.
      *
      * @return list<array{0: int, 1: int}>
      */
     private function busy(CarbonImmutable $from, CarbonImmutable $to, ?Appointment $except): array
     {
-        return Appointment::query()
+        $held = Appointment::query()
             ->where('assigned_user_id', $this->astrologer->getKey())
             ->where('status', '!=', AppointmentStatus::Cancelled->value)
             ->where('starts_at', '<', $to)
             ->where('ends_at', '>', $from)
             ->when($except !== null, fn ($query) => $query->whereKeyNot($except->getKey()))
             ->get(['starts_at', 'ends_at'])
-            ->map(fn (Appointment $appointment) => [$appointment->starts_at->getTimestamp(), $appointment->ends_at->getTimestamp()])
-            ->all();
+            ->map(fn (Appointment $appointment) => [$appointment->starts_at->getTimestamp(), $appointment->ends_at->getTimestamp()]);
+
+        $requested = Appointment::query()
+            ->where('assigned_user_id', $this->astrologer->getKey())
+            ->where('status', AppointmentStatus::Scheduled->value)
+            ->whereNotNull('proposed_starts_at')
+            ->where('proposed_starts_at', '<', $to)
+            ->where('proposed_ends_at', '>', $from)
+            ->when($except !== null, fn ($query) => $query->whereKeyNot($except->getKey()))
+            ->get(['proposed_starts_at', 'proposed_ends_at'])
+            ->map(fn (Appointment $appointment) => [
+                $appointment->proposed_starts_at->getTimestamp(),
+                $appointment->proposed_ends_at->getTimestamp(),
+            ]);
+
+        return $held->concat($requested)->values()->all();
     }
 }

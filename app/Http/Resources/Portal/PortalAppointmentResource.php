@@ -25,6 +25,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * practice's booking astrologer, so an appointment with anyone else is not
  * moved in the portal.
  *
+ * `move_requested`: the time the client asked to move a confirmed appointment
+ * to, while the practice (which confirms bookings by hand) has not answered.
+ *
  * @mixin Appointment
  */
 class PortalAppointmentResource extends JsonResource
@@ -55,6 +58,11 @@ class PortalAppointmentResource extends JsonResource
             'can_cancel' => $cancelUntil !== null && $now < $cancelUntil,
             'reschedule_until' => $rescheduleUntil?->toIso8601ZuluString(),
             'cancel_until' => $cancelUntil?->toIso8601ZuluString(),
+            // The client asked to move it here; it stays at its time until the practice answers.
+            'move_requested' => $upcoming && $this->hasMoveRequest() ? [
+                'starts_at' => $this->proposed_starts_at->toIso8601ZuluString(),
+                'ends_at' => $this->proposed_ends_at->toIso8601ZuluString(),
+            ] : null,
         ];
     }
 

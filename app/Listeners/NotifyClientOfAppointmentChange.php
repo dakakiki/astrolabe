@@ -7,6 +7,9 @@ use App\Events\Appointments\AppointmentBooked;
 use App\Events\Appointments\AppointmentCancelled;
 use App\Events\Appointments\AppointmentConfirmed;
 use App\Events\Appointments\AppointmentDeclined;
+use App\Events\Appointments\AppointmentMoveConfirmed;
+use App\Events\Appointments\AppointmentMoveDeclined;
+use App\Events\Appointments\AppointmentMoveRequested;
 use App\Events\Appointments\AppointmentRescheduled;
 use App\Models\Appointment;
 use App\Notifications\ClientAppointmentCancelled;
@@ -15,6 +18,7 @@ use App\Notifications\ClientAppointmentMoved;
 use App\Notifications\ClientBookingConfirmed;
 use App\Notifications\ClientBookingDeclined;
 use App\Notifications\ClientBookingReceived;
+use App\Notifications\ClientMoveRequest;
 use App\Support\Notifications\ClientAppointmentFacts;
 use App\Support\Notifications\ClientRecipient;
 use Closure;
@@ -22,7 +26,7 @@ use Closure;
 /**
  * Emails the client about their appointment (docs/spec/12, "Mejlovi (9b)"):
  * booked or request received, confirmed, declined (with the practice's
- * message), moved and cancelled — a confirmation of what they did in the
+ * message), moved, a move asked for and its answer (ClientMoveRequest), and cancelled — a confirmation of what they did in the
  * portal, or the news of what the practice did when it chose to tell them.
  *
  * Only while the client can use the portal (ClientRecipient): no link, a
@@ -64,6 +68,43 @@ class NotifyClientOfAppointmentChange
             $event->previousStart->toIso8601ZuluString(),
             $event->previousEnd->toIso8601ZuluString(),
             $byClient,
+        ));
+    }
+
+    public function handleMoveRequested(AppointmentMoveRequested $event): void
+    {
+        $appointment = $event->appointment;
+
+        if (! $appointment->hasMoveRequest()) {
+            return;
+        }
+
+        $this->send($appointment, fn (ClientAppointmentFacts $facts) => new ClientMoveRequest(
+            $facts,
+            ClientMoveRequest::REQUESTED,
+            $appointment->proposed_starts_at->toIso8601ZuluString(),
+            $appointment->proposed_ends_at->toIso8601ZuluString(),
+        ));
+    }
+
+    public function handleMoveConfirmed(AppointmentMoveConfirmed $event): void
+    {
+        $this->send($event->appointment, fn (ClientAppointmentFacts $facts) => new ClientMoveRequest(
+            $facts,
+            ClientMoveRequest::CONFIRMED,
+            $event->previousStart->toIso8601ZuluString(),
+            $event->previousEnd->toIso8601ZuluString(),
+        ));
+    }
+
+    public function handleMoveDeclined(AppointmentMoveDeclined $event): void
+    {
+        $this->send($event->appointment, fn (ClientAppointmentFacts $facts) => new ClientMoveRequest(
+            $facts,
+            ClientMoveRequest::DECLINED,
+            $event->requestedStart->toIso8601ZuluString(),
+            $event->requestedEnd->toIso8601ZuluString(),
+            $event->reason,
         ));
     }
 

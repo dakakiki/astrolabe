@@ -402,6 +402,9 @@ final class PracticeExport
                 'cancelled_at' => $this->time($appointment->cancelled_at),
                 'cancelled_by' => $appointment->cancelled_by,
                 'declined_at' => $this->time($appointment->declined_at),
+                // A move the client asked for and the practice has not answered (docs/spec/12).
+                'proposed_starts_at' => $this->time($appointment->proposed_starts_at),
+                'proposed_ends_at' => $this->time($appointment->proposed_ends_at),
                 'created_at' => $this->time($appointment->created_at),
             ])
             ->all();

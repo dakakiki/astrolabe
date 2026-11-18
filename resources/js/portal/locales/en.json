@@ -124,6 +124,7 @@
                 "no_show": "Missed",
                 "confirmed": "Confirmed",
                 "requested": "Awaiting confirmation",
+                "move_requested": "Move requested",
                 "declined": "Not confirmed",
                 "cancelled_by_client": "Cancelled by you"
             },
@@ -169,6 +170,11 @@
             "move": "Move appointment",
             "moved": "Your appointment was moved.",
             "movedRequested": "It still waits for the practice to confirm it.",
+            "askMove": "Request the move",
+            "moveAsksHint": "The practice confirms the new time first. Until then your appointment stays at its current time, and the new one is held for you.",
+            "moveAsked": "Your request to move it was sent.",
+            "moveAskedNext": "Your appointment stays at its current time until the practice confirms the new one. You will hear either way.",
+            "askedFor": "You asked to move it to {date}, {time}.",
             "unchanged": "Nothing changed — your appointment already has this time.",
             "maybeMoved": "This change may already have gone through — please check your appointments."
         },
@@ -388,6 +394,7 @@
                 "keepRequest": "Keep the request as it is",
                 "keep": "Keep the appointment as it is",
                 "move": "Move the appointment to the time you chose",
+                "askMove": "Ask the practice to move the appointment to the time you chose",
                 "reschedule": "Choose another time for this appointment"
             },
             "booking": {

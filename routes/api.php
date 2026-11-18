@@ -215,6 +215,11 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                     ->name('appointments.confirm');
                 Route::post('/appointments/{appointment}/decline', [AppointmentController::class, 'decline'])
                     ->name('appointments.decline');
+                // A client's request to move a confirmed appointment, answered (docs/spec/12).
+                Route::post('/appointments/{appointment}/move/confirm', [AppointmentController::class, 'confirmMove'])
+                    ->name('appointments.move.confirm');
+                Route::post('/appointments/{appointment}/move/decline', [AppointmentController::class, 'declineMove'])
+                    ->name('appointments.move.decline');
 
                 // Booking in the client portal (Phase 9b, docs/spec/12): the person's own week and
                 // exceptions (Settings → Availability) and the practice's rules (Settings → Booking).

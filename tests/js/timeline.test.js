@@ -172,6 +172,36 @@ describe('describeEvent', () => {
         ]);
     });
 
+    it('tells a move the client asked for, and its answer (docs/spec/12)', () => {
+        const from = '2026-10-21T08:00:00Z';
+        const to = '2026-10-22T10:00:00Z';
+
+        expect(describeEvent(event('appointment_move_requested', { from, to, source: 'portal' }))).toMatchObject({
+            tone: 'appointment',
+            title: ['timeline.moveRequested', {}],
+            moved: { from, to },
+            to: { name: 'calendar', query: { appointment: 7 } },
+        });
+        expect(
+            describeEvent(event('appointment_rescheduled', { from, to, source: 'portal', confirmed: true })).title,
+        ).toEqual(['timeline.moveConfirmed', {}]);
+        expect(
+            describeEvent(
+                event('appointment_move_declined', { starts_at: from, requested: to, reason: 'Fully booked' }),
+            ),
+        ).toMatchObject({
+            title: ['timeline.moveDeclined', {}],
+            body: 'Fully booked',
+            detail: ['timeline.declineSent', {}],
+            asked: to,
+            at: from,
+        });
+        expect(describeEvent(event('appointment_move_declined', { starts_at: from, requested: to }))).toMatchObject({
+            body: null,
+            detail: null,
+        });
+    });
+
     it('tells who cancelled, and shows a declined request’s message as sent to the client', () => {
         const startsAt = '2026-10-20T08:00:00Z';
 

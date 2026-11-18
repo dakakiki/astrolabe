@@ -6,7 +6,9 @@ use App\Actions\Appointments\CancelAppointment;
 use App\Actions\Appointments\SaveAppointment;
 use App\Actions\Booking\CancelPortalAppointment;
 use App\Actions\Booking\ConfirmAppointment;
+use App\Actions\Booking\ConfirmMove;
 use App\Actions\Booking\DeclineAppointment;
+use App\Actions\Booking\DeclineMove;
 use App\Actions\Booking\RescheduleAppointment;
 use App\Enums\PortalAccessStatus;
 use App\Enums\PortalNotificationChannel;
@@ -365,7 +367,11 @@ class ClientPushTest extends TestCase
         $declined = $this->book('2026-10-06 13:00');
         $this->inPractice(fn () => app(ConfirmAppointment::class)->handle($kept));
         $this->inPractice(fn () => app(DeclineAppointment::class)->handle($declined, 'That week is fully booked.'));
+        // The practice confirms by hand, so moving a confirmed one asks first (docs/spec/12).
         $this->moveInThePortal($kept->fresh(), '2026-10-06 14:00');
+        $this->inPractice(fn () => app(ConfirmMove::class)->handle($kept));
+        $this->moveInThePortal($kept->fresh(), '2026-10-06 12:00');
+        $this->inPractice(fn () => app(DeclineMove::class)->handle($kept, 'Fully booked that afternoon.'));
         $this->cancelInThePortal($kept, 'Feeling unwell, sorry.');
 
         // The practice's own appointments carry its internal notes.
@@ -381,22 +387,25 @@ class ClientPushTest extends TestCase
             'Booking request sent',
             'Booking confirmed',
             'Booking not confirmed',
-            'You moved your appointment',
+            'Move request sent',
+            'Move confirmed',
+            'Move request sent',
+            'Move not confirmed',
             'You cancelled your appointment',
             'Appointment moved',
             'Appointment cancelled',
             'Appointment reminder',
         ], array_column($this->pushes(), 0));
-        $this->assertSame($this->tag($reminded), array_column($this->pushes(), 3)[8]);
+        $this->assertSame($this->tag($reminded), array_column($this->pushes(), 3)[11]);
 
         foreach ($this->push->messagesFor($this->portalUser->id) as $message) {
-            foreach (['Vega', 'Vera', 'Natal', 'Ana', 'Marković', 'Viber', 'fully booked', 'unwell', 'double booked', 'Saturn', 'Internal'] as $private) {
+            foreach (['Vega', 'Vera', 'Natal', 'Ana', 'Marković', 'Viber', 'fully booked', 'Fully booked', 'unwell', 'double booked', 'Saturn', 'Internal'] as $private) {
                 $this->assertStringNotContainsString($private, $message->payload());
             }
         }
 
         // The emails do name the practice: only the push is this generic.
-        $this->assertCount(9, $this->emails());
+        $this->assertCount(12, $this->emails());
     }
 
     public function test_a_dropped_subscription_is_deleted_and_the_other_device_still_gets_the_push(): void

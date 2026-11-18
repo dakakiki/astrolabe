@@ -24,6 +24,14 @@ export function isOpen(appointment) {
     return appointment?.status === 'scheduled' || appointment?.status === 'requested';
 }
 
+/**
+ * The client asked in the portal to move this confirmed appointment and waits for the
+ * astrologer's answer (docs/spec/12): it stays at its time, the one asked for is held.
+ */
+export function hasMoveRequest(appointment) {
+    return appointment?.status === 'scheduled' && Boolean(appointment?.proposed_starts_at);
+}
+
 /** Booked by the client in the portal (Phase 9b), not entered by the practice. */
 export function bookedInPortal(appointment) {
     return appointment?.booking_source === 'portal';

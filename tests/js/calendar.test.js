@@ -11,6 +11,7 @@ import {
     conflictingIds,
     daysBetween,
     groupByDay,
+    hasMoveRequest,
     isAhead,
     isOpen,
     layoutDay,
@@ -183,6 +184,15 @@ describe('statuses and the portal (Phase 9b)', () => {
         expect(bookedInPortal({ booking_source: 'portal' })).toBe(true);
         expect(bookedInPortal({ booking_source: 'manual' })).toBe(false);
         expect(bookedInPortal(null)).toBe(false);
+    });
+
+    it('knows a confirmed appointment the client asked to move (docs/spec/12)', () => {
+        const asked = '2026-10-22T10:00:00Z';
+
+        expect(hasMoveRequest({ status: 'scheduled', proposed_starts_at: asked })).toBe(true);
+        expect(hasMoveRequest({ status: 'scheduled', proposed_starts_at: null })).toBe(false);
+        expect(hasMoveRequest({ status: 'cancelled', proposed_starts_at: asked })).toBe(false);
+        expect(hasMoveRequest(null)).toBe(false);
     });
 });
 

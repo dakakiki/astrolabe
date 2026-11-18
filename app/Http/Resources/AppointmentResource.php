@@ -15,7 +15,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * Booked in the portal (Phase 9b): `booking_source` says so, `client_note` is the
  * client's message (with a single appointment only, like notes), `cancelled_by`
  * and `declined_at` tell who called it off and whether a request was turned
- * down. `client_portal` (single appointment only) says whether the client can
+ * down; `proposed_starts_at` is where the client asked to move a confirmed one,
+ * waiting for the astrologer. `client_portal` (single appointment only) says whether the client can
  * use the portal now, so the screen can offer to tell them about a change.
  *
  * @mixin Appointment
@@ -77,6 +78,10 @@ class AppointmentResource extends JsonResource
             'cancelled_at' => $this->cancelled_at?->toIso8601ZuluString(),
             'cancelled_by' => $this->cancelled_by?->value,
             'declined_at' => $this->declined_at?->toIso8601ZuluString(),
+            // The client asked in the portal to move it here and waits for the answer (docs/spec/12).
+            'proposed_starts_at' => $this->proposed_starts_at?->toIso8601ZuluString(),
+            'proposed_ends_at' => $this->proposed_ends_at?->toIso8601ZuluString(),
+            'proposed_at' => $this->proposed_at?->toIso8601ZuluString(),
             'client_portal' => $this->when($this->withNotes, fn () => PortalAccess::query()
                 ->usable()
                 ->where('portal_access.client_id', $this->client_id)

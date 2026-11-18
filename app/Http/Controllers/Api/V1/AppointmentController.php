@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api\V1;
 use App\Actions\Appointments\CancelAppointment;
 use App\Actions\Appointments\SaveAppointment;
 use App\Actions\Booking\ConfirmAppointment;
+use App\Actions\Booking\ConfirmMove;
 use App\Actions\Booking\DeclineAppointment;
+use App\Actions\Booking\DeclineMove;
 use App\Enums\AppointmentActor;
 use App\Enums\AppointmentStatus;
 use App\Enums\LocationType;
@@ -29,7 +31,8 @@ use Illuminate\Validation\ValidationException;
  * moved, marked as held or missed, or cancelled with a reason.
  *
  * Booking in the portal (Phase 9b): a request waiting for the astrologer is
- * confirmed or declined here (409 `not_requested` for anything else). Moving
+ * confirmed or declined here (409 `not_requested` for anything else), and so
+ * is a client's request to move a confirmed one (409 `no_move_request`). Moving
  * and cancelling tell a client who can use the portal unless `notify_client`
  * is false (AppointmentRescheduled, AppointmentCancelled).
  */
@@ -140,6 +143,32 @@ class AppointmentController extends Controller
      * @throws BookingConflict 409 `not_requested`
      */
     public function decline(DeclineAppointmentRequest $request, Appointment $appointment, DeclineAppointment $decline): AppointmentResource
+    {
+        return AppointmentResource::make($decline->handle($appointment, $request->validated('reason')))->withNotes();
+    }
+
+    /**
+     * The appointment goes to the time the client asked to move it to (docs/spec/12).
+     * Something of the astrologer's own there meanwhile is an overlap, allowed on
+     * purpose with `allow_overlap` like in the calendar.
+     *
+     * @throws BookingConflict 409 `no_move_request`, `move_passed`
+     */
+    public function confirmMove(Request $request, Appointment $appointment, ConfirmMove $confirm): AppointmentResource
+    {
+        Gate::authorize('update', $appointment);
+
+        $request->validate(['allow_overlap' => ['sometimes', 'boolean']]);
+
+        return AppointmentResource::make($confirm->handle($appointment, $request->boolean('allow_overlap')))->withNotes();
+    }
+
+    /**
+     * The appointment stays at its time; the reason goes to the client (docs/spec/12).
+     *
+     * @throws BookingConflict 409 `no_move_request`
+     */
+    public function declineMove(DeclineAppointmentRequest $request, Appointment $appointment, DeclineMove $decline): AppointmentResource
     {
         return AppointmentResource::make($decline->handle($appointment, $request->validated('reason')))->withNotes();
     }

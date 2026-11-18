@@ -289,6 +289,17 @@ describe('status badges', () => {
         expect(statusBadge({ status: 'requested', upcoming: true })).toEqual({ key: 'requested', tone: 'b-warn' });
     });
 
+    it('marks a confirmed appointment the client asked to move as waiting', () => {
+        const asked = { starts_at: '2026-10-22T10:00:00Z', ends_at: '2026-10-22T11:00:00Z' };
+
+        expect(statusBadge({ status: 'scheduled', upcoming: true, move_requested: asked })).toEqual({
+            key: 'move_requested',
+            tone: 'b-warn',
+        });
+        expect(statusBadge({ status: 'scheduled', upcoming: true, move_requested: null }).key).toBe('confirmed');
+        expect(en.portal.appointments.status.move_requested).toBe('Move requested');
+    });
+
     it('tells who cancelled and what the practice did not confirm', () => {
         expect(statusBadge({ status: 'cancelled', upcoming: false, declined: true, cancelled_by: 'practice' })).toEqual(
             {

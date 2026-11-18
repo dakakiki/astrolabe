@@ -98,11 +98,12 @@ abstract class ClientAppointmentEmail extends Notification implements ShouldQueu
      * "Today at 3:00 PM", "Tomorrow at 3:00 PM" or "Mon, Oct 5, 2026 at 3:00 PM", on
      * the client's clock. A push may reach a phone that was off up to `portal.push.ttl`
      * later; "today" and "tomorrow" are used only while that cannot be after the
-     * client's midnight — otherwise the date, which is never wrong.
+     * client's midnight — otherwise the date, which is never wrong. Another moment than
+     * the appointment's start may be given (the time a client asked to move it to).
      */
-    protected function pushWhen(string $zone): string
+    protected function pushWhen(string $zone, ?string $startsAt = null): string
     {
-        $start = $this->local($this->appointment->startsAt, $zone);
+        $start = $this->local($startsAt ?? $this->appointment->startsAt, $zone);
         $now = CarbonImmutable::now($zone);
         $today = $now->startOfDay();
         $time = $start->isoFormat('LT');
@@ -153,9 +154,9 @@ abstract class ClientAppointmentEmail extends Notification implements ShouldQueu
     }
 
     /** "Mon, Oct 5, 2026, 3:00 PM" for a subject line. */
-    protected function shortWhen(string $zone): string
+    protected function shortWhen(string $zone, ?string $startsAt = null): string
     {
-        return $this->local($this->appointment->startsAt, $zone)->isoFormat('ddd ll, LT');
+        return $this->local($startsAt ?? $this->appointment->startsAt, $zone)->isoFormat('ddd ll, LT');
     }
 
     /**

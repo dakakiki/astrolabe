@@ -32,7 +32,9 @@ import AppIcon from '@/components/AppIcon.vue';
  * time left out), until the practice's deadline. Service, length, place and
  * status stay as they are. The chosen time is in the address (`?at=…`), so
  * the phone's back button steps back; a time taken meanwhile brings the
- * fresh list back with the answer.
+ * fresh list back with the answer. Where the practice confirms bookings by
+ * hand, moving a confirmed appointment only asks for the new time: it stays
+ * where it is until the practice answers (`move_needs_confirmation`).
  */
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -48,6 +50,8 @@ const appointment = ref(window.history.state?.appointment?.id === id ? window.hi
 const slots = ref(null);
 const slotsFailed = ref(false);
 const reach = ref(1);
+// The practice confirms the move first (docs/spec/12): the screen asks rather than moves.
+const asks = ref(false);
 const selected = ref(null);
 const problem = ref(null);
 const notice = ref(null);
@@ -110,6 +114,7 @@ async function loadSlots() {
         slots.value = response.data.data.slots;
         reach.value = daysAhead(response.data.data.to);
         practiceZone.value = response.data.data.practice_timezone ?? null;
+        asks.value = response.data.data.move_needs_confirmation === true;
     } catch (error) {
         const answer = bookingProblem(error);
         if (['generic', 'too_many'].includes(answer.code)) slotsFailed.value = true;
@@ -145,7 +150,8 @@ async function submit() {
             { headers: { 'Idempotency-Key': requestKey } },
         );
         moved.value = response.data.data;
-        unchanged.value = sameMoment(moved.value.starts_at, before);
+        // Asked for, not moved: the time stands until the practice answers.
+        unchanged.value = !moved.value.move_requested && sameMoment(moved.value.starts_at, before);
         router.replace({ name: 'reschedule', params: { id } });
     } catch (error) {
         const answer = bookingProblem(error);
@@ -316,14 +322,15 @@ const problems = {
                         </dd>
                     </template>
                 </dl>
+                <p v-if="asks" class="notice n-info">{{ t('portal.appointments.moveAsksHint') }}</p>
                 <button
                     type="submit"
                     class="btn btn-primary"
                     :disabled="busy"
-                    v-tip="t('tips.portal.appointments.move')"
+                    v-tip="t(asks ? 'tips.portal.appointments.askMove' : 'tips.portal.appointments.move')"
                 >
-                    <AppIcon name="reschedule" />
-                    {{ t('portal.appointments.move') }}
+                    <AppIcon :name="asks ? 'send' : 'reschedule'" />
+                    {{ t(asks ? 'portal.appointments.askMove' : 'portal.appointments.move') }}
                 </button>
             </form>
         </section>
@@ -333,6 +340,12 @@ const problems = {
             <div class="card-body">
                 <div v-if="unchanged" class="notice n-info mb-4" role="status">
                     <strong>{{ t('portal.appointments.unchanged') }}</strong>
+                </div>
+                <div v-else-if="moved.move_requested" class="notice n-info mb-4" role="status">
+                    <div>
+                        <strong>{{ t('portal.appointments.moveAsked') }}</strong>
+                        {{ t('portal.appointments.moveAskedNext') }}
+                    </div>
                 </div>
                 <div v-else class="notice n-ok mb-4" role="status">
                     <div>

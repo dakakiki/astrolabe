@@ -155,8 +155,11 @@ function taskLine(task) {
                     <div v-if="entry.wasAt" class="tl-body">
                         {{ t('timeline.wasAt', { time: moment(entry.wasAt) }) }}
                     </div>
+                    <div v-if="entry.asked" class="tl-body">
+                        {{ t('timeline.askedFor', { time: moment(entry.asked) }) }}
+                    </div>
                     <div v-if="entry.at" class="tl-body">
-                        {{ t('timeline.forTime', { time: moment(entry.at) }) }}
+                        {{ t(entry.asked ? 'timeline.staysAt' : 'timeline.forTime', { time: moment(entry.at) }) }}
                     </div>
                     <div v-if="entry.event.created_by && entry.event.created_by.id !== auth.user?.id" class="tl-body">
                         {{ t('timeline.by', { name: entry.event.created_by.name }) }}

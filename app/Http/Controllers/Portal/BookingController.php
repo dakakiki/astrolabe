@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Portal;
 
 use App\Actions\Booking\BookAppointment;
+use App\Enums\AppointmentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Portal\BookAppointmentRequest;
 use App\Http\Resources\Portal\PortalAppointmentResource;
@@ -56,6 +57,8 @@ class BookingController extends Controller
      * Free starts for a service (`service_id`), or for moving one of the client's
      * appointments (`appointment_id`: its own length, its own time counting as
      * free, its current start left out) — the policy's whole window, soonest first.
+     * `move_needs_confirmation`: moving it only asks the practice, which confirms
+     * bookings by hand — the appointment stays at its time until it answers (docs/spec/12).
      */
     public function slots(Request $request, PortalContext $context): JsonResponse
     {
@@ -65,6 +68,8 @@ class BookingController extends Controller
         ]);
 
         $now = CarbonImmutable::now();
+        $policy = PortalBooking::policy($request);
+        $asks = false;
 
         if (isset($data['appointment_id'])) {
             $appointment = AppointmentController::forClient($context)->findOrFail($data['appointment_id']);
@@ -72,18 +77,18 @@ class BookingController extends Controller
             self::ensureMovable($request, $appointment, $now);
             $minutes = $appointment->durationMinutes();
             $starts = $availability->slotsToMove($appointment, $now);
+            $asks = $policy->requires_confirmation && $appointment->status === AppointmentStatus::Scheduled;
         } else {
             $minutes = PortalBooking::services()->findOrFail($data['service_id'])->duration_minutes;
             $starts = self::availability($request)->slots($minutes, $now);
         }
-
-        $policy = PortalBooking::policy($request);
 
         return response()->json(['data' => [
             'duration_minutes' => $minutes,
             'from' => $policy->earliestStart($now)->toIso8601ZuluString(),
             'to' => $policy->latestStart($now)->toIso8601ZuluString(),
             'practice_timezone' => PortalBooking::timezone($request),
+            'move_needs_confirmation' => $asks,
             'slots' => BookingConflict::slotList($starts, $minutes),
         ]]);
     }

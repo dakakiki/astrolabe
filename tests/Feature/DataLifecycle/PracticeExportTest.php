@@ -191,6 +191,8 @@ class PracticeExportTest extends TestCase
         $this->assertSame('Could we look at my career?', $appointment['client_note']);
         $this->assertSame('practice', $appointment['cancelled_by']);
         $this->assertSame('2026-12-01T10:00:00Z', $appointment['declined_at']);
+        $this->assertArrayHasKey('proposed_starts_at', $appointment);
+        $this->assertNull($appointment['proposed_starts_at']);
 
         $this->assertTrue(json_decode($files['services.json'], true)[0]['bookable_in_portal']);
 

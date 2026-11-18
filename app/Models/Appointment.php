@@ -75,6 +75,9 @@ class Appointment extends Model
             'declined_at' => 'immutable_datetime',
             'client_remind_at' => 'immutable_datetime',
             'client_reminder_sent_at' => 'immutable_datetime',
+            'proposed_starts_at' => 'immutable_datetime',
+            'proposed_ends_at' => 'immutable_datetime',
+            'proposed_at' => 'immutable_datetime',
         ];
     }
 
@@ -93,6 +96,14 @@ class Appointment extends Model
             if (! $appointment->exists || $appointment->isDirty(['starts_at', 'status'])) {
                 ClientReminders::plan($appointment);
             }
+
+            // A move request ends with the appointment's time or status changing: moved (by the
+            // client's confirmed request or by the practice), cancelled, held, missed.
+            if ($appointment->exists
+                && $appointment->hasMoveRequest()
+                && ($appointment->isDirty('starts_at') || $appointment->status !== AppointmentStatus::Scheduled)) {
+                $appointment->clearMoveRequest();
+            }
         });
     }
 
@@ -110,6 +121,24 @@ class Appointment extends Model
     public function isDeclined(): bool
     {
         return $this->declined_at !== null;
+    }
+
+    /**
+     * The client asked in the portal to move this confirmed appointment and the astrologer
+     * has not answered yet (docs/spec/12, "Pomeranje kao zahtev"): it stays at its time, the
+     * proposed one is held too.
+     */
+    public function hasMoveRequest(): bool
+    {
+        return $this->proposed_starts_at !== null;
+    }
+
+    /** Drops the client's move request (answered, withdrawn, or the appointment called off). */
+    public function clearMoveRequest(): void
+    {
+        $this->proposed_starts_at = null;
+        $this->proposed_ends_at = null;
+        $this->proposed_at = null;
     }
 
     /**

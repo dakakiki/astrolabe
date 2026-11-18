@@ -39,7 +39,8 @@ use Illuminate\Support\Facades\Log;
  * month, outstanding, and the consultations waiting on payment.
  *
  * Phase 9b adds `requests`: the viewer's bookings from the client portal that
- * wait for them to confirm or decline, soonest first.
+ * wait for them to confirm or decline, soonest first — with the confirmed
+ * appointments clients asked to move (`proposed_starts_at`).
  */
 class DashboardController extends Controller
 {
@@ -87,10 +88,16 @@ class DashboardController extends Controller
             ->where('starts_at', '<', $horizon->utc())
             ->orderBy('starts_at');
 
-        // Booked in the portal and waiting for the viewer's answer, however far ahead.
+        // Booked in the portal and waiting for the viewer's answer, however far ahead — and
+        // confirmed ones the client asked to move, until the viewer answers (docs/spec/12).
         $requests = $appointments()
-            ->where('status', AppointmentStatus::Requested->value)
-            ->where('starts_at', '>', $now->utc())
+            ->where(fn (Builder $query) => $query
+                ->where(fn (Builder $query) => $query
+                    ->where('status', AppointmentStatus::Requested->value)
+                    ->where('starts_at', '>', $now->utc()))
+                ->orWhere(fn (Builder $query) => $query
+                    ->where('status', AppointmentStatus::Scheduled->value)
+                    ->where('proposed_starts_at', '>', $now->utc())))
             ->orderBy('starts_at')
             ->orderBy('id');
 

@@ -9,7 +9,7 @@ import TaskList from '@/components/TaskList.vue';
 import BillingBadge from '@/components/BillingBadge.vue';
 import { useLabels } from '@/composables/useLabels';
 import { useMoney } from '@/composables/useMoney';
-import { requestsAgenda, wallClock } from '@/lib/calendar';
+import { hasMoveRequest, requestsAgenda, wallClock } from '@/lib/calendar';
 import { ASPECT_GLYPHS, formatOrb } from '@/lib/chart';
 import { formatDateTime, isFuture } from '@/lib/datetime';
 import { fileKind } from '@/lib/files';
@@ -183,9 +183,9 @@ const nothingBooked = computed(
     () => board.value && !board.value.appointments.today.length && !board.value.appointments.upcoming.length,
 );
 
-function when(appointment, isToday) {
+function when(appointment, isToday, at = appointment.starts_at) {
     return formatDateTime(
-        appointment.starts_at,
+        at,
         locale.value,
         zone.value,
         isToday
@@ -201,7 +201,10 @@ const canRecord = (appointment) =>
     appointment.status !== 'requested' &&
     !isFuture(appointment.starts_at);
 
-// Booking requests from the portal (Phase 9b): confirmed or declined from the list.
+// Booking requests from the portal (Phase 9b): confirmed or declined from the list — and
+// confirmed appointments the client asked to move (docs/spec/12), answered at their own address.
+const answerPath = (request) => (hasMoveRequest(request) ? 'move/' : '');
+
 const answering = ref(null);
 const declining = ref(null);
 const declineMessage = ref('');
@@ -229,8 +232,8 @@ function answerFailed(error) {
 async function confirmRequest(request) {
     answering.value = request.id;
     try {
-        await http.post(`/appointments/${request.id}/confirm`);
-        toast.success(t('appointments.confirmed'));
+        await http.post(`/appointments/${request.id}/${answerPath(request)}confirm`);
+        toast.success(t(hasMoveRequest(request) ? 'appointments.moveConfirmed' : 'appointments.confirmed'));
     } catch (error) {
         answerFailed(error);
     } finally {
@@ -247,8 +250,11 @@ async function declineRequest(request) {
 
     try {
         // The message is optional and goes to the client with the answer.
-        await http.post(`/appointments/${request.id}/decline`, message ? { reason: message } : {});
-        toast.success(t('appointments.declined'));
+        await http.post(
+            `/appointments/${request.id}/${answerPath(request)}decline`,
+            message ? { reason: message } : {},
+        );
+        toast.success(t(hasMoveRequest(request) ? 'appointments.moveDeclined' : 'appointments.declined'));
     } catch (error) {
         if (error.response?.status === 422) {
             declineError.value =
@@ -422,7 +428,19 @@ const steps = computed(() => [
                                             class="nm block truncate hover:underline"
                                             >{{ request.client?.full_name }}</RouterLink
                                         >
-                                        <span class="block font-mono text-xs text-ink-2">{{
+                                        <!-- A move: from where it stands to the time asked for. -->
+                                        <span v-if="hasMoveRequest(request)" class="block text-xs text-ink-2">
+                                            <span class="badge b-warn mr-1">{{
+                                                t('appointments.moveRequestedBadge')
+                                            }}</span>
+                                            <span class="font-mono">{{
+                                                t('dashboard.requests.moveFromTo', {
+                                                    from: when(request, false),
+                                                    to: when(request, false, request.proposed_starts_at),
+                                                })
+                                            }}</span>
+                                        </span>
+                                        <span v-else class="block font-mono text-xs text-ink-2">{{
                                             when(request, false)
                                         }}</span>
                                         <span
@@ -443,7 +461,13 @@ const steps = computed(() => [
                                         class="btn btn-primary btn-sm"
                                         :disabled="answering !== null"
                                         @click="confirmRequest(request)"
-                                        v-tip="t('tips.dashboard.requests.confirm')"
+                                        v-tip="
+                                            t(
+                                                hasMoveRequest(request)
+                                                    ? 'tips.dashboard.requests.confirmMove'
+                                                    : 'tips.dashboard.requests.confirm',
+                                            )
+                                        "
                                     >
                                         <AppIcon name="confirm" />
                                         {{ t('dashboard.requests.confirm') }}
@@ -454,7 +478,13 @@ const steps = computed(() => [
                                         :disabled="answering !== null"
                                         :aria-expanded="declining === request.id"
                                         @click="openDecline(request)"
-                                        v-tip="t('tips.dashboard.requests.decline')"
+                                        v-tip="
+                                            t(
+                                                hasMoveRequest(request)
+                                                    ? 'tips.dashboard.requests.declineMove'
+                                                    : 'tips.dashboard.requests.decline',
+                                            )
+                                        "
                                     >
                                         <AppIcon name="decline" />
                                         {{ t('dashboard.requests.decline') }}
@@ -495,7 +525,13 @@ const steps = computed(() => [
                                         {{ declineError }}
                                     </div>
                                     <div v-else :id="`decline-${request.id}-hint`" class="hint">
-                                        {{ t('dashboard.requests.messageHint') }}
+                                        {{
+                                            t(
+                                                hasMoveRequest(request)
+                                                    ? 'dashboard.requests.moveMessageHint'
+                                                    : 'dashboard.requests.messageHint',
+                                            )
+                                        }}
                                     </div>
                                 </div>
                                 <div class="form-actions">
@@ -512,10 +548,22 @@ const steps = computed(() => [
                                         type="submit"
                                         class="btn btn-danger btn-sm"
                                         :disabled="answering !== null"
-                                        v-tip="t('tips.dashboard.requests.send')"
+                                        v-tip="
+                                            t(
+                                                hasMoveRequest(request)
+                                                    ? 'tips.dashboard.requests.sendMove'
+                                                    : 'tips.dashboard.requests.send',
+                                            )
+                                        "
                                     >
                                         <AppIcon name="decline" />
-                                        {{ t('dashboard.requests.send') }}
+                                        {{
+                                            t(
+                                                hasMoveRequest(request)
+                                                    ? 'dashboard.requests.sendMove'
+                                                    : 'dashboard.requests.send',
+                                            )
+                                        }}
                                     </button>
                                 </div>
                             </form>

@@ -17,7 +17,8 @@ use Illuminate\Notifications\Notification;
 /**
  * To the astrologer about what a client did in the portal (docs/spec/12,
  * "Mejlovi (9b)"; Settings → Notifications → "New portal booking"): a new
- * booking, a request to confirm or decline, a move, a cancellation. Generic on
+ * booking, a request to confirm or decline, a move (or a request to move a
+ * confirmed appointment, docs/spec/12), a cancellation. Generic on
  * purpose, like the reminders: the time on the astrologer's clock with its
  * zone, the service and a link to the calendar — never the client's name or
  * the message they left; the details open after signing in.
@@ -34,6 +35,9 @@ class PortalBookingNotice extends Notification implements ShouldQueue
     public const REQUESTED = 'requested';
 
     public const MOVED = 'moved';
+
+    /** A client asks to move a confirmed appointment; the astrologer confirms or declines it. */
+    public const MOVE_REQUESTED = 'move_requested';
 
     public const CANCELLED = 'cancelled';
 
@@ -63,6 +67,20 @@ class PortalBookingNotice extends Notification implements ShouldQueue
     public static function moved(Appointment $appointment, CarbonImmutable $previousStart, CarbonImmutable $previousEnd): self
     {
         return self::make(self::MOVED, $appointment, $previousStart, $previousEnd);
+    }
+
+    /** The new time is the one asked for; the appointment's own time is the "from". */
+    public static function moveRequested(Appointment $appointment): self
+    {
+        return new self(
+            self::MOVE_REQUESTED,
+            (int) $appointment->getKey(),
+            ClientAppointmentFacts::serviceName($appointment),
+            $appointment->proposed_starts_at->toIso8601ZuluString(),
+            $appointment->proposed_ends_at->toIso8601ZuluString(),
+            $appointment->starts_at->toIso8601ZuluString(),
+            $appointment->ends_at->toIso8601ZuluString(),
+        );
     }
 
     public static function cancelled(Appointment $appointment): self
@@ -102,7 +120,8 @@ class PortalBookingNotice extends Notification implements ShouldQueue
     /**
      * Checked again when the queue gets to it (it may have waited for quiet
      * hours to end): still the astrologer's appointment, the practice still
-     * open, the email still wanted — and a request still waiting for an answer.
+     * open, the email still wanted — and a request still waiting for an answer
+     * (for a move: still asking for the same time).
      */
     public function shouldSend(object $notifiable, string $channel): bool
     {
@@ -115,7 +134,11 @@ class PortalBookingNotice extends Notification implements ShouldQueue
         return $appointment !== null
             && (int) $appointment->assigned_user_id === (int) $notifiable->getKey()
             && Workspace::query()->whereKey($appointment->workspace_id)->whereNull('deletes_at')->exists()
-            && ($this->kind !== self::REQUESTED || $appointment->status === AppointmentStatus::Requested);
+            && ($this->kind !== self::REQUESTED || $appointment->status === AppointmentStatus::Requested)
+            && ($this->kind !== self::MOVE_REQUESTED || (
+                $appointment->status === AppointmentStatus::Scheduled
+                && $appointment->proposed_starts_at?->equalTo(CarbonImmutable::parse($this->startsAt)) === true
+            ));
     }
 
     /**
@@ -125,25 +148,29 @@ class PortalBookingNotice extends Notification implements ShouldQueue
     {
         $zone = $notifiable->timezone ?: 'UTC';
         $start = $this->local($this->startsAt, $zone);
+        $asks = $this->kind === self::REQUESTED || $this->kind === self::MOVE_REQUESTED;
         $values = [
             'when' => $this->span($this->startsAt, $this->endsAt, $zone),
             'zone' => $zone,
         ];
 
-        if ($this->kind === self::MOVED) {
+        if ($this->kind === self::MOVED || $this->kind === self::MOVE_REQUESTED) {
             $values['from'] = $this->span((string) $this->previousStartsAt, (string) $this->previousEndsAt, $zone);
         }
+
+        // A move asked for opens the calendar where the appointment still is.
+        $day = $this->kind === self::MOVE_REQUESTED ? $this->local((string) $this->previousStartsAt, $zone) : $start;
 
         return (new MailMessage)
             ->subject(__("notifications.portal_booking.{$this->kind}.subject", ['when' => $start->isoFormat('ddd ll, LT')]))
             ->greeting(__('notifications.greeting', ['name' => $notifiable->name]))
             ->line(__("notifications.portal_booking.{$this->kind}.line", $values))
             ->lineIf(filled($this->service), __('notifications.portal_booking.service', ['service' => (string) $this->service]))
-            ->lineIf($this->kind === self::REQUESTED, __('notifications.portal_booking.requested.confirm'))
+            ->lineIf($asks, __("notifications.portal_booking.{$this->kind}.confirm"))
             ->action(
-                __($this->kind === self::REQUESTED ? 'notifications.portal_booking.requested.action' : 'notifications.portal_booking.action'),
+                __($asks ? "notifications.portal_booking.{$this->kind}.action" : 'notifications.portal_booking.action'),
                 url('/calendar').'?'.http_build_query([
-                    'date' => $start->format('Y-m-d'),
+                    'date' => $day->format('Y-m-d'),
                     'appointment' => $this->appointmentId,
                 ]),
             )

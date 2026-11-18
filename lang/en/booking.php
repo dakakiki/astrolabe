@@ -9,6 +9,8 @@ return [
     'not_changeable' => 'This appointment cannot be changed any more.',
     'disabled' => 'Booking in the portal is not open at the moment.',
     'not_requested' => 'Only a booking request waiting for confirmation can be confirmed or declined.',
+    'no_move_request' => 'The client is not asking to move this appointment any more.',
+    'move_passed' => 'The time the client asked for has already passed. You can only decline the request.',
     'too_many_open' => 'You already have :max upcoming appointments. To book another one, please contact the practice.',
 
     // Settings → Availability: the astrologer's own week and exceptions.

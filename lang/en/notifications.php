@@ -49,6 +49,12 @@ return [
             'subject' => 'Appointment moved to :when',
             'line' => 'A client moved their appointment in your client portal from :from to :when (:zone).',
         ],
+        'move_requested' => [
+            'subject' => 'Move request: :when',
+            'line' => 'A client asked in your client portal to move their appointment from :from to :when (:zone).',
+            'confirm' => 'The appointment stays at its time, and the new one is held, until you confirm or decline the move in the calendar.',
+            'action' => 'Confirm or decline',
+        ],
         'cancelled' => [
             'subject' => 'Appointment cancelled: :when',
             'line' => 'A client cancelled their appointment in your client portal: :when (:zone). The time is free again.',

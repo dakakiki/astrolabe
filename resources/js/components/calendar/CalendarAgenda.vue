@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 
 import AppointmentStatusBadge from '@/components/calendar/AppointmentStatusBadge.vue';
 import { useLabels } from '@/composables/useLabels';
-import { bookedInPortal, groupByDay, wallClock } from '@/lib/calendar';
+import { bookedInPortal, groupByDay, hasMoveRequest, wallClock } from '@/lib/calendar';
 import { formatDate, initials } from '@/lib/format';
 import { serviceColorClass } from '@/lib/services';
 
@@ -94,7 +94,10 @@ function span(appointment) {
                                             ><span aria-hidden="true">⚠</span
                                             ><span class="sr-only">{{ t('calendar.conflict') }}</span></span
                                         >
-                                        <AppointmentStatusBadge :status="appointment.status" />
+                                        <AppointmentStatusBadge
+                                            :status="appointment.status"
+                                            :move-requested="hasMoveRequest(appointment)"
+                                        />
                                     </span>
                                 </span>
                             </div>
@@ -114,7 +117,10 @@ function span(appointment) {
                                 ><span aria-hidden="true">⚠</span
                                 ><span class="sr-only">{{ t('calendar.conflict') }}</span></span
                             >
-                            <AppointmentStatusBadge :status="appointment.status" />
+                            <AppointmentStatusBadge
+                                :status="appointment.status"
+                                :move-requested="hasMoveRequest(appointment)"
+                            />
                         </td>
                     </tr>
                 </tbody>

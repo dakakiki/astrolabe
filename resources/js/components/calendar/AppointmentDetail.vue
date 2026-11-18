@@ -9,7 +9,7 @@ import NatalChart from '@/components/NatalChart.vue';
 import PaymentForm from '@/components/PaymentForm.vue';
 import { useLabels } from '@/composables/useLabels';
 import { useMoney } from '@/composables/useMoney';
-import { bookedInPortal, cancellation, isOpen, offersCancelEmail } from '@/lib/calendar';
+import { bookedInPortal, cancellation, hasMoveRequest, isOpen, offersCancelEmail } from '@/lib/calendar';
 import { formatDateTime } from '@/lib/datetime';
 import { formatDate, initials } from '@/lib/format';
 import http from '@/lib/http';
@@ -30,7 +30,9 @@ import { useToastStore } from '@/stores/toast';
  * (plain text, only the astrologer sees it). A booking request holds its time
  * until it is confirmed or declined here; a decline may carry a message that
  * goes to the client. When the client uses the portal, cancelling a time still
- * ahead can email them (docs/spec/12, Phase 9b). Each appointment starts with
+ * ahead can email them (docs/spec/12, Phase 9b). A client's request to move a
+ * confirmed appointment is answered the same way: confirm the move, or decline
+ * it with a message — the appointment then stays at its time. Each appointment starts with
  * empty forms: what was typed for one never carries over to the next.
  */
 const props = defineProps({
@@ -54,7 +56,10 @@ const reason = ref('');
 const reasonError = ref(null);
 const notifyClient = ref(true);
 const declining = ref(false);
+/** What the decline form answers: a booking request, or a request to move (docs/spec/12). */
+const declineKind = ref('request');
 const declineMessage = ref('');
+const moveConflicts = ref([]);
 const declineError = ref(null);
 const statusConflicts = ref([]);
 const chart = ref(null);
@@ -72,9 +77,11 @@ async function load() {
     reasonError.value = null;
     notifyClient.value = true;
     declining.value = false;
+    declineKind.value = 'request';
     declineMessage.value = '';
     declineError.value = null;
     statusConflicts.value = [];
+    moveConflicts.value = [];
     chart.value = null;
     chartState.value = 'idle';
     depositOpen.value = false;
@@ -195,6 +202,7 @@ async function answeredMeanwhile(error) {
 
     toast.error(error.response.data?.message ?? t('appointments.notRequested'));
     declining.value = false;
+    moveConflicts.value = [];
     try {
         await refresh();
         emit('changed', appointment.value);
@@ -218,8 +226,9 @@ async function confirmRequest() {
     }
 }
 
-async function openDecline() {
-    declining.value = !declining.value;
+async function openDecline(kind = 'request') {
+    declining.value = !(declining.value && declineKind.value === kind);
+    declineKind.value = kind;
     declineError.value = null;
     if (declining.value) {
         await nextTick();
@@ -234,19 +243,61 @@ async function decline() {
     busy.value = true;
     try {
         // The message is optional and goes to the client with the answer.
+        const move = declineKind.value === 'move';
         const { data } = await http.post(
-            `/appointments/${props.appointmentId}/decline`,
+            `/appointments/${props.appointmentId}/${move ? 'move/decline' : 'decline'}`,
             message ? { reason: message } : {},
         );
         applied(data.data);
         declining.value = false;
         declineMessage.value = '';
-        toast.success(t('appointments.declined'));
+        toast.success(t(move ? 'appointments.moveDeclined' : 'appointments.declined'));
         emit('changed', data.data);
     } catch (error) {
         if (error.response?.status === 422) {
             declineError.value =
                 error.response.data?.errors?.reason?.[0] ?? error.response.data?.message ?? t('errors.generic');
+        } else {
+            await answeredMeanwhile(error);
+        }
+    } finally {
+        busy.value = false;
+    }
+}
+
+// A client's request to move a confirmed appointment (docs/spec/12) ---------------------------
+
+/** The time the client asked for, in the astrologer's zone; null without a request. */
+const moveRequest = computed(() => {
+    const item = appointment.value;
+    if (!hasMoveRequest(item)) return null;
+
+    const date = formatDateTime(item.proposed_starts_at, locale.value, zone.value, { dateStyle: 'full' });
+    const from = formatDateTime(item.proposed_starts_at, locale.value, zone.value, { timeStyle: 'short' });
+    const to = formatDateTime(item.proposed_ends_at, locale.value, zone.value, { timeStyle: 'short' });
+
+    return `${date}, ${from}–${to}`;
+});
+
+/**
+ * Moves the appointment to the time asked for. Something of the astrologer's own there
+ * meanwhile is shown first (409 with `conflicts`), and the move goes ahead only on purpose.
+ */
+async function confirmMove(allowOverlap = false) {
+    busy.value = true;
+    moveConflicts.value = [];
+
+    try {
+        const { data } = await http.post(`/appointments/${props.appointmentId}/move/confirm`, {
+            allow_overlap: allowOverlap || undefined,
+        });
+        applied(data.data);
+        declining.value = false;
+        toast.success(t('appointments.moveConfirmed'));
+        emit('changed', data.data);
+    } catch (error) {
+        if (error.response?.status === 409 && error.response.data?.conflicts) {
+            moveConflicts.value = error.response.data.conflicts;
         } else {
             await answeredMeanwhile(error);
         }
@@ -338,7 +389,12 @@ async function depositSaved() {
                         class="font-medium hover:underline"
                         >{{ appointment.client.full_name }}</RouterLink
                     >
-                    <div class="mt-0.5"><AppointmentStatusBadge :status="appointment.status" /></div>
+                    <div class="mt-0.5">
+                        <AppointmentStatusBadge
+                            :status="appointment.status"
+                            :move-requested="hasMoveRequest(appointment)"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -416,14 +472,66 @@ async function depositSaved() {
                             type="button"
                             class="btn btn-sm"
                             :disabled="busy"
-                            :aria-expanded="declining"
-                            @click="openDecline"
+                            :aria-expanded="declining && declineKind === 'request'"
+                            @click="openDecline('request')"
                             v-tip="t('tips.appointments.detail.decline')"
                         >
                             <AppIcon name="decline" />
                             {{ t('appointments.detail.decline') }}
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <!-- The client asked in the portal to move this confirmed appointment: it stays put until answered. -->
+            <div v-if="moveRequest" class="notice n-warn">
+                <div class="min-w-0">
+                    <strong>{{ t('appointments.detail.moveRequestedTitle') }}</strong>
+                    {{ t('appointments.detail.moveRequested', { when: moveRequest }) }}
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm"
+                            :disabled="busy"
+                            @click="confirmMove()"
+                            v-tip="t('tips.appointments.detail.confirmMove')"
+                        >
+                            <AppIcon name="confirm" />
+                            {{ t('appointments.detail.confirmMove') }}
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-sm"
+                            :disabled="busy"
+                            :aria-expanded="declining && declineKind === 'move'"
+                            @click="openDecline('move')"
+                            v-tip="t('tips.appointments.detail.declineMove')"
+                        >
+                            <AppIcon name="decline" />
+                            {{ t('appointments.detail.declineMove') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="moveConflicts.length" class="notice n-warn" role="alert">
+                <div>
+                    <strong>{{ t('appointments.detail.moveOverlapTitle') }}</strong>
+                    <ul class="mt-1 list-disc pl-5">
+                        <li v-for="conflict in moveConflicts" :key="conflict.id">
+                            {{ moment(conflict) }} · {{ conflict.client?.full_name }}
+                        </li>
+                    </ul>
+                    <button
+                        type="button"
+                        class="btn btn-sm mt-2"
+                        :disabled="busy"
+                        @click="confirmMove(true)"
+                        v-tip="t('tips.appointments.detail.confirmMoveAnyway')"
+                    >
+                        <AppIcon name="warning" />
+                        {{ t('appointments.detail.confirmMoveAnyway') }}
+                    </button>
                 </div>
             </div>
 
@@ -445,9 +553,13 @@ async function depositSaved() {
                     </div>
                     <div v-else id="decline-message-hint" class="hint">
                         {{
-                            appointment.client_portal
-                                ? t('appointments.detail.declineHint')
-                                : t('appointments.detail.declineHintNoPortal')
+                            declineKind === 'move'
+                                ? appointment.client_portal
+                                    ? t('appointments.detail.declineMoveHint')
+                                    : t('appointments.detail.declineMoveHintNoPortal')
+                                : appointment.client_portal
+                                  ? t('appointments.detail.declineHint')
+                                  : t('appointments.detail.declineHintNoPortal')
                         }}
                     </div>
                 </div>
@@ -465,10 +577,22 @@ async function depositSaved() {
                         type="submit"
                         class="btn btn-danger btn-sm"
                         :disabled="busy"
-                        v-tip="t('tips.appointments.detail.confirmDecline')"
+                        v-tip="
+                            t(
+                                declineKind === 'move'
+                                    ? 'tips.appointments.detail.confirmDeclineMove'
+                                    : 'tips.appointments.detail.confirmDecline',
+                            )
+                        "
                     >
                         <AppIcon name="decline" />
-                        {{ t('appointments.detail.confirmDecline') }}
+                        {{
+                            t(
+                                declineKind === 'move'
+                                    ? 'appointments.detail.confirmDeclineMove'
+                                    : 'appointments.detail.confirmDecline',
+                            )
+                        }}
                     </button>
                 </div>
             </form>

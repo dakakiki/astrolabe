@@ -365,6 +365,16 @@ Isti dan, usluge (korisnik: „Add i edit moraju da imaju svoje stranice … ako
 
 Isti dan, portal (korisnik: „za install app mora da stoji posebno ikonica za android i iOS sa objašnjenjem za iOS … na više mesta na klijentskom delu“): instalacija portala je ista traka svuda gde se nudi (Home, Profile → App, obaveštenje o push-u na iPhone-u) — „Install app“ (prozor pregledača ako postoji, inače uputstvo za ovaj uređaj), pa dugmad Android i iOS koja otvaraju korake (Android: Chrome meni → Install app; iOS: Safari → Share → Add to Home Screen → Add, uz napomenu o obaveštenjima); Home nudi instalaciju i na Android telefonu. Odmah zatim (korisnik: „nema zbog čega da instalira app na računar“): instalacija se nudi samo na telefonu — na računaru nema „Install app“ ni kartice na Home, a Profile → App samo kaže da se portal instalira na telefonu i nudi korake za Android i iOS. Bez izmene specifikacije.
 
+## Zakazivanje u portalu — pomeranje kao zahtev (18. 11. 2026)
+
+Korisnik: „uradio sam reschedule ali je odmah prikazao confirmed, ne čeka se da astrolog odobri?“ — po odluci 6 iz 9b klijentovo pomeranje je zadržavalo status. Izabrao „Pomeranje kao zahtev“ (preporuka): stari termin važi dok astrolog ne prihvati novi, novo vreme je zadržano i označeno „Move requested“ (kalendar, kartica na dashboardu, mejl); Confirm premešta termin, Decline ga ostavlja i klijent dobija poruku; bez ručne potvrde pomeranje je odmah, kao i ranije.
+
+- 12: Pravila 9b — „Pomeranje kao zahtev“; odluka 6 izmenjena; mejlovi, audit, push naslovi; opis izvedbe na kraju dela 9b.
+- 02: Kalendar, Dashboard, vremenska linija, portal (Upcoming) i obaveštenja — zahtev za pomeranje.
+- 05: `appointments.proposed_starts_at`, `proposed_ends_at`, `proposed_at`.
+
+Van specifikacije, isti dan (portal, korisnik): ispod datuma „15 free slots“ umesto „15 times“; dani kao slajder sa strelicama gore desno (umesto „Change time zone“); koraci zakazivanja su klikabilni (link „Change service“ otpada); red „Practice's time“ na potvrdi kada se sat klijenta i prakse razlikuju; zelena oznaka „Confirmed“ za potvrđen termin koji predstoji; „Reschedule“ i „Cancel“ desno na kartici termina.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.
