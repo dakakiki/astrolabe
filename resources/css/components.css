@@ -304,6 +304,21 @@
         margin-bottom: 4px;
     }
 
+    /* A path above a page title (Clients › Ana › Consultations): each step a quiet link. */
+    .crumbs a {
+        color: var(--ink-4);
+        text-decoration: none;
+    }
+
+    .crumbs a:hover {
+        color: var(--ink-2);
+        text-decoration: underline;
+    }
+
+    .crumbs .sep {
+        margin: 0 6px;
+    }
+
     .page-head h1 {
         font-size: 24px;
         font-weight: 600;

@@ -14,7 +14,8 @@
         "loading": "Loading…",
         "edit": "Edit",
         "close": "Close",
-        "more": "Show more"
+        "more": "Show more",
+        "breadcrumb": "Where you are"
     },
     "errors": {
         "generic": "Something went wrong. Please try again.",

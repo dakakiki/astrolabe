@@ -375,7 +375,22 @@ const otherZone = computed(() => {
     <template v-else-if="loaded">
         <div class="page-head flex flex-wrap items-start gap-4">
             <div class="min-w-0">
-                <div class="eyebrow">
+                <!-- Where this consultation sits: Clients › the client › their consultations, so the
+                     way back to the client's list is one click from wherever it was opened. -->
+                <nav v-if="client && id" class="eyebrow crumbs" :aria-label="t('common.breadcrumb')">
+                    <RouterLink :to="{ name: 'clients.index' }">{{ t('clients.title') }}</RouterLink>
+                    <span class="sep" aria-hidden="true">›</span>
+                    <RouterLink :to="{ name: 'clients.show', params: { id: client.id } }">{{
+                        client.full_name
+                    }}</RouterLink>
+                    <span class="sep" aria-hidden="true">›</span>
+                    <RouterLink
+                        :to="{ name: 'clients.show', params: { id: client.id }, query: { tab: 'consultations' } }"
+                        >{{ t('consultations.title') }}</RouterLink
+                    >
+                    <template v-if="when"> · {{ when }}</template>
+                </nav>
+                <div v-else class="eyebrow">
                     <RouterLink :to="{ name: 'consultations.index' }" class="text-ink-4 hover:underline">{{
                         t('consultations.title')
                     }}</RouterLink>
