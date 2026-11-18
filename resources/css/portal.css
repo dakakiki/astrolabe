@@ -381,15 +381,46 @@
         color: var(--ink-2);
     }
 
-    /* The days with free times: a strip that scrolls on its own, never the page. */
+    /* The days with free times: a slider — swiped on a phone (each day snaps to the edge),
+       arrows on both sides for a mouse, no scrollbar; it moves on its own, never the page. */
+    .day-slider {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .day-slider .slide-arrow {
+        flex: 0 0 30px;
+        width: 30px;
+        height: 30px;
+    }
+
+    .day-slider .slide-arrow:disabled {
+        opacity: 0.35;
+        cursor: default;
+    }
+
+    .day-slider .slide-arrow .icon {
+        width: 16px;
+        height: 16px;
+    }
+
     .day-strip {
         position: relative;
         display: flex;
+        flex: 1;
+        min-width: 0;
         gap: 8px;
         overflow-x: auto;
-        padding: 2px 2px 6px;
-        scroll-snap-type: x proximity;
-        scrollbar-width: thin;
+        padding: 2px;
+        scroll-snap-type: x mandatory;
+        scroll-padding: 0 2px;
+        scrollbar-width: none;
+        overscroll-behavior-x: contain;
+    }
+
+    .day-strip::-webkit-scrollbar {
+        display: none;
     }
 
     .day-btn {

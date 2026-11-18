@@ -230,7 +230,9 @@
             "maybeBooked": "This booking may already have gone through — please check your appointments.",
             "booked": "You're booked.",
             "requested": "Request sent — the practice will confirm it by email.",
-            "seeAppointments": "See your appointments"
+            "seeAppointments": "See your appointments",
+            "earlierDays": "Earlier days",
+            "laterDays": "Later days"
         },
         "shared": {
             "sub": "Notes, files and links {practice} shared with you.",
@@ -395,7 +397,9 @@
                 "request": "Send the request — the practice confirms it",
                 "book": "Book this time",
                 "retry": "Load the free times again",
-                "seeAppointments": "See all your appointments"
+                "seeAppointments": "See all your appointments",
+                "earlierDays": "Show the earlier days",
+                "laterDays": "Show the later days"
             },
             "choose": {
                 "open": "Open this practice's portal"

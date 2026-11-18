@@ -1,14 +1,15 @@
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink } from 'vue-router';
 
+import AppIcon from '@/components/AppIcon.vue';
 import { dayLabel, dayOf, dayZoneMoment, groupSlotsByDay, nextDay, slotLabels } from '@/portal/lib/booking';
 import { zoneLabel } from '@/portal/lib/portal';
 
 /**
  * Free times to choose from (docs/spec/12, "Zakazivanje (9b)"): the days
- * that have any as a strip, the chosen day's times as buttons, all on the
+ * that have any as a slider (swiped on a phone, arrows beside it, no scrollbar), the chosen day's times as buttons, all on the
  * client's clock with the zone named for that day (it may change with
  * daylight saving inside the window — and within the day the clocks go back,
  * when the hour that happens twice names its zone on both buttons). The
@@ -35,6 +36,25 @@ const zone = computed(() =>
     zoneLabel(props.timeZone, dayZoneMoment(current.value?.slots, selected.value), locale.value),
 );
 const strip = ref(null);
+// Whether the slider can move back or on; the arrows are off at either end.
+const canBack = ref(false);
+const canOn = ref(false);
+
+function updateArrows() {
+    const el = strip.value;
+    if (!el) return;
+    canBack.value = el.scrollLeft > 4;
+    canOn.value = el.scrollLeft + el.clientWidth < el.scrollWidth - 4;
+}
+
+/** One view of days back or on, leaving the edge day in sight. */
+function slide(direction) {
+    const el = strip.value;
+    if (!el) return;
+    el.scrollBy({ left: direction * Math.max(el.clientWidth - 80, 80), behavior: 'smooth' });
+}
+
+let resizeObserver = null;
 
 // A new list (a refresh after a time was taken): stay on the day, or the next one that has times.
 watch(groups, (value) => {
@@ -64,7 +84,18 @@ function showDay() {
     }
 }
 
-onMounted(showDay);
+onMounted(() => {
+    showDay();
+    updateArrows();
+    if (typeof ResizeObserver !== 'undefined' && strip.value) {
+        resizeObserver = new ResizeObserver(updateArrows);
+        resizeObserver.observe(strip.value);
+    }
+});
+
+onBeforeUnmount(() => resizeObserver?.disconnect());
+
+watch(groups, () => nextTick(updateArrows));
 </script>
 
 <template>
@@ -80,22 +111,50 @@ onMounted(showDay);
         </div>
 
         <template v-else>
-            <div ref="strip" class="day-strip" role="group" :aria-label="t('portal.booking.days')">
+            <div class="day-slider">
                 <button
-                    v-for="group in groups"
-                    :key="group.date"
                     type="button"
-                    class="day-btn"
-                    :aria-pressed="group.date === day ? 'true' : 'false'"
-                    :aria-label="`${label(group.date).full} · ${t('portal.booking.dayCount', { count: group.slots.length }, group.slots.length)}`"
-                    @click="day = group.date"
+                    class="icon-btn slide-arrow"
+                    :disabled="!canBack"
+                    :aria-label="t('portal.booking.earlierDays')"
+                    @click="slide(-1)"
+                    v-tip="t('tips.portal.booking.earlierDays')"
                 >
-                    <span class="d-wd">{{ label(group.date).weekday }}</span>
-                    <span class="d-num">{{ label(group.date).day }}</span>
-                    <span class="d-mon">{{ label(group.date).month }}</span>
-                    <span class="d-count">{{
-                        t('portal.booking.dayCount', { count: group.slots.length }, group.slots.length)
-                    }}</span>
+                    <AppIcon name="previous" />
+                </button>
+                <div
+                    ref="strip"
+                    class="day-strip"
+                    role="group"
+                    :aria-label="t('portal.booking.days')"
+                    @scroll.passive="updateArrows"
+                >
+                    <button
+                        v-for="group in groups"
+                        :key="group.date"
+                        type="button"
+                        class="day-btn"
+                        :aria-pressed="group.date === day ? 'true' : 'false'"
+                        :aria-label="`${label(group.date).full} · ${t('portal.booking.dayCount', { count: group.slots.length }, group.slots.length)}`"
+                        @click="day = group.date"
+                    >
+                        <span class="d-wd">{{ label(group.date).weekday }}</span>
+                        <span class="d-num">{{ label(group.date).day }}</span>
+                        <span class="d-mon">{{ label(group.date).month }}</span>
+                        <span class="d-count">{{
+                            t('portal.booking.dayCount', { count: group.slots.length }, group.slots.length)
+                        }}</span>
+                    </button>
+                </div>
+                <button
+                    type="button"
+                    class="icon-btn slide-arrow"
+                    :disabled="!canOn"
+                    :aria-label="t('portal.booking.laterDays')"
+                    @click="slide(1)"
+                    v-tip="t('tips.portal.booking.laterDays')"
+                >
+                    <AppIcon name="next" />
                 </button>
             </div>
 
