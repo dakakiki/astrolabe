@@ -1,7 +1,6 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { RouterLink } from 'vue-router';
 
 import AppIcon from '@/components/AppIcon.vue';
 import { dayLabel, dayOf, dayZoneMoment, groupSlotsByDay, nextDay, slotLabels } from '@/portal/lib/booking';
@@ -9,7 +8,7 @@ import { zoneLabel } from '@/portal/lib/portal';
 
 /**
  * Free times to choose from (docs/spec/12, "Zakazivanje (9b)"): the days
- * that have any as a slider (swiped on a phone, arrows beside it, no scrollbar), the chosen day's times as buttons, all on the
+ * that have any as a slider (swiped on a phone, arrows above it on the right, no scrollbar), the chosen day's times as buttons, all on the
  * client's clock with the zone named for that day (it may change with
  * daylight saving inside the window — and within the day the clocks go back,
  * when the hour that happens twice names its zone on both buttons). The
@@ -100,9 +99,30 @@ watch(groups, () => nextTick(updateArrows));
 
 <template>
     <div>
-        <div class="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <div class="mb-3 flex items-center justify-between gap-3">
             <span class="text-sm text-ink-2">{{ t('portal.appointments.zone', { zone }) }}</span>
-            <RouterLink :to="{ name: 'profile' }" class="text-xs">{{ t('portal.booking.changeZone') }}</RouterLink>
+            <div v-if="groups.length" class="slide-arrows">
+                <button
+                    type="button"
+                    class="icon-btn"
+                    :disabled="!canBack"
+                    :aria-label="t('portal.booking.earlierDays')"
+                    @click="slide(-1)"
+                    v-tip="t('tips.portal.booking.earlierDays')"
+                >
+                    <AppIcon name="previous" />
+                </button>
+                <button
+                    type="button"
+                    class="icon-btn"
+                    :disabled="!canOn"
+                    :aria-label="t('portal.booking.laterDays')"
+                    @click="slide(1)"
+                    v-tip="t('tips.portal.booking.laterDays')"
+                >
+                    <AppIcon name="next" />
+                </button>
+            </div>
         </div>
 
         <div v-if="groups.length === 0" class="empty">
@@ -111,50 +131,28 @@ watch(groups, () => nextTick(updateArrows));
         </div>
 
         <template v-else>
-            <div class="day-slider">
+            <div
+                ref="strip"
+                class="day-strip"
+                role="group"
+                :aria-label="t('portal.booking.days')"
+                @scroll.passive="updateArrows"
+            >
                 <button
+                    v-for="group in groups"
+                    :key="group.date"
                     type="button"
-                    class="icon-btn slide-arrow"
-                    :disabled="!canBack"
-                    :aria-label="t('portal.booking.earlierDays')"
-                    @click="slide(-1)"
-                    v-tip="t('tips.portal.booking.earlierDays')"
+                    class="day-btn"
+                    :aria-pressed="group.date === day ? 'true' : 'false'"
+                    :aria-label="`${label(group.date).full} · ${t('portal.booking.dayCount', { count: group.slots.length }, group.slots.length)}`"
+                    @click="day = group.date"
                 >
-                    <AppIcon name="previous" />
-                </button>
-                <div
-                    ref="strip"
-                    class="day-strip"
-                    role="group"
-                    :aria-label="t('portal.booking.days')"
-                    @scroll.passive="updateArrows"
-                >
-                    <button
-                        v-for="group in groups"
-                        :key="group.date"
-                        type="button"
-                        class="day-btn"
-                        :aria-pressed="group.date === day ? 'true' : 'false'"
-                        :aria-label="`${label(group.date).full} · ${t('portal.booking.dayCount', { count: group.slots.length }, group.slots.length)}`"
-                        @click="day = group.date"
-                    >
-                        <span class="d-wd">{{ label(group.date).weekday }}</span>
-                        <span class="d-num">{{ label(group.date).day }}</span>
-                        <span class="d-mon">{{ label(group.date).month }}</span>
-                        <span class="d-count">{{
-                            t('portal.booking.dayCount', { count: group.slots.length }, group.slots.length)
-                        }}</span>
-                    </button>
-                </div>
-                <button
-                    type="button"
-                    class="icon-btn slide-arrow"
-                    :disabled="!canOn"
-                    :aria-label="t('portal.booking.laterDays')"
-                    @click="slide(1)"
-                    v-tip="t('tips.portal.booking.laterDays')"
-                >
-                    <AppIcon name="next" />
+                    <span class="d-wd">{{ label(group.date).weekday }}</span>
+                    <span class="d-num">{{ label(group.date).day }}</span>
+                    <span class="d-mon">{{ label(group.date).month }}</span>
+                    <span class="d-count">{{
+                        t('portal.booking.dayCount', { count: group.slots.length }, group.slots.length)
+                    }}</span>
                 </button>
             </div>
 

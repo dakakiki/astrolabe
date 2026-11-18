@@ -294,6 +294,23 @@
         color: var(--link);
     }
 
+    /* A step already done is a way back to it. */
+    .book-steps .step-back {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0;
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+    }
+
+    .book-steps .step-back:hover {
+        text-decoration: underline;
+    }
+
     .book-steps li.is-done .n {
         border-color: var(--brand-300);
     }
@@ -381,30 +398,30 @@
         color: var(--ink-2);
     }
 
-    /* The days with free times: a slider — swiped on a phone (each day snaps to the edge),
-       arrows on both sides for a mouse, no scrollbar; it moves on its own, never the page. */
-    .day-slider {
+    /* The slider's arrows, above it on the right (where "Change time zone" was). */
+    .slide-arrows {
         display: flex;
-        align-items: center;
         gap: 6px;
     }
 
-    .day-slider .slide-arrow {
-        flex: 0 0 30px;
+    .slide-arrows .icon-btn {
         width: 30px;
         height: 30px;
+        flex-basis: 30px;
     }
 
-    .day-slider .slide-arrow:disabled {
+    .slide-arrows .icon-btn:disabled {
         opacity: 0.35;
         cursor: default;
     }
 
-    .day-slider .slide-arrow .icon {
+    .slide-arrows .icon-btn .icon {
         width: 16px;
         height: 16px;
     }
 
+    /* The days with free times: a slider — swiped on a phone (each day snaps to the edge), the
+       arrows above it for a mouse, no scrollbar; it moves on its own, never the page. */
     .day-strip {
         position: relative;
         display: flex;

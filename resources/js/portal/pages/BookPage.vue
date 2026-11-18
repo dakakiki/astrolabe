@@ -159,6 +159,11 @@ function next() {
     router.push({ name: 'book', query: { service: service.value.id, at: chosen.value.starts_at } });
 }
 
+/** A step already done, clicked in the steps above: back to choosing the service or the time. */
+function goToStep(name) {
+    stepBack(name === 'service' ? {} : { service: service.value.id });
+}
+
 /** Back to an earlier step: through the history when it came from there, otherwise in place. */
 function stepBack(target) {
     const to = router.resolve({ name: 'book', query: target });
@@ -295,8 +300,20 @@ function rule(line) {
                 :class="{ 'is-done': STEPS.indexOf(step) > index }"
                 :aria-current="step === name ? 'step' : undefined"
             >
-                <span class="n" aria-hidden="true">{{ index + 1 }}</span>
-                {{ t(`portal.booking.steps.${name}`) }}
+                <button
+                    v-if="STEPS.indexOf(step) > index"
+                    type="button"
+                    class="step-back"
+                    @click="goToStep(name)"
+                    v-tip="t(`tips.portal.booking.steps.${name}`)"
+                >
+                    <span class="n" aria-hidden="true">{{ index + 1 }}</span>
+                    {{ t(`portal.booking.steps.${name}`) }}
+                </button>
+                <template v-else>
+                    <span class="n" aria-hidden="true">{{ index + 1 }}</span>
+                    {{ t(`portal.booking.steps.${name}`) }}
+                </template>
             </li>
         </ol>
 
@@ -327,9 +344,6 @@ function rule(line) {
         <section v-else-if="step === 'time'" class="card">
             <div class="card-head">
                 <h2 class="min-w-0 truncate">{{ service.name }}</h2>
-                <button type="button" class="right link" @click="stepBack({})">
-                    {{ t('portal.booking.changeService') }}
-                </button>
             </div>
             <div class="card-body">
                 <div v-if="listed === null && slotsFailed" class="flex flex-wrap items-center gap-3">
@@ -377,9 +391,6 @@ function rule(line) {
         <section v-else-if="step === 'confirm'" class="card">
             <div class="card-head">
                 <h2>{{ t('portal.booking.summary.title') }}</h2>
-                <button type="button" class="right link" @click="stepBack({ service: service.id })">
-                    {{ t('portal.booking.changeTime') }}
-                </button>
             </div>
             <form class="card-body space-y-4" novalidate @submit.prevent="submit">
                 <dl class="book-summary">

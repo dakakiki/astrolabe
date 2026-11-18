@@ -191,8 +191,6 @@
             "disabled": "Booking in the portal is not open at the moment. Please contact the practice to make an appointment.",
             "noServices": "There is nothing to book in the portal at the moment. Please contact the practice.",
             "backHome": "Back to your portal",
-            "changeService": "Change service",
-            "changeZone": "Change time zone",
             "days": "Days with free times",
             "dayCount": "{count} free slot | {count} free slots",
             "noTimes": "No free times in the next {count} day. | No free times in the next {count} days.",
@@ -399,7 +397,11 @@
                 "retry": "Load the free times again",
                 "seeAppointments": "See all your appointments",
                 "earlierDays": "Show the earlier days",
-                "laterDays": "Show the later days"
+                "laterDays": "Show the later days",
+                "steps": {
+                    "service": "Back to choosing the service",
+                    "time": "Back to choosing the time"
+                }
             },
             "choose": {
                 "open": "Open this practice's portal"
