@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\User;
+use App\Support\Notifications\MailLook;
 use Carbon\CarbonImmutable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -36,10 +37,10 @@ class TestEmail extends Notification implements ShouldQueue
         $zone = $notifiable->timezone ?: 'UTC';
         $at = CarbonImmutable::parse($this->requestedAt)->setTimezone($zone)->locale(app()->getLocale());
 
-        return (new MailMessage)
+        return MailLook::forAstrologer((new MailMessage)
             ->subject(__('notifications.test.subject', ['app' => config('app.name')]))
             ->greeting(__('notifications.greeting', ['name' => $notifiable->name]))
             ->line(__('notifications.test.line', ['time' => $at->isoFormat('LLLL'), 'zone' => $zone]))
-            ->action(__('notifications.test.action'), url('/settings/notifications'));
+            ->action(__('notifications.test.action'), url('/settings/notifications')));
     }
 }

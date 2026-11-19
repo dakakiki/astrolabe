@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\User;
 use App\Support\Notifications\InAppMessage;
+use App\Support\Notifications\MailLook;
 use Carbon\CarbonImmutable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -50,13 +51,13 @@ class PracticeDeletionScheduled extends Notification implements ShouldQueue
             ->locale(app()->getLocale())
             ->isoFormat('LL');
 
-        return (new MailMessage)
+        return MailLook::forAstrologer((new MailMessage)
             ->subject(__('notifications.deletion_scheduled.subject', ['date' => $date]))
             ->greeting(__('notifications.greeting', ['name' => $notifiable->name]))
             ->line(__('notifications.deletion_scheduled.line', ['practice' => $this->practice, 'date' => $date]))
             ->line(__('notifications.deletion_scheduled.cancel'))
             ->action(__('notifications.deletion_scheduled.action'), url('/practice-deletion'))
-            ->line(__('notifications.deletion_scheduled.not_you'));
+            ->line(__('notifications.deletion_scheduled.not_you')));
     }
 
     public function toInApp(User $notifiable): InAppMessage

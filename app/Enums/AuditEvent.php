@@ -57,6 +57,8 @@ enum AuditEvent: string
     case AccountRestored = 'account_restored';
     case AdminJobRetried = 'admin_job_retried';
     case AdminJobDeleted = 'admin_job_deleted';
+    // Admin → Notifications (19 Nov 2026): which texts of which notification, never the texts.
+    case AdminNotificationTextsChanged = 'admin_notification_texts_changed';
     case FeedbackSent = 'feedback_sent';
 
     // The client portal (Phase 9a): the astrologer's invitations, and what the client

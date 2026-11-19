@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Workspace;
 use App\Support\Notifications\ClientAppointmentFacts;
 use App\Support\Notifications\InAppMessage;
+use App\Support\Notifications\MailLook;
 use App\Support\Notifications\NotificationPreferences;
 use Carbon\CarbonImmutable;
 use Illuminate\Bus\Queueable;
@@ -176,7 +177,7 @@ class PortalBookingNotice extends Notification implements ShouldQueue
         // A move asked for opens the calendar where the appointment still is.
         $day = $this->kind === self::MOVE_REQUESTED ? $this->local((string) $this->previousStartsAt, $zone) : $start;
 
-        return (new MailMessage)
+        return MailLook::forAstrologer((new MailMessage)
             ->subject(__("notifications.portal_booking.{$this->kind}.subject", ['when' => $start->isoFormat('ddd ll, LT')]))
             ->greeting(__('notifications.greeting', ['name' => $notifiable->name]))
             ->line(__("notifications.portal_booking.{$this->kind}.line", $values))
@@ -190,7 +191,7 @@ class PortalBookingNotice extends Notification implements ShouldQueue
                 ]),
             )
             ->line(__('notifications.portal_booking.private'))
-            ->line(__('notifications.portal_booking.settings', ['url' => url('/settings/notifications')]));
+            ->line(__('notifications.portal_booking.settings', ['url' => url('/settings/notifications')])));
     }
 
     /** "Monday, October 5, 2026, 3:00 PM – 4:00 PM" (the zone follows once). */

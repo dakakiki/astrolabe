@@ -56,6 +56,8 @@ Poslovna polja su opciona. Svako polje namenjeno klijentu ima eksplicitnu vidlji
 
 > **Od 18. 11. 2026 (odluka korisnika: „svako i praksa i klijent moraju da imaju opciju otkazivanja notifikacija … za praksu izlistati notifikacije i omogućiti odabir kanala po svakoj“):** kanali su **Email** i **In the app** (zvonce u zaglavlju); svako obaveštenje ima svoj red i bira kanale, bez oba je isključeno. Obavezna, uvek mejlom, samo nalog i bezbednost (potvrda adrese, nova lozinka, pozivnica, obaveštenja o nalogu) — u listi kao zaključana. Brisanje prakse i izvoz se mogu isključiti; „Practice deleted“ ide samo mejlom. Push za astrologa nije uveden (moguće kasnije). Klijent u portalu dolazi sledeći korak. Opis u dokumentu 02, model u dokumentu 05.
 
+> **Tekstovi obaveštenja (19. 11. 2026, korisnik: „potrebna nam je i administracija za izgled i sadržaj poruka“):** u adminu operatera nova celina **Notifications** — zaglavlje i podnožje mejla i reči svakog mejla i push poruke (dokument 02, „Admin (operater)“). Odluke korisnika: zaglavlje mejla klijentu je ime / logo prakse, a kada ga nema — AstroLabe; tekstovi u zvoncetu aplikacije se sada ne diraju; praksa nema pravo izmene sadržaja poruka.
+
 ## Branding
 
 Astrolog može da postavi:

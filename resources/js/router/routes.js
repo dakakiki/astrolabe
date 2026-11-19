@@ -248,6 +248,18 @@ const routes = [
         meta: { admin: true },
     },
     {
+        path: '/admin/notifications',
+        name: 'admin.notifications',
+        component: () => import('@/pages/admin/AdminNotificationsPage.vue'),
+        meta: { admin: true },
+    },
+    {
+        path: '/admin/notifications/:id([a-z_.]+)',
+        name: 'admin.notification',
+        component: () => import('@/pages/admin/AdminNotificationPage.vue'),
+        meta: { admin: true },
+    },
+    {
         path: '/admin/system',
         name: 'admin.system',
         component: () => import('@/pages/admin/AdminSystemPage.vue'),

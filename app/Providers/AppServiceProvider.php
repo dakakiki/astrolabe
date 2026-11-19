@@ -22,6 +22,8 @@ use App\Models\Service;
 use App\Models\Task;
 use App\Support\Audit\Audit;
 use App\Support\Audit\SecurityEventSubscriber;
+use App\Support\Copy\MessageTexts;
+use App\Support\Copy\OverridableTranslator;
 use App\Support\Tenancy\CurrentWorkspace;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -30,12 +32,15 @@ use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull;
 use Illuminate\Http\Request;
+use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Translation\Translator;
 use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
@@ -49,6 +54,14 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(CurrentWorkspace::class);
 
         $this->app->bind(Geocoder::class, LocalGeoNamesGeocoder::class);
+
+        // The operator's notification texts (Admin → Notifications) over the code's.
+        $this->app->extend('translator', function (Translator $translator) {
+            $overridable = new OverridableTranslator($translator->getLoader(), $translator->getLocale());
+            $overridable->setFallback($translator->getFallback());
+
+            return $overridable;
+        });
 
         // One engine per process; the fake one keeps the positions tests pin on it.
         // The real one keeps its version in the cache, so reading a chart starts no process.
@@ -77,6 +90,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->pointAuthEmailsAtTheSpa();
+
+        // A long-running worker reads the operator's notification texts again for every job.
+        Event::listen(JobProcessing::class, fn () => MessageTexts::forget());
+        // There an empty text means "leave this line out", not "no value".
+        ConvertEmptyStringsToNull::skipWhen(fn (Request $request) => $request->is('api/v1/admin/notifications/*'));
         $this->limitRequests();
         $this->auditCriticalOperations();
         $this->preventLazyLoading();

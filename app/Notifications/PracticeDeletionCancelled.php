@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\User;
 use App\Support\Notifications\InAppMessage;
+use App\Support\Notifications\MailLook;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -40,11 +41,11 @@ class PracticeDeletionCancelled extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
+        return MailLook::forAstrologer((new MailMessage)
             ->subject(__('notifications.deletion_cancelled.subject'))
             ->greeting(__('notifications.greeting', ['name' => $notifiable->name]))
             ->line(__('notifications.deletion_cancelled.line', ['practice' => $this->practice]))
-            ->action(__('notifications.deletion_cancelled.action'), url('/'));
+            ->action(__('notifications.deletion_cancelled.action'), url('/')));
     }
 
     public function toInApp(User $notifiable): InAppMessage

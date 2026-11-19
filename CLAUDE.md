@@ -164,6 +164,11 @@ before starting a phase. The user communicates in Serbian.
   of its push, `ClientAppointmentEmail::preference()`), with `mail` and `push`; `via()` goes through
   `ClientChannels::for($user, $kind)`. Push wanted without a live device comes by email; a notice off on
   both comes not at all. The invitation and the sign-in codes always go by email.
+- Notification texts are the operator's to word (Admin → Notifications, `message_texts`): every text
+  of an email or a push goes through `__()` with a key `NotificationCatalog::wordable()` accepts, never a
+  literal string; a new notification gets a sample in `NotificationCatalog::samples()` and a label in
+  `admin.notification_texts.messages`. Mail views live in `resources/views/vendor/{notifications,mail}`;
+  an email's frame comes from `MailLook` (`forAstrologer`, `forClient`), never set by hand.
 - Client email goes only to the portal account of a usable link (`ClientRecipient::access()` —
   `PortalAccess::usable()`), checked again in `shouldSend()`; a client without the portal gets nothing.
   It names the practice (`Workspace::portalName()`), shows times in the client's zone

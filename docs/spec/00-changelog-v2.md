@@ -402,6 +402,14 @@ Korisnik (uz sliku): „Profile \ App treba da se skloni i da dodaš floating ba
 
 - 02, 12: Instalacija — plutajuća traka na svakoj strani portala na telefonu; Profile → App i ponuda na Home uklonjeni.
 
+## Admin: tekstovi i izgled obaveštenja (19. 11. 2026)
+
+Korisnik: „vezano za notifikacije mislim da nam je potrebna i administracija za izgled i sadržaj poruka … za mail notifikacije, opciju za kreiranje headera i footera poruke i redom sve poruke sa sadržajem … za push poruke, isto“. Odluke: zaglavlje mejla klijentu = praksa, rezervno AstroLabe; zvonce ne dirati sada; praksa nema pravo izmene.
+
+- 02: Admin (operater) → Notifications; izgled mejlova (zaglavlje prakse, link ka podešavanjima obaveštenja).
+- 05: tabela `message_texts`.
+- 09: odluka i odluke korisnika.
+
 ## Nedostaje dokument 08
 
 U poslatom materijalu nema dokumenta između 07 i 09. Ako postoji, treba ga uskladiti sa ovim izmenama — posebno ako se tiče notifikacija ili izveštaja.

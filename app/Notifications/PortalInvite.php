@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\PortalInvitation;
+use App\Support\Notifications\MailLook;
 use Carbon\CarbonImmutable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -35,13 +36,13 @@ class PortalInvite extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
+        return MailLook::forClient((new MailMessage)
             ->subject(__('portal.mail.invitation.subject', ['practice' => $this->practice]))
             ->greeting(__('portal.mail.invitation.greeting'))
             ->line(__('portal.mail.invitation.intro', ['practice' => $this->practice, 'name' => $this->invitedBy]))
             ->line(__('portal.mail.invitation.what'))
             ->action(__('portal.mail.invitation.action'), PortalInvitation::url($this->token))
             ->line(__('portal.mail.invitation.expires', ['date' => $this->expiresAt->utc()->isoFormat('LL').' (UTC)']))
-            ->line(__('portal.mail.invitation.ignore'));
+            ->line(__('portal.mail.invitation.ignore')), null, $this->practice, settings: false);
     }
 }

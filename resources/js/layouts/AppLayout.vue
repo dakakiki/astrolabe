@@ -48,6 +48,7 @@ const adminNav = [
             { to: { name: 'admin.audit' }, label: 'nav.auditLog', icon: 'auditLog' },
             { to: { name: 'admin.invitations' }, label: 'nav.invitations', icon: 'invitations' },
             { to: { name: 'admin.feedback' }, label: 'nav.inbox', icon: 'inbox' },
+            { to: { name: 'admin.notifications' }, label: 'nav.notificationTexts', icon: 'mail' },
             { to: { name: 'admin.system' }, label: 'nav.system', icon: 'system' },
         ],
     },

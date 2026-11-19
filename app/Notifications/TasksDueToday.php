@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\User;
 use App\Support\Notifications\InAppMessage;
+use App\Support\Notifications\MailLook;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -67,10 +68,10 @@ class TasksDueToday extends Notification implements ShouldQueue
             $message->line(trans_choice('notifications.digest.overdue', $this->overdue, ['count' => $this->overdue]));
         }
 
-        return $message
+        return MailLook::forAstrologer($message
             ->action(__('notifications.digest.action'), url('/tasks').'?'.http_build_query(['show' => 'today']))
             ->line(__('notifications.digest.private'))
-            ->line(__('notifications.settings', ['url' => url('/settings/notifications')]));
+            ->line(__('notifications.settings', ['url' => url('/settings/notifications')])));
     }
 
     public function toInApp(User $notifiable): InAppMessage

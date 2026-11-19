@@ -631,6 +631,10 @@ Pravila zakazivanja u portalu (Settings → Booking, menja vlasnik). Red nastaje
 - `portal_users`: `appointment_reminders` (boolean, podrazumevano `true`) — Portal → Profile.
 - `users.notification_preferences`: ključ `portal_bookings` (podrazumevano `true`).
 
+### `message_texts` (19. 11. 2026)
+
+Reči operatera za tekstove obaveštenja (Admin → Notifications): `locale`, `key` (prevodni ključ iz kataloga obaveštenja — `notifications.*`, `portal.mail.*`, `portal.push.*`, `mail_layout.*`, `operations.*`, `admin.feedback.*` i Laravel-ovi tekstovi mejlova za potvrdu adrese i novu lozinku), `value` (tekst sa istim oznakama `:name`), `updated_by` (FK na users, `nullOnDelete`), `created_at`, `updated_at`; jedinstveno `(locale, key)`. Prevodilac aplikacije (`OverridableTranslator`) daje ove reči ispred tekstova iz koda; queue worker ih čita ponovo pre svakog posla. Bez reda — tekst iz koda.
+
 ### `app_notifications` (18. 11. 2026)
 
 Obaveštenja u aplikaciji (zvonce u zaglavlju), jedan red po obaveštenju jednoj osobi: `user_id` (FK, briše se sa nalogom), `workspace_id` (nullable, FK, briše se sa praksom; `null` = o nalogu), `kind` (vrsta iz `notification_preferences.channels`), `data` (JSON: samo id-jevi, UTC vremena i brojevi — bez imena i poruka; ime klijenta se čita pri prikazu liste, u praksi), `read_at`, `created_at`. Indeksi `(user_id, workspace_id, read_at)`, `(user_id, created_at)`, `created_at`. Retencija: `astrolabe.retention.app_notifications_days` (90, `RETENTION_APP_NOTIFICATIONS_DAYS`); brisanje prakse ih uklanja (`DeletePractice`). Nisu deo izvoza prakse (lično stanje, ne podaci prakse).

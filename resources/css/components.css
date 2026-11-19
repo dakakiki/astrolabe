@@ -251,6 +251,129 @@
         z-index: 40;
     }
 
+    /* Admin → Notifications: the list, and the editor with the notification beside its texts. */
+    .notice-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px;
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .notice-row:hover {
+        background: var(--surface-2);
+    }
+
+    .notif-editor {
+        display: grid;
+        gap: 16px;
+        align-items: start;
+    }
+
+    @media (min-width: 1100px) {
+        .notif-editor {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        }
+
+        .notif-preview {
+            position: sticky;
+            top: 16px;
+        }
+    }
+
+    .chip-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        padding: 1px 7px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--surface-2);
+        color: var(--ink-2);
+        font-family: var(--mono);
+        font-size: 11.5px;
+        cursor: pointer;
+    }
+
+    .chip-btn svg {
+        width: 11px;
+        height: 11px;
+    }
+
+    .chip-btn:hover {
+        color: var(--link);
+        border-color: var(--link);
+    }
+
+    .chip-btn.required {
+        border-color: var(--warn);
+    }
+
+    .inline-icon {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        vertical-align: -2px;
+    }
+
+    .mail-frame {
+        border: 1px solid var(--line);
+        border-radius: var(--r-lg);
+        overflow: hidden;
+    }
+
+    .mail-subject {
+        display: grid;
+        gap: 2px;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--line);
+        font-size: 13px;
+    }
+
+    .mail-frame iframe {
+        display: block;
+        width: 100%;
+        height: 640px;
+        border: 0;
+        background: #ffffff;
+    }
+
+    .push-phone {
+        max-width: 380px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--surface-2);
+    }
+
+    .push-card {
+        display: flex;
+        gap: 10px;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        font-size: 13px;
+    }
+
+    .push-icon {
+        flex: 0 0 28px;
+        height: 28px;
+        border-radius: 7px;
+        background: var(--brand);
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-family: var(--serif);
+    }
+
+    .push-app {
+        display: block;
+        font-size: 11px;
+        color: var(--ink-3);
+    }
+
     /* Settings → Notifications: one row per notice, a column per channel (email, in the app). */
     .notif-matrix {
         width: 100%;

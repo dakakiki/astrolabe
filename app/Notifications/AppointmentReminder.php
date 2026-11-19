@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\Scopes\WorkspaceScope;
 use App\Models\User;
 use App\Support\Notifications\InAppMessage;
+use App\Support\Notifications\MailLook;
 use Carbon\CarbonImmutable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -89,7 +90,7 @@ class AppointmentReminder extends Notification implements ShouldQueue
         $start = CarbonImmutable::parse($this->startsAt)->setTimezone($zone)->locale(app()->getLocale());
         $end = CarbonImmutable::parse($this->endsAt)->setTimezone($zone)->locale(app()->getLocale());
 
-        return (new MailMessage)
+        return MailLook::forAstrologer((new MailMessage)
             ->subject(__('notifications.reminder.subject', ['when' => $start->isoFormat('ddd ll, LT')]))
             ->greeting(__('notifications.greeting', ['name' => $notifiable->name]))
             ->line(__('notifications.reminder.line', [
@@ -103,7 +104,7 @@ class AppointmentReminder extends Notification implements ShouldQueue
                 'appointment' => $this->appointmentId,
             ]))
             ->line(__('notifications.reminder.private'))
-            ->line(__('notifications.settings', ['url' => url('/settings/notifications')]));
+            ->line(__('notifications.settings', ['url' => url('/settings/notifications')])));
     }
 
     /** In the app: the appointment and its time; the client's name is read when the list is shown. */

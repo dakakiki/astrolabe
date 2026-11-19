@@ -73,6 +73,7 @@
         "auditLog": "Audit log",
         "invitations": "Invitations",
         "inbox": "Feedback",
+        "notificationTexts": "Notifications",
         "system": "System",
         "security": "Security"
     },
@@ -2019,6 +2020,70 @@
     },
     "admin": {
         "badge": "Operator",
+        "notifications": {
+            "title": "Notifications",
+            "sub": "The words of every email and push message AstroLabe sends, and the layout around every email. Links, codes and buttons' addresses stay as they are.",
+            "tabs": {
+                "email": "Emails",
+                "push": "Push messages",
+                "layout": "Layout"
+            },
+            "groups": {
+                "astrologer": "To astrologers",
+                "client": "To clients",
+                "operator": "To you, the operator"
+            },
+            "channels": {
+                "mail": "Email",
+                "push": "Push message",
+                "layout": "Every email"
+            },
+            "worded": "{count} text in your words | {count} texts in your words",
+            "pushTitle": "Push messages to clients",
+            "pushHint": "What a client's phone shows on the lock screen: keep it short and general — never a name or a message.",
+            "layoutHint": "The header (the practice's name or logo in a client's email, AstroLabe otherwise), the greeting when an email has none, the signature, the line under the button and the footer.",
+            "editLayout": "Edit the layout",
+            "where": "Where you are",
+            "texts": "Texts",
+            "textsHint": "Change the words; a placeholder like :when is filled in when the notification is sent. A line left empty is left out of the email.",
+            "placeholders": "Insert:",
+            "keep": "Keep {names} in this text: without it the notification cannot do its job.",
+            "unknown": "This notification has no {names}.",
+            "shared": "Also used in {count} other notification. | Also used in {count} other notifications.",
+            "reset": "Default",
+            "back": "Back",
+            "save": "Save",
+            "saved": "Notification texts saved",
+            "preview": "Preview",
+            "previewAs": "Show as",
+            "samples": {
+                "client": "Client's email",
+                "astrologer": "Astrologer's email"
+            },
+            "previewHint": "With sample values, as it will be sent. Saved only when you press Save.",
+            "subject": "Subject",
+            "now": "now",
+            "pushLength": "Title {title} characters, text {body}. A lock screen shows about 50 and 120.",
+            "roles": {
+                "subject": "Subject",
+                "greeting": "Greeting",
+                "intro": "Text",
+                "action": "Button",
+                "outro": "Text after the button",
+                "inline": "Part of another text",
+                "title": "Title",
+                "body": "Text"
+            },
+            "layoutKeys": {
+                "header": "Header, when there is no logo",
+                "greeting": "Greeting, when an email has none",
+                "salutation": "Signature",
+                "subcopy": "Line under the button",
+                "settings_link": "Link to the notification settings",
+                "footer": "Footer",
+                "footer_client": "Footer of a client's email"
+            }
+        },
         "noTwoFactor": {
             "title": "Turn on two-factor sign-in",
             "body": "The admin opens only with two-factor sign-in. Turn it on below; the other screens unlock right after."
@@ -2183,6 +2248,7 @@
             "account_restored": "Account restored",
             "admin_job_retried": "Failed job run again",
             "admin_job_deleted": "Failed job dropped",
+            "admin_notification_texts_changed": "Notification texts changed",
             "feedback_sent": "Feedback sent",
             "legal_accepted": "Terms or privacy policy accepted",
             "portal_invitation_sent": "Portal invitation sent",
@@ -2374,6 +2440,13 @@
             "item": "Open what this notification is about"
         },
         "admin": {
+            "notifications": {
+                "editLayout": "Change the header, signature and footer of every email",
+                "reset": "Bring back the words this text had",
+                "placeholder": "Put {name} at the cursor",
+                "back": "Back to the list of notifications — unsaved changes are dropped",
+                "save": "Save these texts — the next notifications use them"
+            },
             "actions": {
                 "resetTwoFactor": "Turn off two-factor sign-in for this astrologer — asks for a reason",
                 "verification": "Email the address confirmation link again",

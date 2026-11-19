@@ -6,6 +6,7 @@ use App\Models\PortalUser;
 use App\Support\Notifications\ClientAppointmentFacts;
 use App\Support\Notifications\ClientChannels;
 use App\Support\Notifications\ClientRecipient;
+use App\Support\Notifications\MailLook;
 use App\Support\Portal\Push\PushMessage;
 use Carbon\CarbonImmutable;
 use Illuminate\Bus\Queueable;
@@ -138,14 +139,14 @@ abstract class ClientAppointmentEmail extends Notification implements ShouldQueu
         return $notifiable->timezone ?: $this->appointment->practiceZone;
     }
 
-    /** Subject, greeting and the first line; the email's own lines follow. */
+    /** Subject and greeting in the practice's frame (MailLook); the email's own lines follow. */
     protected function message(PortalUser $notifiable, string $subject): MailMessage
     {
-        return (new MailMessage)
+        return MailLook::forClient((new MailMessage)
             ->subject($subject)
             ->greeting(filled($notifiable->name)
                 ? __('portal.mail.booking.greeting', ['name' => $notifiable->name])
-                : __('portal.mail.booking.greeting_anonymous'));
+                : __('portal.mail.booking.greeting_anonymous')), $this->appointment->workspaceId, $this->appointment->practice);
     }
 
     /** "Monday, October 5, 2026, 3:00 PM – 4:00 PM (Europe/Belgrade)". */

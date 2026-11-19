@@ -6,6 +6,7 @@ use App\Models\Scopes\WorkspaceScope;
 use App\Models\User;
 use App\Models\WorkspaceExport;
 use App\Support\Notifications\InAppMessage;
+use App\Support\Notifications\MailLook;
 use Carbon\CarbonImmutable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -72,14 +73,14 @@ class PracticeExportReady extends Notification implements ShouldQueue
             ->locale(app()->getLocale())
             ->isoFormat('LL');
 
-        return (new MailMessage)
+        return MailLook::forAstrologer((new MailMessage)
             ->subject(__('notifications.export_ready.subject'))
             ->greeting(__('notifications.greeting', ['name' => $notifiable->name]))
             ->line(__('notifications.export_ready.line', ['practice' => $this->practice]))
             ->action(__('notifications.export_ready.action'), $link)
             ->line(__('notifications.export_ready.link', ['hours' => $hours]))
             ->line(__('notifications.export_ready.kept', ['date' => $until]))
-            ->line(__('notifications.export_ready.private'));
+            ->line(__('notifications.export_ready.private')));
     }
 
     /** In the app: the export can be downloaded in Settings → Your data until it expires. */

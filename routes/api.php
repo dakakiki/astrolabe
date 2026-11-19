@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\Admin\AdminAstrologerController;
 use App\Http\Controllers\Api\V1\Admin\AdminAuditLogController;
 use App\Http\Controllers\Api\V1\Admin\AdminFeedbackController;
 use App\Http\Controllers\Api\V1\Admin\AdminInvitationController;
+use App\Http\Controllers\Api\V1\Admin\AdminNotificationController;
 use App\Http\Controllers\Api\V1\Admin\AdminSystemController;
 use App\Http\Controllers\Api\V1\AppNotificationController;
 use App\Http\Controllers\Api\V1\AppointmentController;
@@ -100,6 +101,19 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/system', [AdminSystemController::class, 'show'])->name('system.show');
         Route::post('/failed-jobs/{uuid}/retry', [AdminSystemController::class, 'retry'])->name('failed-jobs.retry');
         Route::delete('/failed-jobs/{uuid}', [AdminSystemController::class, 'forget'])->name('failed-jobs.forget');
+
+        // The wording of every notification (docs/spec/09, "Obaveštenja — tekstovi").
+        Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
+        Route::get('/notifications/{notification}', [AdminNotificationController::class, 'show'])
+            ->where('notification', '[a-z_.]+')
+            ->name('notifications.show');
+        Route::post('/notifications/{notification}/preview', [AdminNotificationController::class, 'preview'])
+            ->where('notification', '[a-z_.]+')
+            ->middleware('throttle:120,1')
+            ->name('notifications.preview');
+        Route::put('/notifications/{notification}', [AdminNotificationController::class, 'update'])
+            ->where('notification', '[a-z_.]+')
+            ->name('notifications.update');
 
         Route::get('/feedback', [AdminFeedbackController::class, 'index'])->name('feedback.index');
         Route::patch('/feedback/{feedback}', [AdminFeedbackController::class, 'update'])->name('feedback.update');
